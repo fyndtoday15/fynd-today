@@ -41,7 +41,7 @@ html, body {
   pointer-events: all;
 }
 
-/* S1 */
+/* S1 — ARRIVAL */
 #s1 { background: var(--bg); justify-content: center; cursor: pointer; }
 .s1-word {
   font-size: clamp(52px, 12vw, 88px);
@@ -62,16 +62,60 @@ html, body {
 }
 @keyframes ph { 0%,100%{opacity:.15} 50%{opacity:.35} }
 
-/* S2 */
+/* S2 — ENTRY */
 #s2 {
   background: var(--bg);
   justify-content: flex-start;
   padding-top: clamp(56px, 11vh, 88px);
   overflow-y: auto;
 }
+.screen-label {
+  font-size: 11px;
+  color: var(--black);
+  opacity: 0.35;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 40px;
+  align-self: flex-start;
+}
+.stmt {
+  width: 100%;
+  padding: 20px 0;
+  font-size: clamp(15px, 3.8vw, 18px);
+  font-weight: 400;
+  line-height: 1.55;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+  cursor: pointer;
+  user-select: none;
+  transition: opacity 0.15s ease;
+  color: var(--black);
+}
+.stmt:first-of-type { border-top: 1px solid rgba(0,0,0,0.08); }
+.stmt.tapped { opacity: 0.3; pointer-events: none; }
 
-/* S3 — LISTEN */
-#s3 { background: var(--black); justify-content: center; }
+/* S3 — LISTEN SCREEN — split layout */
+#s3 {
+  background: var(--black);
+  justify-content: flex-start;
+  padding: 0;
+  overflow: hidden;
+}
+
+/* Top half — pulse area */
+.listen-top {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  height: 100%;
+  position: relative;
+}
+.listen-top.shrunk {
+  height: 42%;
+}
 .listen-label {
   position: absolute;
   top: clamp(36px, 7vh, 52px);
@@ -82,33 +126,81 @@ html, body {
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
-.pulse-wrap { display: flex; flex-direction: column; align-items: center; gap: 36px; }
+.pulse-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+}
 .pulse-dot {
   width: 10px; height: 10px; border-radius: 50%;
   background: var(--bg); opacity: 0.55;
   animation: pd 2s ease-in-out infinite;
 }
 @keyframes pd { 0%,100%{transform:scale(1);opacity:.5} 50%{transform:scale(1.5);opacity:.85} }
-.track-count { font-size: 11px; color: var(--bg); opacity: 0.2; letter-spacing: 0.18em; }
+.track-count {
+  font-size: 11px;
+  color: var(--bg);
+  opacity: 0.2;
+  letter-spacing: 0.18em;
+}
 
-/* S4 — ASSIGN — overlays on top of listen screen, semi-transparent bg */
-#s4 {
-  background: var(--black);
-  justify-content: flex-start;
-  padding-top: clamp(56px, 11vh, 88px);
+/* Bottom half — assign panel slides up */
+.assign-panel {
+  width: 100%;
+  flex-shrink: 0;
+  height: 0;
+  overflow: hidden;
+  transition: height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  padding: 0 32px;
+}
+.assign-panel.open {
+  height: 58%;
   overflow-y: auto;
 }
+.assign-label {
+  font-size: 11px;
+  color: var(--bg);
+  opacity: 0.4;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 24px;
+  margin-top: 28px;
+  flex-shrink: 0;
+}
+.assign-stmt {
+  width: 100%;
+  padding: 16px 0;
+  font-size: clamp(14px, 3.5vw, 17px);
+  font-weight: 400;
+  color: var(--bg);
+  line-height: 1.5;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  cursor: pointer;
+  user-select: none;
+  transition: opacity 0.15s ease;
+  flex-shrink: 0;
+}
+.assign-stmt:first-of-type { border-top: 1px solid rgba(255,255,255,0.08); }
+.assign-stmt.tapped { opacity: 0.3; pointer-events: none; }
+
+/* divider line between top and bottom */
+.listen-divider {
+  width: 100%;
+  height: 1px;
+  background: rgba(255,255,255,0.06);
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity 0.4s ease 0.3s;
+}
+.listen-divider.show { opacity: 1; }
 
 /* S5 — REVEAL */
 #s5 { background: var(--bg); justify-content: center; gap: 12px; cursor: pointer; }
-.reveal-label {
-  font-size: 11px; color: var(--black); opacity: 0.35;
-  letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 12px;
-}
-.reveal-title {
-  font-size: clamp(22px, 5.5vw, 34px); font-weight: 400;
-  color: var(--black); text-align: center; letter-spacing: -0.01em; line-height: 1.2;
-}
+.reveal-label { font-size: 11px; color: var(--black); opacity: 0.35; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 12px; }
+.reveal-title { font-size: clamp(22px, 5.5vw, 34px); font-weight: 400; color: var(--black); text-align: center; letter-spacing: -0.01em; line-height: 1.2; }
 .reveal-artist { font-size: clamp(14px, 3.2vw, 17px); color: var(--black); opacity: 0.4; text-align: center; }
 .reveal-hint { position: absolute; bottom: clamp(72px,12vh,96px); font-size: 11px; color: var(--black); opacity: 0.2; letter-spacing: 0.1em; }
 .reveal-cta { position: absolute; bottom: clamp(36px,7vh,52px); font-size: 11px; color: var(--black); opacity: 0.18; letter-spacing: 0.12em; text-transform: uppercase; }
@@ -128,32 +220,6 @@ html, body {
   color: var(--black); background: none; border: none; cursor: pointer;
   letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.45; padding: 10px 20px;
 }
-
-/* SHARED LABEL + STATEMENTS */
-.screen-label {
-  font-size: 11px; color: var(--black); opacity: 0.35;
-  letter-spacing: 0.12em; text-transform: uppercase;
-  margin-bottom: 40px; align-self: flex-start;
-}
-#s4 .screen-label { color: var(--bg); opacity: 0.4; }
-
-.stmt {
-  width: 100%; padding: 20px 0;
-  font-size: clamp(15px, 3.8vw, 18px); font-weight: 400;
-  color: var(--black); line-height: 1.55;
-  border-bottom: 1px solid rgba(0,0,0,0.08);
-  cursor: pointer; user-select: none;
-  transition: opacity 0.15s ease;
-}
-.stmt:first-of-type { border-top: 1px solid rgba(0,0,0,0.08); }
-.stmt.tapped { opacity: 0.3; pointer-events: none; }
-
-/* Assign screen statements are white on black */
-#assign-list .stmt {
-  color: var(--bg);
-  border-bottom-color: rgba(255,255,255,0.1);
-}
-#assign-list .stmt:first-of-type { border-top-color: rgba(255,255,255,0.1); }
 
 /* PROGRESS DOTS */
 #dots {
@@ -197,24 +263,25 @@ html, body {
   <div id="entry-list"></div>
 </div>
 
-<!-- S3 LISTEN -->
+<!-- S3 LISTEN — single screen, splits in two -->
 <div class="screen" id="s3">
-  <span class="listen-label">Listen</span>
-  <div class="pulse-wrap">
-    <div class="pulse-dot"></div>
-    <div class="track-count" id="tc">1 — 5</div>
+  <div class="listen-top" id="listen-top">
+    <span class="listen-label">Listen</span>
+    <div class="pulse-wrap">
+      <div class="pulse-dot"></div>
+      <div class="track-count" id="tc">1 — 5</div>
+    </div>
+  </div>
+  <div class="listen-divider" id="listen-divider"></div>
+  <div class="assign-panel" id="assign-panel">
+    <div class="assign-label">Where did that sit</div>
+    <div id="assign-list"></div>
   </div>
   <div id="sc-wrap">
     <iframe id="sc" width="100%" height="166" scrolling="no" frameborder="no" allow="autoplay"
       src="https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/fynd-today/sets/mvp-1&auto_play=false&hide_related=true&show_comments=false&show_user=false&show_reposts=false&show_teaser=false&visual=false">
     </iframe>
   </div>
-</div>
-
-<!-- S4 ASSIGN — shown while music still plays -->
-<div class="screen" id="s4">
-  <span class="screen-label">Where did that sit</span>
-  <div id="assign-list"></div>
 </div>
 
 <!-- S5 REVEAL -->
@@ -263,13 +330,16 @@ var sess = {
   log: [],
 };
 
-function shuffle(a) {
-  var b = a.slice();
-  for (var i = b.length - 1; i > 0; i--) {
-    var j = Math.floor(Math.random() * (i + 1));
-    var t = b[i]; b[i] = b[j]; b[j] = t;
+// Fisher-Yates — verified correct implementation
+function shuffle(arr) {
+  var a = arr.slice();
+  var i = a.length, j, tmp;
+  while (i > 0) {
+    j = Math.floor(Math.random() * i);
+    i--;
+    tmp = a[i]; a[i] = a[j]; a[j] = tmp;
   }
-  return b;
+  return a;
 }
 
 function show(id) {
@@ -279,9 +349,9 @@ function show(id) {
     document.getElementById(id).classList.add('active');
   }, 40);
   var dots = document.getElementById('dots');
-  if (id === 's3' || id === 's4' || id === 's5') {
+  if (id === 's3' || id === 's5') {
     dots.classList.add('show');
-    dots.classList.toggle('dark', id === 's3' || id === 's4');
+    dots.classList.toggle('dark', id === 's3');
   } else {
     dots.classList.remove('show');
     dots.classList.remove('dark');
@@ -297,37 +367,79 @@ function setDots(cur) {
   }
 }
 
-function buildList(elId, includeNone, cb) {
-  var el = document.getElementById(elId);
+// Build entry statements (light bg)
+function buildEntryList(cb) {
+  var el = document.getElementById('entry-list');
   el.innerHTML = '';
-  // Use a fresh copy of sOrder to guarantee correct indices
   var order = sess.sOrder.slice();
   for (var i = 0; i < order.length; i++) {
-    (function(idx) {
-      var s = STMTS[idx];
+    (function(s) {
       var d = document.createElement('div');
       d.className = 'stmt';
       d.textContent = s.text;
       d.addEventListener('click', function() {
         if (d.classList.contains('tapped')) return;
         d.classList.add('tapped');
-        var captured = s.state;
-        setTimeout(function() { cb(captured); }, 150);
+        var st = s.state;
+        setTimeout(function() { cb(st); }, 150);
       });
       el.appendChild(d);
-    })(order[i]);
+    })(STMTS[order[i]]);
   }
-  if (includeNone) {
-    var n = document.createElement('div');
-    n.className = 'stmt';
-    n.textContent = 'None of these.';
-    n.addEventListener('click', function() {
-      if (n.classList.contains('tapped')) return;
-      n.classList.add('tapped');
-      setTimeout(function() { cb('None of These'); }, 150);
-    });
-    el.appendChild(n);
+}
+
+// Build assign statements (dark bg, inside listen screen)
+function buildAssignList(cb) {
+  var el = document.getElementById('assign-list');
+  el.innerHTML = '';
+  // Fresh shuffle for assign — different order each track
+  var order = shuffle([0,1,2,3,4]);
+  for (var i = 0; i < order.length; i++) {
+    (function(s) {
+      var d = document.createElement('div');
+      d.className = 'assign-stmt';
+      d.textContent = s.text;
+      d.addEventListener('click', function() {
+        if (d.classList.contains('tapped')) return;
+        d.classList.add('tapped');
+        var st = s.state;
+        setTimeout(function() { cb(st); }, 150);
+      });
+      el.appendChild(d);
+    })(STMTS[order[i]]);
   }
+  // None of these
+  var n = document.createElement('div');
+  n.className = 'assign-stmt';
+  n.textContent = 'None of these.';
+  n.addEventListener('click', function() {
+    if (n.classList.contains('tapped')) return;
+    n.classList.add('tapped');
+    setTimeout(function() { cb('None of These'); }, 150);
+  });
+  el.appendChild(n);
+}
+
+// Open the assign panel — slides up, top half shrinks
+function openAssignPanel(cb) {
+  buildAssignList(cb);
+  var top = document.getElementById('listen-top');
+  var panel = document.getElementById('assign-panel');
+  var divider = document.getElementById('listen-divider');
+  top.classList.add('shrunk');
+  panel.classList.add('open');
+  divider.classList.add('show');
+}
+
+// Reset listen screen back to full for next track
+function resetListenScreen() {
+  var top = document.getElementById('listen-top');
+  var panel = document.getElementById('assign-panel');
+  var divider = document.getElementById('listen-divider');
+  top.classList.remove('shrunk');
+  panel.classList.remove('open');
+  divider.classList.remove('show');
+  document.getElementById('assign-list').innerHTML = '';
 }
 
 // SoundCloud
@@ -336,38 +448,40 @@ var widget, widgetReady = false, assignTimer, autoTimer;
 function initSC() {
   widget = SC.Widget(document.getElementById('sc'));
   widget.bind(SC.Widget.Events.READY, function() { widgetReady = true; });
-  widget.bind(SC.Widget.Events.FINISH, function() { stopAndReveal(); });
+  widget.bind(SC.Widget.Events.FINISH, function() {
+    // Track finished naturally — open assign if not already open
+    if (!document.getElementById('assign-panel').classList.contains('open')) {
+      openAssignPanel(function(postState) { doReveal(postState); });
+    }
+  });
 }
 
 function playTrack(idx) {
   function go() {
+    resetListenScreen();
     widget.skip(idx);
     setTimeout(function() { widget.play(); }, 300);
     sess.listenStart = Date.now();
     clearTimeout(assignTimer);
     clearTimeout(autoTimer);
 
-    // After 1.5s — transition to assign screen, music keeps playing
+    // After 7s — slide up assign panel, music keeps playing
     assignTimer = setTimeout(function() {
-      buildList('assign-list', true, function(postState) {
-        stopAndReveal(postState);
-      });
-      show('s4');
-    }, 1500);
+      openAssignPanel(function(postState) { doReveal(postState); });
+    }, 7000);
 
-    // Hard stop at 90s if no selection made
+    // Hard stop at 90s
     autoTimer = setTimeout(function() {
       if (widget) widget.pause();
-      // Force assign screen if not already there
-      buildList('assign-list', true, function(postState) {
-        stopAndReveal(postState);
-      });
-      show('s4');
+      if (!document.getElementById('assign-panel').classList.contains('open')) {
+        openAssignPanel(function(postState) { doReveal(postState); });
+      }
     }, 90000);
 
     document.getElementById('tc').textContent = (sess.cur + 1) + ' — 5';
     setDots(sess.cur);
   }
+
   if (widgetReady) {
     go();
   } else {
@@ -377,7 +491,7 @@ function playTrack(idx) {
   }
 }
 
-function stopAndReveal(postState) {
+function doReveal(postState) {
   clearTimeout(assignTimer);
   clearTimeout(autoTimer);
   if (widget) widget.pause();
@@ -386,29 +500,30 @@ function stopAndReveal(postState) {
     ? Math.min(Math.round((Date.now() - sess.listenStart) / 1000), 90)
     : 0;
 
-  if (postState) {
-    var ti = sess.tOrder[sess.cur];
-    var tr = TRACKS[ti] || { id:'T00'+(ti+1), title:'—', artist:'—' };
-    sess.log.push({
-      sessionId:  sess.id,
-      trackId:    tr.id,
-      entryState: sess.entryState,
-      postState:  postState,
-      duration:   sess.dur,
-      match:      sess.entryState === postState ? 'Yes' : 'No',
-    });
-    document.getElementById('r-title').textContent  = tr.title;
-    document.getElementById('r-artist').textContent = tr.artist;
-    show('s5');
-  }
+  var ti = sess.tOrder[sess.cur];
+  var tr = TRACKS[ti] || { id:'T00'+(ti+1), title:'—', artist:'—' };
+
+  sess.log.push({
+    sessionId:  sess.id,
+    trackId:    tr.id,
+    entryState: sess.entryState,
+    postState:  postState,
+    duration:   sess.dur,
+    match:      sess.entryState === postState ? 'Yes' : 'No',
+  });
+
+  document.getElementById('r-title').textContent  = tr.title;
+  document.getElementById('r-artist').textContent = tr.artist;
+  show('s5');
 }
 
 // S1 tap
 document.getElementById('s1').addEventListener('click', function() {
+  // Generate fresh random orders
   sess.sOrder = shuffle([0,1,2,3,4]);
   sess.tOrder = shuffle([0,1,2,3,4]);
 
-  buildList('entry-list', false, function(state) {
+  buildEntryList(function(state) {
     sess.entryState = state;
     show('s3');
     setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 600);
@@ -441,7 +556,6 @@ document.getElementById('email-sub').addEventListener('click', function() {
   h.textContent = "You'll hear when something new arrives.";
   h.style.fontSize = '18px';
   h.style.opacity = '0.4';
-
   console.log('FYND SESSION', JSON.stringify({ id: sess.id, email: email, entryState: sess.entryState, log: sess.log }, null, 2));
 });
 
