@@ -22,13 +22,13 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: var(--bg);
 /* S1 */
 #s1 { background: var(--bg); justify-content: center; cursor: pointer; }
 .s1-word { font-size: clamp(52px,12vw,88px); font-weight: 400; color: var(--black); letter-spacing: -0.02em; user-select: none; }
-.s1-hint { position: absolute; bottom: 44px; font-size: 11px; color: var(--black); opacity: 0.25; letter-spacing: 0.12em; text-transform: uppercase; animation: ph 3s ease-in-out infinite; }
+.s1-hint { position: absolute; bottom: 44px; font-size: 14px; color: var(--black); opacity: 0.35; letter-spacing: 0.12em; text-transform: uppercase; animation: ph 3s ease-in-out infinite; }
 @keyframes ph { 0%,100%{opacity:.15} 50%{opacity:.35} }
 
 /* S2 */
 #s2 { background: var(--bg); justify-content: flex-start; padding-top: clamp(56px,11vh,88px); overflow-y: auto; }
 .screen-label { font-size: 13px; color: var(--black); opacity: 0.6; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 40px; align-self: flex-start; }
-.stmt { width: 100%; padding: 20px 0; font-size: clamp(15px,3.8vw,18px); font-weight: 400; color: var(--black); line-height: 1.55; border-bottom: 1px solid rgba(0,0,0,0.08); cursor: pointer; user-select: none; transition: opacity 0.15s ease; }
+.stmt { width: 100%; padding: 20px 0; font-size: clamp(17px,4.2vw,20px); font-weight: 400; color: var(--black); line-height: 1.55; border-bottom: 1px solid rgba(0,0,0,0.08); cursor: pointer; user-select: none; transition: opacity 0.15s ease; }
 .stmt:first-of-type { border-top: 1px solid rgba(0,0,0,0.08); }
 .stmt.tapped { opacity: 0.3; pointer-events: none; }
 
@@ -48,7 +48,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: var(--bg);
 
 .listen-label { position: absolute; top: clamp(36px,7vh,52px); left: 32px; font-size: 13px; color: var(--bg); opacity: 0.65; letter-spacing: 0.12em; text-transform: uppercase; }
 .pulse-wrap { display: flex; flex-direction: column; align-items: center; gap: 28px; }
-.pulse-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--bg); opacity: 0.8; animation: pd 2s ease-in-out infinite; }
+.pulse-dot { width: 16px; height: 16px; border-radius: 50%; background: var(--bg); opacity: 0.8; animation: pd 2s ease-in-out infinite; }
 @keyframes pd { 0%,100%{transform:scale(1);opacity:.5} 50%{transform:scale(1.5);opacity:.85} }
 .track-count { font-size: 14px; color: var(--bg); opacity: 0.6; letter-spacing: 0.18em; }
 
@@ -72,7 +72,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: var(--bg);
 }
 
 .assign-label { font-size: 14px; color: var(--bg); opacity: 0.75; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 20px; margin-top: 24px; flex-shrink: 0; }
-.assign-stmt { width: 100%; padding: 16px 0; font-size: clamp(16px,4vw,19px); font-weight: 400; color: var(--bg); line-height: 1.5; border-bottom: 1px solid rgba(255,255,255,0.08); cursor: pointer; user-select: none; transition: opacity 0.15s ease; flex-shrink: 0; }
+.assign-stmt { width: 100%; padding: 16px 0; font-size: clamp(17px,4.2vw,20px); font-weight: 400; color: var(--bg); line-height: 1.5; border-bottom: 1px solid rgba(255,255,255,0.08); cursor: pointer; user-select: none; transition: opacity 0.15s ease; flex-shrink: 0; }
 .assign-stmt:first-of-type { border-top: 1px solid rgba(255,255,255,0.08); }
 .assign-stmt.tapped { opacity: 0.3; pointer-events: none; }
 
@@ -81,7 +81,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: var(--bg);
 .reveal-label { font-size: 13px; color: var(--black); opacity: 0.6; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 12px; }
 .reveal-title { font-size: clamp(26px,6vw,38px); font-weight: 400; color: var(--black); text-align: center; letter-spacing: -0.01em; line-height: 1.2; }
 .reveal-artist { font-size: clamp(16px,3.8vw,20px); color: var(--black); opacity: 0.65; text-align: center; }
-.reveal-hint { position: absolute; bottom: clamp(72px,12vh,96px); font-size: 12px; color: var(--black); opacity: 0.45; letter-spacing: 0.1em; }
+.reveal-hint { position: absolute; bottom: clamp(120px,18vh,148px); font-size: 13px; color: var(--black); opacity: 0.45; letter-spacing: 0.1em; }
 .reveal-cta { position: absolute; bottom: clamp(36px,7vh,52px); font-size: 12px; color: var(--black); opacity: 0.35; letter-spacing: 0.12em; text-transform: uppercase; }
 
 /* S6 */
@@ -319,7 +319,7 @@ function doReveal(ps) {
 document.getElementById('s1').addEventListener('click', function() {
   sess.tOrder = shuffle([0,1,2,3,4]);
   // Build entry list with fresh shuffle
-  buildList('entry-list', 'stmt', false, function(state) {
+  buildList('entry-list', 'stmt', true, function(state) {
     sess.entryState = state;
     show('s3');
     setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 600);
