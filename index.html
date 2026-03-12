@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>FYND TODAY</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after {
@@ -13,13 +12,11 @@
   padding: 0;
   -webkit-tap-highlight-color: transparent;
 }
-
 :root {
   --bg: #FCFBF4;
   --black: #000000;
   --f: 'DejaVu LGC Sans', 'DM Sans', Arial, sans-serif;
 }
-
 html, body {
   width: 100%;
   height: 100%;
@@ -28,7 +25,6 @@ html, body {
   font-family: var(--f);
   -webkit-font-smoothing: antialiased;
 }
-
 .screen {
   position: fixed;
   inset: 0;
@@ -40,18 +36,13 @@ html, body {
   pointer-events: none;
   transition: opacity 0.4s ease;
 }
-
 .screen.active {
   opacity: 1;
   pointer-events: all;
 }
 
-/* SCREEN 1 */
-#s1 {
-  background: var(--bg);
-  justify-content: center;
-  cursor: pointer;
-}
+/* S1 */
+#s1 { background: var(--bg); justify-content: center; cursor: pointer; }
 .s1-word {
   font-size: clamp(52px, 12vw, 88px);
   font-weight: 400;
@@ -67,49 +58,20 @@ html, body {
   opacity: 0.25;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  animation: pulse-hint 3s ease-in-out infinite;
+  animation: ph 3s ease-in-out infinite;
 }
-@keyframes pulse-hint {
-  0%,100% { opacity: 0.15; }
-  50% { opacity: 0.35; }
-}
+@keyframes ph { 0%,100%{opacity:.15} 50%{opacity:.35} }
 
-/* SCREENS 2 + 4 */
-#s2, #s4 {
+/* S2 */
+#s2 {
   background: var(--bg);
   justify-content: flex-start;
   padding-top: clamp(56px, 11vh, 88px);
   overflow-y: auto;
 }
-.screen-label {
-  font-size: 11px;
-  color: var(--black);
-  opacity: 0.35;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  margin-bottom: 40px;
-  align-self: flex-start;
-}
-.stmt {
-  width: 100%;
-  padding: 20px 0;
-  font-size: clamp(15px, 3.8vw, 18px);
-  font-weight: 400;
-  color: var(--black);
-  line-height: 1.55;
-  border-bottom: 1px solid rgba(0,0,0,0.08);
-  cursor: pointer;
-  user-select: none;
-  transition: opacity 0.15s ease;
-}
-.stmt:first-of-type { border-top: 1px solid rgba(0,0,0,0.08); }
-.stmt.tapped { opacity: 0.3; pointer-events: none; }
 
-/* SCREEN 3 */
-#s3 {
-  background: var(--black);
-  justify-content: center;
-}
+/* S3 — LISTEN */
+#s3 { background: var(--black); justify-content: center; }
 .listen-label {
   position: absolute;
   top: clamp(36px, 7vh, 52px);
@@ -120,160 +82,78 @@ html, body {
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
-.pulse-wrap {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 36px;
-}
+.pulse-wrap { display: flex; flex-direction: column; align-items: center; gap: 36px; }
 .pulse-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--bg);
-  opacity: 0.55;
-  animation: pdot 2s ease-in-out infinite;
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--bg); opacity: 0.55;
+  animation: pd 2s ease-in-out infinite;
 }
-@keyframes pdot {
-  0%,100% { transform: scale(1); opacity: 0.5; }
-  50% { transform: scale(1.5); opacity: 0.85; }
-}
-.track-count {
-  font-size: 11px;
-  color: var(--bg);
-  opacity: 0.2;
-  letter-spacing: 0.18em;
-}
-.skip-btn {
-  position: absolute;
-  bottom: clamp(36px, 7vh, 52px);
-  left: 50%;
-  transform: translateX(-50%);
-  font-family: var(--f);
-  font-size: 11px;
-  color: var(--bg);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 16px 24px;
-  opacity: 0;
-  transition: opacity 0.6s ease;
-  pointer-events: none;
-}
-.skip-btn.show {
-  opacity: 0.35;
-  pointer-events: all;
+@keyframes pd { 0%,100%{transform:scale(1);opacity:.5} 50%{transform:scale(1.5);opacity:.85} }
+.track-count { font-size: 11px; color: var(--bg); opacity: 0.2; letter-spacing: 0.18em; }
+
+/* S4 — ASSIGN — overlays on top of listen screen, semi-transparent bg */
+#s4 {
+  background: var(--black);
+  justify-content: flex-start;
+  padding-top: clamp(56px, 11vh, 88px);
+  overflow-y: auto;
 }
 
-#sc-wrap {
-  position: absolute;
-  top: -9999px;
-  left: -9999px;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-}
-
-/* SCREEN 5 */
-#s5 {
-  background: var(--bg);
-  justify-content: center;
-  gap: 12px;
-  cursor: pointer;
-}
+/* S5 — REVEAL */
+#s5 { background: var(--bg); justify-content: center; gap: 12px; cursor: pointer; }
 .reveal-label {
-  font-size: 11px;
-  color: var(--black);
-  opacity: 0.35;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  margin-bottom: 12px;
+  font-size: 11px; color: var(--black); opacity: 0.35;
+  letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 12px;
 }
 .reveal-title {
-  font-size: clamp(22px, 5.5vw, 34px);
-  font-weight: 400;
-  color: var(--black);
-  text-align: center;
-  letter-spacing: -0.01em;
-  line-height: 1.2;
+  font-size: clamp(22px, 5.5vw, 34px); font-weight: 400;
+  color: var(--black); text-align: center; letter-spacing: -0.01em; line-height: 1.2;
 }
-.reveal-artist {
-  font-size: clamp(14px, 3.2vw, 17px);
-  color: var(--black);
-  opacity: 0.4;
-  text-align: center;
-}
-.reveal-hint {
-  position: absolute;
-  bottom: clamp(72px, 12vh, 96px);
-  font-size: 11px;
-  color: var(--black);
-  opacity: 0.2;
-  letter-spacing: 0.1em;
-}
-.reveal-cta {
-  position: absolute;
-  bottom: clamp(36px, 7vh, 52px);
-  font-size: 11px;
-  color: var(--black);
-  opacity: 0.18;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
+.reveal-artist { font-size: clamp(14px, 3.2vw, 17px); color: var(--black); opacity: 0.4; text-align: center; }
+.reveal-hint { position: absolute; bottom: clamp(72px,12vh,96px); font-size: 11px; color: var(--black); opacity: 0.2; letter-spacing: 0.1em; }
+.reveal-cta { position: absolute; bottom: clamp(36px,7vh,52px); font-size: 11px; color: var(--black); opacity: 0.18; letter-spacing: 0.12em; text-transform: uppercase; }
 
-/* SCREEN 6 */
-#s6 {
-  background: var(--bg);
-  justify-content: center;
-}
-.email-head {
-  font-size: clamp(30px, 7vw, 46px);
-  font-weight: 400;
-  color: var(--black);
-  letter-spacing: -0.02em;
-  margin-bottom: 44px;
-  text-align: center;
-}
+/* S6 — EMAIL */
+#s6 { background: var(--bg); justify-content: center; }
+.email-head { font-size: clamp(30px,7vw,46px); font-weight: 400; color: var(--black); letter-spacing: -0.02em; margin-bottom: 44px; text-align: center; }
 .email-input {
-  width: 100%;
-  max-width: 300px;
-  font-family: var(--f);
-  font-size: 16px;
-  color: var(--black);
-  background: transparent;
-  border: none;
-  border-bottom: 1px solid rgba(0,0,0,0.45);
-  padding: 10px 0;
-  outline: none;
-  text-align: center;
-  border-radius: 0;
-  -webkit-appearance: none;
+  width: 100%; max-width: 300px; font-family: var(--f); font-size: 16px;
+  color: var(--black); background: transparent; border: none;
+  border-bottom: 1px solid rgba(0,0,0,0.45); padding: 10px 0;
+  outline: none; text-align: center; border-radius: 0; -webkit-appearance: none;
 }
 .email-input::placeholder { color: var(--black); opacity: 0.22; }
 .email-sub {
-  display: block;
-  margin: 28px auto 0;
-  font-family: var(--f);
-  font-size: 12px;
-  color: var(--black);
-  background: none;
-  border: none;
-  cursor: pointer;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  opacity: 0.45;
-  padding: 10px 20px;
+  display: block; margin: 28px auto 0; font-family: var(--f); font-size: 12px;
+  color: var(--black); background: none; border: none; cursor: pointer;
+  letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.45; padding: 10px 20px;
 }
-.email-confirm {
-  font-size: 14px;
-  color: var(--black);
-  opacity: 0.4;
-  text-align: center;
-  line-height: 1.7;
-  display: none;
+
+/* SHARED LABEL + STATEMENTS */
+.screen-label {
+  font-size: 11px; color: var(--black); opacity: 0.35;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  margin-bottom: 40px; align-self: flex-start;
 }
+#s4 .screen-label { color: var(--bg); opacity: 0.4; }
+
+.stmt {
+  width: 100%; padding: 20px 0;
+  font-size: clamp(15px, 3.8vw, 18px); font-weight: 400;
+  color: var(--black); line-height: 1.55;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+  cursor: pointer; user-select: none;
+  transition: opacity 0.15s ease;
+}
+.stmt:first-of-type { border-top: 1px solid rgba(0,0,0,0.08); }
+.stmt.tapped { opacity: 0.3; pointer-events: none; }
+
+/* Assign screen statements are white on black */
+#assign-list .stmt {
+  color: var(--bg);
+  border-bottom-color: rgba(255,255,255,0.1);
+}
+#assign-list .stmt:first-of-type { border-top-color: rgba(255,255,255,0.1); }
 
 /* PROGRESS DOTS */
 #dots {
@@ -281,25 +161,18 @@ html, body {
   bottom: clamp(24px, 4.5vh, 40px);
   left: 50%;
   transform: translateX(-50%);
-  display: flex;
-  gap: 8px;
+  display: flex; gap: 8px;
   pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.4s ease;
+  opacity: 0; transition: opacity 0.4s ease;
   z-index: 999;
 }
 #dots.show { opacity: 1; }
-.dot {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: var(--black);
-  opacity: 0.15;
-  transition: opacity 0.3s ease;
-}
+.dot { width: 5px; height: 5px; border-radius: 50%; background: var(--black); opacity: 0.15; transition: opacity 0.3s ease; }
 .dot.done { opacity: 0.5; }
 .dot.active { opacity: 1; }
 #dots.dark .dot { background: var(--bg); }
+
+#sc-wrap { position: absolute; top: -9999px; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
 </style>
 </head>
 <body>
@@ -331,16 +204,14 @@ html, body {
     <div class="pulse-dot"></div>
     <div class="track-count" id="tc">1 — 5</div>
   </div>
-  <button class="skip-btn" id="skip">Skip</button>
   <div id="sc-wrap">
-    <iframe id="sc"
-      width="100%" height="166" scrolling="no" frameborder="no" allow="autoplay"
+    <iframe id="sc" width="100%" height="166" scrolling="no" frameborder="no" allow="autoplay"
       src="https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/fynd-today/sets/mvp-1&auto_play=false&hide_related=true&show_comments=false&show_user=false&show_reposts=false&show_teaser=false&visual=false">
     </iframe>
   </div>
 </div>
 
-<!-- S4 ASSIGN -->
+<!-- S4 ASSIGN — shown while music still plays -->
 <div class="screen" id="s4">
   <span class="screen-label">Where did that sit</span>
   <div id="assign-list"></div>
@@ -360,26 +231,25 @@ html, body {
   <div class="email-head" id="email-head">More comes.</div>
   <input class="email-input" id="email-in" type="email" placeholder="your email" autocomplete="email" autocapitalize="none">
   <button class="email-sub" id="email-sub">In.</button>
-  <div class="email-confirm" id="email-ok">You'll hear when something<br>new arrives.</div>
 </div>
 
 <script src="https://w.soundcloud.com/player/api.js"></script>
 <script>
 
 var TRACKS = [
-  { id:'T001', title:'Soul',         artist:'Lee Brice'  },
-  { id:'T002', title:"We Don't Care",artist:'Akon'       },
-  { id:'T003', title:'In Between',   artist:'Nija'       },
-  { id:'T004', title:'I See Life',   artist:'thekidszn'  },
-  { id:'T005', title:'Alvarado',     artist:'Sean Jacobs'},
+  { id:'T001', title:'Soul',          artist:'Lee Brice'   },
+  { id:'T002', title:"We Don't Care", artist:'Akon'        },
+  { id:'T003', title:'In Between',    artist:'Nija'        },
+  { id:'T004', title:'I See Life',    artist:'thekidszn'   },
+  { id:'T005', title:'Alvarado',      artist:'Sean Jacobs' },
 ];
 
 var STMTS = [
-  { text:'Something is unresolved and the day keeps moving.',         state:'Holding'    },
-  { text:"Something finished. The next thing hasn't started yet.",    state:'Between'    },
-  { text:"You're moving. Nothing specific is pulling you forward.",   state:'Drifting'   },
-  { text:'Everything keeps sliding past without landing.',            state:'Unanchored' },
-  { text:"Something is in front of you. You haven't stepped into it yet.", state:'Before'},
+  { text:'Something is unresolved and the day keeps moving.',              state:'Holding'    },
+  { text:"Something finished. The next thing hasn't started yet.",         state:'Between'    },
+  { text:"You're moving. Nothing specific is pulling you forward.",        state:'Drifting'   },
+  { text:'Everything keeps sliding past without landing.',                 state:'Unanchored' },
+  { text:"Something is in front of you. You haven't stepped into it yet.", state:'Before'     },
 ];
 
 var sess = {
@@ -404,18 +274,14 @@ function shuffle(a) {
 
 function show(id) {
   var all = document.querySelectorAll('.screen');
-  for (var i = 0; i < all.length; i++) {
-    all[i].classList.remove('active');
-  }
+  for (var i = 0; i < all.length; i++) all[i].classList.remove('active');
   setTimeout(function() {
     document.getElementById(id).classList.add('active');
   }, 40);
-
   var dots = document.getElementById('dots');
   if (id === 's3' || id === 's4' || id === 's5') {
     dots.classList.add('show');
-    if (id === 's3') dots.classList.add('dark');
-    else dots.classList.remove('dark');
+    dots.classList.toggle('dark', id === 's3' || id === 's4');
   } else {
     dots.classList.remove('show');
     dots.classList.remove('dark');
@@ -434,18 +300,23 @@ function setDots(cur) {
 function buildList(elId, includeNone, cb) {
   var el = document.getElementById(elId);
   el.innerHTML = '';
-  sess.sOrder.forEach(function(idx) {
-    var s = STMTS[idx];
-    var d = document.createElement('div');
-    d.className = 'stmt';
-    d.textContent = s.text;
-    d.addEventListener('click', function() {
-      if (d.classList.contains('tapped')) return;
-      d.classList.add('tapped');
-      setTimeout(function() { cb(s.state); }, 150);
-    });
-    el.appendChild(d);
-  });
+  // Use a fresh copy of sOrder to guarantee correct indices
+  var order = sess.sOrder.slice();
+  for (var i = 0; i < order.length; i++) {
+    (function(idx) {
+      var s = STMTS[idx];
+      var d = document.createElement('div');
+      d.className = 'stmt';
+      d.textContent = s.text;
+      d.addEventListener('click', function() {
+        if (d.classList.contains('tapped')) return;
+        d.classList.add('tapped');
+        var captured = s.state;
+        setTimeout(function() { cb(captured); }, 150);
+      });
+      el.appendChild(d);
+    })(order[i]);
+  }
   if (includeNone) {
     var n = document.createElement('div');
     n.className = 'stmt';
@@ -460,16 +331,12 @@ function buildList(elId, includeNone, cb) {
 }
 
 // SoundCloud
-var widget, widgetReady = false, skipTimer, autoTimer;
+var widget, widgetReady = false, assignTimer, autoTimer;
 
 function initSC() {
   widget = SC.Widget(document.getElementById('sc'));
-  widget.bind(SC.Widget.Events.READY, function() {
-    widgetReady = true;
-  });
-  widget.bind(SC.Widget.Events.FINISH, function() {
-    endTrack();
-  });
+  widget.bind(SC.Widget.Events.READY, function() { widgetReady = true; });
+  widget.bind(SC.Widget.Events.FINISH, function() { stopAndReveal(); });
 }
 
 function playTrack(idx) {
@@ -477,12 +344,27 @@ function playTrack(idx) {
     widget.skip(idx);
     setTimeout(function() { widget.play(); }, 300);
     sess.listenStart = Date.now();
-    var skipBtn = document.getElementById('skip');
-    skipBtn.classList.remove('show');
-    clearTimeout(skipTimer);
+    clearTimeout(assignTimer);
     clearTimeout(autoTimer);
-    skipTimer = setTimeout(function() { skipBtn.classList.add('show'); }, 30000);
-    autoTimer = setTimeout(endTrack, 90000);
+
+    // After 1.5s — transition to assign screen, music keeps playing
+    assignTimer = setTimeout(function() {
+      buildList('assign-list', true, function(postState) {
+        stopAndReveal(postState);
+      });
+      show('s4');
+    }, 1500);
+
+    // Hard stop at 90s if no selection made
+    autoTimer = setTimeout(function() {
+      if (widget) widget.pause();
+      // Force assign screen if not already there
+      buildList('assign-list', true, function(postState) {
+        stopAndReveal(postState);
+      });
+      show('s4');
+    }, 90000);
+
     document.getElementById('tc').textContent = (sess.cur + 1) + ' — 5';
     setDots(sess.cur);
   }
@@ -495,51 +377,47 @@ function playTrack(idx) {
   }
 }
 
-function endTrack() {
-  clearTimeout(skipTimer);
+function stopAndReveal(postState) {
+  clearTimeout(assignTimer);
   clearTimeout(autoTimer);
   if (widget) widget.pause();
-  document.getElementById('skip').classList.remove('show');
-  sess.dur = sess.listenStart ? Math.min(Math.round((Date.now() - sess.listenStart) / 1000), 90) : 0;
 
-  buildList('assign-list', true, function(postState) {
+  sess.dur = sess.listenStart
+    ? Math.min(Math.round((Date.now() - sess.listenStart) / 1000), 90)
+    : 0;
+
+  if (postState) {
     var ti = sess.tOrder[sess.cur];
     var tr = TRACKS[ti] || { id:'T00'+(ti+1), title:'—', artist:'—' };
     sess.log.push({
-      sessionId: sess.id,
-      trackId: tr.id,
+      sessionId:  sess.id,
+      trackId:    tr.id,
       entryState: sess.entryState,
-      postState: postState,
-      duration: sess.dur,
-      match: sess.entryState === postState ? 'Yes' : 'No',
+      postState:  postState,
+      duration:   sess.dur,
+      match:      sess.entryState === postState ? 'Yes' : 'No',
     });
-    document.getElementById('r-title').textContent = tr.title;
+    document.getElementById('r-title').textContent  = tr.title;
     document.getElementById('r-artist').textContent = tr.artist;
     show('s5');
-  });
-
-  show('s4');
+  }
 }
 
-// SCREEN 1 — tap
+// S1 tap
 document.getElementById('s1').addEventListener('click', function() {
   sess.sOrder = shuffle([0,1,2,3,4]);
   sess.tOrder = shuffle([0,1,2,3,4]);
+
   buildList('entry-list', false, function(state) {
     sess.entryState = state;
     show('s3');
     setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 600);
   });
+
   show('s2');
 });
 
-// SKIP
-document.getElementById('skip').addEventListener('click', function(e) {
-  e.stopPropagation();
-  endTrack();
-});
-
-// SCREEN 5 — reveal tap
+// S5 reveal tap
 document.getElementById('s5').addEventListener('click', function() {
   sess.cur++;
   if (sess.cur < 5) {
@@ -550,7 +428,7 @@ document.getElementById('s5').addEventListener('click', function() {
   }
 });
 
-// EMAIL
+// Email
 document.getElementById('email-sub').addEventListener('click', function() {
   var email = document.getElementById('email-in').value.trim();
   if (!email || !email.includes('@')) {
@@ -559,22 +437,18 @@ document.getElementById('email-sub').addEventListener('click', function() {
   }
   document.getElementById('email-in').style.display = 'none';
   document.getElementById('email-sub').style.display = 'none';
-  document.getElementById('email-head').textContent = "You'll hear when something new arrives.";
-  document.getElementById('email-head').style.fontSize = '18px';
-  document.getElementById('email-head').style.opacity = '0.4';
+  var h = document.getElementById('email-head');
+  h.textContent = "You'll hear when something new arrives.";
+  h.style.fontSize = '18px';
+  h.style.opacity = '0.4';
 
-  console.log('FYND SESSION', JSON.stringify({
-    id: sess.id, email: email,
-    entryState: sess.entryState,
-    log: sess.log
-  }, null, 2));
+  console.log('FYND SESSION', JSON.stringify({ id: sess.id, email: email, entryState: sess.entryState, log: sess.log }, null, 2));
 });
 
 document.getElementById('email-in').addEventListener('keydown', function(e) {
   if (e.key === 'Enter') document.getElementById('email-sub').click();
 });
 
-// INIT
 initSC();
 
 </script>
