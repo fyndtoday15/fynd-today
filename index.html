@@ -27,7 +27,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: var(--bg);
 
 /* S2 */
 #s2 { background: var(--bg); justify-content: flex-start; padding-top: clamp(56px,11vh,88px); overflow-y: auto; }
-.screen-label { font-size: 11px; color: var(--black); opacity: 0.35; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 40px; align-self: flex-start; }
+.screen-label { font-size: 13px; color: var(--black); opacity: 0.6; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 40px; align-self: flex-start; }
 .stmt { width: 100%; padding: 20px 0; font-size: clamp(15px,3.8vw,18px); font-weight: 400; color: var(--black); line-height: 1.55; border-bottom: 1px solid rgba(0,0,0,0.08); cursor: pointer; user-select: none; transition: opacity 0.15s ease; }
 .stmt:first-of-type { border-top: 1px solid rgba(0,0,0,0.08); }
 .stmt.tapped { opacity: 0.3; pointer-events: none; }
@@ -46,11 +46,11 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: var(--bg);
 }
 .listen-top.shrunk { flex-grow: 0.7; }
 
-.listen-label { position: absolute; top: clamp(36px,7vh,52px); left: 32px; font-size: 11px; color: var(--bg); opacity: 0.3; letter-spacing: 0.12em; text-transform: uppercase; }
+.listen-label { position: absolute; top: clamp(36px,7vh,52px); left: 32px; font-size: 13px; color: var(--bg); opacity: 0.65; letter-spacing: 0.12em; text-transform: uppercase; }
 .pulse-wrap { display: flex; flex-direction: column; align-items: center; gap: 28px; }
-.pulse-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--bg); opacity: 0.55; animation: pd 2s ease-in-out infinite; }
+.pulse-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--bg); opacity: 0.8; animation: pd 2s ease-in-out infinite; }
 @keyframes pd { 0%,100%{transform:scale(1);opacity:.5} 50%{transform:scale(1.5);opacity:.85} }
-.track-count { font-size: 11px; color: var(--bg); opacity: 0.2; letter-spacing: 0.18em; }
+.track-count { font-size: 14px; color: var(--bg); opacity: 0.6; letter-spacing: 0.18em; }
 
 .listen-divider { width: 100%; height: 1px; background: rgba(255,255,255,0.07); flex-shrink: 0; transform: scaleX(0); transition: transform 0.5s ease 0.3s; }
 .listen-divider.show { transform: scaleX(1); }
@@ -71,18 +71,18 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: var(--bg);
   overflow-y: auto;
 }
 
-.assign-label { font-size: 11px; color: var(--bg); opacity: 0.4; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 20px; margin-top: 24px; flex-shrink: 0; }
-.assign-stmt { width: 100%; padding: 16px 0; font-size: clamp(14px,3.5vw,17px); font-weight: 400; color: var(--bg); line-height: 1.5; border-bottom: 1px solid rgba(255,255,255,0.08); cursor: pointer; user-select: none; transition: opacity 0.15s ease; flex-shrink: 0; }
+.assign-label { font-size: 14px; color: var(--bg); opacity: 0.75; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 20px; margin-top: 24px; flex-shrink: 0; }
+.assign-stmt { width: 100%; padding: 16px 0; font-size: clamp(16px,4vw,19px); font-weight: 400; color: var(--bg); line-height: 1.5; border-bottom: 1px solid rgba(255,255,255,0.08); cursor: pointer; user-select: none; transition: opacity 0.15s ease; flex-shrink: 0; }
 .assign-stmt:first-of-type { border-top: 1px solid rgba(255,255,255,0.08); }
 .assign-stmt.tapped { opacity: 0.3; pointer-events: none; }
 
 /* S5 */
 #s5 { background: var(--bg); justify-content: center; gap: 12px; cursor: pointer; }
-.reveal-label { font-size: 11px; color: var(--black); opacity: 0.35; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 12px; }
-.reveal-title { font-size: clamp(22px,5.5vw,34px); font-weight: 400; color: var(--black); text-align: center; letter-spacing: -0.01em; line-height: 1.2; }
-.reveal-artist { font-size: clamp(14px,3.2vw,17px); color: var(--black); opacity: 0.4; text-align: center; }
-.reveal-hint { position: absolute; bottom: clamp(72px,12vh,96px); font-size: 11px; color: var(--black); opacity: 0.2; letter-spacing: 0.1em; }
-.reveal-cta { position: absolute; bottom: clamp(36px,7vh,52px); font-size: 11px; color: var(--black); opacity: 0.18; letter-spacing: 0.12em; text-transform: uppercase; }
+.reveal-label { font-size: 13px; color: var(--black); opacity: 0.6; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 12px; }
+.reveal-title { font-size: clamp(26px,6vw,38px); font-weight: 400; color: var(--black); text-align: center; letter-spacing: -0.01em; line-height: 1.2; }
+.reveal-artist { font-size: clamp(16px,3.8vw,20px); color: var(--black); opacity: 0.65; text-align: center; }
+.reveal-hint { position: absolute; bottom: clamp(72px,12vh,96px); font-size: 12px; color: var(--black); opacity: 0.45; letter-spacing: 0.1em; }
+.reveal-cta { position: absolute; bottom: clamp(36px,7vh,52px); font-size: 12px; color: var(--black); opacity: 0.35; letter-spacing: 0.12em; text-transform: uppercase; }
 
 /* S6 */
 #s6 { background: var(--bg); justify-content: center; }
@@ -132,7 +132,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: var(--bg);
   </div>
   <div class="listen-divider" id="listen-divider"></div>
   <div class="assign-panel" id="assign-panel">
-    <div class="assign-label">Where did that sit</div>
+    <div class="assign-label">Where do you sit now</div>
     <div id="assign-list"></div>
   </div>
   <div id="sc-wrap">
@@ -284,7 +284,7 @@ function playTrack(idx) {
 
     assignTimer = setTimeout(function() {
       openPanel(function(ps) { doReveal(ps); });
-    }, 7000);
+    }, 15000);
 
     autoTimer = setTimeout(function() {
       if (widget) widget.pause();
