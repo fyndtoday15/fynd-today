@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" id="theme-color" content="#FCFBF4">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>FYND TODAY</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400&display=swap" rel="stylesheet">
 <style>
@@ -40,7 +42,7 @@ html.assign-top, body.assign-top { background: var(--black); }
 .stmt.tapped { opacity: 0.3; pointer-events: none; }
 
 /* S3 — LISTEN */
-#s3 { background: var(--black); padding: 0 0 0 0; padding-top: env(safe-area-inset-top); justify-content: flex-start; overflow: hidden; }
+#s3 { background: var(--black); padding: 0; justify-content: flex-start; overflow: hidden; }
 
 .listen-top {
   width: 100%; flex-grow: 1; flex-shrink: 1;
@@ -74,14 +76,13 @@ html.assign-top, body.assign-top { background: var(--black); }
   display: flex;
   align-items: center;
   gap: 8px;
-  animation: ph-white-hidden 3s ease-in-out infinite;
-  animation-play-state: paused;
 }
 .ready-prompt.show {
   pointer-events: all;
-  animation-play-state: running;
+  animation: ph-white 3s ease-in-out infinite;
+  animation-delay: 0s;
 }
-@keyframes ph-white-hidden { 0%,100%{opacity:.45} 50%{opacity:.85} }
+@keyframes ph-white { 0%{opacity:.45} 50%{opacity:.85} 100%{opacity:.45} }
 .ready-prompt-arrow { font-size: 16px; }
 
 /* ASSIGN PANEL — slides up as off-white */
@@ -183,8 +184,8 @@ html.assign-top, body.assign-top { background: var(--black); }
 </head>
 <body>
 
-<div id="safe-top" style="position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top);background:#FCFBF4;z-index:9999;transition:background 0.4s ease;"></div>
-<div id="safe-bot" style="position:fixed;bottom:0;left:0;right:0;height:env(safe-area-inset-bottom);background:#FCFBF4;z-index:9999;transition:background 0.4s ease;"></div>
+<div id="safe-top" style="position:fixed;top:0;left:0;right:0;height:max(env(safe-area-inset-top),50px);background:#FCFBF4;z-index:9999;"></div>
+<div id="safe-bot" style="position:fixed;bottom:0;left:0;right:0;height:max(env(safe-area-inset-bottom),34px);background:#FCFBF4;z-index:9999;"></div>
 <div id="dots">
   <div class="dot" id="d1"></div>
   <div class="dot" id="d2"></div>
