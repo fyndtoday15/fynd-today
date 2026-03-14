@@ -9,9 +9,10 @@
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 :root { --bg: #FCFBF4; --black: #000000; --f: 'DejaVu LGC Sans','DM Sans',Arial,sans-serif; }
-html, body { width: 100%; height: 100%; overflow: hidden; background: var(--bg); font-family: var(--f); -webkit-font-smoothing: antialiased; transition: background 0.4s ease; }
-body.listen-mode { background: var(--black); }
-body.assign-mode { background: var(--black); }
+html { background: var(--bg); transition: background 0.4s ease; }
+body { width: 100%; height: 100%; overflow: hidden; background: var(--bg); font-family: var(--f); -webkit-font-smoothing: antialiased; transition: background 0.4s ease; }
+html.listen-mode, body.listen-mode { background: var(--black); }
+html.assign-top, body.assign-top { background: var(--black); }
 
 
 .screen {
@@ -178,6 +179,8 @@ body.assign-mode { background: var(--black); }
 </head>
 <body>
 
+<div id="safe-top" style="position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top);background:#FCFBF4;z-index:9999;transition:background 0.4s ease;"></div>
+<div id="safe-bot" style="position:fixed;bottom:0;left:0;right:0;height:env(safe-area-inset-bottom);background:#FCFBF4;z-index:9999;transition:background 0.4s ease;"></div>
 <div id="dots">
   <div class="dot" id="d1"></div>
   <div class="dot" id="d2"></div>
@@ -293,13 +296,16 @@ function show(id) {
   }
   // Update safe area colors and theme-color for Safari
   var tc = document.getElementById('theme-color');
-  var b = document.body;
-  b.classList.remove('listen-mode','assign-mode');
+  var st = document.getElementById('safe-top');
+  var sb = document.getElementById('safe-bot');
   if (id === 's3') {
-    b.classList.add('listen-mode');
     if (tc) tc.content = '#000000';
+    if (st) st.style.background = '#000000';
+    if (sb) sb.style.background = '#000000';
   } else {
     if (tc) tc.content = '#FCFBF4';
+    if (st) st.style.background = '#FCFBF4';
+    if (sb) sb.style.background = '#FCFBF4';
   }
 }
 
@@ -359,8 +365,8 @@ function openPanel(cb) {
   var lbl = document.querySelector('.listen-label');
   if (lbl) lbl.textContent = 'Answer';
   // Safe area: top stays black, bottom becomes off-white
-  document.body.classList.remove('listen-mode');
-  document.body.classList.add('assign-mode');
+  var sb = document.getElementById('safe-bot');
+  if (sb) sb.style.background = '#FCFBF4';
   // Show entry state at top of panel
   var stateEl = document.getElementById('assign-entry-state');
   if (stateEl && sess.entryState) {
@@ -386,8 +392,8 @@ function resetPanel() {
   var lbl = document.querySelector('.listen-label');
   if (lbl) lbl.textContent = 'Listen';
   // Safe area back to full black
-  document.body.classList.remove('assign-mode');
-  document.body.classList.add('listen-mode');
+  var sb = document.getElementById('safe-bot');
+  if (sb) sb.style.background = '#000000';
   // Restore transition after reset
   setTimeout(function() {
     panel.style.transition = '';
