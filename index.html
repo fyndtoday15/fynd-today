@@ -45,11 +45,13 @@ html.assign-top, body.assign-top { background: var(--black); }
 #s3 { background: var(--black); padding: 0; justify-content: flex-start; overflow: hidden; }
 
 .listen-top {
-  width: 100%; flex-grow: 1; flex-shrink: 1;
+  width: 100%;
+  flex-grow: 0;
+  flex-shrink: 0;
+  height: 28vh;
+  min-height: 120px;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   position: relative;
-  transition: flex-grow 0.6s cubic-bezier(0.4,0,0.2,1);
-  min-height: 0;
 }
 .listen-label { position: absolute; top: clamp(36px,7vh,52px); left: 32px; font-size: 16px; color: var(--bg); opacity: 0.75; letter-spacing: 0.12em; text-transform: uppercase; }
 .pulse-wrap { display: flex; flex-direction: column; align-items: center; gap: 28px; }
@@ -101,8 +103,8 @@ html.assign-top, body.assign-top { background: var(--black); }
   z-index: 1000;
 }
 .assign-panel.open {
-  height: 72vh;
-  max-height: 72vh;
+  height: calc(100vh - 28vh - max(env(safe-area-inset-top),50px) - max(env(safe-area-inset-bottom),34px));
+  max-height: calc(100vh - 28vh - max(env(safe-area-inset-top),50px) - max(env(safe-area-inset-bottom),34px));
   overflow-y: scroll;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
