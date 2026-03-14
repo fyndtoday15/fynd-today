@@ -35,7 +35,7 @@ html.assign-top, body.assign-top { background: var(--black); }
 @keyframes ph { 0%,100%{opacity:.4} 50%{opacity:.8} }
 
 /* S2 — ENTRY */
-#s2 { background: var(--bg); justify-content: flex-start; padding-top: clamp(56px,11vh,88px); overflow-y: auto; }
+#s2 { background: var(--bg); justify-content: flex-start; padding-top: clamp(56px,11vh,88px); overflow-y: auto; -webkit-overflow-scrolling: touch; }
 .screen-label { font-size: 15px; color: var(--black); opacity: 0.75; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 40px; align-self: flex-start; }
 .stmt { width: 100%; padding: 20px 0; font-size: clamp(17px,4.2vw,20px); font-weight: 400; color: var(--black); line-height: 1.55; border-bottom: 1px solid rgba(0,0,0,0.08); cursor: pointer; user-select: none; transition: opacity 0.15s ease; }
 .stmt:first-of-type { border-top: 1px solid rgba(0,0,0,0.08); }
@@ -101,6 +101,7 @@ html.assign-top, body.assign-top { background: var(--black); }
 .assign-panel.open {
   max-height: 72vh;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 .assign-entry-state {
   font-size: 13px;
