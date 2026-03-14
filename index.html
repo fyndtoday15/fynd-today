@@ -310,35 +310,39 @@ function startDot() {
 function buildList(elId, cls, includeNone, cb) {
   var el = document.getElementById(elId);
   el.innerHTML = '';
-  var order = shuffle([0,1,2,3,4]);
+  var indices = [0,1,2,3,4];
+  if (includeNone) indices.push(5); // 5 = sentinel for None of these
+  var order = shuffle(indices);
   for (var i = 0; i < order.length; i++) {
-    (function(s) {
+    (function(idx) {
       var d = document.createElement('div');
       d.className = cls;
-      d.textContent = s.text;
-      d.addEventListener('click', function() {
-        if (d.classList.contains('tapped')) return;
-        d.classList.add('tapped');
-        var st = s.state;
-        setTimeout(function() { cb(st); }, 150);
-      });
+      if (idx === 5) {
+        d.textContent = 'None of these.';
+        d.addEventListener('click', function() {
+          if (d.classList.contains('tapped')) return;
+          d.classList.add('tapped');
+          setTimeout(function() { cb('None of These'); }, 150);
+        });
+      } else {
+        var s = STMTS[idx];
+        d.textContent = s.text;
+        d.addEventListener('click', function() {
+          if (d.classList.contains('tapped')) return;
+          d.classList.add('tapped');
+          var st = s.state;
+          setTimeout(function() { cb(st); }, 150);
+        });
+      }
       el.appendChild(d);
-    })(STMTS[order[i]]);
-  }
-  if (includeNone) {
-    var n = document.createElement('div');
-    n.className = cls;
-    n.textContent = 'None of these.';
-    n.addEventListener('click', function() {
-      if (n.classList.contains('tapped')) return;
-      n.classList.add('tapped');
-      setTimeout(function() { cb('None of These'); }, 150);
-    });
-    el.appendChild(n);
+    })(order[i]);
   }
 }
 
 function openPanel(cb) {
+  // Swap listen label to Answer
+  var lbl = document.querySelector('.listen-label');
+  if (lbl) lbl.textContent = 'Answer';
   // Show entry state at top of panel
   var stateEl = document.getElementById('assign-entry-state');
   if (stateEl && sess.entryState) {
@@ -360,6 +364,9 @@ function resetPanel() {
   document.getElementById('assign-list').innerHTML = '';
   document.getElementById('ready-prompt').classList.remove('show');
   document.getElementById('ready-prompt').style.pointerEvents = 'none';
+  // Restore listen label
+  var lbl = document.querySelector('.listen-label');
+  if (lbl) lbl.textContent = 'Listen';
   // Restore transition after reset
   setTimeout(function() {
     panel.style.transition = '';
