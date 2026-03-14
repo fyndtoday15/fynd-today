@@ -23,7 +23,7 @@ html.assign-top, body.assign-top { background: var(--black); }
   display: flex; flex-direction: column; align-items: center;
   padding: calc(env(safe-area-inset-top) + 0px) 32px calc(env(safe-area-inset-bottom) + 0px);
   opacity: 0; pointer-events: none;
-  transition: opacity 0.4s ease;
+  transition: opacity 0.5s ease-in-out;
 }
 .screen.active { opacity: 1; pointer-events: all; }
 
@@ -54,7 +54,7 @@ html.assign-top, body.assign-top { background: var(--black); }
 .listen-label { position: absolute; top: clamp(36px,7vh,52px); left: 32px; font-size: 16px; color: var(--bg); opacity: 0.75; letter-spacing: 0.12em; text-transform: uppercase; }
 .pulse-wrap { display: flex; flex-direction: column; align-items: center; gap: 28px; }
 .pulse-dot { width: 28px; height: 28px; border-radius: 50%; background: var(--bg); opacity: 0.8; animation: pd 2s ease-in-out infinite; }
-.pulse-dot.stopped { animation-play-state: paused; opacity: 0.3; transform: scale(1); transition: opacity 0.4s ease; }
+.pulse-dot.stopped { animation-play-state: paused; opacity: 0.3; transform: scale(1); transition: opacity 0.5s ease; }
 @keyframes pd { 0%,100%{transform:scale(1);opacity:.6} 50%{transform:scale(1.5);opacity:1} }
 .track-count { font-size: 15px; color: var(--bg); opacity: 0.75; letter-spacing: 0.18em; }
 
@@ -174,7 +174,7 @@ html.assign-top, body.assign-top { background: var(--black); }
 .email-sub { display: block; margin: 28px auto 0; font-family: var(--f); font-size: 12px; color: var(--black); background: none; border: none; cursor: pointer; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.45; padding: 10px 20px; }
 
 /* DOTS */
-#dots { position: fixed; bottom: clamp(24px,4.5vh,40px); left: 50%; transform: translateX(-50%); display: flex; gap: 8px; pointer-events: none; opacity: 0; transition: opacity 0.4s ease; z-index: 999; }
+#dots { position: fixed; bottom: clamp(24px,4.5vh,40px); left: 50%; transform: translateX(-50%); display: flex; gap: 8px; pointer-events: none; opacity: 0; transition: opacity 0.5s ease; z-index: 999; }
 #dots.show { opacity: 1; }
 .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--black); opacity: 0.15; transition: opacity 0.3s ease; }
 .dot.done { opacity: 0.5; }
@@ -290,9 +290,11 @@ function shuffle(arr) {
 }
 
 function show(id) {
-  var all = document.querySelectorAll('.screen');
-  for (var i = 0; i < all.length; i++) all[i].classList.remove('active');
-  setTimeout(function() { document.getElementById(id).classList.add('active'); }, 40);
+  var current = document.querySelector('.screen.active');
+  var next = document.getElementById(id);
+  if (!next) return;
+
+  // Update dots and safe areas immediately
   var dots = document.getElementById('dots');
   if (id === 's3' || id === 's5') {
     dots.classList.add('show');
@@ -301,7 +303,6 @@ function show(id) {
     dots.classList.remove('show');
     dots.classList.remove('dark');
   }
-  // Update safe area colors and theme-color for Safari
   var tc = document.getElementById('theme-color');
   var st = document.getElementById('safe-top');
   var sb = document.getElementById('safe-bot');
@@ -313,6 +314,17 @@ function show(id) {
     if (tc) tc.content = '#FCFBF4';
     if (st) { st.style.transition = 'none'; st.style.background = '#FCFBF4'; }
     if (sb) { sb.style.transition = 'none'; sb.style.background = '#FCFBF4'; }
+  }
+
+  if (current && current !== next) {
+    // Fade out current fully first
+    current.classList.remove('active');
+    // Wait for fade out to complete (400ms) then fade in next
+    setTimeout(function() {
+      next.classList.add('active');
+    }, 500);
+  } else {
+    next.classList.add('active');
   }
 }
 
