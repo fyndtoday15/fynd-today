@@ -2,18 +2,44 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" id="theme-color" content="#FCFBF4">
 <title>FYND TODAY</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 :root { --bg: #FCFBF4; --black: #000000; --f: 'DejaVu LGC Sans','DM Sans',Arial,sans-serif; }
 html, body { width: 100%; height: 100%; overflow: hidden; background: var(--bg); font-family: var(--f); -webkit-font-smoothing: antialiased; }
+/* Safe area fills */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: env(safe-area-inset-top);
+  background: var(--bg);
+  z-index: 9998;
+  transition: background 0.4s ease;
+}
+body::after {
+  content: '';
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: env(safe-area-inset-bottom);
+  background: var(--bg);
+  z-index: 9998;
+  transition: background 0.4s ease;
+}
+body.listen-mode::before { background: var(--black); }
+body.listen-mode::after { background: var(--black); }
+body.assign-mode::before { background: var(--black); }
+body.assign-mode::after { background: var(--bg); }
 
 .screen {
   position: fixed; inset: 0;
   display: flex; flex-direction: column; align-items: center;
   padding: 0 32px;
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
   opacity: 0; pointer-events: none;
   transition: opacity 0.4s ease;
 }
@@ -286,6 +312,16 @@ function show(id) {
     dots.classList.remove('show');
     dots.classList.remove('dark');
   }
+  // Update safe area colors and theme-color for Safari
+  var tc = document.getElementById('theme-color');
+  var b = document.body;
+  b.classList.remove('listen-mode','assign-mode');
+  if (id === 's3') {
+    b.classList.add('listen-mode');
+    if (tc) tc.content = '#000000';
+  } else {
+    if (tc) tc.content = '#FCFBF4';
+  }
 }
 
 function setDots(cur) {
@@ -343,6 +379,9 @@ function openPanel(cb) {
   // Swap listen label to Answer
   var lbl = document.querySelector('.listen-label');
   if (lbl) lbl.textContent = 'Answer';
+  // Safe area: top stays black, bottom becomes off-white
+  document.body.classList.remove('listen-mode');
+  document.body.classList.add('assign-mode');
   // Show entry state at top of panel
   var stateEl = document.getElementById('assign-entry-state');
   if (stateEl && sess.entryState) {
@@ -367,6 +406,9 @@ function resetPanel() {
   // Restore listen label
   var lbl = document.querySelector('.listen-label');
   if (lbl) lbl.textContent = 'Listen';
+  // Safe area back to full black
+  document.body.classList.remove('assign-mode');
+  document.body.classList.add('listen-mode');
   // Restore transition after reset
   setTimeout(function() {
     panel.style.transition = '';
