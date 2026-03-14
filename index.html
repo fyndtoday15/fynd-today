@@ -101,11 +101,17 @@ html.assign-top, body.assign-top { background: var(--black); }
   z-index: 1000;
 }
 .assign-panel.open {
-  height: 78vh;
-  max-height: 78vh;
+  height: 58vh;
+  max-height: 58vh;
   overflow-y: scroll;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
+}
+@media (min-width: 768px) {
+  .assign-panel.open {
+    height: 72vh;
+    max-height: 72vh;
+  }
 }
 .assign-entry-state {
   font-size: 13px;
