@@ -51,6 +51,7 @@ html.assign-top, body.assign-top { background: var(--black); }
   transition: flex-grow 0.6s cubic-bezier(0.4,0,0.2,1);
   min-height: 0;
 }
+.listen-top.shrunk { flex-grow: 0.4; }
 .listen-label { position: absolute; top: clamp(36px,7vh,52px); left: 32px; font-size: 16px; color: var(--bg); opacity: 0.75; letter-spacing: 0.12em; text-transform: uppercase; }
 .pulse-wrap { display: flex; flex-direction: column; align-items: center; gap: 28px; }
 .pulse-dot { width: 28px; height: 28px; border-radius: 50%; background: var(--bg); opacity: 0.8; animation: pd 2s ease-in-out infinite; }
@@ -99,10 +100,11 @@ html.assign-top, body.assign-top { background: var(--black); }
   border-radius: 20px 20px 0 0;
 }
 .assign-panel.open {
-  height: 58vh;
-  max-height: 58vh;
+  height: 64vh;
+  max-height: 64vh;
   overflow-y: scroll;
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
 .assign-entry-state {
   font-size: 13px;
@@ -199,7 +201,7 @@ html.assign-top, body.assign-top { background: var(--black); }
 <!-- S1 ARRIVAL -->
 <div class="screen active" id="s1">
   <span class="s1-word">Today.</span>
-  <p class="s1-intro">Listen. Tell us where you land.<br>That's it.</p>
+  <p class="s1-intro">Find out where the music takes you.</p>
   <span class="s1-hint">tap to begin</span>
 </div>
 
@@ -391,6 +393,7 @@ function openPanel(cb) {
   document.getElementById('ready-prompt').classList.remove('show');
   document.getElementById('ready-prompt').style.pointerEvents = 'none';
   document.getElementById('assign-panel').classList.add('open');
+  document.getElementById('listen-top').classList.add('shrunk');
 }
 
 function resetPanel() {
@@ -405,6 +408,7 @@ function resetPanel() {
   // Restore listen label
   var lbl = document.querySelector('.listen-label');
   if (lbl) lbl.textContent = 'Listen';
+  document.getElementById('listen-top').classList.remove('shrunk');
   // Safe area back to full black
   var sb = document.getElementById('safe-bot');
   if (sb) { sb.style.transition = 'none'; sb.style.background = '#000000'; }
