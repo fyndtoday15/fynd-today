@@ -173,7 +173,7 @@ html.assign-top, body.assign-top { background: var(--black); }
 .email-head { font-size: clamp(30px,7vw,46px); font-weight: 400; color: var(--black); letter-spacing: -0.02em; margin-bottom: 44px; text-align: center; }
 .email-input { width: 100%; max-width: 300px; font-family: var(--f); font-size: 16px; color: var(--black); background: transparent; border: none; border-bottom: 1px solid rgba(0,0,0,0.45); padding: 10px 0; outline: none; text-align: center; border-radius: 0; -webkit-appearance: none; }
 .email-input::placeholder { color: var(--black); opacity: 0.22; }
-.email-sub { display: block; margin: 28px auto 0; font-family: var(--f); font-size: 12px; color: var(--black); background: none; border: none; cursor: pointer; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.45; padding: 10px 20px; }
+.email-sub { display: block; margin: 28px auto 0; font-family: var(--f); font-size: 12px; color: var(--black); background: none; border: none; cursor: pointer; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.45; padding: 10px 20px; animation: ph 3s ease-in-out infinite; }
 
 /* DOTS */
 #dots { position: fixed; bottom: clamp(24px,4.5vh,40px); left: 50%; transform: translateX(-50%); display: flex; gap: 8px; pointer-events: none; opacity: 0; transition: opacity 0.3s ease; z-index: 999; }
@@ -252,7 +252,7 @@ html.assign-top, body.assign-top { background: var(--black); }
 <div class="screen" id="s6">
   <div class="email-head" id="email-head">More comes.</div>
   <input class="email-input" id="email-in" type="email" placeholder="your email" autocomplete="email" autocapitalize="none">
-  <button class="email-sub" id="email-sub">In.</button>
+  <button class="email-sub" id="email-sub">I'm in.</button>
 </div>
 
 <script src="https://w.soundcloud.com/player/api.js"></script>
