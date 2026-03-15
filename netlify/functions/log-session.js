@@ -1,6 +1,6 @@
 exports.handler = async function(event, context) {
   if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: 'Method Not Allowed' };
+    return { statusCode: 405, body: 'Method Not Allowed' }; 
   }
 
   const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
