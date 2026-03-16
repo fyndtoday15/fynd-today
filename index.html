@@ -870,12 +870,16 @@ document.getElementById('btn-continue').addEventListener('click', function() {
 
 // Stop for now — go to email
 document.getElementById('btn-stop').addEventListener('click', function() {
+  clearAbandoned();
+  LS.set('onEmailScreen', true);
   show('s6');
 });
 
 // Recap continue -> email (skip if already have email)
 document.getElementById('recap-continue').addEventListener('click', function() {
   updateSetButtons();
+  clearAbandoned();
+  LS.set('onEmailScreen', true);
   var savedEmail = LS.get('email');
   if (savedEmail) {
     // Already have their info — log the set completion with saved details
@@ -913,6 +917,7 @@ document.getElementById('email-sub').addEventListener('click', function() {
   // Save to localStorage for return visits
   LS.set('email', email);
   LS.set('firstName', firstName);
+  LS.set('onEmailScreen', false);
   if (!firstName) { document.getElementById('name-in').style.borderBottomColor = 'rgba(0,0,0,0.9)'; return; }
   if (!email || !email.includes('@')) { document.getElementById('email-in').style.borderBottomColor = 'rgba(0,0,0,0.9)'; return; }
   document.getElementById('name-in').style.display = 'none';
@@ -1137,9 +1142,12 @@ function initUserState() {
     ? Math.floor((Date.now() - lastVisit) / (1000 * 60 * 60 * 24))
     : null;
 
+  var onEmailScreen = LS.get('onEmailScreen');
+
   if (returning) {
     // Check for abandoned session first
-    if (abandoned) {
+    // But not if we were on the email screen — that means session completed
+    if (abandoned && !onEmailScreen) {
       // Resume abandoned — go straight to entry then resume
       sess.id = abandoned.sessionId;
       sess.playlist = abandoned.playlist;
@@ -1182,11 +1190,17 @@ function initUserState() {
   // Pre-fill email/name if we have them
   if (savedEmail) window._savedEmail = savedEmail;
   if (savedName) window._savedName = savedName;
+
+  // If refreshed on email/set-buttons screen — clear it so next tap goes to next set
+  if (onEmailScreen) {
+    LS.set('onEmailScreen', false);
+  }
 }
 
 initUserState();
 
 initSC();
+
 
 // Capture partial listen if tab closed mid-session if tab closed mid-session
 window.addEventListener('beforeunload', function() {
