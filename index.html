@@ -1136,35 +1136,20 @@ function loadSet(playlistName) {
   sess.playlist = playlistName;
   var url = playlistUrls[playlistName] || playlistUrls['MVP 1'];
 
-  // widget.load() with auto_play:true starts playback on the new playlist.
-  // We listen for PLAY_PROGRESS (fires reliably on mobile when audio starts)
-  // to know playback is live, then skip to correct track and start timers.
+  // Swap iframe src directly — same as what happens on a refresh.
+  // This is the only approach that works reliably across all mobile browsers.
+  var iframe = document.getElementById('sc');
+  iframe.src = 'https://w.soundcloud.com/player/?url=' + encodeURIComponent(url) +
+    '&auto_play=false&hide_related=true&show_comments=false&show_user=false' +
+    '&show_reposts=false&show_teaser=false&visual=false';
+
   widgetReady = false;
-  var loadSetHandled = false;
-
-  widget.unbind(SC.Widget.Events.PLAY_PROGRESS);
-  widget.bind(SC.Widget.Events.PLAY_PROGRESS, function() {
-    if (loadSetHandled) return;
-    loadSetHandled = true;
-    widget.unbind(SC.Widget.Events.PLAY_PROGRESS);
-
-    widgetReady = true;
-    var target = sess.tOrder[sess.cur];
-    if (target !== 0) {
-      widget.skip(target);
-      setTimeout(function() { widget.play(); }, 200);
-    }
-    startTrackTimers();
-  });
-
-  widget.load(url, {
-    auto_play: true,
-    hide_related: true,
-    show_comments: false,
-    show_user: false,
-    show_reposts: false,
-    show_teaser: false,
-  });
+  setTimeout(function() {
+    initSC();
+    setTimeout(function() {
+      playTrack(sess.tOrder[sess.cur]);
+    }, 500);
+  }, 800);
 }
 
 // ── RETURNING USER SYSTEM ───────────────────────────────
