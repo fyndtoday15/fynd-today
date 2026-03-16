@@ -786,8 +786,9 @@ document.getElementById('thumb-down').addEventListener('click', function() {
     if (stD) { stD.style.transition = 'none'; stD.style.background = '#000000'; }
     if (sbD) { sbD.style.transition = 'none'; sbD.style.background = '#000000'; }
     if (isMobile && widget && widgetReady) { widget.play(); }
+    if (isMobile && widget && widgetReady) { widget.play(); }
     show('s3');
-    setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 300);
+    setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 500);
   } else {
     markSetComplete(sess.playlist);
     clearAbandoned();
@@ -864,20 +865,17 @@ document.getElementById('s1').addEventListener('click', function() {
     window._resumeCur = undefined;
     if (isMobile && widget && widgetReady) { widget.play(); }
     show('s3');
-    setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 300);
+    setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 500);
     return;
   }
 
   // Normal flow — show entry question
   buildList('entry-list', 'stmt', true, function(state) {
     sess.entryState = state;
-    // Mobile: call widget.play() synchronously inside this tap gesture
-    // This unlocks audio for the cross-origin iframe on mobile browsers
-    if (isMobile && widget && widgetReady) {
-      widget.play();
-    }
+    // Mobile: play synchronously inside tap gesture to unlock audio context
+    if (isMobile && widget && widgetReady) { widget.play(); }
     show('s3');
-    setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 300);
+    setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 500);
   });
   show('s2');
 });
@@ -896,7 +894,7 @@ document.getElementById('btn-continue').addEventListener('click', function() {
     if (sbC) { sbC.style.transition = 'none'; sbC.style.background = '#000000'; }
     if (isMobile && widget && widgetReady) { widget.play(); }
     show('s3');
-    setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 300);
+    setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 500);
   } else {
     markSetComplete(sess.playlist);
     clearAbandoned();
@@ -1066,13 +1064,13 @@ function loadSet(playlistName) {
   sess.playlist = playlistName;
   var url = playlistUrls[playlistName] || playlistUrls['MVP 1'];
 
-  // Mobile: call widget.play() synchronously in this tap gesture BEFORE
-  // changing the src — this keeps the audio context unlocked on mobile.
+  // Mobile: widget.play() synchronously inside the tap gesture unlocks
+  // the audio context for the cross-origin iframe on mobile browsers.
   if (isMobile && widget && widgetReady) {
     widget.play();
   }
 
-  // All browsers: swap iframe src and reinit widget
+  // All browsers: same src swap + reinit approach
   var iframe = document.getElementById('sc');
   iframe.src = 'https://w.soundcloud.com/player/?url=' + encodeURIComponent(url) +
     '&auto_play=false&hide_related=true&show_comments=false&show_user=false' +
