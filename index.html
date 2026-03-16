@@ -647,20 +647,25 @@ function playTrack(idx) {
   function go() {
     resetPanel();
     startDot();
-    // Force position change silently before landing on target track
-    // Mute during prime to prevent audio glitch from brief wrong-track load
-    widget.setVolume(0);
-    var primeIdx = idx === 0 ? 1 : 0;
-    widget.skip(primeIdx);
-    setTimeout(function() {
-      widget.skip(idx);
-      setTimeout(function() {
-        widget.setVolume(100);
-        widget.play();
-        // Backup play attempt for Safari
-        setTimeout(function() { widget.play(); }, 800);
-      }, 600);
-    }, 300);
+    // Use getSounds to confirm tracks are loaded before navigating
+    // This is more reliable than fixed timeouts, especially on Safari
+    function attemptPlay(attemptsLeft) {
+      widget.getSounds(function(sounds) {
+        if (sounds && sounds.length > idx) {
+          // Tracks loaded — navigate and play
+          widget.skip(idx);
+          setTimeout(function() {
+            widget.play();
+            // One backup attempt
+            setTimeout(function() { widget.play(); }, 1000);
+          }, 400);
+        } else if (attemptsLeft > 0) {
+          // Tracks not ready yet — retry
+          setTimeout(function() { attemptPlay(attemptsLeft - 1); }, 300);
+        }
+      });
+    }
+    attemptPlay(10); // up to 10 attempts = 3 seconds max wait
     sess.listenStart = Date.now();
     clearTimeout(readyTimer);
     clearTimeout(autoTimer);
