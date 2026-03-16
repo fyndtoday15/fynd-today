@@ -1143,11 +1143,8 @@ function loadSet(playlistName) {
     widget.unbind(SC.Widget.Events.READY);
     widget.bind(SC.Widget.Events.READY, function() { widgetReady = true; });
 
-    // Switch to the shuffled first track, but do NOT call play() again.
-    // Mobile already has playback permission from the set-button tap + auto_play load.
-    widget.skip(sess.tOrder[sess.cur]);
-
-    // Start UI/timers only.
+    // Do NOT skip or play here on mobile.
+    // The widget already started on the correct track.
     setTimeout(function() {
       startTrackTimers();
     }, 250);
@@ -1155,6 +1152,7 @@ function loadSet(playlistName) {
 
   widget.load(url, {
     auto_play: true,
+    start_track: sess.tOrder[sess.cur],
     hide_related: true,
     show_comments: false,
     show_user: false,
