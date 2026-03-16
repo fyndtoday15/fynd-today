@@ -432,6 +432,9 @@ var sess = {
   reaction: '',
 };
 
+// Detect mobile — iOS and Android browsers need gesture-aware playback
+var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
 function shuffle(arr) {
   var a = arr.slice(), i = a.length, j, t;
   while (i--) { j = Math.floor(Math.random() * (i + 1)); t = a[i]; a[i] = a[j]; a[j] = t; }
@@ -679,13 +682,12 @@ function playTrack(idx) {
   function go() {
     resetPanel();
     startDot();
-    // Always skip to correct track then play
     sess._gestureUnlocked = false;
     widget.skip(idx);
     setTimeout(function() {
       widget.play();
-      setTimeout(function() { widget.play(); }, 500);
-    }, 150);
+      setTimeout(function() { widget.play(); }, 800);
+    }, 300);
     sess.listenStart = Date.now();
     clearTimeout(readyTimer);
     clearTimeout(autoTimer);
@@ -788,8 +790,11 @@ document.getElementById('thumb-down').addEventListener('click', function() {
     if (stD) { stD.style.transition = 'none'; stD.style.background = '#000000'; }
     if (sbD) { sbD.style.transition = 'none'; sbD.style.background = '#000000'; }
     show('s3');
-    if (widgetReady) { sess._gestureUnlocked = true; }
-  setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 100);
+    if (isMobile && widgetReady) {
+    widget.play();
+    sess._gestureUnlocked = true;
+  }
+  setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, isMobile ? 50 : 100);
   } else {
     markSetComplete(sess.playlist);
     clearAbandoned();
@@ -929,12 +934,13 @@ document.getElementById('s1').addEventListener('click', function() {
   // Show entry question
   buildList('entry-list', 'stmt', true, function(state) {
     sess.entryState = state;
-    show('s3');
-    // Play immediately after screen switch — still within gesture context on Safari
-    if (widgetReady) {
+    // Mobile: call widget.play() synchronously inside gesture before any timeout
+    if (isMobile && widgetReady) {
+      widget.play();
       sess._gestureUnlocked = true;
     }
-    setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 100);
+    show('s3');
+    setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, isMobile ? 50 : 100);
   });
   show('s2');
 });
@@ -951,9 +957,12 @@ document.getElementById('btn-continue').addEventListener('click', function() {
     var sbC = document.getElementById('safe-bot');
     if (stC) { stC.style.transition = 'none'; stC.style.background = '#000000'; }
     if (sbC) { sbC.style.transition = 'none'; sbC.style.background = '#000000'; }
+    if (isMobile && widgetReady) {
+      widget.play();
+      sess._gestureUnlocked = true;
+    }
     show('s3');
-    if (widgetReady) { sess._gestureUnlocked = true; }
-    setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 100);
+    setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, isMobile ? 50 : 100);
   } else {
     markSetComplete(sess.playlist);
     clearAbandoned();
@@ -1080,35 +1089,23 @@ function updateSetButtons() {
 }
 
 function loadSet(playlistName) {
-  // Unlock Safari audio context on this user gesture
-  try {
-    var silentAudio3 = new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAA' +
-      'EAAQARAAAAAgABAAIAZGF0YQAAAAA=');
-    silentAudio3.volume = 0;
-    silentAudio3.play().catch(function(){});
-  } catch(e) {}
-
-  // Mark this set button as used and mark as complete in localStorage
+  // Mark set button used
   var btns = document.querySelectorAll('.set-btn');
   btns.forEach(function(b) {
-    if (b.textContent.trim() === setLabel(playlistName)) {
-      b.classList.add('used');
-    }
+    if (b.textContent.trim() === setLabel(playlistName)) b.classList.add('used');
   });
-  // Clear email screen flag — they are starting a new session
   LS.set('onEmailScreen', false);
 
-  // Reset panel and dot immediately so s3 is clean before showing
+  // Reset UI
   resetPanel();
   startDot();
-  // Force black before transition
   document.body.style.background = '#000000';
   var stL = document.getElementById('safe-top');
   var sbL = document.getElementById('safe-bot');
   if (stL) { stL.style.transition = 'none'; stL.style.background = '#000000'; }
   if (sbL) { sbL.style.transition = 'none'; sbL.style.background = '#000000'; }
 
-  // Full clean session reset
+  // Full session reset
   sess.cur = 0;
   sess.tOrder = shuffle([0,1,2,3,4]);
   sess.log = [];
@@ -1120,11 +1117,9 @@ function loadSet(playlistName) {
   window._resumeMode = false;
   window._resumeCur = undefined;
 
-  // Show s3 immediately so person sees black screen right away
   show('s3');
   document.getElementById('tc').textContent = '1 — 5';
 
-  // Update SoundCloud widget to new playlist
   var playlistUrls = {
     'MVP 1':   'https://soundcloud.com/fynd-today/sets/mvp-1',
     'MVP 1.2': 'https://soundcloud.com/fynd-today/sets/mvp-1-2',
@@ -1136,30 +1131,60 @@ function loadSet(playlistName) {
   sess.playlist = playlistName;
   var url = playlistUrls[playlistName] || playlistUrls['MVP 1'];
 
-  // Use widget.load() with auto_play:true — Safari allows this because
-  // the load() call is initiated synchronously within the user gesture
   widgetReady = false;
-  widget.load(url, {
-    auto_play: true,
-    hide_related: true,
-    show_comments: false,
-    show_user: false,
-    show_reposts: false,
-    show_teaser: false,
-    callback: function() {
-      widgetReady = true;
-      var target = sess.tOrder[sess.cur];
-      // Skip to correct shuffled track if not track 0
-      if (target !== 0) {
-        widget.skip(target);
-        setTimeout(function() {
-          widget.play();
-        }, 200);
-      }
-      // Start session timers
-      startTrackTimers();
+
+  var finishHandler = function() {
+    if (widget) widget.pause();
+    stopDot();
+    document.getElementById('thumbs-wrap').classList.remove('show');
+    clearTimeout(thumbsTimer);
+    if (!document.getElementById('assign-panel').classList.contains('open')) {
+      openPanel(function(ps) { doReveal(ps); });
     }
-  });
+  };
+
+  if (isMobile) {
+    // ── MOBILE ─────────────────────────────────────────────────────────────
+    // widget.load() with auto_play:true — called synchronously in the tap
+    // gesture. Mobile browsers allow autoplay when load() is called within
+    // a user gesture, even in a cross-origin iframe.
+    widget.load(url, {
+      auto_play: true,
+      hide_related: true,
+      show_comments: false,
+      show_user: false,
+      show_reposts: false,
+      show_teaser: false,
+      callback: function() {
+        widgetReady = true;
+        var target = sess.tOrder[0]; // always play first shuffled track
+        if (target !== 0) {
+          // SoundCloud autoplayed track 0 — skip to correct track
+          widget.skip(target);
+          setTimeout(function() { widget.play(); }, 300);
+        }
+        // Rebind FINISH after load
+        widget.bind(SC.Widget.Events.FINISH, finishHandler);
+        startTrackTimers();
+      }
+    });
+  } else {
+    // ── DESKTOP ────────────────────────────────────────────────────────────
+    // widget.load() with auto_play:false — normal flow, playTrack handles play
+    widget.load(url, {
+      auto_play: false,
+      hide_related: true,
+      show_comments: false,
+      show_user: false,
+      show_reposts: false,
+      show_teaser: false,
+      callback: function() {
+        widgetReady = true;
+        widget.bind(SC.Widget.Events.FINISH, finishHandler);
+        playTrack(sess.tOrder[0]);
+      }
+    });
+  }
 }
 
 // ── RETURNING USER SYSTEM ───────────────────────────────
