@@ -31,37 +31,46 @@ exports.handler = async function(event, context) {
     return { statusCode: 400, body: 'Invalid JSON' };
   }
 
-  // EMAIL + NAME UPDATE — find existing records by session ID and patch
+  // EMAIL + NAME — write a dedicated record so it never fails
   if (data.emailUpdate) {
     try {
-      const searchUrl = BASE_URL + '?filterByFormula=' + encodeURIComponent('{Session ID}="' + data.sessionId + '"');
-      const searchRes = await fetch(searchUrl, { headers: HEADERS });
-      const searchData = await searchRes.json();
-
-      if (!searchData.records || searchData.records.length === 0) {
-        return { statusCode: 200, body: JSON.stringify({ message: 'No records found' }) };
-      }
-
-      const patches = searchData.records.map(function(r) {
-        return {
-          id: r.id,
-          fields: {
-            'Email': data.email || '',
-            'First Name': data.firstName || '',
-          }
-        };
-      });
-
-      await fetch(BASE_URL, {
-        method: 'PATCH',
+      const response = await fetch(BASE_URL, {
+        method: 'POST',
         headers: HEADERS,
-        body: JSON.stringify({ records: patches }),
+        body: JSON.stringify({
+          records: [{
+            fields: {
+              'Session ID': data.sessionId || '',
+              'First Name': data.firstName || '',
+              'Email': data.email || '',
+              'Entry State': data.entryState || '',
+              'Track ID': 'EMAIL',
+              'Track Title': 'Email Record',
+              'Playlist': '',
+              'Duration': 0,
+              'Position': '',
+              'Week': '',
+              'Returning Visitor': 'No',
+            }
+          }]
+        }),
       });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        console.error('Email record error:', result);
+        return {
+          statusCode: 500,
+          headers: { 'Access-Control-Allow-Origin': '*' },
+          body: JSON.stringify(result),
+        };
+      }
 
       return {
         statusCode: 200,
         headers: { 'Access-Control-Allow-Origin': '*' },
-        body: JSON.stringify({ success: true, updated: patches.length }),
+        body: JSON.stringify({ success: true }),
       };
     } catch(err) {
       console.error('Email update error:', err);
@@ -69,7 +78,7 @@ exports.handler = async function(event, context) {
     }
   }
 
-  // TRACK LOG — create new record for this track assignment
+  // TRACK LOG — create one record per track assignment
   const { sessionId, email, entryState, assignments } = data;
 
   if (!assignments || assignments.length === 0) {
@@ -90,6 +99,7 @@ exports.handler = async function(event, context) {
         'Email': '',
         'Week': a.week || 'W01',
         'Returning Visitor': a.returningVisitor || 'No',
+        'Reaction': a.reaction || '',
       }
     };
   });
