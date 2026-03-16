@@ -101,7 +101,7 @@ exports.handler = async function(event, context) {
         'Returning Visitor': a.returningVisitor || 'No',
         'Reaction': a.reaction || '',
         'Visit Number': a.visitNumber || 1,
-        'Days Since Last Visit': a.daysSinceLastVisit !== undefined && a.daysSinceLastVisit !== null ? a.daysSinceLastVisit : '',
+        'Days Since Last Visit': (a.daysSinceLastVisit !== undefined && a.daysSinceLastVisit !== null && a.daysSinceLastVisit !== '') ? Number(a.daysSinceLastVisit) : null,
       }
     };
   });
