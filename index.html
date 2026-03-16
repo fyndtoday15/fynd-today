@@ -1136,12 +1136,11 @@ function loadSet(playlistName) {
   sess.playlist = playlistName;
   var url = playlistUrls[playlistName] || playlistUrls['MVP 1'];
 
-  // Use widget.load() to swap playlist — keeps the same iframe instance
-  // Then call play() immediately in the callback which Safari allows
-  // because widget.load() was initiated within the user gesture
+  // Use widget.load() with auto_play:true — Safari allows this because
+  // the load() call is initiated synchronously within the user gesture
   widgetReady = false;
   widget.load(url, {
-    auto_play: false,
+    auto_play: true,
     hide_related: true,
     show_comments: false,
     show_user: false,
@@ -1150,11 +1149,15 @@ function loadSet(playlistName) {
     callback: function() {
       widgetReady = true;
       var target = sess.tOrder[sess.cur];
-      widget.skip(target);
-      setTimeout(function() {
-        widget.play();
-        startTrackTimers();
-      }, 300);
+      // Skip to correct shuffled track if not track 0
+      if (target !== 0) {
+        widget.skip(target);
+        setTimeout(function() {
+          widget.play();
+        }, 200);
+      }
+      // Start session timers
+      startTrackTimers();
     }
   });
 }
