@@ -42,6 +42,10 @@ html.assign-top, body.assign-top { background: var(--black); }
 .stmt:first-of-type { border-top: 1px solid rgba(0,0,0,0.08); }
 .stmt.tapped { opacity: 0.3; pointer-events: none; }
 
+/* S3B — SET LOADED, WAITING FOR TAP */
+#s3b { background: var(--black); justify-content: center; cursor: pointer; }
+.s3b-hint { font-size: 15px; color: var(--bg); opacity: 0.7; letter-spacing: 0.12em; text-transform: uppercase; animation: ph 3s ease-in-out infinite; }
+
 /* S3 — LISTEN */
 #s3 { background: var(--black); padding: 0; justify-content: flex-start; overflow: hidden; }
 
@@ -53,8 +57,6 @@ html.assign-top, body.assign-top { background: var(--black); }
   min-height: 0;
 }
 .listen-label { position: absolute; top: clamp(36px,7vh,52px); left: 32px; font-size: 16px; color: var(--bg); opacity: 0.75; letter-spacing: 0.12em; text-transform: uppercase; }
-.tap-to-listen { position: absolute; bottom: clamp(80px,15vh,110px); left: 50%; transform: translateX(-50%); font-family: var(--f); font-size: 12px; color: var(--bg); opacity: 0.5; letter-spacing: 0.14em; text-transform: uppercase; background: none; border: 1px solid rgba(255,255,255,0.35); border-radius: 2px; padding: 14px 28px; cursor: pointer; display: none; animation: ph 3s ease-in-out infinite; }
-@keyframes ph { 0%,100%{opacity:0.35} 50%{opacity:0.65} }
 .pulse-wrap { display: flex; flex-direction: column; align-items: center; gap: 28px; }
 .pulse-dot { width: 28px; height: 28px; border-radius: 50%; background: var(--bg); opacity: 0.8; animation: pd 2s ease-in-out infinite; }
 .pulse-dot.stopped { animation-play-state: paused; opacity: 0.3; transform: scale(1); transition: opacity 0.3s ease; }
@@ -276,6 +278,11 @@ html.assign-top, body.assign-top { background: var(--black); }
   <div id="entry-list" style="padding-bottom: 80px;"></div>
 </div>
 
+<!-- S3B — SET LOADED WAITING FOR TAP -->
+<div class="screen" id="s3b">
+  <span class="s3b-hint">tap to begin</span>
+</div>
+
 <!-- S3 LISTEN -->
 <div class="screen" id="s3">
   <div class="listen-top" id="listen-top">
@@ -292,7 +299,6 @@ html.assign-top, body.assign-top { background: var(--black); }
       <span>Answer now</span>
       <span class="ready-prompt-arrow">↑</span>
     </div>
-    <button class="tap-to-listen" id="tap-to-listen">Tap to listen</button>
   </div>
   <div class="assign-panel" id="assign-panel">
     <div class="assign-label">While this plays —</div>
@@ -1139,8 +1145,8 @@ function loadSet(playlistName) {
   sess.playlist = playlistName;
   var url = playlistUrls[playlistName] || playlistUrls['MVP 1'];
 
-  // Load the new playlist. When ready, show a tap button.
-  // The tap button calls widget.play() synchronously — direct user gesture —
+  // Load new playlist silently. When ready, show s3b (full black tap screen).
+  // The s3b tap is a direct user gesture — widget.play() fires inside it,
   // which is the only reliable way to unlock audio on mobile browsers.
   widgetReady = false;
   widget.unbind(SC.Widget.Events.READY);
@@ -1148,10 +1154,10 @@ function loadSet(playlistName) {
     widgetReady = true;
     widget.unbind(SC.Widget.Events.READY);
     widget.bind(SC.Widget.Events.READY, function() { widgetReady = true; });
-    // Skip to correct shuffled track silently (no play)
+    // Pre-position to correct shuffled track while still silent
     widget.skip(sess.tOrder[sess.cur]);
-    // Show tap button — user tap will be the gesture that unlocks audio
-    document.getElementById('tap-to-listen').style.display = 'block';
+    // Show the tap screen — user tap will be the gesture that starts audio
+    show('s3b');
   });
 
   widget.load(url, {
@@ -1322,13 +1328,12 @@ initUserState();
 
 initSC();
 
-// Tap to listen — fires widget.play() inside a direct user gesture
-// Used after loadSet loads a new playlist on mobile
-document.getElementById('tap-to-listen').addEventListener('click', function() {
-  document.getElementById('tap-to-listen').style.display = 'none';
+// S3B tap — direct user gesture, widget.play() fires synchronously
+document.getElementById('s3b').addEventListener('click', function() {
   if (widget && widgetReady) {
     widget.play();
   }
+  show('s3');
   startTrackTimers();
 });
 
