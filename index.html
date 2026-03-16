@@ -920,12 +920,6 @@ document.getElementById('s1').addEventListener('click', function() {
     silentAudio.play().catch(function(){});
   } catch(e) {}
 
-  // Pre-position widget on first track without playing — no audible effect
-  if (widgetReady) {
-    widget.skip(sess.tOrder[0]);
-    sess._primedIdx = sess.tOrder[0];
-  }
-
   // Show entry question
   buildList('entry-list', 'stmt', true, function(state) {
     sess.entryState = state;
@@ -1324,28 +1318,6 @@ if (window.location.search.indexOf('reset=true') !== -1) {
 initUserState();
 
 initSC();
-
-// Send entry state + abandoned record when tab is closed mid-listen
-window.addEventListener('pagehide', function() {
-  if (!sess.listenStart) return;
-  if (!sess.entryState) return;
-  var dur = Math.min(Math.round((Date.now() - sess.listenStart) / 1000), 90);
-  var ti = sess.tOrder[sess.cur];
-  if (ti === undefined) return;
-  var tr = getTrack(sess.playlist, ti);
-  var sessionTrackId = 'T00' + (sess.cur + 1);
-  var trackTitle = tr.title + ' — ' + tr.artist;
-  var week = 'W' + String(Math.max(1, Math.ceil((Date.now() - new Date('2026-03-15').getTime()) / (7*24*60*60*1000)))).padStart(2,'0');
-  var payload = JSON.stringify({
-    sessionId: sess.id,
-    email: '',
-    entryState: sess.entryState,
-    assignments: [{ trackId: sessionTrackId, trackTitle: trackTitle, duration: dur, postState: 'Abandoned', week: week, playlist: sess.playlist, reaction: '', visitNumber: window._visitNumber || 1, daysSinceLastVisit: window._daysSinceLastVisit }],
-  });
-  if (navigator.sendBeacon) {
-    navigator.sendBeacon('/.netlify/functions/log-session', new Blob([payload], { type: 'application/json' }));
-  }
-});
 
 // Set screen restore handled in s1 tap);
 
