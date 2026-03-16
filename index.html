@@ -182,16 +182,17 @@ html.assign-top, body.assign-top { background: var(--black); }
 #s6 { background: var(--bg); justify-content: center; }
 .legal-corner {
   position: absolute;
-  bottom: clamp(24px,4.5vh,40px);
-  right: 16px;
+  bottom: clamp(14px,3vh,24px);
+  right: 12px;
   font-size: 8px;
   color: var(--bg);
   opacity: 0.2;
   letter-spacing: 0.03em;
   text-align: right;
   pointer-events: none;
-  max-width: 140px;
+  max-width: 130px;
   line-height: 1.4;
+  z-index: 10;
 }
 .legal-corner a { pointer-events: all; color: inherit; text-decoration: none; }
 
@@ -230,6 +231,7 @@ html.assign-top, body.assign-top { background: var(--black); }
   line-height: 1;
 }
 .thumb-btn:active { opacity: 0.5; }
+.thumb-btn { -webkit-filter: grayscale(100%); filter: grayscale(100%); }
 .thumb-icon { font-size: 12px; color: var(--bg); line-height: 1; }
 
 #dots { position: fixed; bottom: clamp(24px,4.5vh,40px); left: 50%; transform: translateX(-50%); display: flex; gap: 8px; pointer-events: none; opacity: 0; transition: opacity 0.3s ease; z-index: 999; }
@@ -271,7 +273,6 @@ html.assign-top, body.assign-top { background: var(--black); }
 <div class="screen" id="s3">
   <div class="listen-top" id="listen-top">
     <span class="listen-label">Listen</span>
-    <div class="legal-corner">Music streamed via <a href="https://soundcloud.com/fynd-today" target="_blank" style="color:inherit;text-decoration:none;">SoundCloud</a>. All rights belong to their respective owners. No commercial use.</div>
     <div class="pulse-wrap">
       <div class="pulse-dot" id="pulse-dot"></div>
       <div class="track-count" id="tc">1 — 5</div>
@@ -289,6 +290,7 @@ html.assign-top, body.assign-top { background: var(--black); }
     <div class="assign-label">While this plays —</div>
     <div id="assign-list" style="padding-bottom: 32px;"></div>
   </div>
+  <div class="legal-corner">Music streamed via <a href="https://soundcloud.com/fynd-today" target="_blank">SoundCloud</a>. All rights belong to their respective owners. No commercial use.</div>
   <div id="sc-wrap">
     <iframe id="sc" width="100%" height="166" scrolling="no" frameborder="no"
       allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen
