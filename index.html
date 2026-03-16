@@ -1088,16 +1088,6 @@ function loadSet(playlistName) {
     silentAudio3.play().catch(function(){});
   } catch(e) {}
 
-  // PRIME THE SOUNDCLOUD WIDGET ON THE SAME USER TAP
-  try {
-    if (widget && widgetReady) {
-      widget.play();
-      setTimeout(function() {
-        widget.pause();
-      }, 80);
-    }
-  } catch(e) {}
-
   // Mark this set button as used and mark as complete in localStorage
   var btns = document.querySelectorAll('.set-btn');
   btns.forEach(function(b) {
@@ -1146,25 +1136,21 @@ function loadSet(playlistName) {
   sess.playlist = playlistName;
   var url = playlistUrls[playlistName] || playlistUrls['MVP 1'];
 
-  // widget.load() with auto_play:true starts playback on the new playlist.
-  // We listen for PLAY_PROGRESS (fires reliably on mobile when audio starts)
-  // to know playback is live, then skip to correct track and start timers.
   widgetReady = false;
-  var loadSetHandled = false;
-
-  widget.unbind(SC.Widget.Events.PLAY_PROGRESS);
-  widget.bind(SC.Widget.Events.PLAY_PROGRESS, function() {
-    if (loadSetHandled) return;
-    loadSetHandled = true;
-    widget.unbind(SC.Widget.Events.PLAY_PROGRESS);
-
+  widget.unbind(SC.Widget.Events.READY);
+  widget.bind(SC.Widget.Events.READY, function() {
     widgetReady = true;
-    var target = sess.tOrder[sess.cur];
-    if (target !== 0) {
-      widget.skip(target);
-      setTimeout(function() { widget.play(); }, 200);
-    }
-    startTrackTimers();
+    widget.unbind(SC.Widget.Events.READY);
+    widget.bind(SC.Widget.Events.READY, function() { widgetReady = true; });
+
+    // Switch to the shuffled first track, but do NOT call play() again.
+    // Mobile already has playback permission from the set-button tap + auto_play load.
+    widget.skip(sess.tOrder[sess.cur]);
+
+    // Start UI/timers only.
+    setTimeout(function() {
+      startTrackTimers();
+    }, 250);
   });
 
   widget.load(url, {
