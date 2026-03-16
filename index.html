@@ -862,6 +862,10 @@ document.getElementById('s1').addEventListener('click', function() {
   // If set screen should be restored — go there directly
   if (window._restoreSetScreen) {
     window._restoreSetScreen = false;
+    // Unlock SC widget audio context NOW inside this tap gesture.
+    // Without this, the widget.play() in loadSet fires outside any
+    // gesture window and mobile blocks it.
+    if (widget && widgetReady) { widget.play(); widget.pause(); }
     var h = document.getElementById('email-head');
     if (h) h.textContent = "You'll hear when something new arrives.";
     document.getElementById('email-in').style.display = 'none';
@@ -1136,14 +1140,8 @@ function loadSet(playlistName) {
   sess.playlist = playlistName;
   var url = playlistUrls[playlistName] || playlistUrls['MVP 1'];
 
-  // Unlock audio context synchronously inside this tap gesture.
-  // Returning users go straight to s6 from Today tap — widget.play()
-  // is never called before this, so audio is locked on mobile.
-  // Calling widget.play() here unlocks it. widget.load() immediately
-  // overwrites the playlist so the old track never audibly plays.
-  if (widgetReady) { widget.play(); }
-
-  // Load new playlist — READY fires when done, then playTrack plays cleanly.
+  // Audio context already unlocked by widget.play() in s1 tap gesture.
+  // Now load the new playlist and play via READY event.
   widgetReady = false;
   widget.unbind(SC.Widget.Events.READY);
   widget.bind(SC.Widget.Events.READY, function() {
