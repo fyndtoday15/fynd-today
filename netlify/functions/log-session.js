@@ -31,30 +31,33 @@ exports.handler = async function(event, context) {
     return { statusCode: 400, body: 'Invalid JSON' };
   }
 
-  // EMAIL UPDATE — find existing records by session ID and patch email
+  // EMAIL + NAME UPDATE — find existing records by session ID and patch
   if (data.emailUpdate) {
     try {
-      // Find all records with this session ID
       const searchUrl = BASE_URL + '?filterByFormula=' + encodeURIComponent('{Session ID}="' + data.sessionId + '"');
       const searchRes = await fetch(searchUrl, { headers: HEADERS });
       const searchData = await searchRes.json();
 
       if (!searchData.records || searchData.records.length === 0) {
-        return { statusCode: 200, body: JSON.stringify({ message: 'No records found for session' }) };
+        return { statusCode: 200, body: JSON.stringify({ message: 'No records found' }) };
       }
 
-      // Patch each record with the email
       const patches = searchData.records.map(function(r) {
-        return { id: r.id, fields: { 'Email': data.email } };
+        return {
+          id: r.id,
+          fields: {
+            'Email': data.email || '',
+            'First Name': data.firstName || '',
+          }
+        };
       });
 
-      const patchRes = await fetch(BASE_URL, {
+      await fetch(BASE_URL, {
         method: 'PATCH',
         headers: HEADERS,
         body: JSON.stringify({ records: patches }),
       });
 
-      const patchData = await patchRes.json();
       return {
         statusCode: 200,
         headers: { 'Access-Control-Allow-Origin': '*' },
@@ -77,13 +80,16 @@ exports.handler = async function(event, context) {
     return {
       fields: {
         'Session ID': sessionId || '',
+        'First Name': '',
         'Entry State': entryState || '',
         'Track ID': a.trackId || '',
+        'Track Title': a.trackTitle || '',
+        'Playlist': a.playlist || '',
         'Duration': a.duration || 0,
-        'Post Assignment': a.postState || '',
-        'Match': a.match || '',
-        'Email': email || '',
+        'Position': a.postState || '',
+        'Email': '',
         'Week': a.week || 'W01',
+        'Returning Visitor': a.returningVisitor || 'No',
       }
     };
   });
