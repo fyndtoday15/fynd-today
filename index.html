@@ -241,6 +241,10 @@ html.assign-top, body.assign-top { background: var(--black); }
     <div class="assign-label">While this plays —</div>
     <div id="assign-list" style="padding-bottom: 32px;"></div>
   </div>
+  <div class="thumbs-wrap" id="thumbs-wrap">
+    <button class="thumb-btn" id="thumb-down">👎</button>
+    <button class="thumb-btn" id="thumb-up">👍</button>
+  </div>
   <div id="sc-wrap">
     <iframe id="sc" width="100%" height="166" scrolling="no" frameborder="no"
       allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen
@@ -347,6 +351,7 @@ var sess = {
   dur: 0,
   log: [],
   playlist: 'MVP 1',
+  reaction: '',
 };
 
 function shuffle(arr) {
@@ -515,7 +520,7 @@ function resetPanel() {
 }
 
 // SoundCloud
-var widget, widgetReady = false, readyTimer, autoTimer;
+var widget, widgetReady = false, readyTimer, autoTimer, thumbsTimer;
 
 function initSC() {
   widget = SC.Widget(document.getElementById('sc'));
@@ -539,8 +544,15 @@ function playTrack(idx) {
     clearTimeout(readyTimer);
     clearTimeout(autoTimer);
 
-    // At 30s — show subtle ready prompt
+    // At 5s — show thumbs
+    clearTimeout(thumbsTimer);
+    thumbsTimer = setTimeout(function() {
+      document.getElementById('thumbs-wrap').classList.add('show');
+    }, 5000);
+
+    // At 30s — hide thumbs, show ready prompt
     readyTimer = setTimeout(function() {
+      document.getElementById('thumbs-wrap').classList.remove('show');
       var prompt = document.getElementById('ready-prompt');
       prompt.classList.add('show');
       prompt.style.pointerEvents = 'all';
@@ -571,6 +583,56 @@ document.getElementById('ready-prompt').addEventListener('click', function() {
   if (widget) widget.pause();
   stopDot();
   openPanel(function(ps) { doReveal(ps); });
+});
+
+// Thumb up — hide thumbs, store reaction, music keeps playing
+document.getElementById('thumb-up').addEventListener('click', function() {
+  document.getElementById('thumbs-wrap').classList.remove('show');
+  clearTimeout(thumbsTimer);
+  sess.reaction = 'Up';
+});
+
+// Thumb down — record skip, go straight to next track
+document.getElementById('thumb-down').addEventListener('click', function() {
+  clearTimeout(thumbsTimer);
+  clearTimeout(readyTimer);
+  clearTimeout(autoTimer);
+  if (widget) widget.pause();
+  stopDot();
+  document.getElementById('thumbs-wrap').classList.remove('show');
+
+  var dur = sess.listenStart ? Math.min(Math.round((Date.now() - sess.listenStart) / 1000), 90) : 0;
+  var ti = sess.tOrder[sess.cur];
+  var tr = getTrack(sess.playlist, ti);
+  var sessionTrackId = 'T00' + (sess.cur + 1);
+  var trackTitle = tr.title + ' — ' + tr.artist;
+  var week = 'W' + String(Math.max(1, Math.ceil((Date.now() - new Date('2026-03-15').getTime()) / (7*24*60*60*1000)))).padStart(2,'0');
+
+  fetch('/.netlify/functions/log-session', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      sessionId: sess.id,
+      email: '',
+      entryState: sess.entryState,
+      assignments: [{ trackId: sessionTrackId, trackTitle: trackTitle, duration: dur, postState: 'Skipped', reaction: 'Down', week: week, playlist: sess.playlist }],
+    }),
+  }).catch(function(err) { console.error('Skip log error:', err); });
+
+  sess.cur++;
+  resetPanel();
+  if (sess.cur < 5) {
+    show('s3');
+    if (widgetReady) {
+      widget.skip(sess.tOrder[sess.cur]);
+      widget.play();
+      sess._playedOnGesture = true;
+    }
+    setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 600);
+  } else {
+    buildRecap();
+    show('s7');
+  }
 });
 
   var DIRECTION = {
@@ -604,10 +666,11 @@ function doReveal(ps) {
       sessionId: sess.id,
       email: '',
       entryState: sess.entryState,
-      assignments: [{ trackId: sessionTrackId, trackTitle: trackTitle, duration: assignment.duration, postState: assignment.postState, week: week, playlist: sess.playlist }],
+      assignments: [{ trackId: sessionTrackId, trackTitle: trackTitle, duration: assignment.duration, postState: assignment.postState, week: week, playlist: sess.playlist, reaction: sess.reaction }],
     }),
   }).catch(function(err) { console.error('Track log error:', err); });
 
+  sess.reaction = '';
   document.getElementById('r-title').textContent = tr.title;
   document.getElementById('r-artist').textContent = tr.artist;
   show('s5');
@@ -765,6 +828,35 @@ function loadSet(playlistName) {
 }
 
 initSC();
+
+// Capture partial listen if tab closed mid-session
+window.addEventListener('beforeunload', function() {
+  if (!sess.listenStart) return;
+  var dur = Math.min(Math.round((Date.now() - sess.listenStart) / 1000), 90);
+  if (dur < 2) return; // ignore accidental closes
+  var ti = sess.tOrder[sess.cur];
+  if (ti === undefined) return;
+  var tr = getTrack(sess.playlist, ti);
+  var week = 'W' + String(Math.max(1, Math.ceil((Date.now() - new Date('2026-03-15').getTime()) / (7*24*60*60*1000)))).padStart(2,'0');
+  // Use sendBeacon for reliability on page close
+  var payload = JSON.stringify({
+    sessionId: sess.id,
+    email: '',
+    entryState: sess.entryState,
+    assignments: [{
+      trackId: 'T00' + (sess.cur + 1),
+      trackTitle: tr.title + ' — ' + tr.artist,
+      duration: dur,
+      postState: 'Abandoned',
+      reaction: sess.reaction || '',
+      week: week,
+      playlist: sess.playlist,
+    }],
+  });
+  if (navigator.sendBeacon) {
+    navigator.sendBeacon('/.netlify/functions/log-session', new Blob([payload], { type: 'application/json' }));
+  }
+});
 
 // Prevent s3 from swallowing touchmove so assign panel can scroll on Safari
 document.getElementById('s3').addEventListener('touchmove', function(e) {
