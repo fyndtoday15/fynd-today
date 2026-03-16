@@ -42,10 +42,6 @@ html.assign-top, body.assign-top { background: var(--black); }
 .stmt:first-of-type { border-top: 1px solid rgba(0,0,0,0.08); }
 .stmt.tapped { opacity: 0.3; pointer-events: none; }
 
-/* S3B — SET LOADED, WAITING FOR TAP */
-#s3b { background: var(--black); justify-content: center; cursor: pointer; }
-.s3b-hint { font-size: 15px; color: var(--bg); opacity: 0.7; letter-spacing: 0.12em; text-transform: uppercase; animation: ph 3s ease-in-out infinite; }
-
 /* S3 — LISTEN */
 #s3 { background: var(--black); padding: 0; justify-content: flex-start; overflow: hidden; }
 
@@ -278,11 +274,6 @@ html.assign-top, body.assign-top { background: var(--black); }
   <div id="entry-list" style="padding-bottom: 80px;"></div>
 </div>
 
-<!-- S3B — SET LOADED WAITING FOR TAP -->
-<div class="screen" id="s3b">
-  <span class="s3b-hint">tap to begin</span>
-</div>
-
 <!-- S3 LISTEN -->
 <div class="screen" id="s3">
   <div class="listen-top" id="listen-top">
@@ -322,6 +313,15 @@ html.assign-top, body.assign-top { background: var(--black); }
       'MVP 1.5': 'https://soundcloud.com/fynd-today/sets/mvp-1-5',
     };
     try {
+      // pendingSet — user chose a set via set button, reload happened
+      var pending = JSON.parse(localStorage.getItem('fynd_pendingSet'));
+      if (pending && URLS[pending]) {
+        var iframe = document.getElementById('sc');
+        if (iframe) {
+          iframe.src = 'https://w.soundcloud.com/player/?url=' + encodeURIComponent(URLS[pending]) + '&auto_play=false&hide_related=true&show_comments=false&show_user=false&show_reposts=false&show_teaser=false&visual=false';
+        }
+        return; // src set, done
+      }
       // Only preload correct src for abandoned session resume
       // initUserState handles all other routing
       var abandoned = JSON.parse(localStorage.getItem('fynd_abandoned'));
@@ -868,6 +868,18 @@ document.getElementById('s1').addEventListener('click', function() {
   // Mark as returning for future visits
   markReturning();
 
+  // pendingSet reload — go straight to entry question then listen
+  if (window._pendingSetReady) {
+    window._pendingSetReady = false;
+    buildList('entry-list', 'stmt', true, function(state) {
+      sess.entryState = state;
+      show('s3');
+      setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 500);
+    });
+    show('s2');
+    return;
+  }
+
   // If set screen should be restored — go there directly
   if (window._restoreSetScreen) {
     window._restoreSetScreen = false;
@@ -1145,29 +1157,11 @@ function loadSet(playlistName) {
   sess.playlist = playlistName;
   var url = playlistUrls[playlistName] || playlistUrls['MVP 1'];
 
-  // Load new playlist silently. When ready, show s3b (full black tap screen).
-  // The s3b tap is a direct user gesture — widget.play() fires inside it,
-  // which is the only reliable way to unlock audio on mobile browsers.
-  widgetReady = false;
-  widget.unbind(SC.Widget.Events.READY);
-  widget.bind(SC.Widget.Events.READY, function() {
-    widgetReady = true;
-    widget.unbind(SC.Widget.Events.READY);
-    widget.bind(SC.Widget.Events.READY, function() { widgetReady = true; });
-    // Pre-position to correct shuffled track while still silent
-    widget.skip(sess.tOrder[sess.cur]);
-    // Show the tap screen — user tap will be the gesture that starts audio
-    show('s3b');
-  });
-
-  widget.load(url, {
-    auto_play: false,
-    hide_related: true,
-    show_comments: false,
-    show_user: false,
-    show_reposts: false,
-    show_teaser: false,
-  });
+  // Save the chosen playlist and reload the page.
+  // After reload the person taps Today. which already works perfectly on mobile.
+  // This is the same path as a manual refresh — proven to work every time.
+  LS.set('pendingSet', playlistName);
+  window.location.reload();
 }
 
 // ── RETURNING USER SYSTEM ───────────────────────────────
@@ -1246,6 +1240,14 @@ function markReturning() {
 
 // On arrival — check state and set up accordingly
 function initUserState() {
+  // If a set was chosen via set button, use it and clear the flag
+  var pendingSet = LS.get('pendingSet');
+  if (pendingSet) {
+    LS.set('pendingSet', null);
+    sess.playlist = pendingSet;
+    // Skip all other routing — go straight to Today. tap flow
+    window._pendingSet = pendingSet;
+  }
   var returning = isReturning();
   var abandoned = getAbandoned();
   var nextSet = getNextSet();
@@ -1275,7 +1277,12 @@ function initUserState() {
     : null;
 
   var onEmailScreen = LS.get('onEmailScreen');
-  if (returning) {
+
+  // pendingSet takes priority — user explicitly chose this set
+  if (window._pendingSet) {
+    sess.playlist = window._pendingSet;
+    window._resumeMode = false;
+  } else if (returning) {
     // Check for abandoned session first
     // But not if we were on the email screen — that means session completed
     if (abandoned && !onEmailScreen) {
@@ -1327,15 +1334,6 @@ if (window.location.search.indexOf('reset=true') !== -1) {
 initUserState();
 
 initSC();
-
-// S3B tap — direct user gesture, widget.play() fires synchronously
-document.getElementById('s3b').addEventListener('click', function() {
-  if (widget && widgetReady) {
-    widget.play();
-  }
-  show('s3');
-  startTrackTimers();
-});
 
 // Set screen restore handled in s1 tap);
 
