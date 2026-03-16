@@ -785,8 +785,9 @@ document.getElementById('thumb-down').addEventListener('click', function() {
     var sbD = document.getElementById('safe-bot');
     if (stD) { stD.style.transition = 'none'; stD.style.background = '#000000'; }
     if (sbD) { sbD.style.transition = 'none'; sbD.style.background = '#000000'; }
+    if (isMobile && widget && widgetReady) { widget.play(); }
     show('s3');
-    setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 500);
+    setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 300);
   } else {
     markSetComplete(sess.playlist);
     clearAbandoned();
@@ -861,19 +862,25 @@ document.getElementById('s1').addEventListener('click', function() {
     sess.cur = window._resumeCur;
     window._resumeMode = false;
     window._resumeCur = undefined;
+    if (isMobile && widget && widgetReady) { widget.play(); }
     show('s3');
-    setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 500);
+    setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 300);
     return;
   }
 
   // Normal flow — show entry question
   buildList('entry-list', 'stmt', true, function(state) {
     sess.entryState = state;
+    // Mobile: call widget.play() synchronously inside this tap gesture
+    // This unlocks audio for the cross-origin iframe on mobile browsers
+    if (isMobile && widget && widgetReady) {
+      widget.play();
+    }
     show('s3');
-    setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 500);
+    setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 300);
   });
   show('s2');
-});;
+});
 
 // Continue button
 document.getElementById('btn-continue').addEventListener('click', function() {
@@ -887,8 +894,9 @@ document.getElementById('btn-continue').addEventListener('click', function() {
     var sbC = document.getElementById('safe-bot');
     if (stC) { stC.style.transition = 'none'; stC.style.background = '#000000'; }
     if (sbC) { sbC.style.transition = 'none'; sbC.style.background = '#000000'; }
+    if (isMobile && widget && widgetReady) { widget.play(); }
     show('s3');
-    setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 500);
+    setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 300);
   } else {
     markSetComplete(sess.playlist);
     clearAbandoned();
@@ -1058,58 +1066,25 @@ function loadSet(playlistName) {
   sess.playlist = playlistName;
   var url = playlistUrls[playlistName] || playlistUrls['MVP 1'];
 
-  if (isMobile) {
-    // ── MOBILE ──────────────────────────────────────────────────────────────
-    // Set iframe src with auto_play=true synchronously in the tap gesture.
-    // Do NOT call SC.Widget() immediately — that interrupts the loading iframe.
-    // Instead, let it load and autoplay freely, then rebind after it's running.
-    var iframeM = document.getElementById('sc');
-    iframeM.src = 'https://w.soundcloud.com/player/?url=' + encodeURIComponent(url) +
-      '&auto_play=true&hide_related=true&show_comments=false&show_user=false' +
-      '&show_reposts=false&show_teaser=false&visual=false';
-
-    widgetReady = false;
-
-    // Wait for iframe to load before rebinding — enough time for the player
-    // to initialize but not so long that the first track has ended
-    setTimeout(function() {
-      widget = SC.Widget(iframeM);
-      widget.bind(SC.Widget.Events.READY, function() {
-        widgetReady = true;
-        var target = sess.tOrder[0];
-        if (target !== 0) {
-          // auto_play started track 0 — skip to correct shuffled track
-          widget.skip(target);
-          setTimeout(function() { widget.play(); }, 200);
-        }
-        startTrackTimers();
-      });
-      widget.bind(SC.Widget.Events.FINISH, function() {
-        if (widget) widget.pause();
-        stopDot();
-        document.getElementById('thumbs-wrap').classList.remove('show');
-        clearTimeout(thumbsTimer);
-        if (!document.getElementById('assign-panel').classList.contains('open')) {
-          openPanel(function(ps) { doReveal(ps); });
-        }
-      });
-    }, 1500);
-  } else {
-    // ── DESKTOP ─────────────────────────────────────────────────────────────
-    // Swap iframe src — exactly as confirmed working on desktop.
-    var iframe = document.getElementById('sc');
-    iframe.src = 'https://w.soundcloud.com/player/?url=' + encodeURIComponent(url) +
-      '&auto_play=false&hide_related=true&show_comments=false&show_user=false' +
-      '&show_reposts=false&show_teaser=false&visual=false';
-
-    widgetReady = false;
-    setTimeout(function() {
-      initSC();
-      setTimeout(function() {
-        playTrack(sess.tOrder[sess.cur]);
-      }, 500);
-    }, 800);
+  // Mobile: call widget.play() synchronously in this tap gesture BEFORE
+  // changing the src — this keeps the audio context unlocked on mobile.
+  if (isMobile && widget && widgetReady) {
+    widget.play();
   }
+
+  // All browsers: swap iframe src and reinit widget
+  var iframe = document.getElementById('sc');
+  iframe.src = 'https://w.soundcloud.com/player/?url=' + encodeURIComponent(url) +
+    '&auto_play=false&hide_related=true&show_comments=false&show_user=false' +
+    '&show_reposts=false&show_teaser=false&visual=false';
+
+  widgetReady = false;
+  setTimeout(function() {
+    initSC();
+    setTimeout(function() {
+      playTrack(sess.tOrder[sess.cur]);
+    }, 500);
+  }, 800);
 }
 
 
