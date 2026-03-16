@@ -1136,18 +1136,28 @@ function loadSet(playlistName) {
   sess.playlist = playlistName;
   var url = playlistUrls[playlistName] || playlistUrls['MVP 1'];
 
-  // Swap the iframe src to load the new playlist.
-  // Do NOT set widgetReady=false — keep it true so playTrack fires immediately,
-  // exactly like the entry statement path that already works on mobile.
-  var iframe = document.getElementById('sc');
-  iframe.src = 'https://w.soundcloud.com/player/?url=' + encodeURIComponent(url) +
-    '&auto_play=false&hide_related=true&show_comments=false&show_user=false' +
-    '&show_reposts=false&show_teaser=false&visual=false';
+  // Load new playlist. When READY fires, call playTrack exactly as the
+  // entry statement path does — that path already works on mobile.
+  widgetReady = false;
 
-  // widgetReady stays true — playTrack goes() immediately without polling
-  setTimeout(function() {
+  widget.unbind(SC.Widget.Events.READY);
+  widget.bind(SC.Widget.Events.READY, function() {
+    widgetReady = true;
+    // Restore the normal READY handler
+    widget.unbind(SC.Widget.Events.READY);
+    widget.bind(SC.Widget.Events.READY, function() { widgetReady = true; });
+    // Now call playTrack exactly like the entry statement path
     playTrack(sess.tOrder[sess.cur]);
-  }, 1000);
+  });
+
+  widget.load(url, {
+    auto_play: false,
+    hide_related: true,
+    show_comments: false,
+    show_user: false,
+    show_reposts: false,
+    show_teaser: false,
+  });
 }
 
 // ── RETURNING USER SYSTEM ───────────────────────────────
