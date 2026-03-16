@@ -102,16 +102,17 @@ html.assign-top, body.assign-top { background: var(--black); }
   z-index: 1000;
 }
 .assign-panel.open {
-  height: 58vh;
-  max-height: 58vh;
-  overflow-y: scroll;
+  height: auto;
+  max-height: 52vh;
+  overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
+  padding-bottom: 24px;
 }
 @media (min-width: 768px) {
   .assign-panel.open {
-    height: 72vh;
-    max-height: 72vh;
+    height: auto;
+    max-height: 55vh;
   }
 }
 
@@ -262,7 +263,7 @@ html.assign-top, body.assign-top { background: var(--black); }
 
 <!-- S7 RECAP -->
 <div class="screen" id="s7">
-  <span class="recap-head">Come back to these.</span>
+  <span class="recap-head">Come back to these:</span>
   <div id="recap-list"></div>
   <button class="recap-continue" id="recap-continue">Continue</button>
 </div>
@@ -680,11 +681,9 @@ document.getElementById('email-sub').addEventListener('click', function() {
   h.textContent = "You'll hear when something new arrives.";
   h.style.fontSize = '18px';
   h.style.opacity = '0.6';
-  // Show listen again button
-  setTimeout(function() {
-    var again = document.getElementById('listen-again');
-    if (again) again.style.display = 'block';
-  }, 600);
+  // Show listen again button immediately with confirmation
+  var again = document.getElementById('listen-again');
+  if (again) again.style.display = 'block';
   // Email submitted — update records for this session
   // Send email update — patches all records for this session with email
   fetch('/.netlify/functions/log-session', {
@@ -726,12 +725,20 @@ function loadSet(playlistName) {
     }
   });
 
+  // Reset panel and dot immediately so s3 is clean before showing
+  resetPanel();
+  startDot();
+
   // Reset session for new set
   sess.cur = 0;
   sess.tOrder = shuffle([0,1,2,3,4]);
   sess.log = [];
   sess.listenStart = null;
   sess.id = 'S' + Date.now().toString(36).toUpperCase();
+
+  // Show s3 immediately so person sees black screen right away
+  show('s3');
+  document.getElementById('tc').textContent = '1 — 5';
 
   // Update SoundCloud widget to new playlist
   var playlistUrls = {
@@ -747,15 +754,14 @@ function loadSet(playlistName) {
   var iframe = document.getElementById('sc');
   iframe.src = 'https://w.soundcloud.com/player/?url=' + encodeURIComponent(url) + '&auto_play=false&hide_related=true&show_comments=false&show_user=false&show_reposts=false&show_teaser=false&visual=false';
 
-  // Reinit widget after iframe reload
+  // Reinit widget after iframe reload — wait for it to be ready
   widgetReady = false;
   setTimeout(function() {
     initSC();
-    show('s3');
     setTimeout(function() {
       playTrack(sess.tOrder[sess.cur]);
     }, 800);
-  }, 1000);
+  }, 1200);
 }
 
 initSC();
