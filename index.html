@@ -647,25 +647,11 @@ function playTrack(idx) {
   function go() {
     resetPanel();
     startDot();
-    // Use getSounds to confirm tracks are loaded before navigating
-    // This is more reliable than fixed timeouts, especially on Safari
-    function attemptPlay(attemptsLeft) {
-      widget.getSounds(function(sounds) {
-        if (sounds && sounds.length > idx) {
-          // Tracks loaded — navigate and play
-          widget.skip(idx);
-          setTimeout(function() {
-            widget.play();
-            // One backup attempt
-            setTimeout(function() { widget.play(); }, 1000);
-          }, 400);
-        } else if (attemptsLeft > 0) {
-          // Tracks not ready yet — retry
-          setTimeout(function() { attemptPlay(attemptsLeft - 1); }, 300);
-        }
-      });
-    }
-    attemptPlay(10); // up to 10 attempts = 3 seconds max wait
+    widget.skip(idx);
+    setTimeout(function() {
+      widget.play();
+      setTimeout(function() { widget.play(); }, 800);
+    }, 500);
     sess.listenStart = Date.now();
     clearTimeout(readyTimer);
     clearTimeout(autoTimer);
@@ -820,6 +806,11 @@ function doReveal(ps) {
 
 // S1 tap
 document.getElementById('s1').addEventListener('click', function() {
+  // Unlock Safari audio context within user gesture — synchronous
+  if (widget) {
+    try { widget.play(); setTimeout(function() { widget.pause(); }, 50); } catch(e) {}
+  }
+
   // Mark as returning for future visits
   markReturning();
 
