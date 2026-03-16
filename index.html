@@ -313,24 +313,18 @@ html.assign-top, body.assign-top { background: var(--black); }
       'MVP 1.5': 'https://soundcloud.com/fynd-today/sets/mvp-1-5',
     };
     try {
+      // Only preload correct src for abandoned session resume
+      // initUserState handles all other routing
       var abandoned = JSON.parse(localStorage.getItem('fynd_abandoned'));
       var onEmail = JSON.parse(localStorage.getItem('fynd_onEmailScreen'));
-      var completed = JSON.parse(localStorage.getItem('fynd_completedSets')) || [];
-      var ORDER = ['MVP 1','MVP 1.2','MVP 1.3','MVP 1.4','MVP 1.5'];
-      var playlist = 'MVP 1'; // default first visit
-      if (abandoned && !onEmail && abandoned.timestamp && (Date.now() - abandoned.timestamp < 86400000)) {
-        playlist = abandoned.playlist || 'MVP 1';
-      } else if (completed.length > 0) {
-        // Returning user — pick random uncompleted set
-        var remaining = ORDER.filter(function(p) { return completed.indexOf(p) === -1; });
-        if (remaining.length > 0) {
-          playlist = remaining[Math.floor(Math.random() * remaining.length)];
+      if (abandoned && !onEmail && abandoned.playlist && abandoned.timestamp && (Date.now() - abandoned.timestamp < 86400000)) {
+        var url = URLS[abandoned.playlist];
+        if (url && abandoned.playlist !== 'MVP 1') {
+          var iframe = document.getElementById('sc');
+          if (iframe) {
+            iframe.src = 'https://w.soundcloud.com/player/?url=' + encodeURIComponent(url) + '&auto_play=false&hide_related=true&show_comments=false&show_user=false&show_reposts=false&show_teaser=false&visual=false';
+          }
         }
-      }
-      var url = URLS[playlist] || URLS['MVP 1'];
-      var iframe = document.getElementById('sc');
-      if (iframe && playlist !== 'MVP 1') {
-        iframe.src = 'https://w.soundcloud.com/player/?url=' + encodeURIComponent(url) + '&auto_play=false&hide_related=true&show_comments=false&show_user=false&show_reposts=false&show_teaser=false&visual=false';
       }
     } catch(e) {}
   })();
@@ -654,7 +648,16 @@ function playTrack(idx) {
     resetPanel();
     startDot();
     widget.skip(idx);
-    setTimeout(function() { widget.play(); }, 300);
+    // Wait for track to load before playing — 600ms covers Safari's slower init
+    setTimeout(function() {
+      widget.play();
+      // Secondary play attempt in case first fired before track was ready
+      setTimeout(function() {
+        if (sess.listenStart && (Date.now() - sess.listenStart < 2000)) {
+          widget.play();
+        }
+      }, 1000);
+    }, 600);
     sess.listenStart = Date.now();
     clearTimeout(readyTimer);
     clearTimeout(autoTimer);
@@ -812,6 +815,21 @@ document.getElementById('s1').addEventListener('click', function() {
   // Mark as returning for future visits
   markReturning();
 
+  // If set screen should be restored — go there directly
+  if (window._restoreSetScreen) {
+    window._restoreSetScreen = false;
+    var h = document.getElementById('email-head');
+    if (h) h.textContent = "You'll hear when something new arrives.";
+    document.getElementById('email-in').style.display = 'none';
+    document.getElementById('name-in').style.display = 'none';
+    document.getElementById('email-sub').style.display = 'none';
+    var again = document.getElementById('listen-again');
+    if (again) { again.style.display = 'block'; updateSetButtons(); }
+    if (window._nextSetPlaylist) sess.playlist = window._nextSetPlaylist;
+    show('s6');
+    return;
+  }
+
   // All sets complete — show waiting screen
   if (window._allSetsComplete) {
     var h = document.getElementById('email-head');
@@ -883,7 +901,6 @@ document.getElementById('recap-continue').addEventListener('click', function() {
   updateSetButtons();
   clearAbandoned();
   LS.set('onEmailScreen', true);
-  try { sessionStorage.setItem('fynd_onSetScreen', 'true'); } catch(e) {}
   var savedEmail = LS.get('email');
   if (savedEmail) {
     // Already have their info — log the set completion with saved details
@@ -999,7 +1016,6 @@ function loadSet(playlistName) {
   });
   // Clear email screen flag — they are starting a new session
   LS.set('onEmailScreen', false);
-  try { sessionStorage.removeItem('fynd_onSetScreen'); } catch(e) {}
 
   // Reset panel and dot immediately so s3 is clean before showing
   resetPanel();
@@ -1042,14 +1058,26 @@ function loadSet(playlistName) {
   iframe.src = 'https://w.soundcloud.com/player/?url=' + encodeURIComponent(url) + '&auto_play=false&hide_related=true&show_comments=false&show_user=false&show_reposts=false&show_teaser=false&visual=false';
 
   // Reinit widget after iframe reload
+  // Reset ready state and rebind — playTrack polls until ready
   widgetReady = false;
   setTimeout(function() {
-    initSC();
-    // playTrack polls for widgetReady — safe to call immediately
-    setTimeout(function() {
-      playTrack(sess.tOrder[sess.cur]);
-    }, 500);
-  }, 800);
+    // Rebind widget to new iframe src
+    widget = SC.Widget(document.getElementById('sc'));
+    widget.bind(SC.Widget.Events.READY, function() {
+      widgetReady = true;
+    });
+    widget.bind(SC.Widget.Events.FINISH, function() {
+      if (widget) widget.pause();
+      stopDot();
+      document.getElementById('thumbs-wrap').classList.remove('show');
+      clearTimeout(thumbsTimer);
+      if (!document.getElementById('assign-panel').classList.contains('open')) {
+        openPanel(function(ps) { doReveal(ps); });
+      }
+    });
+    // playTrack polls widgetReady — will wait however long Safari needs
+    playTrack(sess.tOrder[sess.cur]);
+  }, 600);
 }
 
 // ── RETURNING USER SYSTEM ───────────────────────────────
@@ -1190,77 +1218,29 @@ function initUserState() {
   if (savedEmail) window._savedEmail = savedEmail;
   if (savedName) window._savedName = savedName;
 
-  // If refreshed on email/set-buttons screen — restore that screen
-  // Use both onEmailScreen check and a backup sessionStorage flag for Safari
-  var ssRestore = false;
-  try { ssRestore = sessionStorage.getItem('fynd_onSetScreen') === 'true'; } catch(e) {}
-  if (onEmailScreen || ssRestore) {
+  // Restore set screen if:
+  // 1. onEmailScreen flag is set (same browser, same tab)
+  // 2. Returning user with completed sets and no abandoned session (new tab or new browser session)
+  var completedSetsCheck = LS.get('completedSets') || [];
+  var shouldRestore = onEmailScreen || (returning && completedSetsCheck.length > 0 && !abandoned);
+  if (shouldRestore) {
     window._restoreSetScreen = true;
     window._nextSetPlaylist = nextSet;
   }
+}
+
+// Dev reset — add ?reset=true to URL to clear all localStorage
+if (window.location.search.indexOf('reset=true') !== -1) {
+  var keys = ['returning','completedSets','email','firstName','abandoned','onEmailScreen','visitCount','lastVisit'];
+  keys.forEach(function(k) { try { localStorage.removeItem('fynd_' + k); } catch(e) {} });
+  window.location.href = window.location.pathname;
 }
 
 initUserState();
 
 initSC();
 
-// If refreshed on set-buttons screen — show it directly
-if (window._restoreSetScreen) {
-  setTimeout(function() {
-    var h = document.getElementById('email-head');
-    if (h) h.textContent = "You'll hear when something new arrives.";
-    document.getElementById('email-in').style.display = 'none';
-    document.getElementById('name-in').style.display = 'none';
-    document.getElementById('email-sub').style.display = 'none';
-    var again = document.getElementById('listen-again');
-    if (again) {
-      again.style.display = 'block';
-      updateSetButtons();
-    }
-    // Update sess.playlist to next available set
-    if (window._nextSetPlaylist) {
-      sess.playlist = window._nextSetPlaylist;
-    }
-    // Keep onEmailScreen true so further refreshes still restore this screen
-    try { sessionStorage.setItem('fynd_onSetScreen', 'true'); } catch(e) {}
-    show('s6');
-  }, 150);
-}
-
-
-// Capture partial listen if tab closed mid-session if tab closed mid-session
-window.addEventListener('beforeunload', function() {
-  // Only save abandoned if session is not complete
-  // onEmailScreen means session completed — don't overwrite clearAbandoned
-  if (!LS.get('onEmailScreen')) {
-    saveAbandoned();
-  }
-  if (!sess.listenStart) return;
-  var dur = Math.min(Math.round((Date.now() - sess.listenStart) / 1000), 90);
-  if (dur < 2) return; // ignore accidental closes
-  var ti = sess.tOrder[sess.cur];
-  if (ti === undefined) return;
-  var tr = getTrack(sess.playlist, ti);
-  var week = 'W' + String(Math.max(1, Math.ceil((Date.now() - new Date('2026-03-15').getTime()) / (7*24*60*60*1000)))).padStart(2,'0');
-  // Use sendBeacon for reliability on page close
-  var payload = JSON.stringify({
-    sessionId: sess.id,
-    email: '',
-    entryState: sess.entryState,
-    assignments: [{
-      trackId: 'T00' + (sess.cur + 1),
-      trackTitle: tr.title + ' — ' + tr.artist,
-      duration: dur,
-      postState: 'Abandoned',
-      reaction: sess.reaction || '',
-      week: week,
-      playlist: sess.playlist,
-    }],
-  });
-  if (navigator.sendBeacon) {
-    navigator.sendBeacon('/.netlify/functions/log-session', new Blob([payload], { type: 'application/json' }));
-  }
-});
+// Set screen restore handled in s1 tap);
 
 // Prevent s3 from swallowing touchmove so assign panel can scroll on Safari
 document.getElementById('s3').addEventListener('touchmove', function(e) {
