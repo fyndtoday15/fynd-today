@@ -182,7 +182,7 @@ html.assign-top, body.assign-top { background: var(--black); }
 #s6 { background: var(--bg); justify-content: center; }
 .legal-corner {
   position: absolute;
-  bottom: clamp(52px,8vh,72px);
+  bottom: clamp(28px,5vh,44px);
   right: 12px;
   font-size: 8px;
   color: var(--bg);
@@ -773,17 +773,27 @@ document.getElementById('s1').addEventListener('click', function() {
     setTimeout(function() { widget.pause(); }, 200);
   }
 
-  // Build entry list — always shown even on resume
+  // If resuming abandoned session — skip entry question, go straight to track
+  if (window._resumeMode && window._resumeCur !== undefined) {
+    sess.cur = window._resumeCur;
+    window._resumeMode = false;
+    window._resumeCur = undefined;
+    show('s3');
+    setTimeout(function() {
+      var idx = sess.tOrder[sess.cur];
+      if (widgetReady) {
+        widget.skip(idx);
+        widget.play();
+        sess._playedOnGesture = true;
+      }
+      setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 400);
+    }, 250);
+    return;
+  }
+
+  // Normal flow — show entry question
   buildList('entry-list', 'stmt', true, function(state) {
     sess.entryState = state;
-
-    // If resuming abandoned session set cur to where they left off
-    if (window._resumeMode && window._resumeCur !== undefined) {
-      sess.cur = window._resumeCur;
-      window._resumeMode = false;
-      window._resumeCur = undefined;
-    }
-
     show('s3');
     setTimeout(function() {
       var idx = sess.tOrder[sess.cur];
@@ -802,10 +812,14 @@ document.getElementById('s1').addEventListener('click', function() {
 document.getElementById('btn-continue').addEventListener('click', function() {
   sess.cur++;
   if (sess.cur < 5) {
-    // Reset panel immediately so off-white never shows during transition
     resetPanel();
+    // Force black immediately before transition — prevents flash
+    document.body.style.background = '#000000';
+    var st = document.getElementById('safe-top');
+    var sb = document.getElementById('safe-bot');
+    if (st) { st.style.transition = 'none'; st.style.background = '#000000'; }
+    if (sb) { sb.style.transition = 'none'; sb.style.background = '#000000'; }
     show('s3');
-    // Play on user gesture for Safari
     if (widgetReady) {
       widget.skip(sess.tOrder[sess.cur]);
       widget.play();
@@ -920,6 +934,12 @@ function loadSet(playlistName) {
   // Reset panel and dot immediately so s3 is clean before showing
   resetPanel();
   startDot();
+  // Force black before transition
+  document.body.style.background = '#000000';
+  var stL = document.getElementById('safe-top');
+  var sbL = document.getElementById('safe-bot');
+  if (stL) { stL.style.transition = 'none'; stL.style.background = '#000000'; }
+  if (sbL) { sbL.style.transition = 'none'; sbL.style.background = '#000000'; }
 
   // Reset session for new set
   sess.cur = 0;
