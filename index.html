@@ -647,11 +647,12 @@ function playTrack(idx) {
   function go() {
     resetPanel();
     startDot();
-    // If this track was already primed by Safari gesture, just play
-    if (sess._primedIdx === idx) {
-      sess._primedIdx = undefined;
-      widget.play();
-      setTimeout(function() { widget.play(); }, 600);
+    if (sess._gestureUnlocked) {
+      // Safari: audio already unlocked by synchronous play in gesture
+      // Just skip to correct track — audio context is open
+      sess._gestureUnlocked = false;
+      widget.skip(idx);
+      setTimeout(function() { widget.play(); }, 200);
     } else {
       widget.skip(idx);
       setTimeout(function() {
@@ -761,7 +762,8 @@ document.getElementById('thumb-down').addEventListener('click', function() {
     if (stD) { stD.style.transition = 'none'; stD.style.background = '#000000'; }
     if (sbD) { sbD.style.transition = 'none'; sbD.style.background = '#000000'; }
     show('s3');
-    setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 500);
+    if (widgetReady) { widget.play(); sess._gestureUnlocked = true; }
+  setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 100);
   } else {
     markSetComplete(sess.playlist);
     clearAbandoned();
@@ -901,8 +903,14 @@ document.getElementById('s1').addEventListener('click', function() {
   // Show entry question
   buildList('entry-list', 'stmt', true, function(state) {
     sess.entryState = state;
+    // Call play SYNCHRONOUSLY inside tap gesture — Safari requires this
+    // No setTimeout between tap and play
+    if (widgetReady) {
+      widget.play();
+      sess._gestureUnlocked = true;
+    }
     show('s3');
-    setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 300);
+    setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 100);
   });
   show('s2');
 });
@@ -919,8 +927,10 @@ document.getElementById('btn-continue').addEventListener('click', function() {
     var sbC = document.getElementById('safe-bot');
     if (stC) { stC.style.transition = 'none'; stC.style.background = '#000000'; }
     if (sbC) { sbC.style.transition = 'none'; sbC.style.background = '#000000'; }
+    // Synchronous play for Safari gesture unlock
+    if (widgetReady) { widget.play(); sess._gestureUnlocked = true; }
     show('s3');
-    setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 500);
+    setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 100);
   } else {
     markSetComplete(sess.playlist);
     clearAbandoned();
