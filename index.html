@@ -1136,11 +1136,10 @@ function loadSet(playlistName) {
   sess.playlist = playlistName;
   var url = playlistUrls[playlistName] || playlistUrls['MVP 1'];
 
-  // widget.load() with auto_play:true — called synchronously in the tap gesture.
-  // After load completes, READY fires and we skip to the correct shuffled track.
+  // widget.load() with auto_play:true — initiated in the tap gesture so
+  // mobile browsers permit playback. READY fires when the new playlist
+  // is loaded — that is the correct hook, not the unsupported 'callback'.
   widgetReady = false;
-
-  // Unbind previous READY to avoid duplicates, then bind fresh
   widget.unbind(SC.Widget.Events.READY);
   widget.bind(SC.Widget.Events.READY, function() {
     widgetReady = true;
@@ -1150,11 +1149,10 @@ function loadSet(playlistName) {
       setTimeout(function() { widget.play(); }, 200);
     }
     startTrackTimers();
-    // Rebind READY back to normal initSC handler for subsequent tracks
+    // Restore normal READY handler for the rest of the session
     widget.unbind(SC.Widget.Events.READY);
     widget.bind(SC.Widget.Events.READY, function() { widgetReady = true; });
   });
-
   widget.load(url, {
     auto_play: true,
     hide_related: true,
