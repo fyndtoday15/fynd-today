@@ -711,11 +711,11 @@ function playTrack(idx) {
       prompt.style.pointerEvents = 'all';
     }, 30000);
 
-    // At 60s — hard open panel regardless
+    // At 90s — hard open panel regardless
     autoTimer = setTimeout(function() {
       if (widget) widget.pause();
       stopDot();
-      // Hide thumbs when panel auto-opens at 60s
+      // Hide thumbs when panel auto-opens at 90s
       document.getElementById('thumbs-wrap').classList.remove('show');
       clearTimeout(thumbsTimer);
       if (!document.getElementById('assign-panel').classList.contains('open')) {
@@ -986,7 +986,11 @@ document.getElementById('btn-continue').addEventListener('click', function() {
 
 // Stop for now — go to email
 document.getElementById('btn-stop').addEventListener('click', function() {
+  // cur is on the just-completed track — save abandoned at cur+1 so
+  // resume starts at the next track, not the one they already answered
+  sess.cur++;
   saveAbandoned();
+  sess.cur--;
   var savedEmail = LS.get('email');
   if (savedEmail) {
     var h = document.getElementById('email-head');
@@ -1129,7 +1133,6 @@ function loadSet(playlistName) {
   // Clear email screen flag — they are starting a new session
   LS.set('onEmailScreen', false);
 
-  // Save chosen playlist and reload — same path as manual refresh.
   LS.set('pendingSet', playlistName);
   window.location.reload();
 }
