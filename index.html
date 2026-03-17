@@ -363,6 +363,7 @@ html.assign-top, body.assign-top { background: var(--black); }
   <input class="email-input" id="email-in" type="email" placeholder="your email" autocomplete="email" autocapitalize="none">
   <button class="email-sub" id="email-sub">I'm in.</button>
   <div id="listen-again" style="display:none; margin-top: 48px; text-align: center; width: 100%;">
+    <button class="set-btn resume-btn" id="resume-btn" style="display:none; margin-bottom: 16px; width: 100%; max-width: 240px;" onclick="resumeAbandonedSet()">Resume Set 1</button>
     <div style="font-size: 11px; color: var(--black); opacity: 0.35; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 20px;">Play another set</div>
     <button class="set-btn" onclick="loadSet('MVP 1.2')">Set 2</button>
     <button class="set-btn" onclick="loadSet('MVP 1.3')">Set 3</button>
@@ -872,12 +873,12 @@ document.getElementById('s1').addEventListener('click', function() {
   if (window._restoreSetScreen) {
     window._restoreSetScreen = false;
     var h = document.getElementById('email-head');
-    if (h) { h.textContent = "You'll hear when something new arrives."; h.style.fontSize = '18px'; h.style.opacity = '0.6'; }
+    if (h) h.textContent = "You'll hear when something new arrives.";
     document.getElementById('email-in').style.display = 'none';
     document.getElementById('name-in').style.display = 'none';
     document.getElementById('email-sub').style.display = 'none';
     var again = document.getElementById('listen-again');
-    if (again) { again.style.display = 'block'; updateSetButtons(); }
+    if (again) { again.style.display = 'block'; updateSetButtons(); updateResumeButton(); }
     if (window._nextSetPlaylist) sess.playlist = window._nextSetPlaylist;
     show('s6');
     return;
@@ -896,9 +897,25 @@ document.getElementById('s1').addEventListener('click', function() {
     return;
   }
 
-  // pendingSet reload — skip entry, go straight to listen
+  // pendingSet reload — skip entry; if _resumeMode also set, resume at correct track
   if (window._skipEntry) {
     window._skipEntry = false;
+    if (window._resumeMode && window._resumeCur !== undefined) {
+      sess.cur = window._resumeCur;
+      window._resumeMode = false;
+      window._resumeCur = undefined;
+      try {
+        var silentAudioR = new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAA' +
+          'EAAQARAAAAAgABAAIAZGF0YQAAAAA=');
+        silentAudioR.volume = 0;
+        silentAudioR.play().catch(function(){});
+      } catch(e) {}
+      if (widgetReady) { widget.skip(sess.tOrder[sess.cur]); sess._primedIdx = sess.tOrder[sess.cur]; }
+      show('s3');
+      setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 300);
+      return;
+    }
+    // Fresh set load — start at track 0
     sess.tOrder = shuffle([0,1,2,3,4]);
     try {
       var silentAudioP = new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAA' +
@@ -906,10 +923,7 @@ document.getElementById('s1').addEventListener('click', function() {
       silentAudioP.volume = 0;
       silentAudioP.play().catch(function(){});
     } catch(e) {}
-    if (widgetReady) {
-      widget.skip(sess.tOrder[0]);
-      sess._primedIdx = sess.tOrder[0];
-    }
+    if (widgetReady) { widget.skip(sess.tOrder[0]); sess._primedIdx = sess.tOrder[0]; }
     show('s3');
     setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 300);
     return;
@@ -986,8 +1000,6 @@ document.getElementById('btn-continue').addEventListener('click', function() {
 
 // Stop for now — go to email
 document.getElementById('btn-stop').addEventListener('click', function() {
-  // cur is on the just-completed track — save abandoned at cur+1 so
-  // resume starts at the next track, not the one they already answered
   sess.cur++;
   saveAbandoned();
   sess.cur--;
@@ -999,7 +1011,7 @@ document.getElementById('btn-stop').addEventListener('click', function() {
     document.getElementById('name-in').style.display = 'none';
     document.getElementById('email-sub').style.display = 'none';
     var again = document.getElementById('listen-again');
-    if (again) { again.style.display = 'block'; updateSetButtons(); }
+    if (again) { again.style.display = 'block'; updateSetButtons(); updateResumeButton(); }
   }
   show('s6');
 });
@@ -1027,12 +1039,12 @@ document.getElementById('recap-continue').addEventListener('click', function() {
 
     // Show brief confirmation then listen again
     var h = document.getElementById('email-head');
-    if (h) { h.textContent = "You'll hear when something new arrives."; h.style.fontSize = '18px'; h.style.opacity = '0.6'; }
+    if (h) h.textContent = "You'll hear when something new arrives.";
     document.getElementById('email-in').style.display = 'none';
     document.getElementById('name-in').style.display = 'none';
     document.getElementById('email-sub').style.display = 'none';
     var again = document.getElementById('listen-again');
-    if (again) again.style.display = 'block';
+    if (again) { again.style.display = 'block'; updateSetButtons(); updateResumeButton(); }
     show('s6');
   } else {
     show('s6');
@@ -1211,6 +1223,33 @@ function markReturning() {
   LS.set('returning', true);
 }
 
+function setNumFromPlaylist(playlist) {
+  var map = { 'MVP 1': '1', 'MVP 1.2': '2', 'MVP 1.3': '3', 'MVP 1.4': '4', 'MVP 1.5': '5' };
+  return map[playlist] || '1';
+}
+
+function updateResumeButton() {
+  var btn = document.getElementById('resume-btn');
+  if (!btn) return;
+  var abandoned = getAbandoned();
+  if (abandoned && abandoned.playlist) {
+    btn.textContent = 'Resume Set ' + setNumFromPlaylist(abandoned.playlist);
+    btn.style.display = 'block';
+  } else {
+    btn.style.display = 'none';
+  }
+}
+
+function resumeAbandonedSet() {
+  var abandoned = getAbandoned();
+  if (!abandoned) return;
+  // Save as pendingSet so reload picks up correct iframe src
+  // Also save a resume flag so _skipEntry knows to resume at cur not start at 0
+  LS.set('pendingSet', abandoned.playlist);
+  LS.set('pendingResume', true);
+  window.location.reload();
+}
+
 // On arrival — check state and set up accordingly
 function initUserState() {
   var returning = isReturning();
@@ -1283,6 +1322,18 @@ function initUserState() {
     sess.playlist = pendingSet;
     window._resumeMode = false;
     window._restoreSetScreen = false;
+    // Check if this is a resume (not a fresh set load)
+    var pendingResume = LS.get('pendingResume');
+    if (pendingResume) {
+      LS.set('pendingResume', null);
+      // Re-read abandoned to get cur and tOrder
+      var ab = getAbandoned();
+      if (ab && ab.playlist === pendingSet) {
+        sess.tOrder = ab.tOrder;
+        window._resumeCur = ab.cur;
+        window._resumeMode = true;
+      }
+    }
     window._skipEntry = true;
   } else {
     var shouldRestore = onEmailScreen || (returning && completedSetsCheck.length > 0 && !abandoned);
