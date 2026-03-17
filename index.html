@@ -363,8 +363,8 @@ html.assign-top, body.assign-top { background: var(--black); }
   <input class="email-input" id="email-in" type="email" placeholder="your email" autocomplete="email" autocapitalize="none">
   <button class="email-sub" id="email-sub">I'm in.</button>
   <div id="listen-again" style="display:none; margin-top: 48px; text-align: center; width: 100%;">
-    <button class="set-btn resume-btn" id="resume-btn" style="display:none; margin-bottom: 16px; width: 100%; max-width: 240px;" onclick="resumeAbandonedSet()">Resume Set 1</button>
     <div style="font-size: 11px; color: var(--black); opacity: 0.35; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 20px;">Play another set</div>
+    <button class="set-btn" id="set-btn-1" onclick="loadSet('MVP 1')" style="display:none;">Set 1</button>
     <button class="set-btn" onclick="loadSet('MVP 1.2')">Set 2</button>
     <button class="set-btn" onclick="loadSet('MVP 1.3')">Set 3</button>
     <button class="set-btn" onclick="loadSet('MVP 1.4')">Set 4</button>
@@ -873,12 +873,12 @@ document.getElementById('s1').addEventListener('click', function() {
   if (window._restoreSetScreen) {
     window._restoreSetScreen = false;
     var h = document.getElementById('email-head');
-    if (h) h.textContent = "You'll hear when something new arrives.";
+    if (h) { h.textContent = "You'll hear when something new arrives."; h.style.fontSize = '18px'; h.style.opacity = '0.6'; }
     document.getElementById('email-in').style.display = 'none';
     document.getElementById('name-in').style.display = 'none';
     document.getElementById('email-sub').style.display = 'none';
     var again = document.getElementById('listen-again');
-    if (again) { again.style.display = 'block'; updateSetButtons(); updateResumeButton(); }
+    if (again) { again.style.display = 'block'; updateSetButtons(); }
     if (window._nextSetPlaylist) sess.playlist = window._nextSetPlaylist;
     show('s6');
     return;
@@ -915,7 +915,6 @@ document.getElementById('s1').addEventListener('click', function() {
       setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 300);
       return;
     }
-    // Fresh set load — start at track 0
     sess.tOrder = shuffle([0,1,2,3,4]);
     try {
       var silentAudioP = new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAA' +
@@ -1011,7 +1010,7 @@ document.getElementById('btn-stop').addEventListener('click', function() {
     document.getElementById('name-in').style.display = 'none';
     document.getElementById('email-sub').style.display = 'none';
     var again = document.getElementById('listen-again');
-    if (again) { again.style.display = 'block'; updateSetButtons(); updateResumeButton(); }
+    if (again) { again.style.display = 'block'; updateSetButtons(); }
   }
   show('s6');
 });
@@ -1039,12 +1038,12 @@ document.getElementById('recap-continue').addEventListener('click', function() {
 
     // Show brief confirmation then listen again
     var h = document.getElementById('email-head');
-    if (h) h.textContent = "You'll hear when something new arrives.";
+    if (h) { h.textContent = "You'll hear when something new arrives."; h.style.fontSize = '18px'; h.style.opacity = '0.6'; }
     document.getElementById('email-in').style.display = 'none';
     document.getElementById('name-in').style.display = 'none';
     document.getElementById('email-sub').style.display = 'none';
     var again = document.getElementById('listen-again');
-    if (again) { again.style.display = 'block'; updateSetButtons(); updateResumeButton(); }
+    if (again) { again.style.display = 'block'; updateSetButtons(); }
     show('s6');
   } else {
     show('s6');
@@ -1108,20 +1107,48 @@ function setLabel(playlistName) {
 
 function updateSetButtons() {
   var completed = LS.get('completedSets') || [];
-  var playlistByLabel = {
-    'Set 2': 'MVP 1.2',
-    'Set 3': 'MVP 1.3',
-    'Set 4': 'MVP 1.4',
-    'Set 5': 'MVP 1.5',
+  var abandoned = getAbandoned();
+  var abandonedPlaylist = abandoned ? abandoned.playlist : null;
+
+  var playlistByBtn = {
+    'MVP 1':   document.getElementById('set-btn-1'),
+    'MVP 1.2': null,
+    'MVP 1.3': null,
+    'MVP 1.4': null,
+    'MVP 1.5': null,
   };
-  var btns = document.querySelectorAll('.set-btn');
-  btns.forEach(function(b) {
-    var label = b.textContent.trim();
-    var playlist = playlistByLabel[label];
-    if (playlist && completed.indexOf(playlist) !== -1) {
-      b.classList.add('used');
+  // Map Set 2-5 buttons by their onclick
+  document.querySelectorAll('.set-btn').forEach(function(b) {
+    var oc = b.getAttribute('onclick') || '';
+    var m = oc.match(/loadSet\('([^']+)'\)/);
+    if (m && m[1] !== 'MVP 1') playlistByBtn[m[1]] = b;
+  });
+
+  // Set 1 button — show only if MVP 1 not completed
+  var btn1 = document.getElementById('set-btn-1');
+  if (btn1) {
+    if (completed.indexOf('MVP 1') !== -1) {
+      btn1.style.display = 'none';
     } else {
-      b.classList.remove('used');
+      btn1.style.display = 'inline-block';
+    }
+  }
+
+  // Update all set buttons: mark used if completed, show Resume if abandoned
+  var setNames = { 'MVP 1': 'Set 1', 'MVP 1.2': 'Set 2', 'MVP 1.3': 'Set 3', 'MVP 1.4': 'Set 4', 'MVP 1.5': 'Set 5' };
+  Object.keys(playlistByBtn).forEach(function(playlist) {
+    var btn = playlistByBtn[playlist];
+    if (!btn) return;
+    if (completed.indexOf(playlist) !== -1) {
+      btn.classList.add('used');
+      btn.textContent = setNames[playlist];
+    } else {
+      btn.classList.remove('used');
+      if (abandonedPlaylist === playlist) {
+        btn.textContent = 'Resume ' + setNames[playlist];
+      } else {
+        btn.textContent = setNames[playlist];
+      }
     }
   });
 }
@@ -1223,28 +1250,9 @@ function markReturning() {
   LS.set('returning', true);
 }
 
-function setNumFromPlaylist(playlist) {
-  var map = { 'MVP 1': '1', 'MVP 1.2': '2', 'MVP 1.3': '3', 'MVP 1.4': '4', 'MVP 1.5': '5' };
-  return map[playlist] || '1';
-}
-
-function updateResumeButton() {
-  var btn = document.getElementById('resume-btn');
-  if (!btn) return;
-  var abandoned = getAbandoned();
-  if (abandoned && abandoned.playlist) {
-    btn.textContent = 'Resume Set ' + setNumFromPlaylist(abandoned.playlist);
-    btn.style.display = 'block';
-  } else {
-    btn.style.display = 'none';
-  }
-}
-
 function resumeAbandonedSet() {
   var abandoned = getAbandoned();
   if (!abandoned) return;
-  // Save as pendingSet so reload picks up correct iframe src
-  // Also save a resume flag so _skipEntry knows to resume at cur not start at 0
   LS.set('pendingSet', abandoned.playlist);
   LS.set('pendingResume', true);
   window.location.reload();
@@ -1322,11 +1330,9 @@ function initUserState() {
     sess.playlist = pendingSet;
     window._resumeMode = false;
     window._restoreSetScreen = false;
-    // Check if this is a resume (not a fresh set load)
     var pendingResume = LS.get('pendingResume');
     if (pendingResume) {
       LS.set('pendingResume', null);
-      // Re-read abandoned to get cur and tOrder
       var ab = getAbandoned();
       if (ab && ab.playlist === pendingSet) {
         sess.tOrder = ab.tOrder;
