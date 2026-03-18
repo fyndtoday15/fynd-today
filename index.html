@@ -855,6 +855,7 @@ function doReveal(ps) {
   document.getElementById('r-title').textContent = tr.title;
   document.getElementById('r-artist').textContent = tr.artist;
   show('s5');
+  sess.listenStart = null; // prevent pagehide beacon from double-logging
   sess.cur++;
   saveAbandoned();
   sess.cur--;
