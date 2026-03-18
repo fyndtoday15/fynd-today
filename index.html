@@ -321,22 +321,25 @@ html.assign-top, body.assign-top { background: var(--black); }
         }
         return;
       }
-      // Most recently touched abandoned set — for refresh resume
+      // Find most recently active abandoned session for iframe src
       var abandonedSets = JSON.parse(localStorage.getItem('fynd_abandonedSets')) || {};
       var onEmail = JSON.parse(localStorage.getItem('fynd_onEmailScreen'));
-      var now = Date.now();
       var cutoff = 24 * 60 * 60 * 1000;
-      var latest = null;
+      var now = Date.now();
+      var best = null;
       Object.keys(abandonedSets).forEach(function(k) {
         var a = abandonedSets[k];
-        if (!onEmail && a && a.timestamp && (now - a.timestamp < cutoff)) {
-          if (!latest || a.timestamp > latest.timestamp) latest = a;
+        if (a && a.timestamp && (now - a.timestamp < cutoff)) {
+          if (!best || a.timestamp > best.timestamp) best = a;
         }
       });
-      if (latest && latest.playlist && URLS[latest.playlist] && latest.playlist !== 'MVP 1') {
-        var iframe = document.getElementById('sc');
-        if (iframe) {
-          iframe.src = 'https://w.soundcloud.com/player/?url=' + encodeURIComponent(URLS[latest.playlist]) + '&auto_play=false&hide_related=true&show_comments=false&show_user=false&show_reposts=false&show_teaser=false&visual=false';
+      if (best && !onEmail && best.playlist && best.playlist !== 'MVP 1') {
+        var url = URLS[best.playlist];
+        if (url) {
+          var iframe = document.getElementById('sc');
+          if (iframe) {
+            iframe.src = 'https://w.soundcloud.com/player/?url=' + encodeURIComponent(url) + '&auto_play=false&hide_related=true&show_comments=false&show_user=false&show_reposts=false&show_teaser=false&visual=false';
+          }
         }
       }
     } catch(e) {}
@@ -371,7 +374,6 @@ html.assign-top, body.assign-top { background: var(--black); }
   <button class="email-sub" id="email-sub">I'm in.</button>
   <div id="listen-again" style="display:none; margin-top: 48px; text-align: center; width: 100%;">
     <div style="font-size: 11px; color: var(--black); opacity: 0.35; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 20px;">Play another set</div>
-    <button class="set-btn" id="set-btn-1" onclick="loadSet('MVP 1')">Set 1</button>
     <button class="set-btn" id="set-btn-1" onclick="loadSet('MVP 1')">Set 1</button>
     <button class="set-btn" onclick="loadSet('MVP 1.2')">Set 2</button>
     <button class="set-btn" onclick="loadSet('MVP 1.3')">Set 3</button>
@@ -935,36 +937,6 @@ document.getElementById('s1').addEventListener('click', function() {
     return;
   }
 
-  if (window._skipEntry) {
-    window._skipEntry = false;
-    if (window._resumeMode && window._resumeCur !== undefined) {
-      sess.cur = window._resumeCur;
-      window._resumeMode = false;
-      window._resumeCur = undefined;
-      try {
-        var silentAudioR = new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAA' +
-          'EAAQARAAAAAgABAAIAZGF0YQAAAAA=');
-        silentAudioR.volume = 0;
-        silentAudioR.play().catch(function(){});
-      } catch(e) {}
-      if (widgetReady) { widget.skip(sess.tOrder[sess.cur]); sess._primedIdx = sess.tOrder[sess.cur]; }
-      show('s3');
-      setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 300);
-      return;
-    }
-    sess.tOrder = shuffle([0,1,2,3,4]);
-    try {
-      var silentAudioP = new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAA' +
-        'EAAQARAAAAAgABAAIAZGF0YQAAAAA=');
-      silentAudioP.volume = 0;
-      silentAudioP.play().catch(function(){});
-    } catch(e) {}
-    if (widgetReady) { widget.skip(sess.tOrder[0]); sess._primedIdx = sess.tOrder[0]; }
-    show('s3');
-    setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 300);
-    return;
-  }
-
   // If resuming abandoned session within 24hrs — skip entry, go straight to track
   if (window._resumeMode && window._resumeCur !== undefined) {
     sess.cur = window._resumeCur;
@@ -1254,15 +1226,14 @@ function getAbandoned(playlist) {
     if (now - all[k].timestamp > cutoff) { delete all[k]; changed = true; }
   });
   if (changed) LS.set('abandonedSets', all);
-  // Specific playlist requested (e.g. for Resume button or pendingSet)
   if (playlist) return all[playlist] || null;
-  // No playlist — auto-resume: skip MVP 1 since it has its own Set 1 button
-  // Return the most recently touched non-MVP-1 entry
-  var keys = Object.keys(all).filter(function(k) { return k !== 'MVP 1'; });
+  // No playlist specified — return most recently active entry
+  var keys = Object.keys(all);
   if (!keys.length) return null;
-  return keys.reduce(function(best, k) {
-    return all[k].timestamp > best.timestamp ? all[k] : best;
-  }, all[keys[0]]);
+  var bestKey = keys.reduce(function(best, k) {
+    return all[k].timestamp > all[best].timestamp ? k : best;
+  }, keys[0]);
+  return all[bestKey];
 }
 
 function isReturning() {
@@ -1276,7 +1247,6 @@ function markReturning() {
 // On arrival — check state and set up accordingly
 function initUserState() {
   var returning = isReturning();
-  var abandoned = getAbandoned();
   var nextSet = getNextSet();
   var savedEmail = LS.get('email') || '';
   var savedName = LS.get('firstName') || '';
@@ -1304,11 +1274,9 @@ function initUserState() {
     : null;
 
   var onEmailScreen = LS.get('onEmailScreen');
+  var abandoned = getAbandoned(); // most recently active
   if (returning) {
-    // Check for abandoned session first
-    // But not if we were on the email screen — that means session completed
     if (abandoned && !onEmailScreen) {
-      // Resume abandoned — go straight to entry then resume
       sess.id = abandoned.sessionId;
       sess.playlist = abandoned.playlist;
       sess.tOrder = abandoned.tOrder;
@@ -1317,15 +1285,12 @@ function initUserState() {
       window._resumeCur = abandoned.cur;
       window._resumeMode = true;
     } else if (!nextSet) {
-      // All sets done — show waiting screen after tap
       window._allSetsComplete = true;
     } else {
-      // Next set available
       sess.playlist = nextSet;
       window._resumeMode = false;
     }
   } else {
-    // First time — always MVP 1
     sess.playlist = 'MVP 1';
   }
 
@@ -1345,11 +1310,11 @@ function initUserState() {
     sess.playlist = pendingSet;
     window._resumeMode = false;
     window._restoreSetScreen = false;
-    var ab = getAbandoned(pendingSet);
-    if (ab) {
-      sess.tOrder = ab.tOrder;
-      sess.log = ab.log || [];
-      window._resumeCur = ab.cur;
+    var abPending = getAbandoned(pendingSet);
+    if (abPending) {
+      sess.tOrder = abPending.tOrder;
+      sess.log = abPending.log || [];
+      window._resumeCur = abPending.cur;
       window._resumeMode = true;
     }
     window._skipEntry = true;
