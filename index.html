@@ -684,6 +684,7 @@ function startTrackTimers() {
     document.getElementById('thumbs-wrap').classList.remove('show');
     clearTimeout(thumbsTimer);
     if (!document.getElementById('assign-panel').classList.contains('open')) {
+      sess._triggered = 'auto';
       openPanel(function(ps) { doReveal(ps); });
     }
   }, 60000);
@@ -731,6 +732,7 @@ function playTrack(idx) {
       document.getElementById('thumbs-wrap').classList.remove('show');
       clearTimeout(thumbsTimer);
       if (!document.getElementById('assign-panel').classList.contains('open')) {
+        sess._triggered = 'auto';
         openPanel(function(ps) { doReveal(ps); });
       }
     }, 60000);
@@ -754,6 +756,7 @@ document.getElementById('ready-prompt').addEventListener('click', function() {
   stopDot();
   document.getElementById('thumbs-wrap').classList.remove('show');
   clearTimeout(thumbsTimer);
+  sess._triggered = 'manual';
   openPanel(function(ps) { doReveal(ps); });
 });
 
@@ -847,7 +850,7 @@ function doReveal(ps) {
       sessionId: sess.id,
       email: '',
       entryState: sess.entryState,
-      assignments: [{ trackId: sessionTrackId, trackTitle: trackTitle, duration: assignment.duration, postState: assignment.postState, week: week, playlist: sess.playlist, reaction: sess.reaction, visitNumber: window._visitNumber || 1, daysSinceLastVisit: window._daysSinceLastVisit }],
+      assignments: [{ trackId: sessionTrackId, trackTitle: trackTitle, duration: assignment.duration, postState: assignment.postState, week: week, playlist: sess.playlist, reaction: sess.reaction, visitNumber: window._visitNumber || 1, daysSinceLastVisit: window._daysSinceLastVisit, triggered: sess._triggered || 'manual' }],
     }),
   }).catch(function(err) { console.error('Track log error:', err); });
 
