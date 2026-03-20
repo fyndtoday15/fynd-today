@@ -684,7 +684,6 @@ function startTrackTimers() {
     document.getElementById('thumbs-wrap').classList.remove('show');
     clearTimeout(thumbsTimer);
     if (!document.getElementById('assign-panel').classList.contains('open')) {
-      sess._triggered = 'auto';
       openPanel(function(ps) { doReveal(ps); });
     }
   }, 60000);
@@ -732,7 +731,6 @@ function playTrack(idx) {
       document.getElementById('thumbs-wrap').classList.remove('show');
       clearTimeout(thumbsTimer);
       if (!document.getElementById('assign-panel').classList.contains('open')) {
-        sess._triggered = 'auto';
         openPanel(function(ps) { doReveal(ps); });
       }
     }, 60000);
@@ -756,7 +754,6 @@ document.getElementById('ready-prompt').addEventListener('click', function() {
   stopDot();
   document.getElementById('thumbs-wrap').classList.remove('show');
   clearTimeout(thumbsTimer);
-  sess._triggered = 'manual';
   openPanel(function(ps) { doReveal(ps); });
 });
 
@@ -850,7 +847,7 @@ function doReveal(ps) {
       sessionId: sess.id,
       email: '',
       entryState: sess.entryState,
-      assignments: [{ trackId: sessionTrackId, trackTitle: trackTitle, duration: assignment.duration, postState: assignment.postState, week: week, playlist: sess.playlist, reaction: sess.reaction, visitNumber: window._visitNumber || 1, daysSinceLastVisit: window._daysSinceLastVisit, triggered: sess._triggered || 'manual' }],
+      assignments: [{ trackId: sessionTrackId, trackTitle: trackTitle, duration: assignment.duration, postState: assignment.postState, week: week, playlist: sess.playlist, reaction: sess.reaction, visitNumber: window._visitNumber || 1, daysSinceLastVisit: window._daysSinceLastVisit }],
     }),
   }).catch(function(err) { console.error('Track log error:', err); });
 
@@ -884,9 +881,30 @@ document.getElementById('s1').addEventListener('click', function() {
   // Mark as returning for future visits
   markReturning();
 
-  // If set screen should be restored — go there directly
+  // If set screen should be restored
   if (window._restoreSetScreen) {
     window._restoreSetScreen = false;
+    // If over 24hrs — show entry question first, then sets page
+    if (window._over24hrs) {
+      window._showSetsAfterEntry = true;
+      sess.tOrder = shuffle([0,1,2,3,4]);
+      buildList('entry-list', 'stmt', true, function(state) {
+        sess.entryState = state;
+        var h = document.getElementById('email-head');
+        if (h) { h.textContent = "You'll hear when something new arrives."; h.style.fontSize = '18px'; h.style.opacity = '0.6'; }
+        document.getElementById('email-in').style.display = 'none';
+        document.getElementById('name-in').style.display = 'none';
+        document.getElementById('email-sub').style.display = 'none';
+        var again = document.getElementById('listen-again');
+        if (again) { again.style.display = 'block'; updateSetButtons(); }
+        if (window._nextSetPlaylist) sess.playlist = window._nextSetPlaylist;
+        window._showSetsAfterEntry = false;
+        show('s6');
+      });
+      show('s2');
+      return;
+    }
+    // Within 24hrs — go straight to sets page
     var h = document.getElementById('email-head');
     if (h) { h.textContent = "You'll hear when something new arrives."; h.style.fontSize = '18px'; h.style.opacity = '0.6'; }
     document.getElementById('email-in').style.display = 'none';
@@ -963,11 +981,12 @@ document.getElementById('s1').addEventListener('click', function() {
     return;
   }
 
-  // Fresh session — shuffle tracks
-  sess.tOrder = shuffle([0,1,2,3,4]);
+  // Shuffle only if not resuming after 24hrs (resume restores saved tOrder)
+  if (!window._resumeAfterEntry) {
+    sess.tOrder = shuffle([0,1,2,3,4]);
+  }
 
   // Unlock Safari audio context silently using a tiny HTML5 audio element
-  // This does NOT touch the SoundCloud widget so no audible glitch
   try {
     var silentAudio = new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAA' +
       'EAAQARAAAAAgABAAIAZGF0YQAAAAA=');
@@ -979,11 +998,16 @@ document.getElementById('s1').addEventListener('click', function() {
   buildList('entry-list', 'stmt', true, function(state) {
     sess.entryState = state;
     show('s3');
-    // Play immediately after screen switch — still within gesture context on Safari
-    if (widgetReady) {
-      sess._gestureUnlocked = true;
+    if (widgetReady) { sess._gestureUnlocked = true; }
+    if (window._resumeAfterEntry && window._resumeCur !== undefined) {
+      // Returning after 24hrs — resume at correct track after entry question
+      window._resumeAfterEntry = false;
+      sess.cur = window._resumeCur;
+      window._resumeCur = undefined;
+      setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 100);
+    } else {
+      setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 100);
     }
-    setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 100);
   });
   show('s2');
 });
@@ -1280,6 +1304,9 @@ function initUserState() {
 
   var onEmailScreen = LS.get('onEmailScreen');
   var abandoned = getAbandoned(); // most recently active
+  // If it's been more than 24hrs, force entry question regardless of abandoned state
+  var over24hrs = lastVisit && (Date.now() - lastVisit) > 24 * 60 * 60 * 1000;
+  window._over24hrs = !!over24hrs;
   if (returning) {
     if (abandoned && !onEmailScreen) {
       sess.id = abandoned.sessionId;
@@ -1288,7 +1315,13 @@ function initUserState() {
       sess.entryState = abandoned.entryState;
       sess.log = abandoned.log || [];
       window._resumeCur = abandoned.cur;
-      window._resumeMode = true;
+      // Only resume silently if within 24hrs — otherwise show entry question first
+      if (over24hrs) {
+        window._resumeMode = false;
+        window._resumeAfterEntry = true; // show entry question, then resume at correct track
+      } else {
+        window._resumeMode = true;
+      }
     } else if (!nextSet) {
       window._allSetsComplete = true;
     } else {
