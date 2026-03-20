@@ -392,7 +392,7 @@ var PLAYLIST_TRACKS = {
     { title:'I See Life',              artist:'thekidszn'        },
     { title:'timebomb',                artist:'GVIN'             },
     { title:'belong',                  artist:'slenderbodies'    },
-    { title:'Places We Don\'t Know',   artist:'Kasbo'            },
+    { title:"Places We Don't Know",    artist:'Kasbo'            },
   ],
   'MVP 1.2': [
     { title:'3am',                     artist:'Łaszewo'          },
@@ -1321,6 +1321,23 @@ if (window.location.search.indexOf('reset=true') !== -1) {
   keys.forEach(function(k) { try { localStorage.removeItem('fynd_' + k); } catch(e) {} });
   window.location.href = window.location.pathname;
 }
+
+// ── PLAYLIST VERSION CHECK ─────────────────────────────
+// Bump this number whenever songs are updated.
+// On mismatch, completedSets and abandonedSets are cleared
+// so returning users can replay sets with new songs.
+// Email, name, and visit history are preserved.
+var PLAYLIST_VERSION = '1';
+(function() {
+  try {
+    var storedVersion = localStorage.getItem('fynd_playlistVersion');
+    if (storedVersion !== PLAYLIST_VERSION) {
+      localStorage.removeItem('fynd_completedSets');
+      localStorage.removeItem('fynd_abandonedSets');
+      localStorage.setItem('fynd_playlistVersion', PLAYLIST_VERSION);
+    }
+  } catch(e) {}
+})();
 
 initUserState();
 
