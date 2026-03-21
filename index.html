@@ -314,6 +314,14 @@ html.assign-top, body.assign-top { background: var(--black); }
       'MVP 1.5': 'https://soundcloud.com/fynd-today/sets/mvp-1-5',
     };
     try {
+      // Run version check here too — before reading abandonedSets
+      // so a song update doesn't cause src/track mismatch
+      var _pv = '1';
+      if (localStorage.getItem('fynd_playlistVersion') !== _pv) {
+        localStorage.removeItem('fynd_completedSets');
+        localStorage.removeItem('fynd_abandonedSets');
+        localStorage.setItem('fynd_playlistVersion', _pv);
+      }
       var pending = JSON.parse(localStorage.getItem('fynd_pendingSet'));
       if (pending && URLS[pending]) {
         var iframe = document.getElementById('sc');
@@ -789,9 +797,10 @@ document.getElementById('thumb-down').addEventListener('click', function() {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       sessionId: sess.id,
-      email: '',
+      email: LS.get('email') || '',
+      firstName: LS.get('firstName') || '',
       entryState: sess.entryState,
-      assignments: [{ trackId: sessionTrackId, trackTitle: trackTitle, duration: dur, postState: 'Skipped', reaction: 'Down', week: week, playlist: sess.playlist }],
+      assignments: [{ trackId: sessionTrackId, trackTitle: trackTitle, duration: dur, postState: 'Skipped', reaction: 'Down', week: week, playlist: sess.playlist, visitNumber: window._visitNumber || 1, daysSinceLastVisit: window._daysSinceLastVisit }],
     }),
   }).catch(function(err) { console.error('Skip log error:', err); });
 
@@ -845,7 +854,8 @@ function doReveal(ps) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       sessionId: sess.id,
-      email: '',
+      email: LS.get('email') || '',
+      firstName: LS.get('firstName') || '',
       entryState: sess.entryState,
       assignments: [{ trackId: sessionTrackId, trackTitle: trackTitle, duration: assignment.duration, postState: assignment.postState, week: week, playlist: sess.playlist, reaction: sess.reaction, visitNumber: window._visitNumber || 1, daysSinceLastVisit: window._daysSinceLastVisit }],
     }),
@@ -1354,7 +1364,8 @@ window.addEventListener('pagehide', function() {
   var week = 'W' + String(Math.max(1, Math.ceil((Date.now() - new Date('2026-03-15').getTime()) / (7*24*60*60*1000)))).padStart(2,'0');
   var payload = JSON.stringify({
     sessionId: sess.id,
-    email: '',
+    email: LS.get('email') || '',
+    firstName: LS.get('firstName') || '',
     entryState: sess.entryState,
     assignments: [{ trackId: sessionTrackId, trackTitle: trackTitle, duration: dur, postState: 'Abandoned', week: week, playlist: sess.playlist, reaction: '', visitNumber: window._visitNumber || 1, daysSinceLastVisit: window._daysSinceLastVisit }],
   });
