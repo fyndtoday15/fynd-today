@@ -79,7 +79,7 @@ exports.handler = async function(event, context) {
   }
 
   // TRACK LOG — create one record per track assignment
-  const { sessionId, email, entryState, assignments } = data;
+  const { sessionId, email, firstName, entryState, assignments } = data;
 
   if (!assignments || assignments.length === 0) {
     return { statusCode: 400, body: 'No assignments' };
@@ -89,14 +89,14 @@ exports.handler = async function(event, context) {
     return {
       fields: {
         'Session ID': sessionId || '',
-        'First Name': '',
+        'First Name': firstName || '',
         'Entry State': entryState || '',
         'Track ID': a.trackId || '',
         'Track Title': a.trackTitle || '',
         'Playlist': a.playlist || '',
         'Duration': a.duration || 0,
         'Position': a.postState || '',
-        'Email': '',
+        'Email': email || '',
         'Week': a.week || 'W01',
         'Returning Visitor': a.returningVisitor || 'No',
         'Reaction': a.reaction || '',
