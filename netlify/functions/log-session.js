@@ -50,7 +50,6 @@ exports.handler = async function(event, context) {
               'Duration': 0,
               'Position': '',
               'Week': '',
-              'Returning Visitor': 'No',
             }
           }]
         }),
@@ -98,7 +97,6 @@ exports.handler = async function(event, context) {
         'Position': a.postState || '',
         'Email': email || '',
         'Week': a.week || 'W01',
-        'Returning Visitor': a.returningVisitor || 'No',
         'Reaction': a.reaction || '',
         'Visit Number': a.visitNumber || 1,
         'Days Since Last Visit': (a.daysSinceLastVisit !== undefined && a.daysSinceLastVisit !== null && a.daysSinceLastVisit !== '') ? Number(a.daysSinceLastVisit) : null,
