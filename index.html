@@ -752,6 +752,14 @@ function playTrack(idx) {
     go();
   } else {
     var poll = setInterval(function() { if (widgetReady) { clearInterval(poll); go(); } }, 200);
+    // Safety net — if widget never readies in 2s, rebind and try once more
+    setTimeout(function() {
+      if (!widgetReady) {
+        clearInterval(poll);
+        initSC();
+        setTimeout(function() { if (widgetReady) go(); }, 500);
+      }
+    }, 2000);
   }
 }
 
@@ -936,37 +944,30 @@ document.getElementById('s1').addEventListener('click', function() {
       setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 300);
       return;
     }
-    sess.tOrder = shuffle([0,1,2,3,4]);
-    try {
-      var silentAudioP = new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAA' +
-        'EAAQARAAAAAgABAAIAZGF0YQAAAAA=');
-      silentAudioP.volume = 0;
-      silentAudioP.play().catch(function(){});
-    } catch(e) {}
-    if (widgetReady) { widget.skip(sess.tOrder[0]); sess._primedIdx = sess.tOrder[0]; }
-    show('s3');
-    setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 300);
+    // New set — route to sets page, Resume button handles actual listen
+    var h = document.getElementById('email-head');
+    if (h) { h.textContent = "You'll hear when something new arrives."; h.style.fontSize = '18px'; h.style.opacity = '0.6'; }
+    document.getElementById('email-in').style.display = 'none';
+    document.getElementById('name-in').style.display = 'none';
+    document.getElementById('email-sub').style.display = 'none';
+    var again = document.getElementById('listen-again');
+    if (again) { again.style.display = 'block'; updateSetButtons(); }
+    show('s6');
     return;
   }
 
-  // If resuming abandoned session within 24hrs — skip entry, go straight to track
-  if (window._resumeMode && window._resumeCur !== undefined) {
-    sess.cur = window._resumeCur;
+  // Returning user with abandoned session — route to sets page
+  // Resume Set X button handles navigating back into listen
+  if (window._resumeMode) {
     window._resumeMode = false;
-    window._resumeCur = undefined;
-    // Unlock Safari silently and pre-position widget
-    try {
-      var silentAudio2 = new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAA' +
-        'EAAQARAAAAAgABAAIAZGF0YQAAAAA=');
-      silentAudio2.volume = 0;
-      silentAudio2.play().catch(function(){});
-    } catch(e) {}
-    if (widgetReady) {
-      widget.skip(sess.tOrder[sess.cur]);
-      sess._primedIdx = sess.tOrder[sess.cur];
-    }
-    show('s3');
-    setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 300);
+    var h = document.getElementById('email-head');
+    if (h) { h.textContent = "You'll hear when something new arrives."; h.style.fontSize = '18px'; h.style.opacity = '0.6'; }
+    document.getElementById('email-in').style.display = 'none';
+    document.getElementById('name-in').style.display = 'none';
+    document.getElementById('email-sub').style.display = 'none';
+    var again = document.getElementById('listen-again');
+    if (again) { again.style.display = 'block'; updateSetButtons(); }
+    show('s6');
     return;
   }
 
@@ -1177,9 +1178,7 @@ function getNextSet() {
     return completed.indexOf(p) === -1;
   });
   if (remaining.length === 0) return null;
-  // Always return MVP 1 first if not yet completed — preserves correct order
-  // and ensures iframe default src matches sess.playlist
-  if (remaining.indexOf('MVP 1') !== -1) return 'MVP 1';
+  // Return a random uncompleted set
   return remaining[Math.floor(Math.random() * remaining.length)];
 }
 
