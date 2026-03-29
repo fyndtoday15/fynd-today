@@ -24,7 +24,6 @@ html.assign-top, body.assign-top { background: var(--black); }
   display: flex; flex-direction: column; align-items: center;
   padding: calc(env(safe-area-inset-top) + 0px) 32px calc(env(safe-area-inset-bottom) + 0px);
   opacity: 0; pointer-events: none;
-  transition: opacity 0.3s ease;
 }
 .screen.active { opacity: 1; pointer-events: all; }
 
@@ -524,20 +523,10 @@ function show(id) {
       }
     }, 50);
   } else {
-    // Instant cut between off-white screens — no fade gap
-    for (var i = 0; i < all.length; i++) {
-      all[i].style.transition = 'none';
-      all[i].classList.remove('active');
-    }
+    // Instant cut between off-white screens
+    for (var i = 0; i < all.length; i++) all[i].classList.remove('active');
     var nextEl2 = document.getElementById(id);
-    if (nextEl2) {
-      nextEl2.style.transition = 'none';
-      nextEl2.classList.add('active');
-    }
-    setTimeout(function() {
-      var screens = document.querySelectorAll('.screen');
-      for (var j = 0; j < screens.length; j++) screens[j].style.transition = '';
-    }, 50);
+    if (nextEl2) nextEl2.classList.add('active');
   }
 
   var dots = document.getElementById('dots');
