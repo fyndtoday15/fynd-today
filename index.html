@@ -944,15 +944,16 @@ document.getElementById('s1').addEventListener('click', function() {
       setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 300);
       return;
     }
-    // New set — route to sets page, Resume button handles actual listen
-    var h = document.getElementById('email-head');
-    if (h) { h.textContent = "You'll hear when something new arrives."; h.style.fontSize = '18px'; h.style.opacity = '0.6'; }
-    document.getElementById('email-in').style.display = 'none';
-    document.getElementById('name-in').style.display = 'none';
-    document.getElementById('email-sub').style.display = 'none';
-    var again = document.getElementById('listen-again');
-    if (again) { again.style.display = 'block'; updateSetButtons(); }
-    show('s6');
+    sess.tOrder = shuffle([0,1,2,3,4]);
+    try {
+      var silentAudioP = new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAA' +
+        'EAAQARAAAAAgABAAIAZGF0YQAAAAA=');
+      silentAudioP.volume = 0;
+      silentAudioP.play().catch(function(){});
+    } catch(e) {}
+    if (widgetReady) { widget.skip(sess.tOrder[0]); sess._primedIdx = sess.tOrder[0]; }
+    show('s3');
+    setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 300);
     return;
   }
 
