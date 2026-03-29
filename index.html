@@ -730,8 +730,7 @@ function playTrack(idx) {
     widget.skip(idx);
     setTimeout(function() {
       widget.play();
-      setTimeout(function() { widget.play(); }, 500);
-    }, 150);
+    }, 400);
     sess.listenStart = Date.now();
     clearTimeout(readyTimer);
     clearTimeout(autoTimer);
@@ -772,12 +771,15 @@ function playTrack(idx) {
     go();
   } else {
     var poll = setInterval(function() { if (widgetReady) { clearInterval(poll); go(); } }, 200);
-    // Safety net — if widget never readies in 2s, rebind and try once more
+    // Safety net — if widget never readies in 2s, rebind and poll again
     setTimeout(function() {
       if (!widgetReady) {
         clearInterval(poll);
         initSC();
-        setTimeout(function() { if (widgetReady) go(); }, 500);
+        var poll2 = setInterval(function() {
+          if (widgetReady) { clearInterval(poll2); go(); }
+        }, 200);
+        setTimeout(function() { clearInterval(poll2); }, 3000);
       }
     }, 2000);
   }
