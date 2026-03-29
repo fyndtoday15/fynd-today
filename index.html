@@ -686,6 +686,10 @@ function initSC() {
       openPanel(function(ps) { doReveal(ps); });
     }
   });
+  // If widget already fired READY before binding, catch it now
+  try {
+    widget.isPaused(function() { widgetReady = true; });
+  } catch(e) {}
 }
 
 function startTrackTimers() {
