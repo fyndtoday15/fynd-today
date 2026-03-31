@@ -1274,21 +1274,20 @@ function initUserState() {
   var savedName = LS.get('firstName') || '';
 
   // Track visit number and time since last visit
-  // A new visit = more than 30 minutes since last page load
+  // A new visit = new tab/browser session (sessionStorage cleared on tab close)
+  // Refreshes and set reloads within the same tab do NOT increment
   var visitCount = LS.get('visitCount') || 0;
   var lastVisit = LS.get('lastVisit') || null;
-  var thirtyMin = 30 * 60 * 1000;
-  var isNewVisit = !lastVisit || (Date.now() - lastVisit) > thirtyMin;
+  var isNewVisit = !sessionStorage.getItem('fynd_sessionActive');
 
   if (isNewVisit) {
     window._visitNumber = visitCount + 1;
     LS.set('visitCount', window._visitNumber);
     LS.set('lastVisit', Date.now());
+    sessionStorage.setItem('fynd_sessionActive', '1');
   } else {
-    // Same visit — refresh or quick reload — don't increment
+    // Same tab session — refresh or set reload — don't increment
     window._visitNumber = visitCount;
-    // Update lastVisit timestamp to keep session alive
-    LS.set('lastVisit', Date.now());
   }
 
   window._daysSinceLastVisit = (lastVisit && isNewVisit)
