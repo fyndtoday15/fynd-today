@@ -7,11 +7,26 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>FYND TODAY</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400&display=swap" rel="stylesheet">
+<style>
+@font-face {
+  font-family: 'DejaVu Sans';
+  src: url('/DejaVuSans.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'DejaVu Sans';
+  src: url('/DejaVuSans-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+</style>
 <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABCGlDQ1BJQ0MgUHJvZmlsZQAAeJxjYGA8wQAELAYMDLl5JUVB7k4KEZFRCuwPGBiBEAwSk4sLGHADoKpv1yBqL+viUYcLcKakFicD6Q9ArFIEtBxopAiQLZIOYWuA2EkQtg2IXV5SUAJkB4DYRSFBzkB2CpCtkY7ETkJiJxcUgdT3ANk2uTmlyQh3M/Ck5oUGA2kOIJZhKGYIYnBncAL5H6IkfxEDg8VXBgbmCQixpJkMDNtbGRgkbiHEVBYwMPC3MDBsO48QQ4RJQWJRIliIBYiZ0tIYGD4tZ2DgjWRgEL7AwMAVDQsIHG5TALvNnSEfCNMZchhSgSKeDHkMyQx6QJYRgwGDIYMZAKbWPz9HbOBQAAACfUlEQVR4nO2VzUtUURiHn3POnY/bnXEhXCFhKnEmEnJZIiFuTAlxlwt3CaaBpNlCaCGBf4BgC0loZ0JboZ3QshJaGRgVfkSGbsTMmZiZe889LWaMgXRmrIUt5geXA+eee85z39/7vkf4ftpwhpJneXgNoAZQA/gvAKxqFmmtEUIghMAYgxCCIDBIKQiCACllyXxQ/EqgVOX/qwogHK4DNOABUSAPhIEcEAGyxTFfHAvy/TRCiL8EMIAAYwyTkw+RUtHRcYM3r98ycm+IxecvuNJymeXlV0xNPWJhYZGenm5mZp4QiYTo779NV1c3nvcTKU+OxIlvDPwO+dLSS/b29qivd2lONtPZeZPNrS2ampqYm5tn/ukzVlbesbb2gfX1dYaHRxgdHWd39xuWFcGYk6+biiYZYwiHw7S2XsV16xkcvIvWmomJ+2jfp7f3Fh8/fWZ19T2O4xCNRkkkEnieh+d5hTCWUVmAI/va29sYGrpDMtmC1ln6+npxHAcrFKLt+jUejI+SSiW5cDGBpSzGxsaYnn5MInEJ38+WzQNRzXWsVBjPywIGpSyktCkkYJiCWaq40qc0rbROUykCVQEclVo+HzA7O0tDg4vv+8RicXZ2dkgmmwm0JpvLoZQik8kwMDCAZUkqFEF1ZSilRGuNbdfR2HgepSTb29vkcl/JZNIcHh6ytfkFt8EllUoSizlEo3Hy+R8opcruXVUESlA4OPhOPB5jY2MT13XZ39/Htm0c5xxaa6SU2LaNZYUo2FNepwQApVTRkggFzxUQFB8BGIIgKFt6/wRQ2nILfYI/fK7U/UpVVQ4ct/lRdzvFWcfqzG/DGkANoAZQAzhzgF/lue0iCzr6DgAAAABJRU5ErkJggg==">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-:root { --bg: #FCFBF4; --black: #000000; --f: 'DejaVu LGC Sans','DM Sans',Arial,sans-serif; }
+:root { --bg: #FCFBF4; --black: #000000; --f: 'DejaVu Sans',Arial,sans-serif; }
 html { background: var(--bg); }
 body { width: 100%; height: 100%; overflow: hidden; background: var(--bg); font-family: var(--f); -webkit-font-smoothing: antialiased; }
 html.listen-mode, body.listen-mode { background: var(--black); }
@@ -480,6 +495,7 @@ var sess = {
   log: [],
   playlist: 'MVP 1',
   reaction: '',
+  triggered: '',
 };
 
 function shuffle(arr) {
@@ -718,6 +734,7 @@ function startTrackTimers() {
     document.getElementById('thumbs-wrap').classList.remove('show');
     clearTimeout(thumbsTimer);
     if (!document.getElementById('assign-panel').classList.contains('open')) {
+      sess.triggered = 'auto';
       openPanel(function(ps) { doReveal(ps); });
     }
   }, 60000);
@@ -787,6 +804,7 @@ function playTrack(idx) {
       document.getElementById('thumbs-wrap').classList.remove('show');
       clearTimeout(thumbsTimer);
       if (!document.getElementById('assign-panel').classList.contains('open')) {
+        sess.triggered = 'auto';
         openPanel(function(ps) { doReveal(ps); });
       }
     }, 60000);
@@ -821,6 +839,7 @@ document.getElementById('ready-prompt').addEventListener('click', function() {
   stopDot();
   document.getElementById('thumbs-wrap').classList.remove('show');
   clearTimeout(thumbsTimer);
+  sess.triggered = 'manual';
   openPanel(function(ps) { doReveal(ps); });
 });
 
@@ -862,6 +881,7 @@ document.getElementById('thumb-down').addEventListener('click', function() {
       assignments: [{ trackId: sessionTrackId, trackTitle: trackTitle, duration: dur, postState: 'Skipped', reaction: 'Down', date: date, playlist: sess.playlist, visitNumber: window._visitNumber || 1, daysSinceLastVisit: window._daysSinceLastVisit }],
     }),
   }).catch(function(err) { console.error('Skip log error:', err); });
+  try { localStorage.removeItem('fynd_pendingAbandoned'); } catch(e) {}
 
   sess.cur++;
   resetPanel();
@@ -916,11 +936,12 @@ function doReveal(ps) {
       email: LS.get('email') || '',
       firstName: LS.get('firstName') || '',
       entryState: sess.entryState,
-      assignments: [{ trackId: sessionTrackId, trackTitle: trackTitle, duration: assignment.duration, postState: assignment.postState, date: date, playlist: sess.playlist, reaction: sess.reaction, visitNumber: window._visitNumber || 1, daysSinceLastVisit: window._daysSinceLastVisit }],
+      assignments: [{ trackId: sessionTrackId, trackTitle: trackTitle, duration: assignment.duration, postState: assignment.postState, date: date, playlist: sess.playlist, reaction: sess.reaction, triggered: sess.triggered, visitNumber: window._visitNumber || 1, daysSinceLastVisit: window._daysSinceLastVisit }],
     }),
   }).catch(function(err) { console.error('Track log error:', err); });
 
   sess.reaction = '';
+  sess.triggered = '';
   document.getElementById('r-title').textContent = tr.title;
   document.getElementById('r-artist').textContent = tr.artist;
   // Hide stop button on last track — no reason to stop now
@@ -1146,7 +1167,7 @@ document.getElementById('email-sub').addEventListener('click', function() {
   document.getElementById('name-in').style.display = 'none';
   document.getElementById('email-in').style.display = 'none';
   document.getElementById('email-sub').style.display = 'none';
-  var consentLabel = document.querySelector('label:has(#consent-check)');
+  var consentLabel = document.getElementById('consent-label');
   if (consentLabel) consentLabel.style.display = 'none';
   if (document.getElementById('consent-error')) document.getElementById('consent-error').style.display = 'none';
   var h = document.getElementById('email-head');
@@ -1375,6 +1396,7 @@ function initUserState() {
     window._restoreSetScreen = false;
     var abPending = getAbandoned(pendingSet);
     if (abPending) {
+      sess.id = abPending.sessionId;
       sess.tOrder = abPending.tOrder;
       sess.log = abPending.log || [];
       window._resumeCur = abPending.cur;
