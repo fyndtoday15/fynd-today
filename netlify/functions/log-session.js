@@ -76,6 +76,11 @@ exports.handler = async function(event, context) {
     return { statusCode: 400, body: 'Invalid JSON' };
   }
 
+  // Honeypot check — bots fill hidden fields, real users don't
+  if (data.hp && data.hp.length > 0) {
+    return { statusCode: 200, body: JSON.stringify({ success: true }) };
+  }
+
   // EMAIL + NAME — write a dedicated record so it never fails
   if (data.emailUpdate) {
     try {
