@@ -1,9 +1,38 @@
+// Allowed origins
+const ALLOWED_ORIGINS = [
+  'https://fyndtoday.netlify.app',
+  'https://fyndtoday.com',
+  'https://www.fyndtoday.com',
+];
+
+// In-memory rate limit — per function instance
+const rateLimitMap = {};
+const RATE_LIMIT = 10;
+const RATE_WINDOW = 60000;
+
+function isRateLimited(ip) {
+  const now = Date.now();
+  if (!rateLimitMap[ip]) rateLimitMap[ip] = [];
+  rateLimitMap[ip] = rateLimitMap[ip].filter(t => now - t < RATE_WINDOW);
+  if (rateLimitMap[ip].length >= RATE_LIMIT) return true;
+  rateLimitMap[ip].push(now);
+  return false;
+}
+
+function sanitizeString(val, maxLen) {
+  if (typeof val !== 'string') return '';
+  return val.slice(0, maxLen).replace(/[<>]/g, '');
+}
+
 exports.handler = async function(event, context) {
+  const origin = event.headers.origin || event.headers.Origin || '';
+  const allowedOrigin = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+
   if (event.httpMethod === 'OPTIONS') {
     return {
       statusCode: 200,
       headers: {
-        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Origin': allowedOrigin,
         'Access-Control-Allow-Headers': 'Content-Type',
         'Access-Control-Allow-Methods': 'POST, OPTIONS',
       },
@@ -13,6 +42,22 @@ exports.handler = async function(event, context) {
 
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: 'Method Not Allowed' };
+  }
+
+  // Block requests not from your domain
+  if (!ALLOWED_ORIGINS.includes(origin)) {
+    return { statusCode: 403, body: 'Forbidden' };
+  }
+
+  // Rate limiting
+  const ip = event.headers['x-forwarded-for'] || event.headers['client-ip'] || 'unknown';
+  if (isRateLimited(ip)) {
+    return { statusCode: 429, body: 'Too Many Requests' };
+  }
+
+  // Payload size check
+  if (event.body && event.body.length > 10000) {
+    return { statusCode: 413, body: 'Payload Too Large' };
   }
 
   const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
@@ -40,10 +85,10 @@ exports.handler = async function(event, context) {
         body: JSON.stringify({
           records: [{
             fields: {
-              'Session ID': data.sessionId || '',
-              'First Name': data.firstName || '',
-              'Email': data.email || '',
-              'Entry State': data.entryState || '',
+              'Session ID': sanitizeString(data.sessionId, 64),
+              'First Name': sanitizeString(data.firstName, 100),
+              'Email': sanitizeString(data.email, 200),
+              'Entry State': sanitizeString(data.entryState, 100),
               'Track ID': 'EMAIL',
               'Track Title': 'Email Record',
               'Playlist': '',
@@ -61,14 +106,14 @@ exports.handler = async function(event, context) {
         console.error('Email record error:', result);
         return {
           statusCode: 500,
-          headers: { 'Access-Control-Allow-Origin': '*' },
+          headers: { 'Access-Control-Allow-Origin': allowedOrigin },
           body: JSON.stringify(result),
         };
       }
 
       return {
         statusCode: 200,
-        headers: { 'Access-Control-Allow-Origin': '*' },
+        headers: { 'Access-Control-Allow-Origin': allowedOrigin },
         body: JSON.stringify({ success: true }),
       };
     } catch(err) {
@@ -84,23 +129,27 @@ exports.handler = async function(event, context) {
     return { statusCode: 400, body: 'No assignments' };
   }
 
+  if (assignments.length > 5) {
+    return { statusCode: 400, body: 'Too many assignments' };
+  }
+
   const records = assignments.map(function(a) {
     return {
       fields: {
-        'Session ID': sessionId || '',
-        'First Name': firstName || '',
-        'Entry State': entryState || '',
-        'Track ID': a.trackId || '',
-        'Track Title': a.trackTitle || '',
-        'Playlist': a.playlist || '',
-        'Duration': a.duration || 0,
-        'Position': a.postState || '',
-        'Email': email || '',
-        'Week': a.week || 'W01',
-        'Reaction': a.reaction || '',
-        'Visit Number': a.visitNumber || 1,
-        'Days Since Last Visit': (a.daysSinceLastVisit !== undefined && a.daysSinceLastVisit !== null && a.daysSinceLastVisit !== '') ? Number(a.daysSinceLastVisit) : null,
-        'Triggered': a.triggered || '',
+        'Session ID': sanitizeString(sessionId, 64),
+        'First Name': sanitizeString(firstName, 100),
+        'Entry State': sanitizeString(entryState, 100),
+        'Track ID': sanitizeString(a.trackId, 20),
+        'Track Title': sanitizeString(a.trackTitle, 200),
+        'Playlist': sanitizeString(a.playlist, 50),
+        'Duration': Math.min(Math.max(Number(a.duration) || 0, 0), 60),
+        'Position': sanitizeString(a.postState, 50),
+        'Email': sanitizeString(email, 200),
+        'Week': sanitizeString(a.week, 10),
+        'Reaction': sanitizeString(a.reaction, 20),
+        'Visit Number': Math.min(Math.max(Number(a.visitNumber) || 1, 1), 9999),
+        'Days Since Last Visit': (a.daysSinceLastVisit !== undefined && a.daysSinceLastVisit !== null && a.daysSinceLastVisit !== '') ? Math.min(Number(a.daysSinceLastVisit), 9999) : null,
+        'Triggered': sanitizeString(a.triggered, 20),
       }
     };
   });
@@ -118,14 +167,14 @@ exports.handler = async function(event, context) {
       console.error('Airtable error:', result);
       return {
         statusCode: 500,
-        headers: { 'Access-Control-Allow-Origin': '*' },
+        headers: { 'Access-Control-Allow-Origin': allowedOrigin },
         body: JSON.stringify(result),
       };
     }
 
     return {
       statusCode: 200,
-      headers: { 'Access-Control-Allow-Origin': '*' },
+      headers: { 'Access-Control-Allow-Origin': allowedOrigin },
       body: JSON.stringify({ success: true, created: result.records.length }),
     };
 
