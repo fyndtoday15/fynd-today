@@ -400,7 +400,7 @@ html.assign-top, body.assign-top { background: var(--black); }
   <input class="email-input" id="email-in" type="email" placeholder="your email" autocomplete="email" autocapitalize="none">
   <div id="email-error" style="display:none; font-size:12px; color:rgba(0,0,0,0.6); margin-top:8px; letter-spacing:0.04em;">Please enter a valid email address.</div>
   <input type="text" id="hp-field" name="website" autocomplete="off" tabindex="-1" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;" aria-hidden="true">
-  <label id="consent-label" style="display:flex;align-items:flex-start;gap:10px;max-width:280px;margin:20px auto 0;cursor:pointer;text-align:left;">
+  <label style="display:flex;align-items:flex-start;gap:10px;max-width:280px;margin:20px auto 0;cursor:pointer;text-align:left;">
     <input type="checkbox" id="consent-check" style="margin-top:3px;flex-shrink:0;cursor:pointer;">
     <span style="font-size:11px;color:var(--black);opacity:0.5;line-height:1.5;letter-spacing:0.04em;">I agree to receive updates from FYND TODAY. We'll only use your email to share what comes next.</span>
   </label>
@@ -744,6 +744,7 @@ function playTrack(idx) {
     // Save current position so refresh can resume here
     saveAbandoned();
 
+
     // At 5s — show thumbs
     clearTimeout(thumbsTimer);
     thumbsTimer = setTimeout(function() {
@@ -939,7 +940,6 @@ document.getElementById('s1').addEventListener('click', function() {
     document.getElementById('email-in').style.display = 'none';
     document.getElementById('name-in').style.display = 'none';
     document.getElementById('email-sub').style.display = 'none';
-    var cl1 = document.getElementById('consent-label'); if (cl1) cl1.style.display = 'none';
     var again = document.getElementById('listen-again');
     if (again) { again.style.display = 'block'; updateSetButtons(); }
     if (window._nextSetPlaylist) sess.playlist = window._nextSetPlaylist;
@@ -954,7 +954,6 @@ document.getElementById('s1').addEventListener('click', function() {
     document.getElementById('email-in').style.display = 'none';
     document.getElementById('name-in').style.display = 'none';
     document.getElementById('email-sub').style.display = 'none';
-    var cl2 = document.getElementById('consent-label'); if (cl2) cl2.style.display = 'none';
     var again = document.getElementById('listen-again');
     if (again) again.style.display = 'none';
     show('s6');
@@ -1002,7 +1001,6 @@ document.getElementById('s1').addEventListener('click', function() {
     document.getElementById('email-sub').style.display = 'none';
     var again = document.getElementById('listen-again');
     if (again) { again.style.display = 'block'; updateSetButtons(); }
-    var cl4 = document.getElementById('consent-label'); if (cl4) cl4.style.display = 'none';
     show('s6');
     return;
   }
@@ -1069,7 +1067,6 @@ document.getElementById('btn-stop').addEventListener('click', function() {
     document.getElementById('email-sub').style.display = 'none';
     var again = document.getElementById('listen-again');
     if (again) { again.style.display = 'block'; updateSetButtons(); }
-    var cl3 = document.getElementById('consent-label'); if (cl3) cl3.style.display = 'none';
   }
   show('s6');
 });
@@ -1089,7 +1086,6 @@ document.getElementById('recap-continue').addEventListener('click', function() {
     document.getElementById('email-sub').style.display = 'none';
     var again = document.getElementById('listen-again');
     if (again) { again.style.display = 'block'; updateSetButtons(); }
-    var cl4 = document.getElementById('consent-label'); if (cl4) cl4.style.display = 'none';
     show('s6');
   } else {
     show('s6');
@@ -1124,8 +1120,9 @@ document.getElementById('email-sub').addEventListener('click', function() {
   document.getElementById('name-in').style.display = 'none';
   document.getElementById('email-in').style.display = 'none';
   document.getElementById('email-sub').style.display = 'none';
-  var cl = document.getElementById('consent-label'); if (cl) cl.style.display = 'none';
-  var ce = document.getElementById('consent-error'); if (ce) ce.style.display = 'none';
+  var consentLabel = document.querySelector('label:has(#consent-check)');
+  if (consentLabel) consentLabel.style.display = 'none';
+  if (document.getElementById('consent-error')) document.getElementById('consent-error').style.display = 'none';
   var h = document.getElementById('email-head');
   h.textContent = "You'll hear when something new arrives.";
   h.style.fontSize = '18px';
@@ -1406,16 +1403,6 @@ var PLAYLIST_VERSION = '1';
   } catch(e) {}
 })();
 
-// Hide consent elements if email already submitted
-(function() {
-  try {
-    if (localStorage.getItem('fynd_email')) {
-      var cl = document.getElementById('consent-label');
-      if (cl) cl.style.display = 'none';
-    }
-  } catch(e) {}
-})();
-
 initUserState();
 
 initSC();
@@ -1437,7 +1424,30 @@ window.addEventListener('pagehide', function() {
     assignments: [{ trackId: sessionTrackId, trackTitle: trackTitle, duration: dur, postState: 'Abandoned', week: week, playlist: sess.playlist, reaction: '', visitNumber: window._visitNumber || 1, daysSinceLastVisit: window._daysSinceLastVisit }],
   });
   if (navigator.sendBeacon) {
-    navigator.sendBeacon('/.netlify/functions/log-session', new Blob([payload], { type: 'application/json' }));
+    try {
+      var sent = navigator.sendBeacon('/.netlify/functions/log-session', new Blob([payload], { type: 'application/json' }));
+      if (!sent) throw new Error('sendBeacon returned false');
+    } catch(e) {
+      // sendBeacon blocked (e.g. Brave) — fall back to fetch with keepalive
+      try {
+        fetch('/.netlify/functions/log-session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: payload,
+          keepalive: true,
+        });
+      } catch(e2) {}
+    }
+  } else {
+    // No sendBeacon support — use fetch with keepalive
+    try {
+      fetch('/.netlify/functions/log-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: payload,
+        keepalive: true,
+      });
+    } catch(e) {}
   }
 });
 
