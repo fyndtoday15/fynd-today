@@ -625,8 +625,8 @@ function openPanel(cb) {
   el.innerHTML = '';
   var positions = [
     { text: 'Something in me wants to stay here.', value: 'Stay' },
-    { text: 'Something in me wants to move.',      value: 'Move' },
-    { text: 'Something just became clearer.',       value: 'Open' },
+    { text: 'Something in me is ready to shift.',   value: 'Move' },
+    { text: "I noticed something I didn't before.", value: 'Open' },
   ];
   positions.forEach(function(p) {
     var d = document.createElement('div');
@@ -857,8 +857,8 @@ document.getElementById('thumb-down').addEventListener('click', function() {
 
   var DIRECTION = {
     'Stay': 'When you want to stay with the moment.',
-    'Move': 'When you want to move from the moment.',
-    'Open': 'When you want the moment to open up.',
+    'Move': "When you're ready to shift from the moment.",
+    'Open': 'When the moment reveals something new.',
     'Something Else': 'When none of these landed — keep listening.',
   };
 
