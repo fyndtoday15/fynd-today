@@ -1474,6 +1474,7 @@ initSC();
 
 window.addEventListener('pagehide', function() {
   if (!sess.listenStart) return;
+  try { localStorage.removeItem('fynd_pendingAbandoned'); } catch(e) {}
   var dur = Math.min(Math.round((Date.now() - sess.listenStart) / 1000), 60);
   var ti = sess.tOrder[sess.cur];
   if (ti === undefined) return;
