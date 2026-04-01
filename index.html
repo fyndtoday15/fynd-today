@@ -400,7 +400,7 @@ html.assign-top, body.assign-top { background: var(--black); }
   <input class="email-input" id="email-in" type="email" placeholder="your email" autocomplete="email" autocapitalize="none">
   <div id="email-error" style="display:none; font-size:12px; color:rgba(0,0,0,0.6); margin-top:8px; letter-spacing:0.04em;">Please enter a valid email address.</div>
   <input type="text" id="hp-field" name="website" autocomplete="off" tabindex="-1" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;" aria-hidden="true">
-  <label style="display:flex;align-items:flex-start;gap:10px;max-width:280px;margin:20px auto 0;cursor:pointer;text-align:left;">
+  <label id="consent-label" style="display:flex;align-items:flex-start;gap:10px;max-width:280px;margin:20px auto 0;cursor:pointer;text-align:left;">
     <input type="checkbox" id="consent-check" style="margin-top:3px;flex-shrink:0;cursor:pointer;">
     <span style="font-size:11px;color:var(--black);opacity:0.5;line-height:1.5;letter-spacing:0.04em;">I agree to receive updates from FYND TODAY. We'll only use your email to share what comes next.</span>
   </label>
@@ -743,6 +743,28 @@ function playTrack(idx) {
     clearTimeout(autoTimer);
     // Save current position so refresh can resume here
     saveAbandoned();
+    // Store pending abandoned to localStorage — sent on next page load
+    // This guarantees capture even when Brave kills network on tab close
+    try {
+      var _ti = sess.tOrder[sess.cur];
+      if (_ti !== undefined) {
+        var _tr = getTrack(sess.playlist, _ti);
+        var _week = 'W' + String(Math.max(1, Math.ceil((Date.now() - new Date('2026-03-15').getTime()) / (7*24*60*60*1000)))).padStart(2,'0');
+        localStorage.setItem('fynd_pendingAbandoned', JSON.stringify({
+          sessionId: sess.id,
+          email: LS.get('email') || '',
+          firstName: LS.get('firstName') || '',
+          entryState: sess.entryState,
+          trackId: 'T00' + (sess.cur + 1),
+          trackTitle: _tr.title + ' — ' + _tr.artist,
+          playlist: sess.playlist,
+          week: _week,
+          visitNumber: window._visitNumber || 1,
+          daysSinceLastVisit: window._daysSinceLastVisit,
+          startTime: Date.now(),
+        }));
+      }
+    } catch(e) {}
 
 
     // At 5s — show thumbs
@@ -907,6 +929,7 @@ function doReveal(ps) {
   if (stopBtn) stopBtn.style.display = sess.cur === 4 ? 'none' : '';
   show('s5');
   sess.listenStart = null; // prevent pagehide beacon from double-logging
+  try { localStorage.removeItem('fynd_pendingAbandoned'); } catch(e) {}
   sess.cur++;
   saveAbandoned();
   sess.cur--;
@@ -1402,6 +1425,28 @@ var PLAYLIST_VERSION = '1';
       localStorage.removeItem('fynd_completedSets');
       localStorage.removeItem('fynd_abandonedSets');
       localStorage.setItem('fynd_playlistVersion', PLAYLIST_VERSION);
+    }
+  } catch(e) {}
+})();
+
+// Send any pending abandoned record from previous session (survives Brave tab close)
+(function() {
+  try {
+    var pending = JSON.parse(localStorage.getItem('fynd_pendingAbandoned'));
+    if (pending) {
+      localStorage.removeItem('fynd_pendingAbandoned');
+      var dur = Math.min(Math.round((Date.now() - pending.startTime) / 1000), 60);
+      fetch('/.netlify/functions/log-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sessionId: pending.sessionId,
+          email: pending.email || '',
+          firstName: pending.firstName || '',
+          entryState: pending.entryState,
+          assignments: [{ trackId: pending.trackId, trackTitle: pending.trackTitle, duration: dur, postState: 'Abandoned', week: pending.week, playlist: pending.playlist, reaction: '', visitNumber: pending.visitNumber || 1, daysSinceLastVisit: pending.daysSinceLastVisit }],
+        }),
+      }).catch(function(){});
     }
   } catch(e) {}
 })();
