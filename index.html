@@ -940,6 +940,7 @@ document.getElementById('s1').addEventListener('click', function() {
     document.getElementById('email-in').style.display = 'none';
     document.getElementById('name-in').style.display = 'none';
     document.getElementById('email-sub').style.display = 'none';
+    var cl1 = document.getElementById('consent-label'); if (cl1) cl1.style.display = 'none';
     var again = document.getElementById('listen-again');
     if (again) { again.style.display = 'block'; updateSetButtons(); }
     if (window._nextSetPlaylist) sess.playlist = window._nextSetPlaylist;
@@ -954,6 +955,7 @@ document.getElementById('s1').addEventListener('click', function() {
     document.getElementById('email-in').style.display = 'none';
     document.getElementById('name-in').style.display = 'none';
     document.getElementById('email-sub').style.display = 'none';
+    var cl2 = document.getElementById('consent-label'); if (cl2) cl2.style.display = 'none';
     var again = document.getElementById('listen-again');
     if (again) again.style.display = 'none';
     show('s6');
@@ -999,6 +1001,7 @@ document.getElementById('s1').addEventListener('click', function() {
     document.getElementById('email-in').style.display = 'none';
     document.getElementById('name-in').style.display = 'none';
     document.getElementById('email-sub').style.display = 'none';
+    var cl3 = document.getElementById('consent-label'); if (cl3) cl3.style.display = 'none';
     var again = document.getElementById('listen-again');
     if (again) { again.style.display = 'block'; updateSetButtons(); }
     show('s6');
@@ -1399,6 +1402,16 @@ var PLAYLIST_VERSION = '1';
       localStorage.removeItem('fynd_completedSets');
       localStorage.removeItem('fynd_abandonedSets');
       localStorage.setItem('fynd_playlistVersion', PLAYLIST_VERSION);
+    }
+  } catch(e) {}
+})();
+
+// Hide consent label if email already submitted
+(function() {
+  try {
+    if (localStorage.getItem('fynd_email')) {
+      var cl = document.getElementById('consent-label');
+      if (cl) cl.style.display = 'none';
     }
   } catch(e) {}
 })();
