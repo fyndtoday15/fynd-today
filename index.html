@@ -398,6 +398,8 @@ html.assign-top, body.assign-top { background: var(--black); }
   <div class="email-head" id="email-head">More comes.</div>
   <input class="email-input" id="name-in" type="text" placeholder="first name" autocomplete="given-name" autocapitalize="words" style="margin-bottom: 16px;">
   <input class="email-input" id="email-in" type="email" placeholder="your email" autocomplete="email" autocapitalize="none">
+  <div id="email-error" style="display:none; font-size:12px; color:rgba(0,0,0,0.6); margin-top:8px; letter-spacing:0.04em;">Please enter a valid email address.</div>
+  <input type="text" id="hp-field" name="website" autocomplete="off" tabindex="-1" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;" aria-hidden="true">
   <button class="email-sub" id="email-sub">I'm in.</button>
   <div id="listen-again" style="display:none; margin-top: 48px; text-align: center; width: 100%;">
     <div style="font-size: 11px; color: var(--black); opacity: 0.35; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 20px;">Play another set</div>
@@ -1089,11 +1091,19 @@ document.getElementById('email-sub').addEventListener('click', function() {
   var firstName = document.getElementById('name-in').value.trim();
   var email = document.getElementById('email-in').value.trim();
   // Save to localStorage for return visits
+  var hp = document.getElementById('hp-field') ? document.getElementById('hp-field').value : '';
   LS.set('email', email);
   LS.set('firstName', firstName);
   LS.set('onEmailScreen', false);
   if (!firstName) { document.getElementById('name-in').style.borderBottomColor = 'rgba(0,0,0,0.9)'; return; }
-  if (!email || !email.includes('@')) { document.getElementById('email-in').style.borderBottomColor = 'rgba(0,0,0,0.9)'; return; }
+  var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  var emailError = document.getElementById('email-error');
+  if (!email || !emailRegex.test(email)) {
+    document.getElementById('email-in').style.borderBottomColor = 'rgba(0,0,0,0.9)';
+    if (emailError) emailError.style.display = 'block';
+    return;
+  }
+  if (emailError) emailError.style.display = 'none';
   document.getElementById('name-in').style.display = 'none';
   document.getElementById('email-in').style.display = 'none';
   document.getElementById('email-sub').style.display = 'none';
@@ -1117,6 +1127,7 @@ document.getElementById('email-sub').addEventListener('click', function() {
       email: email,
       firstName: firstName,
       entryState: sess.entryState,
+      hp: hp,
       emailUpdate: true,
     }),
   }).then(function(r) { return r.json(); })
