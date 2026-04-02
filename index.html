@@ -77,6 +77,8 @@ html.assign-top, body.assign-top { background: var(--black); }
 .pulse-dot.stopped { animation-play-state: paused; opacity: 0.3; transform: scale(1); transition: opacity 0.3s ease; }
 @keyframes pd { 0%,100%{transform:scale(1);opacity:.6} 50%{transform:scale(1.5);opacity:1} }
 .track-count { font-size: 15px; color: var(--bg); opacity: 0.75; letter-spacing: 0.18em; }
+.replay-btn { display: none; margin-top: 20px; background: none; border: none; cursor: pointer; font-family: var(--f); font-size: 12px; color: var(--bg); opacity: 0.45; letter-spacing: 0.12em; text-transform: uppercase; padding: 8px; animation: ph 3s ease-in-out infinite; }
+.replay-btn.show { display: block; }
 
 /* Ready prompt — appears at 30s */
 .ready-prompt {
@@ -301,6 +303,7 @@ html.assign-top, body.assign-top { background: var(--black); }
       <div class="pulse-dot" id="pulse-dot"></div>
       <div class="track-count" id="tc">1 — 5</div>
     </div>
+    <button class="replay-btn" id="replay-btn">&#8635; Replay song</button>
     <div class="thumbs-wrap" id="thumbs-wrap">
       <button class="thumb-btn" id="thumb-down">&#128078;</button>
       <button class="thumb-btn" id="thumb-up">&#128077;</button>
@@ -496,6 +499,7 @@ var sess = {
   playlist: 'MVP 1',
   reaction: '',
   triggered: '',
+  replay: false,
 };
 
 function shuffle(arr) {
@@ -677,6 +681,9 @@ function resetPanel() {
   document.getElementById('assign-list').innerHTML = '';
   document.getElementById('ready-prompt').classList.remove('show');
   document.getElementById('ready-prompt').style.pointerEvents = 'none';
+  // Hide replay button
+  var rbReset = document.getElementById('replay-btn');
+  if (rbReset) rbReset.classList.remove('show');
   // Restore listen label
   var lbl = document.querySelector('.listen-label');
   if (lbl) lbl.textContent = 'Listen';
@@ -733,6 +740,8 @@ function startTrackTimers() {
     stopDot();
     document.getElementById('thumbs-wrap').classList.remove('show');
     clearTimeout(thumbsTimer);
+    var rb = document.getElementById('replay-btn');
+    if (rb) rb.classList.add('show');
     if (!document.getElementById('assign-panel').classList.contains('open')) {
       sess.triggered = 'auto';
       openPanel(function(ps) { doReveal(ps); });
@@ -803,6 +812,8 @@ function playTrack(idx) {
       // Hide thumbs when panel auto-opens at 60s
       document.getElementById('thumbs-wrap').classList.remove('show');
       clearTimeout(thumbsTimer);
+      var rb2 = document.getElementById('replay-btn');
+      if (rb2) rb2.classList.add('show');
       if (!document.getElementById('assign-panel').classList.contains('open')) {
         sess.triggered = 'auto';
         openPanel(function(ps) { doReveal(ps); });
@@ -841,6 +852,43 @@ document.getElementById('ready-prompt').addEventListener('click', function() {
   clearTimeout(thumbsTimer);
   sess.triggered = 'manual';
   openPanel(function(ps) { doReveal(ps); });
+});
+
+// Replay button — restart current track, reset timers, mark replay
+document.getElementById('replay-btn').addEventListener('click', function() {
+  sess.replay = true;
+  var rb = document.getElementById('replay-btn');
+  if (rb) rb.classList.remove('show');
+  clearTimeout(readyTimer);
+  clearTimeout(autoTimer);
+  clearTimeout(thumbsTimer);
+  document.getElementById('thumbs-wrap').classList.remove('show');
+  document.getElementById('ready-prompt').classList.remove('show');
+  document.getElementById('ready-prompt').style.pointerEvents = 'none';
+  sess.listenStart = Date.now();
+  widget.skip(sess.tOrder[sess.cur]);
+  setTimeout(function() { widget.play(); }, 400);
+  // Restart timers
+  thumbsTimer = setTimeout(function() {
+    document.getElementById('thumbs-wrap').classList.add('show');
+  }, 5000);
+  readyTimer = setTimeout(function() {
+    var prompt = document.getElementById('ready-prompt');
+    prompt.classList.add('show');
+    prompt.style.pointerEvents = 'all';
+  }, 30000);
+  autoTimer = setTimeout(function() {
+    if (widget) widget.pause();
+    stopDot();
+    document.getElementById('thumbs-wrap').classList.remove('show');
+    clearTimeout(thumbsTimer);
+    var rb2 = document.getElementById('replay-btn');
+    if (rb2) rb2.classList.add('show');
+    if (!document.getElementById('assign-panel').classList.contains('open')) {
+      sess.triggered = 'auto';
+      openPanel(function(ps) { doReveal(ps); });
+    }
+  }, 60000);
 });
 
 // Thumb up — hide thumbs, store reaction, music keeps playing
@@ -916,7 +964,7 @@ function doReveal(ps) {
   clearTimeout(autoTimer);
   if (widget) widget.pause();
   stopDot();
-  sess.dur = sess.listenStart ? Math.min(Math.round((Date.now() - sess.listenStart) / 1000), 60) : 0;
+  sess.dur = sess.listenStart ? Math.round((Date.now() - sess.listenStart) / 1000) : 0;
   var ti = sess.tOrder[sess.cur];
   var tr = getTrack(sess.playlist, ti);
   // Track ID reflects session position (1-5), not playlist position
@@ -936,12 +984,13 @@ function doReveal(ps) {
       email: LS.get('email') || '',
       firstName: LS.get('firstName') || '',
       entryState: sess.entryState,
-      assignments: [{ trackId: sessionTrackId, trackTitle: trackTitle, duration: assignment.duration, postState: assignment.postState, date: date, playlist: sess.playlist, reaction: sess.reaction, triggered: sess.triggered, visitNumber: window._visitNumber || 1, daysSinceLastVisit: window._daysSinceLastVisit }],
+      assignments: [{ trackId: sessionTrackId, trackTitle: trackTitle, duration: assignment.duration, postState: assignment.postState, date: date, playlist: sess.playlist, reaction: sess.reaction, triggered: sess.triggered, replay: sess.replay ? 'Yes' : '', visitNumber: window._visitNumber || 1, daysSinceLastVisit: window._daysSinceLastVisit }],
     }),
   }).catch(function(err) { console.error('Track log error:', err); });
 
   sess.reaction = '';
   sess.triggered = '';
+  sess.replay = false;
   document.getElementById('r-title').textContent = tr.title;
   document.getElementById('r-artist').textContent = tr.artist;
   // Hide stop button on last track — no reason to stop now
