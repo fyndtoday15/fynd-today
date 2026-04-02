@@ -860,6 +860,7 @@ document.getElementById('replay-btn').addEventListener('click', function() {
   sess.replay = true;
   var rb = document.getElementById('replay-btn');
   if (rb) rb.classList.remove('show');
+  document.getElementById('thumbs-wrap').classList.add('show');
   widget.seekTo(0);
   setTimeout(function() { widget.play(); }, 200);
 });
