@@ -925,6 +925,14 @@ document.getElementById('thumb-down').addEventListener('click', function() {
     markSetComplete(sess.playlist);
     clearAbandoned();
     buildRecap();
+    // Send recap email for Sets 2-5 (email already collected) — 10s delay
+    (function() {
+      var _re = LS.get('email') || '';
+      var _rn = LS.get('firstName') || '';
+      var _rp = sess.playlist;
+      var _rl = sess.log.slice();
+      if (_re) setTimeout(function() { sendRecapEmail(_re, _rn, _rp, _rl); }, 10000);
+    })();
     show('s7');
   }
 });
@@ -1136,6 +1144,14 @@ document.getElementById('btn-continue').addEventListener('click', function() {
     markSetComplete(sess.playlist);
     clearAbandoned();
     buildRecap();
+    // Send recap email for Sets 2-5 (email already collected) — 10s delay
+    (function() {
+      var _re2 = LS.get('email') || '';
+      var _rn2 = LS.get('firstName') || '';
+      var _rp2 = sess.playlist;
+      var _rl2 = sess.log.slice();
+      if (_re2) setTimeout(function() { sendRecapEmail(_re2, _rn2, _rp2, _rl2); }, 10000);
+    })();
     show('s7');
   }
 });
@@ -1239,6 +1255,21 @@ document.getElementById('email-sub').addEventListener('click', function() {
   }).then(function(r) { return r.json(); })
   .then(function(result) { console.log('Email logged:', result); })
   .catch(function(err) { console.error('Email log error:', err); });
+
+  // Send welcome email
+  fetch('/.netlify/functions/send-welcome', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: email, firstName: firstName }),
+  }).catch(function(err) { console.error('Welcome email error:', err); });
+
+  // Send recap email for Set 1 (email just collected) — 10s delay
+  if (sess.log && sess.log.length > 0) {
+    (function() {
+      var _e = email, _fn = firstName, _rp = sess.playlist, _rl = sess.log.slice();
+      setTimeout(function() { sendRecapEmail(_e, _fn, _rp, _rl); }, 10000);
+    })();
+  }
 });
 
 document.getElementById('email-in').addEventListener('keydown', function(e) {
@@ -1509,6 +1540,16 @@ var PLAYLIST_VERSION = '1';
     }
   } catch(e) {}
 })();
+
+
+function sendRecapEmail(email, firstName, playlist, log) {
+  if (!email || !firstName) return;
+  fetch('/.netlify/functions/send-recap', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: email, firstName: firstName, playlist: playlist, log: log }),
+  }).catch(function(err) { console.error('Recap email error:', err); });
+}
 
 initUserState();
 
