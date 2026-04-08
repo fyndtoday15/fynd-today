@@ -1112,15 +1112,20 @@ document.getElementById('s1').addEventListener('click', function() {
     silentAudio.play().catch(function(){});
   } catch(e) {}
 
+  // Pre-prime widget on s1 gesture so it's ready when entry state is picked
+  if (widgetReady) {
+    widget.skip(sess.tOrder[0]);
+    sess._primedIdx = sess.tOrder[0];
+  }
+
   // Show entry question
   buildList('entry-list', 'stmt', true, function(state) {
     sess.entryState = state;
     show('s3');
-    // Play immediately after screen switch — still within gesture context on Safari
     if (widgetReady) {
       sess._gestureUnlocked = true;
     }
-    setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 100);
+    setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 300);
   });
   show('s2');
 });
