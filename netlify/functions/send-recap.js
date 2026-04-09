@@ -78,6 +78,15 @@ exports.handler = async function(event, context) {
       };
     });
 
+  // If all tracks were skipped, no recap to send
+  if (recapTracks.length === 0) {
+    return {
+      statusCode: 200,
+      headers: { 'Access-Control-Allow-Origin': allowedOrigin },
+      body: JSON.stringify({ success: true, skipped: true }),
+    };
+  }
+
   const setName = SET_NAMES[playlist] || playlist;
 
   try {
