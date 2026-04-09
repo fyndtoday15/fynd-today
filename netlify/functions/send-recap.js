@@ -59,17 +59,15 @@ exports.handler = async function(event, context) {
     return { statusCode: 400, body: 'Missing required fields' };
   }
 
-  // Build recap text — only answered tracks (skip Skipped)
-  const recapLines = log
+  // Build recap as structured array — Brevo template loops over it natively
+  const recapTracks = log
     .filter(function(a) { return a.postState && a.postState !== 'Skipped'; })
     .map(function(a) {
-      const direction = DIRECTION[a.postState] || '';
-      return '<p style="margin:0 0 20px 0;">'
-        + '<span style="font-size:15px;color:#000000;font-weight:400;">' + (a.trackTitle || '') + '</span><br>'
-        + '<span style="font-size:12px;color:#000000;opacity:0.4;">' + direction + '</span>'
-        + '</p>';
-    })
-    .join('');
+      return {
+        title: a.trackTitle || '',
+        direction: DIRECTION[a.postState] || '',
+      };
+    });
 
   const setName = SET_NAMES[playlist] || playlist;
 
@@ -86,7 +84,7 @@ exports.handler = async function(event, context) {
         params: {
           firstName: firstName,
           setName: setName,
-          recap: recapLines,
+          tracks: recapTracks,
         },
       }),
     });
