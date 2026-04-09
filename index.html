@@ -507,6 +507,8 @@ var sess = {
 
 // Holds completed set log in memory for recap email — survives same-page navigation
 window._pendingRecap = null;
+
+function shuffle(arr) {
   var a = arr.slice(), i = a.length, j, t;
   while (i--) { j = Math.floor(Math.random() * (i + 1)); t = a[i]; a[i] = a[j]; a[j] = t; }
   return a;
