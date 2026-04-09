@@ -761,11 +761,14 @@ function playTrack(idx) {
     resetPanel();
     startDot();
     // Always skip to correct track then play
-    sess._gestureUnlocked = false;
     widget.skip(idx);
+    if (sess._gestureUnlocked) {
+      widget.play();
+    }
+    sess._gestureUnlocked = false;
     setTimeout(function() {
       widget.play();
-    }, 400);
+    }, 300);
     sess.listenStart = Date.now();
     clearTimeout(readyTimer);
     clearTimeout(autoTimer);
@@ -1112,20 +1115,15 @@ document.getElementById('s1').addEventListener('click', function() {
     silentAudio.play().catch(function(){});
   } catch(e) {}
 
-  // Pre-prime widget on s1 gesture so it's ready when entry state is picked
-  if (widgetReady) {
-    widget.skip(sess.tOrder[0]);
-    sess._primedIdx = sess.tOrder[0];
-  }
-
   // Show entry question
   buildList('entry-list', 'stmt', true, function(state) {
     sess.entryState = state;
     show('s3');
+    // Play immediately after screen switch — still within gesture context on Safari
     if (widgetReady) {
       sess._gestureUnlocked = true;
     }
-    setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 300);
+    setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 100);
   });
   show('s2');
 });
