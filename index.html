@@ -505,9 +505,6 @@ var sess = {
   replay: false,
 };
 
-// Holds completed set log in memory for recap email — survives same-page navigation
-window._pendingRecap = null;
-
 function shuffle(arr) {
   var a = arr.slice(), i = a.length, j, t;
   while (i--) { j = Math.floor(Math.random() * (i + 1)); t = a[i]; a[i] = a[j]; a[j] = t; }
@@ -936,10 +933,8 @@ document.getElementById('thumb-down').addEventListener('click', function() {
       var _re = LS.get('email') || '';
       var _rn = LS.get('firstName') || '';
       var _rp = sess.playlist;
-      var _rl = getSavedLog(_rp);
-      // Also capture in memory in case localStorage failed
-      window._pendingRecap = { playlist: _rp, log: _rl.length > 0 ? _rl : sess.log.slice() };
-      if (_re) setTimeout(function() { sendRecapEmail(_re, _rn, _rp, window._pendingRecap ? window._pendingRecap.log : _rl); clearSavedLog(_rp); window._pendingRecap = null; }, 10000);
+      var _rl = sess.log.slice();
+      if (_re) setTimeout(function() { sendRecapEmail(_re, _rn, _rp, _rl); }, 1000);
     })();
     show('s7');
   }
@@ -966,8 +961,6 @@ function doReveal(ps) {
   var trackTitle = tr.title + ' — ' + tr.artist;
   var assignment = { sessionId:sess.id, trackId:sessionTrackId, trackTitle:trackTitle, entryState:sess.entryState, postState:ps, duration:sess.dur };
   sess.log.push(assignment);
-  // Persist log to localStorage immediately after every answered track
-  persistLog(sess.playlist, sess.log);
 
   // Send this track's data immediately — don't wait for email
   var date = new Date().toISOString().slice(0,10);
@@ -1159,10 +1152,8 @@ document.getElementById('btn-continue').addEventListener('click', function() {
       var _re2 = LS.get('email') || '';
       var _rn2 = LS.get('firstName') || '';
       var _rp2 = sess.playlist;
-      var _rl2 = getSavedLog(_rp2);
-      // Also capture in memory in case localStorage failed
-      window._pendingRecap = { playlist: _rp2, log: _rl2.length > 0 ? _rl2 : sess.log.slice() };
-      if (_re2) setTimeout(function() { sendRecapEmail(_re2, _rn2, _rp2, window._pendingRecap ? window._pendingRecap.log : _rl2); clearSavedLog(_rp2); window._pendingRecap = null; }, 10000);
+      var _rl2 = sess.log.slice();
+      if (_re2) setTimeout(function() { sendRecapEmail(_re2, _rn2, _rp2, _rl2); }, 1000);
     })();
     show('s7');
   }
@@ -1276,18 +1267,12 @@ document.getElementById('email-sub').addEventListener('click', function() {
   }).catch(function(err) { console.error('Welcome email error:', err); });
 
   // Send recap email for Set 1 (email just collected) — 10s delay
-  (function() {
-    var _e = email, _fn = firstName, _rp = sess.playlist;
-    // Three-layer fallback: in-memory → localStorage → sess.log
-    var _rl = (window._pendingRecap && window._pendingRecap.playlist === _rp && window._pendingRecap.log.length > 0)
-      ? window._pendingRecap.log
-      : getSavedLog(_rp).length > 0
-        ? getSavedLog(_rp)
-        : sess.log.slice();
-    if (_rl.length > 0) {
-      setTimeout(function() { sendRecapEmail(_e, _fn, _rp, _rl); clearSavedLog(_rp); window._pendingRecap = null; }, 10000);
-    }
-  })();
+  if (sess.log && sess.log.length > 0) {
+    (function() {
+      var _e = email, _fn = firstName, _rp = sess.playlist, _rl = sess.log.slice();
+      setTimeout(function() { sendRecapEmail(_e, _fn, _rp, _rl); }, 1000);
+    })();
+  }
 });
 
 document.getElementById('email-in').addEventListener('keydown', function(e) {
@@ -1394,31 +1379,6 @@ function saveAbandoned() {
     timestamp: Date.now(),
   };
   LS.set('abandonedSets', all);
-  // Persist log separately so recap survives reloads/set switches
-  persistLog(sess.playlist, sess.log || []);
-}
-
-function persistLog(playlist, log) {
-  var all = LS.get('savedLogs') || {};
-  var existing = all[playlist] || [];
-  // Merge — add any entries not already tracked by trackId
-  var ids = existing.map(function(e) { return e.trackId; });
-  log.forEach(function(e) {
-    if (ids.indexOf(e.trackId) === -1) { existing.push(e); ids.push(e.trackId); }
-  });
-  all[playlist] = existing;
-  LS.set('savedLogs', all);
-}
-
-function getSavedLog(playlist) {
-  var all = LS.get('savedLogs') || {};
-  return all[playlist] || [];
-}
-
-function clearSavedLog(playlist) {
-  var all = LS.get('savedLogs') || {};
-  delete all[playlist];
-  LS.set('savedLogs', all);
 }
 
 function clearAbandoned() {
