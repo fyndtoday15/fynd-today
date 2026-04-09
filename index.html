@@ -1268,8 +1268,8 @@ document.getElementById('email-sub').addEventListener('click', function() {
     body: JSON.stringify({ email: email, firstName: firstName }),
   }).catch(function(err) { console.error('Welcome email error:', err); });
 
-  // Send recap email for Set 1 (email just collected) — 10s delay
-  if (sess.log && sess.log.length > 0) {
+  // Send recap email for Set 1 (email just collected) — only if set fully complete
+  if (sess.cur >= 5 && sess.log && sess.log.length > 0) {
     (function() {
       var _e = email, _fn = firstName, _rp = sess.playlist, _rl = sess.log.slice(), _rs = sess.entryState || '';
       setTimeout(function() { sendRecapEmail(_e, _fn, _rp, _rl, _rs); }, 1000);
