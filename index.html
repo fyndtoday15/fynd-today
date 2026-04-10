@@ -911,7 +911,7 @@ document.getElementById('thumb-down').addEventListener('click', function() {
   if (widget) widget.pause();
   stopDot();
 
-  var dur = sess.listenStart ? Math.min(Math.round((Date.now() - sess.listenStart) / 1000), 60) : 0;
+  var dur = sess.listenStart ? Math.round((Date.now() - sess.listenStart) / 1000) : 0;
   var ti = sess.tOrder[sess.cur];
   var tr = getTrack(sess.playlist, ti);
   var sessionTrackId = 'T00' + (sess.cur + 1);
@@ -926,9 +926,11 @@ document.getElementById('thumb-down').addEventListener('click', function() {
       email: LS.get('email') || '',
       firstName: LS.get('firstName') || '',
       entryState: sess.entryState,
-      assignments: [{ trackId: sessionTrackId, trackTitle: trackTitle, duration: dur, postState: 'Skipped', reaction: 'Down', date: date, playlist: sess.playlist, visitNumber: window._visitNumber || 1, daysSinceLastVisit: window._daysSinceLastVisit }],
+      assignments: [{ trackId: sessionTrackId, trackTitle: trackTitle, duration: dur, postState: 'Skipped', reaction: 'Down', date: date, playlist: sess.playlist, triggered: sess.triggered, replay: sess.replay ? 'Yes' : '', visitNumber: window._visitNumber || 1, daysSinceLastVisit: window._daysSinceLastVisit }],
     }),
   }).catch(function(err) { console.error('Skip log error:', err); });
+  sess.triggered = '';
+  sess.replay = false;
   try { localStorage.removeItem('fynd_pendingAbandoned'); } catch(e) {}
 
   sess.cur++;
