@@ -1007,9 +1007,28 @@ function doReveal(ps) {
   show('s5');
   sess.listenStart = null; // prevent pagehide beacon from double-logging
   try { localStorage.removeItem('fynd_pendingAbandoned'); } catch(e) {}
-  // On last track — set recap flag so refresh routes to recap, not back to this track
+  // On last track — run full completion flow immediately so refresh can recover
   if (sess.cur === 4) {
+    sess.cur = 5; // mark complete
+    markSetComplete(sess.playlist);
+    clearAbandoned();
+    LS.set('onEmailScreen', true);
+    // Persist log so buildRecap works after refresh
+    try { localStorage.setItem('fynd_completedLog', JSON.stringify({ log: sess.log, playlist: sess.playlist, entryState: sess.entryState || '' })); } catch(e) {}
     try { localStorage.setItem('fynd_onRecapScreen', '1'); } catch(e) {}
+    // Persist Set 1 recap for email submit path
+    if (sess.playlist === 'MVP 1') {
+      try { localStorage.setItem('fynd_set1recap', JSON.stringify({ log: sess.log, playlist: sess.playlist, entryState: sess.entryState || '' })); } catch(e) {}
+    }
+    // Send recap email for Sets 2-5 (email already collected)
+    (function() {
+      var _re = LS.get('email') || '';
+      var _rn = LS.get('firstName') || '';
+      var _rp = sess.playlist;
+      var _rl = sess.log.slice();
+      var _rs = sess.entryState || '';
+      if (_re) setTimeout(function() { sendRecapEmail(_re, _rn, _rp, _rl, _rs); }, 1000);
+    })();
   } else {
     sess.cur++;
     saveAbandoned();
@@ -1040,6 +1059,14 @@ document.getElementById('s1').addEventListener('click', function() {
   // If recap screen should be restored after refresh — rebuild and show s7
   if (window._restoreRecapScreen) {
     window._restoreRecapScreen = false;
+    try {
+      var completedLog = JSON.parse(localStorage.getItem('fynd_completedLog'));
+      if (completedLog && completedLog.log) {
+        sess.log = completedLog.log;
+        sess.playlist = completedLog.playlist || sess.playlist;
+        sess.entryState = completedLog.entryState || sess.entryState;
+      }
+    } catch(e) {}
     buildRecap();
     show('s7');
     return;
@@ -1176,6 +1203,12 @@ document.getElementById('s1').addEventListener('click', function() {
 
 // Continue button
 document.getElementById('btn-continue').addEventListener('click', function() {
+  // If completion already ran in doReveal (last track), just show recap
+  if (sess.cur === 5) {
+    buildRecap();
+    show('s7');
+    return;
+  }
   sess.cur++;
   if (sess.cur < 5) {
     resetPanel();
@@ -1556,7 +1589,7 @@ function initUserState() {
 
 // Dev reset — add ?reset=true to URL to clear all localStorage
 if (window.location.search.indexOf('reset=true') !== -1) {
-  var keys = ['returning','completedSets','email','firstName','abandoned','onEmailScreen','visitCount','lastVisit','abandonedSets','playlistVersion','pendingSet','savedLogs','onRecapScreen','entryState'];
+  var keys = ['returning','completedSets','email','firstName','abandoned','onEmailScreen','visitCount','lastVisit','abandonedSets','playlistVersion','pendingSet','savedLogs','onRecapScreen','entryState','completedLog'];
   keys.forEach(function(k) { try { localStorage.removeItem('fynd_' + k); } catch(e) {} });
   try { localStorage.removeItem('fynd_pendingAbandoned'); } catch(e) {}
   window.location.href = window.location.pathname;
