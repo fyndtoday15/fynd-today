@@ -413,6 +413,7 @@ html.assign-top, body.assign-top { background: var(--black); }
 <!-- S6 EMAIL -->
 <div class="screen" id="s6">
   <div class="email-head" id="email-head">More comes.</div>
+  <div id="return-note" style="display:none; font-size:13px; color:rgba(0,0,0,0.55); letter-spacing:0.04em; text-align:center; margin-bottom:24px; line-height:1.6; max-width:280px;">Enter your name and email to unlock new sets.</div>
   <input class="email-input" id="name-in" type="text" placeholder="first name" autocomplete="given-name" autocapitalize="words" style="margin-bottom: 16px;">
   <input class="email-input" id="email-in" type="email" placeholder="your email" autocomplete="email" autocapitalize="none">
   <div id="email-error" style="display:none; font-size:12px; color:rgba(0,0,0,0.6); margin-top:8px; letter-spacing:0.04em;">Please enter a valid email address.</div>
@@ -1022,8 +1023,18 @@ document.getElementById('s1').addEventListener('click', function() {
     document.getElementById('name-in').style.display = 'none';
     document.getElementById('email-sub').style.display = 'none';
     var cl1 = document.getElementById('consent-label'); if (cl1) cl1.style.display = 'none';
+    var rn1 = document.getElementById('return-note'); if (rn1) rn1.style.display = 'none';
     var again = document.getElementById('listen-again');
     if (again) { again.style.display = 'block'; updateSetButtons(); }
+    show('s6');
+    return;
+  }
+
+  // Returning without email after completing Set 1 — show email form with note
+  if (window._returnToEmail) {
+    window._returnToEmail = false;
+    var rn2 = document.getElementById('return-note');
+    if (rn2) rn2.style.display = 'block';
     show('s6');
     return;
   }
@@ -1482,16 +1493,22 @@ function initUserState() {
     }
     window._skipEntry = true;
   } else {
-    var shouldRestore = onEmailScreen || (returning && completedSetsCheck.length > 0 && !abandoned);
+    // onEmailScreen true but no email yet — route to email screen with note
+    // onEmailScreen true with email — route to sets screen
+    // returning with completed sets and no abandoned — route to sets screen
+    var shouldRestore = (onEmailScreen && !!savedEmail) || (returning && completedSetsCheck.length > 0 && !abandoned && !!savedEmail);
+    var shouldShowEmail = onEmailScreen && !savedEmail;
     if (shouldRestore) {
       window._restoreSetScreen = true;
+    } else if (shouldShowEmail) {
+      window._returnToEmail = true;
     }
   }
 }
 
 // Dev reset — add ?reset=true to URL to clear all localStorage
 if (window.location.search.indexOf('reset=true') !== -1) {
-  var keys = ['returning','completedSets','email','firstName','abandoned','onEmailScreen','visitCount','lastVisit','abandonedSets','playlistVersion','pendingSet','savedLogs'];
+  var keys = ['returning','completedSets','email','firstName','abandoned','onEmailScreen','visitCount','lastVisit','abandonedSets','playlistVersion','pendingSet'];
   keys.forEach(function(k) { try { localStorage.removeItem('fynd_' + k); } catch(e) {} });
   try { localStorage.removeItem('fynd_pendingAbandoned'); } catch(e) {}
   window.location.href = window.location.pathname;
