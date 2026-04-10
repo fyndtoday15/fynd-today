@@ -879,6 +879,7 @@ document.getElementById('replay-btn').addEventListener('click', function() {
   var rb = document.getElementById('replay-btn');
   if (rb) rb.classList.remove('show');
   document.getElementById('thumbs-wrap').classList.add('show');
+  startDot();
   widget.seekTo(0);
   setTimeout(function() { widget.play(); }, 200);
 });
