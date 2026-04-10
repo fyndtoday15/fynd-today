@@ -955,6 +955,7 @@ document.getElementById('thumb-down').addEventListener('click', function() {
       var _rs = sess.entryState || '';
       if (_re) setTimeout(function() { sendRecapEmail(_re, _rn, _rp, _rl, _rs); }, 1000);
     })();
+    try { localStorage.setItem('fynd_onRecapScreen', '1'); } catch(e) {}
     show('s7');
   }
 });
@@ -1030,6 +1031,14 @@ document.getElementById('s1').addEventListener('click', function() {
 
   // Mark as returning for future visits
   markReturning();
+
+  // If recap screen should be restored after refresh — rebuild and show s7
+  if (window._restoreRecapScreen) {
+    window._restoreRecapScreen = false;
+    buildRecap();
+    show('s7');
+    return;
+  }
 
   // If set screen should be restored — go there directly
   if (window._restoreSetScreen) {
@@ -1190,6 +1199,7 @@ document.getElementById('btn-continue').addEventListener('click', function() {
       var _rs2 = sess.entryState || '';
       if (_re2) setTimeout(function() { sendRecapEmail(_re2, _rn2, _rp2, _rl2, _rs2); }, 1000);
     })();
+    try { localStorage.setItem('fynd_onRecapScreen', '1'); } catch(e) {}
     show('s7');
   }
 });
@@ -1217,6 +1227,7 @@ document.getElementById('btn-stop').addEventListener('click', function() {
 document.getElementById('recap-continue').addEventListener('click', function() {
   updateSetButtons();
   clearAbandoned();
+  try { localStorage.removeItem('fynd_onRecapScreen'); } catch(e) {}
   LS.set('onEmailScreen', true);
   var savedEmail = LS.get('email');
   if (savedEmail) {
@@ -1522,9 +1533,12 @@ function initUserState() {
     // onEmailScreen true but no email yet — route to email screen with note
     // onEmailScreen true with email — route to sets screen
     // returning with completed sets and no abandoned — route to sets screen
+    var onRecapScreen = localStorage.getItem('fynd_onRecapScreen');
     var shouldRestore = (onEmailScreen && !!savedEmail) || (returning && completedSetsCheck.length > 0 && !abandoned && !!savedEmail);
     var shouldShowEmail = onEmailScreen && !savedEmail;
-    if (shouldRestore) {
+    if (onRecapScreen) {
+      window._restoreRecapScreen = true;
+    } else if (shouldRestore) {
       window._restoreSetScreen = true;
     } else if (shouldShowEmail) {
       window._returnToEmail = true;
@@ -1534,7 +1548,7 @@ function initUserState() {
 
 // Dev reset — add ?reset=true to URL to clear all localStorage
 if (window.location.search.indexOf('reset=true') !== -1) {
-  var keys = ['returning','completedSets','email','firstName','abandoned','onEmailScreen','visitCount','lastVisit','abandonedSets','playlistVersion','pendingSet','savedLogs'];
+  var keys = ['returning','completedSets','email','firstName','abandoned','onEmailScreen','visitCount','lastVisit','abandonedSets','playlistVersion','pendingSet','savedLogs','onRecapScreen'];
   keys.forEach(function(k) { try { localStorage.removeItem('fynd_' + k); } catch(e) {} });
   try { localStorage.removeItem('fynd_pendingAbandoned'); } catch(e) {}
   window.location.href = window.location.pathname;
