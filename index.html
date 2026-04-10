@@ -942,6 +942,8 @@ document.getElementById('thumb-down').addEventListener('click', function() {
     clearAbandoned();
     LS.set('onEmailScreen', true);
     buildRecap();
+    // Persist log so buildRecap works after refresh
+    try { localStorage.setItem('fynd_completedLog', JSON.stringify({ log: sess.log, playlist: sess.playlist, entryState: sess.entryState || '' })); } catch(e) {}
     // Persist Set 1 recap to localStorage — sess may not survive until email submit on mobile
     if (sess.playlist === 'MVP 1') {
       try { localStorage.setItem('fynd_set1recap', JSON.stringify({ log: sess.log, playlist: sess.playlist, entryState: sess.entryState || '' })); } catch(e) {}
@@ -1227,6 +1229,8 @@ document.getElementById('btn-continue').addEventListener('click', function() {
     clearAbandoned();
     LS.set('onEmailScreen', true);
     buildRecap();
+    // Persist log so buildRecap works after refresh
+    try { localStorage.setItem('fynd_completedLog', JSON.stringify({ log: sess.log, playlist: sess.playlist, entryState: sess.entryState || '' })); } catch(e) {}
     // Persist Set 1 recap to localStorage — sess may not survive until email submit on mobile
     if (sess.playlist === 'MVP 1') {
       try { localStorage.setItem('fynd_set1recap', JSON.stringify({ log: sess.log, playlist: sess.playlist, entryState: sess.entryState || '' })); } catch(e) {}
