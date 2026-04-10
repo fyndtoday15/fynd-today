@@ -942,7 +942,7 @@ document.getElementById('thumb-down').addEventListener('click', function() {
     clearAbandoned();
     LS.set('onEmailScreen', true);
     buildRecap();
-    // Save Set 1 recap data to localStorage so email submit handler can access it after page transitions
+    // Persist Set 1 recap to localStorage — sess may not survive until email submit on mobile
     if (sess.playlist === 'MVP 1') {
       try { localStorage.setItem('fynd_set1recap', JSON.stringify({ log: sess.log, playlist: sess.playlist, entryState: sess.entryState || '' })); } catch(e) {}
     }
@@ -1177,7 +1177,7 @@ document.getElementById('btn-continue').addEventListener('click', function() {
     clearAbandoned();
     LS.set('onEmailScreen', true);
     buildRecap();
-    // Save Set 1 recap data to localStorage so email submit handler can access it after page transitions
+    // Persist Set 1 recap to localStorage — sess may not survive until email submit on mobile
     if (sess.playlist === 'MVP 1') {
       try { localStorage.setItem('fynd_set1recap', JSON.stringify({ log: sess.log, playlist: sess.playlist, entryState: sess.entryState || '' })); } catch(e) {}
     }
@@ -1302,7 +1302,7 @@ document.getElementById('email-sub').addEventListener('click', function() {
     body: JSON.stringify({ email: email, firstName: firstName }),
   }).catch(function(err) { console.error('Welcome email error:', err); });
 
-  // Send recap email for Set 1 (email just collected) — read from localStorage in case sess was reset
+  // Send recap email for Set 1 (email just collected) — read from localStorage, sess may have reset on mobile
   (function() {
     var recapData = null;
     try { recapData = JSON.parse(localStorage.getItem('fynd_set1recap')); } catch(e) {}
