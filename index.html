@@ -855,7 +855,14 @@ function playTrack(idx) {
         var poll2 = setInterval(function() {
           if (widgetReady) { clearInterval(poll2); go(); }
         }, 200);
-        setTimeout(function() { clearInterval(poll2); }, 3000);
+        // Final forced fallback for Safari fresh tab — widget is ready but READY event never fired
+        setTimeout(function() {
+          if (!widgetReady) {
+            clearInterval(poll2);
+            widgetReady = true;
+            go();
+          }
+        }, 4000);
       }
     }, 2000);
   }
@@ -1295,6 +1302,7 @@ document.getElementById('recap-continue').addEventListener('click', function() {
 // Email
 document.getElementById('email-sub').addEventListener('click', function() {
   var firstName = document.getElementById('name-in').value.trim();
+  if (firstName) firstName = firstName.charAt(0).toUpperCase() + firstName.slice(1);
   var email = document.getElementById('email-in').value.trim();
   // Save to localStorage for return visits
   var hp = document.getElementById('hp-field') ? document.getElementById('hp-field').value : '';
