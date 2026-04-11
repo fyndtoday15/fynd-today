@@ -1467,6 +1467,23 @@ function markSetComplete(playlistName) {
     LS.set('completedSets', completed);
   }
   updateSetButtons();
+  // Fire all-sets email once when every set is complete
+  var allSetsEmailSent = false;
+  try { allSetsEmailSent = !!localStorage.getItem('fynd_allSetsEmailSent'); } catch(e) {}
+  if (!allSetsEmailSent && allSetsComplete()) {
+    var _ae = LS.get('email') || '';
+    var _an = LS.get('firstName') || '';
+    if (_ae && _an) {
+      try { localStorage.setItem('fynd_allSetsEmailSent', '1'); } catch(e) {}
+      setTimeout(function() {
+        fetch('/.netlify/functions/send-allsets', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: _ae, firstName: _an }),
+        }).catch(function(err) { console.error('All-sets email error:', err); });
+      }, 2000);
+    }
+  }
 }
 
 function saveAbandoned() {
@@ -1604,7 +1621,7 @@ function initUserState() {
 
 // Dev reset — add ?reset=true to URL to clear all localStorage
 if (window.location.search.indexOf('reset=true') !== -1) {
-  var keys = ['returning','completedSets','email','firstName','abandoned','onEmailScreen','visitCount','lastVisit','abandonedSets','playlistVersion','pendingSet','savedLogs','onRecapScreen','entryState','completedLog'];
+  var keys = ['returning','completedSets','email','firstName','abandoned','onEmailScreen','visitCount','lastVisit','abandonedSets','playlistVersion','pendingSet','savedLogs','onRecapScreen','entryState','completedLog','allSetsEmailSent'];
   keys.forEach(function(k) { try { localStorage.removeItem('fynd_' + k); } catch(e) {} });
   try { localStorage.removeItem('fynd_pendingAbandoned'); } catch(e) {}
   window.location.href = window.location.pathname;
