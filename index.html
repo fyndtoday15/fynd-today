@@ -1124,30 +1124,20 @@ document.getElementById('s1').addEventListener('click', function() {
 
   if (window._skipEntry) {
     window._skipEntry = false;
-    // Check if entry state has expired (24 hours) — if so clear and show entry screen
-    var entryStateExpired = false;
+    // Check if entry state has expired (24 hours) — clear it but never show entry screen here
+    // Entry screen only appears from the s1 (Today.) tap, never from a set button click
     try {
       var entryStateTime = parseInt(localStorage.getItem('fynd_entryStateTime') || '0', 10);
-      if (!entryStateTime || (Date.now() - entryStateTime) > 24 * 60 * 60 * 1000) {
-        entryStateExpired = true;
+      var entryStateVal = localStorage.getItem('fynd_entryState');
+      if (entryStateVal && !entryStateTime) {
+        // Has state but no timestamp — write timestamp now
+        localStorage.setItem('fynd_entryStateTime', Date.now().toString());
+      } else if (entryStateTime && (Date.now() - entryStateTime) > 24 * 60 * 60 * 1000) {
+        // Expired — clear so next s1 tap prompts fresh selection
         localStorage.removeItem('fynd_entryState');
         localStorage.removeItem('fynd_entryStateTime');
       }
     } catch(e) {}
-    if (entryStateExpired) {
-      // Show entry screen — treat as fresh session
-      sess.tOrder = shuffle([0,1,2,3,4]);
-      buildList('entry-list', 'stmt', true, function(state) {
-        sess.entryState = state;
-        try { localStorage.setItem('fynd_entryState', state); } catch(e) {}
-        try { localStorage.setItem('fynd_entryStateTime', Date.now().toString()); } catch(e) {}
-        show('s3');
-        if (widgetReady) { sess._gestureUnlocked = true; }
-        setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 100);
-      });
-      show('s2');
-      return;
-    }
     // Restore entryState from localStorage — not re-selected on Sets 2-5
     try { sess.entryState = localStorage.getItem('fynd_entryState') || sess.entryState || ''; } catch(e) {}
     if (window._resumeMode && window._resumeCur !== undefined) {
