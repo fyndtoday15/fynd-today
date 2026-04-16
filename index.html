@@ -1067,6 +1067,35 @@ document.getElementById('s1').addEventListener('click', function() {
   // Mark as returning for future visits
   markReturning();
 
+  // Universal 24-hour entry state check — runs for all returning users before any routing
+  // If expired, show entry screen first, then continue to intended destination via callback
+  function showEntryThenRoute(routeFn) {
+    buildList('entry-list', 'stmt', true, function(state) {
+      sess.entryState = state;
+      try { localStorage.setItem('fynd_entryState', state); } catch(e) {}
+      try { localStorage.setItem('fynd_entryStateTime', Date.now().toString()); } catch(e) {}
+      routeFn();
+    });
+    show('s2');
+  }
+
+  var entryExpired = false;
+  if (isReturning()) {
+    try {
+      var _esTime = parseInt(localStorage.getItem('fynd_entryStateTime') || '0', 10);
+      var _esVal = localStorage.getItem('fynd_entryState');
+      if (_esVal && !_esTime) {
+        // Has state but no timestamp — write now, not expired
+        localStorage.setItem('fynd_entryStateTime', Date.now().toString());
+      } else if (!_esVal || (_esTime && (Date.now() - _esTime) > 24 * 60 * 60 * 1000)) {
+        // No state or timestamp expired — needs fresh entry selection
+        entryExpired = true;
+        localStorage.removeItem('fynd_entryState');
+        localStorage.removeItem('fynd_entryStateTime');
+      }
+    } catch(e) {}
+  }
+
   // If recap screen should be restored after refresh — rebuild and show s7
   if (window._restoreRecapScreen) {
     window._restoreRecapScreen = false;
@@ -1078,88 +1107,68 @@ document.getElementById('s1').addEventListener('click', function() {
         sess.entryState = completedLog.entryState || sess.entryState;
       }
     } catch(e) {}
+    if (entryExpired) {
+      showEntryThenRoute(function() { buildRecap(); show('s7'); });
+      return;
+    }
     buildRecap();
     show('s7');
     return;
   }
 
-  // If set screen should be restored — check entry state expiry first
+  // If set screen should be restored — go there directly
   if (window._restoreSetScreen) {
     window._restoreSetScreen = false;
-    if (window._entryStateExpired) {
-      window._entryStateExpired = false;
-      // Entry state expired — show entry screen, then route to sets page
-      buildList('entry-list', 'stmt', true, function(state) {
-        sess.entryState = state;
-        try { localStorage.setItem('fynd_entryState', state); } catch(e) {}
-        try { localStorage.setItem('fynd_entryStateTime', Date.now().toString()); } catch(e) {}
-        // Route to sets page after selection
-        var h = document.getElementById('email-head');
-        if (h) { h.textContent = "You'll hear when something new arrives."; h.style.fontSize = '18px'; h.style.opacity = '0.6'; }
-        document.getElementById('email-in').style.display = 'none';
-        document.getElementById('name-in').style.display = 'none';
-        document.getElementById('email-sub').style.display = 'none';
-        var cl0 = document.getElementById('consent-label'); if (cl0) cl0.style.display = 'none';
-        var rn0 = document.getElementById('return-note'); if (rn0) rn0.style.display = 'none';
-        var again0 = document.getElementById('listen-again');
-        if (again0) { again0.style.display = 'block'; updateSetButtons(); }
-        show('s6');
-      });
-      show('s2');
-      return;
+    function goToSetsPage() {
+      var h = document.getElementById('email-head');
+      if (h) { h.textContent = "You'll hear when something new arrives."; h.style.fontSize = '18px'; h.style.opacity = '0.6'; }
+      document.getElementById('email-in').style.display = 'none';
+      document.getElementById('name-in').style.display = 'none';
+      document.getElementById('email-sub').style.display = 'none';
+      var cl1 = document.getElementById('consent-label'); if (cl1) cl1.style.display = 'none';
+      var rn1 = document.getElementById('return-note'); if (rn1) rn1.style.display = 'none';
+      var again = document.getElementById('listen-again');
+      if (again) { again.style.display = 'block'; updateSetButtons(); }
+      show('s6');
     }
-    var h = document.getElementById('email-head');
-    if (h) { h.textContent = "You'll hear when something new arrives."; h.style.fontSize = '18px'; h.style.opacity = '0.6'; }
-    document.getElementById('email-in').style.display = 'none';
-    document.getElementById('name-in').style.display = 'none';
-    document.getElementById('email-sub').style.display = 'none';
-    var cl1 = document.getElementById('consent-label'); if (cl1) cl1.style.display = 'none';
-    var rn1 = document.getElementById('return-note'); if (rn1) rn1.style.display = 'none';
-    var again = document.getElementById('listen-again');
-    if (again) { again.style.display = 'block'; updateSetButtons(); }
-    show('s6');
+    if (entryExpired) { showEntryThenRoute(goToSetsPage); return; }
+    goToSetsPage();
     return;
   }
 
   // Returning without email after completing Set 1 — show email form with note
   if (window._returnToEmail) {
     window._returnToEmail = false;
-    var rn2 = document.getElementById('return-note');
-    if (rn2) rn2.style.display = 'block';
-    show('s6');
+    function goToEmailPage() {
+      var rn2 = document.getElementById('return-note');
+      if (rn2) rn2.style.display = 'block';
+      show('s6');
+    }
+    if (entryExpired) { showEntryThenRoute(goToEmailPage); return; }
+    goToEmailPage();
     return;
   }
 
   // All sets complete — show waiting screen
   if (window._allSetsComplete) {
-    var h = document.getElementById('email-head');
-    if (h) { h.textContent = "You'll hear when something new arrives."; h.style.fontSize = '18px'; h.style.opacity = '0.6'; }
-    document.getElementById('email-in').style.display = 'none';
-    document.getElementById('name-in').style.display = 'none';
-    document.getElementById('email-sub').style.display = 'none';
-    var cl2 = document.getElementById('consent-label'); if (cl2) cl2.style.display = 'none';
-    var again = document.getElementById('listen-again');
-    if (again) again.style.display = 'none';
-    show('s6');
+    function goToAllComplete() {
+      var h = document.getElementById('email-head');
+      if (h) { h.textContent = "You'll hear when something new arrives."; h.style.fontSize = '18px'; h.style.opacity = '0.6'; }
+      document.getElementById('email-in').style.display = 'none';
+      document.getElementById('name-in').style.display = 'none';
+      document.getElementById('email-sub').style.display = 'none';
+      var cl2 = document.getElementById('consent-label'); if (cl2) cl2.style.display = 'none';
+      var again = document.getElementById('listen-again');
+      if (again) again.style.display = 'none';
+      show('s6');
+    }
+    if (entryExpired) { showEntryThenRoute(goToAllComplete); return; }
+    goToAllComplete();
     return;
   }
 
   if (window._skipEntry) {
     window._skipEntry = false;
-    // Check if entry state has expired (24 hours) — clear it but never show entry screen here
-    // Entry screen only appears from the s1 (Today.) tap, never from a set button click
-    try {
-      var entryStateTime = parseInt(localStorage.getItem('fynd_entryStateTime') || '0', 10);
-      var entryStateVal = localStorage.getItem('fynd_entryState');
-      if (entryStateVal && !entryStateTime) {
-        // Has state but no timestamp — write timestamp now
-        localStorage.setItem('fynd_entryStateTime', Date.now().toString());
-      } else if (entryStateTime && (Date.now() - entryStateTime) > 24 * 60 * 60 * 1000) {
-        // Expired — clear so next s1 tap prompts fresh selection
-        localStorage.removeItem('fynd_entryState');
-        localStorage.removeItem('fynd_entryStateTime');
-      }
-    } catch(e) {}
     // Restore entryState from localStorage — not re-selected on Sets 2-5
     try { sess.entryState = localStorage.getItem('fynd_entryState') || sess.entryState || ''; } catch(e) {}
     if (window._resumeMode && window._resumeCur !== undefined) {
@@ -1210,35 +1219,19 @@ document.getElementById('s1').addEventListener('click', function() {
       return;
     }
     window._resumeMode = false;
-    // If entry state expired — show entry screen before sets page
-    if (window._entryStateExpired) {
-      window._entryStateExpired = false;
-      buildList('entry-list', 'stmt', true, function(state) {
-        sess.entryState = state;
-        try { localStorage.setItem('fynd_entryState', state); } catch(e) {}
-        try { localStorage.setItem('fynd_entryStateTime', Date.now().toString()); } catch(e) {}
-        var h = document.getElementById('email-head');
-        if (h) { h.textContent = "You'll hear when something new arrives."; h.style.fontSize = '18px'; h.style.opacity = '0.6'; }
-        document.getElementById('email-in').style.display = 'none';
-        document.getElementById('name-in').style.display = 'none';
-        document.getElementById('email-sub').style.display = 'none';
-        var clM = document.getElementById('consent-label'); if (clM) clM.style.display = 'none';
-        var againM = document.getElementById('listen-again');
-        if (againM) { againM.style.display = 'block'; updateSetButtons(); }
-        show('s6');
-      });
-      show('s2');
-      return;
+    function goToResumeSetPage() {
+      var h = document.getElementById('email-head');
+      if (h) { h.textContent = "You'll hear when something new arrives."; h.style.fontSize = '18px'; h.style.opacity = '0.6'; }
+      document.getElementById('email-in').style.display = 'none';
+      document.getElementById('name-in').style.display = 'none';
+      document.getElementById('email-sub').style.display = 'none';
+      var cl3 = document.getElementById('consent-label'); if (cl3) cl3.style.display = 'none';
+      var again = document.getElementById('listen-again');
+      if (again) { again.style.display = 'block'; updateSetButtons(); }
+      show('s6');
     }
-    var h = document.getElementById('email-head');
-    if (h) { h.textContent = "You'll hear when something new arrives."; h.style.fontSize = '18px'; h.style.opacity = '0.6'; }
-    document.getElementById('email-in').style.display = 'none';
-    document.getElementById('name-in').style.display = 'none';
-    document.getElementById('email-sub').style.display = 'none';
-    var cl3 = document.getElementById('consent-label'); if (cl3) cl3.style.display = 'none';
-    var again = document.getElementById('listen-again');
-    if (again) { again.style.display = 'block'; updateSetButtons(); }
-    show('s6');
+    if (entryExpired) { showEntryThenRoute(goToResumeSetPage); return; }
+    goToResumeSetPage();
     return;
   }
 
@@ -1667,25 +1660,6 @@ function initUserState() {
     var onRecapScreen = localStorage.getItem('fynd_onRecapScreen');
     var shouldRestore = (onEmailScreen && !!savedEmail) || (returning && completedSetsCheck.length > 0 && !abandoned && !!savedEmail);
     var shouldShowEmail = onEmailScreen && !savedEmail;
-    // Check entry state expiry for all returning users
-    if (returning) {
-      try {
-        var esTime = parseInt(localStorage.getItem('fynd_entryStateTime') || '0', 10);
-        var esVal = localStorage.getItem('fynd_entryState');
-        if (esVal && !esTime) {
-          // No timestamp yet — write now, not expired
-          localStorage.setItem('fynd_entryStateTime', Date.now().toString());
-        } else if (esTime && (Date.now() - esTime) > 24 * 60 * 60 * 1000) {
-          // Expired — flag it, clear stored state
-          window._entryStateExpired = true;
-          localStorage.removeItem('fynd_entryState');
-          localStorage.removeItem('fynd_entryStateTime');
-        } else if (!esVal && !esTime) {
-          // Nothing stored at all — also expired
-          window._entryStateExpired = true;
-        }
-      } catch(e) {}
-    }
     if (onRecapScreen) {
       window._restoreRecapScreen = true;
     } else if (shouldRestore) {
