@@ -1083,9 +1083,31 @@ document.getElementById('s1').addEventListener('click', function() {
     return;
   }
 
-  // If set screen should be restored — go there directly
+  // If set screen should be restored — check entry state expiry first
   if (window._restoreSetScreen) {
     window._restoreSetScreen = false;
+    if (window._entryStateExpired) {
+      window._entryStateExpired = false;
+      // Entry state expired — show entry screen, then route to sets page
+      buildList('entry-list', 'stmt', true, function(state) {
+        sess.entryState = state;
+        try { localStorage.setItem('fynd_entryState', state); } catch(e) {}
+        try { localStorage.setItem('fynd_entryStateTime', Date.now().toString()); } catch(e) {}
+        // Route to sets page after selection
+        var h = document.getElementById('email-head');
+        if (h) { h.textContent = "You'll hear when something new arrives."; h.style.fontSize = '18px'; h.style.opacity = '0.6'; }
+        document.getElementById('email-in').style.display = 'none';
+        document.getElementById('name-in').style.display = 'none';
+        document.getElementById('email-sub').style.display = 'none';
+        var cl0 = document.getElementById('consent-label'); if (cl0) cl0.style.display = 'none';
+        var rn0 = document.getElementById('return-note'); if (rn0) rn0.style.display = 'none';
+        var again0 = document.getElementById('listen-again');
+        if (again0) { again0.style.display = 'block'; updateSetButtons(); }
+        show('s6');
+      });
+      show('s2');
+      return;
+    }
     var h = document.getElementById('email-head');
     if (h) { h.textContent = "You'll hear when something new arrives."; h.style.fontSize = '18px'; h.style.opacity = '0.6'; }
     document.getElementById('email-in').style.display = 'none';
@@ -1625,6 +1647,22 @@ function initUserState() {
     var onRecapScreen = localStorage.getItem('fynd_onRecapScreen');
     var shouldRestore = (onEmailScreen && !!savedEmail) || (returning && completedSetsCheck.length > 0 && !abandoned && !!savedEmail);
     var shouldShowEmail = onEmailScreen && !savedEmail;
+    // Check entry state expiry for returning users going to sets page
+    if (shouldRestore) {
+      try {
+        var esTime = parseInt(localStorage.getItem('fynd_entryStateTime') || '0', 10);
+        var esVal = localStorage.getItem('fynd_entryState');
+        if (esVal && !esTime) {
+          // No timestamp yet — write now, not expired
+          localStorage.setItem('fynd_entryStateTime', Date.now().toString());
+        } else if (esTime && (Date.now() - esTime) > 24 * 60 * 60 * 1000) {
+          // Expired — flag it, clear stored state
+          window._entryStateExpired = true;
+          localStorage.removeItem('fynd_entryState');
+          localStorage.removeItem('fynd_entryStateTime');
+        }
+      } catch(e) {}
+    }
     if (onRecapScreen) {
       window._restoreRecapScreen = true;
     } else if (shouldRestore) {
