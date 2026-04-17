@@ -759,6 +759,10 @@ function startTrackTimers() {
     if (rb) rb.classList.add('show');
     if (!document.getElementById('assign-panel').classList.contains('open')) {
       sess.triggered = 'auto';
+      try {
+        var _pa = JSON.parse(localStorage.getItem('fynd_pendingAbandoned'));
+        if (_pa) { _pa.triggered = 'auto'; localStorage.setItem('fynd_pendingAbandoned', JSON.stringify(_pa)); }
+      } catch(e) {}
       openPanel(function(ps) { doReveal(ps); });
     }
   }, 60000);
@@ -834,6 +838,10 @@ function playTrack(idx) {
       if (rb2) rb2.classList.add('show');
       if (!document.getElementById('assign-panel').classList.contains('open')) {
         sess.triggered = 'auto';
+        try {
+          var _pa = JSON.parse(localStorage.getItem('fynd_pendingAbandoned'));
+          if (_pa) { _pa.triggered = 'auto'; localStorage.setItem('fynd_pendingAbandoned', JSON.stringify(_pa)); }
+        } catch(e) {}
         openPanel(function(ps) { doReveal(ps); });
       }
     }, 60000);
@@ -876,6 +884,10 @@ document.getElementById('ready-prompt').addEventListener('click', function() {
   document.getElementById('thumbs-wrap').classList.remove('show');
   clearTimeout(thumbsTimer);
   sess.triggered = 'manual';
+  try {
+    var _pa = JSON.parse(localStorage.getItem('fynd_pendingAbandoned'));
+    if (_pa) { _pa.triggered = 'manual'; localStorage.setItem('fynd_pendingAbandoned', JSON.stringify(_pa)); }
+  } catch(e) {}
   openPanel(function(ps) { doReveal(ps); });
 });
 
@@ -887,6 +899,11 @@ document.getElementById('replay-btn').addEventListener('click', function() {
   if (rb) rb.classList.remove('show');
   document.getElementById('thumbs-wrap').classList.add('show');
   startDot();
+  // Update pending abandoned record with replay flag
+  try {
+    var _pa = JSON.parse(localStorage.getItem('fynd_pendingAbandoned'));
+    if (_pa) { _pa.replay = 'Yes'; localStorage.setItem('fynd_pendingAbandoned', JSON.stringify(_pa)); }
+  } catch(e) {}
   widget.seekTo(0);
   setTimeout(function() { widget.play(); }, 200);
 });
@@ -896,6 +913,10 @@ document.getElementById('thumb-up').addEventListener('click', function() {
   document.getElementById('thumbs-wrap').classList.remove('show');
   clearTimeout(thumbsTimer);
   sess.reaction = 'Up';
+  try {
+    var _pa = JSON.parse(localStorage.getItem('fynd_pendingAbandoned'));
+    if (_pa) { _pa.reaction = 'Up'; localStorage.setItem('fynd_pendingAbandoned', JSON.stringify(_pa)); }
+  } catch(e) {}
 });
 
 // Thumb down — record skip, go straight to next track
@@ -1731,7 +1752,7 @@ var PLAYLIST_VERSION = '1';
           email: pending.email || '',
           firstName: pending.firstName || '',
           entryState: pending.entryState,
-          assignments: [{ trackId: pending.trackId, trackTitle: pending.trackTitle, duration: dur, postState: 'Abandoned', date: pending.date, playlist: pending.playlist, reaction: '', visitNumber: pending.visitNumber || 1, daysSinceLastVisit: pending.daysSinceLastVisit }],
+          assignments: [{ trackId: pending.trackId, trackTitle: pending.trackTitle, duration: dur, postState: 'Abandoned', date: pending.date, playlist: pending.playlist, reaction: pending.reaction || '', replay: pending.replay || '', triggered: pending.triggered || '', visitNumber: pending.visitNumber || 1, daysSinceLastVisit: pending.daysSinceLastVisit }],
         }),
       }).catch(function(){});
     }
@@ -1777,7 +1798,7 @@ window.addEventListener('pagehide', function() {
     email: LS.get('email') || '',
     firstName: LS.get('firstName') || '',
     entryState: sess.entryState,
-    assignments: [{ trackId: sessionTrackId, trackTitle: trackTitle, duration: dur, postState: 'Abandoned', date: date, playlist: sess.playlist, reaction: '', visitNumber: window._visitNumber || 1, daysSinceLastVisit: window._daysSinceLastVisit }],
+    assignments: [{ trackId: sessionTrackId, trackTitle: trackTitle, duration: dur, postState: 'Abandoned', date: date, playlist: sess.playlist, reaction: sess.reaction || '', replay: sess.replay ? 'Yes' : '', triggered: sess.triggered || '', visitNumber: window._visitNumber || 1, daysSinceLastVisit: window._daysSinceLastVisit }],
   });
   if (navigator.sendBeacon) {
     try {
