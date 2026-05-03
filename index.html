@@ -314,7 +314,7 @@ html.assign-top, body.assign-top { background: var(--black); }
     </div>
   </div>
   <div class="assign-panel" id="assign-panel">
-    <div class="assign-label">While this plays —</div>
+    <div class="assign-label">Right now, this sound...</div>
     <div id="assign-list" style="padding-bottom: 32px;"></div>
   </div>
   <div class="legal-corner">Music streamed via <a href="https://soundcloud.com/fynd-today" target="_blank">SoundCloud</a>. All rights belong to their respective owners. No commercial use.</div>
@@ -413,7 +413,7 @@ html.assign-top, body.assign-top { background: var(--black); }
 <!-- S6 EMAIL -->
 <div class="screen" id="s6">
   <div class="email-head" id="email-head">This is the moment.</div>
-  <div id="return-note" style="display:none; font-size:13px; color:rgba(0,0,0,0.55); letter-spacing:0.04em; text-align:center; margin-bottom:24px; line-height:1.6; max-width:280px;">Enter your name and email to unlock new sets.</div>
+  <div id="return-note" style="display:block; font-size:13px; color:rgba(0,0,0,0.55); letter-spacing:0.04em; text-align:center; margin-bottom:24px; line-height:1.6; max-width:280px;">Enter your name and email to unlock new sets.</div>
   <input class="email-input" id="name-in" type="text" placeholder="first name" autocomplete="given-name" autocapitalize="words" style="margin-bottom: 16px;">
   <input class="email-input" id="email-in" type="email" placeholder="your email" autocomplete="email" autocapitalize="none">
   <div id="email-error" style="display:none; font-size:12px; color:rgba(0,0,0,0.6); margin-top:8px; letter-spacing:0.04em;">Please enter a valid email address.</div>
@@ -665,9 +665,9 @@ function openPanel(cb) {
   var el = document.getElementById('assign-list');
   el.innerHTML = '';
   var positions = [
-    { text: 'Something in me wants to stay here.', value: 'Stay' },
-    { text: 'Something in me is ready to shift.',   value: 'Move' },
-    { text: "I noticed something I didn't before.", value: 'Open' },
+    { text: 'Fit where I am.',                value: 'Stay' },
+    { text: 'Pointed me forward.',             value: 'Move' },
+    { text: 'Opened my eyes to something.',    value: 'Open' },
   ];
   positions.forEach(function(p) {
     var d = document.createElement('div');
