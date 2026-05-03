@@ -1199,6 +1199,7 @@ document.getElementById('s1').addEventListener('click', function() {
       document.getElementById('name-in').style.display = 'none';
       document.getElementById('email-sub').style.display = 'none';
       var cl2 = document.getElementById('consent-label'); if (cl2) cl2.style.display = 'none';
+      var rn2 = document.getElementById('return-note'); if (rn2) rn2.style.display = 'none';
       var again = document.getElementById('listen-again');
       if (again) again.style.display = 'none';
       show('s6');
@@ -1267,6 +1268,7 @@ document.getElementById('s1').addEventListener('click', function() {
       document.getElementById('name-in').style.display = 'none';
       document.getElementById('email-sub').style.display = 'none';
       var cl3 = document.getElementById('consent-label'); if (cl3) cl3.style.display = 'none';
+      var rn3 = document.getElementById('return-note'); if (rn3) rn3.style.display = 'none';
       var again = document.getElementById('listen-again');
       if (again) { again.style.display = 'block'; updateSetButtons(); }
       show('s6');
@@ -1363,6 +1365,7 @@ document.getElementById('btn-stop').addEventListener('click', function() {
     document.getElementById('name-in').style.display = 'none';
     document.getElementById('email-sub').style.display = 'none';
     var clS = document.getElementById('consent-label'); if (clS) clS.style.display = 'none';
+    var rnS = document.getElementById('return-note'); if (rnS) rnS.style.display = 'none';
     var again = document.getElementById('listen-again');
     if (again) { again.style.display = 'block'; updateSetButtons(); }
   }
@@ -1385,6 +1388,7 @@ document.getElementById('recap-continue').addEventListener('click', function() {
     document.getElementById('name-in').style.display = 'none';
     document.getElementById('email-sub').style.display = 'none';
     var clR = document.getElementById('consent-label'); if (clR) clR.style.display = 'none';
+    var rnR = document.getElementById('return-note'); if (rnR) rnR.style.display = 'none';
     var again = document.getElementById('listen-again');
     if (again) { again.style.display = 'block'; updateSetButtons(); }
     show('s6');
