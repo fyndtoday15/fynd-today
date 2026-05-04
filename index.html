@@ -13,24 +13,13 @@ body{background:var(--bg);color:var(--off);font-family:'Noto Sans','DejaVu Sans'
 nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:24px 48px;display:flex;justify-content:space-between;align-items:center}
 .logo{font-size:10px;letter-spacing:.28em;text-transform:uppercase;font-weight:400;color:var(--off);opacity:.5}
 .nav-tag{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--off);opacity:.28}
-
 .hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:120px 64px 80px;position:relative;overflow:hidden}
-
-/* wave canvas right side full height */
-canvas#sw{position:absolute;right:0;top:0;width:50%;height:100%;opacity:.15;pointer-events:none}
-
-/* portal btn floats bottom-right of wave area */
-.wave-portal-btn{
-  position:absolute;
-  right:64px;bottom:72px;
-  opacity:0;animation:up 1s ease forwards 1.2s;
-}
-
+canvas#sw{position:absolute;right:0;top:0;width:52%;height:100%;opacity:.15;pointer-events:none}
+.wave-portal-btn{position:absolute;right:64px;bottom:72px;opacity:0;animation:up 1s ease forwards 1.2s}
 .htag{font-size:10px;letter-spacing:.26em;text-transform:uppercase;color:var(--off);margin-bottom:28px;opacity:0;animation:up .8s ease forwards .2s}
 h1{font-family:'Noto Serif','DejaVu Serif',Georgia,serif;font-size:clamp(30px,4vw,54px);font-weight:400;font-style:italic;line-height:1.08;letter-spacing:-.02em;max-width:500px;opacity:0;animation:up 1s ease forwards .4s}
 .hsub{margin-top:22px;font-family:'Noto Serif','DejaVu Serif',Georgia,serif;font-size:clamp(16px,2vw,26px);font-weight:400;font-style:italic;line-height:1.2;letter-spacing:-.01em;max-width:380px;opacity:0;animation:up 1s ease forwards .72s}
 .hcta{margin-top:44px;opacity:0;animation:up 1s ease forwards 1s}
-
 .rule{height:1px;background:var(--line)}
 .blk{max-width:1040px;margin:0 auto;padding:100px 64px}
 .lbl{font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--off);opacity:.38;margin-bottom:48px}
@@ -39,37 +28,36 @@ h1{font-family:'Noto Serif','DejaVu Serif',Georgia,serif;font-size:clamp(30px,4v
 .hn{font-size:10px;letter-spacing:.2em;color:var(--off);opacity:.28;margin-bottom:32px}
 .ht{font-family:'Noto Serif','DejaVu Serif',Georgia,serif;font-size:20px;font-weight:400;font-style:italic;margin-bottom:18px;line-height:1.25}
 .hb{font-size:14px;line-height:1.85;color:var(--off)}
-
 .close-blk{max-width:1040px;margin:0 auto;padding:100px 64px;text-align:center}
 .close-h{font-family:'Noto Serif','DejaVu Serif',Georgia,serif;font-size:clamp(26px,4vw,52px);font-weight:400;font-style:italic;line-height:1.1;letter-spacing:-.02em;margin-bottom:20px}
 .close-s{font-size:clamp(14px,1.4vw,17px);line-height:1.8;color:var(--off);margin-bottom:44px}
-
 .enter{min-height:65vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:100px 48px;position:relative;overflow:hidden}
 canvas#rc{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;opacity:.18}
 .eh{font-family:'Noto Serif','DejaVu Serif',Georgia,serif;font-size:clamp(32px,5.5vw,64px);font-weight:400;font-style:italic;letter-spacing:-.02em;line-height:1.05;margin-bottom:14px;position:relative}
 .es{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--off);opacity:.5;margin-bottom:48px;position:relative}
-
 .btn{display:inline-block;padding:16px 48px;border:1px solid rgba(252,251,244,.32);font-family:'Noto Sans','DejaVu Sans',sans-serif;font-size:10px;font-weight:400;letter-spacing:.26em;text-transform:uppercase;color:var(--off);text-decoration:none;background:transparent;cursor:pointer;position:relative;overflow:hidden}
 .btn::before{content:'';position:absolute;left:0;bottom:0;right:0;height:0;background:var(--off);transition:height .32s ease}
 .btn span{position:relative;z-index:1;transition:color .32s ease}
 .btn:hover::before{height:100%}
 .btn:hover span{color:var(--bg)}
 .btn-sm{padding:12px 32px}
-
 .en{margin-top:20px;font-size:11px;letter-spacing:.1em;color:var(--off);opacity:.28;position:relative}
 footer{padding:30px 64px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
 footer span{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--off);opacity:.22}
 
-/* PORTAL OVERLAY */
-.portal-overlay{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:0;background:var(--bg)}
-.portal-overlay.active{pointer-events:all}
+/* PORTAL — fullscreen black, sits on top of everything immediately */
+#portal{
+  position:fixed;inset:0;z-index:9999;
+  background:var(--bg);
+  display:none;
+}
+#portal.active{display:block}
 canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
 
 @keyframes up{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
 .rev{opacity:0;transform:translateY(20px);transition:opacity .7s ease,transform .7s ease}
 .rev.on{opacity:1;transform:translateY(0)}
 .d1{transition-delay:.1s}.d2{transition-delay:.2s}.d3{transition-delay:.3s}
-
 @media(max-width:700px){
   nav{padding:20px 20px}
   .hero{padding:96px 24px 60px}
@@ -85,7 +73,7 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
 </head>
 <body>
 
-<div class="portal-overlay" id="portal">
+<div id="portal">
   <canvas id="portal-c"></canvas>
 </div>
 
@@ -96,12 +84,9 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
 
 <section class="hero">
   <canvas id="sw"></canvas>
-
-  <!-- portal button sits under the wave -->
   <div class="wave-portal-btn">
     <a href="#" class="btn btn-sm portal-trigger"><span>Enter Sound Portal</span></a>
   </div>
-
   <p class="htag">A recognition system</p>
   <h1>Most people never stop to ask where they are.</h1>
   <p class="hsub">Are you ready to find out?</p>
@@ -164,16 +149,16 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
 <script>
 var PORTAL_URL='/today';
 
-/* SCROLL WAVE — tall narrow bars */
+/* SCROLL WAVE — bars spread full width, shorter height */
 (function(){
   var c=document.getElementById('sw');if(!c)return;
-  var N=80,bars=[];
+  var N=90,bars=[];
   for(var i=0;i<N;i++){
     var d=Math.abs(i-N/2)/(N/2);
     bars.push({
-      envelope:Math.pow(1-d*d,0.4),
+      envelope:Math.pow(1-d*d,0.55),
       phase:Math.random()*Math.PI*2,
-      speed:0.65+Math.random()*0.7
+      speed:0.6+Math.random()*0.8
     });
   }
   var sy=0;
@@ -182,14 +167,19 @@ var PORTAL_URL='/today';
     c.width=c.offsetWidth;c.height=c.offsetHeight;
     var ctx=c.getContext('2d');
     ctx.clearRect(0,0,c.width,c.height);
-    var bw=1,gap=4,total=N*(bw+gap)-gap;
-    var sx=(c.width-total)/2,cy=c.height/2;
+    /* spread bars across full canvas width */
+    var bw=1,gap=Math.floor((c.width-N*bw)/(N-1));
+    if(gap<2)gap=2;
+    var total=N*(bw+gap)-gap;
+    var sx=Math.floor((c.width-total)/2);
+    var cy=c.height/2;
+    var maxH=c.height*0.55; /* shorter bars */
     var t=sy*0.0026;
     ctx.fillStyle='#FCFBF4';
     for(var i=0;i<N;i++){
       var b=bars[i];
-      var sc=0.03+0.97*Math.abs(Math.sin(t*b.speed+b.phase+i*0.13));
-      var h=c.height*0.96*b.envelope*sc;
+      var sc=0.05+0.95*Math.abs(Math.sin(t*b.speed+b.phase+i*0.12));
+      var h=maxH*b.envelope*sc;
       ctx.fillRect(sx+i*(bw+gap),cy-h/2,bw,h);
     }
     requestAnimationFrame(frame);
@@ -230,18 +220,35 @@ var PORTAL_URL='/today';
   })();
 })();
 
-/* PORTAL — full screen, rings start huge, you slide inward, pure immersion, no text */
+/* PORTAL — black screen immediately, then travel along rings inward */
 function triggerPortal(){
-  var overlay=document.getElementById('portal');
+  var portal=document.getElementById('portal');
   var pc=document.getElementById('portal-c');
-  if(overlay.classList.contains('active'))return;
-  overlay.classList.add('active');
-  var start=null,dur=2600;
+  if(portal.classList.contains('active'))return;
+  portal.classList.add('active');
+
+  var start=null;
+
+  /* ring definitions — large to small, offset ellipses like the rose */
+  var rings=[
+    {rx:1.00,ry:.80,ox:-.04,oy:.05,rot:.00},
+    {rx:.82,ry:.68,ox:.05,oy:-.04,rot:.11},
+    {rx:.64,ry:.54,ox:-.03,oy:.05,rot:.22},
+    {rx:.48,ry:.42,ox:.04,oy:-.03,rot:.33},
+    {rx:.34,ry:.30,ox:-.02,oy:.03,rot:.44},
+    {rx:.21,ry:.19,ox:.02,oy:-.02,rot:.55},
+    {rx:.10,ry:.09,ox:0,oy:0,rot:.66},
+  ];
+
+  /* total loops: travel 1.5 full loops on ring 0, then step inward */
+  var loopsPerRing=1.2;
+  var totalAngle=rings.length*loopsPerRing*Math.PI*2;
+  var dur=3200;
 
   (function anim(ts){
     if(!start)start=ts;
     var raw=Math.min((ts-start)/dur,1);
-    /* ease in — slow start, accelerates inward */
+    /* ease: slow start, smooth through, gentle end */
     var ease=raw<.5?2*raw*raw:1-Math.pow(-2*raw+2,2)/2;
 
     pc.width=window.innerWidth;pc.height=window.innerHeight;
@@ -249,49 +256,74 @@ function triggerPortal(){
     ctx.clearRect(0,0,pc.width,pc.height);
 
     var cx=pc.width/2,cy=pc.height/2;
-    /* start large — outermost ring fills screen edge-to-edge */
-    var maxBase=Math.sqrt(cx*cx+cy*cy)*1.05;
-    /* shrink toward zero as ease approaches 1 */
-    var base=maxBase*(1-ease);
+    var base=Math.min(pc.width,pc.height)*.44;
 
-    overlay.style.opacity=Math.min(raw*2.2,1);
+    /* angle traveled so far */
+    var traveled=ease*totalAngle;
+    /* which ring are we on */
+    var ringIdx=Math.min(Math.floor(traveled/(loopsPerRing*Math.PI*2)),rings.length-1);
+    /* angle within current ring */
+    var angleInRing=traveled%(loopsPerRing*Math.PI*2);
 
+    /* draw all rings — fading out ones we have passed */
     ctx.strokeStyle='#FCFBF4';
-
-    var rings=[
-      {rx:1.00,ry:.82,ox:-.04,oy:.06,lw:2.0,a:.95},
-      {rx:.84,ry:.70,ox:.05,oy:-.04,lw:1.6,a:.88},
-      {rx:.66,ry:.56,ox:-.03,oy:.05,lw:1.3,a:.80},
-      {rx:.50,ry:.44,ox:.04,oy:-.03,lw:1.1,a:.72},
-      {rx:.35,ry:.31,ox:-.02,oy:.03,lw:.9,a:.62},
-      {rx:.22,ry:.20,ox:.02,oy:-.02,lw:.7,a:.52},
-      {rx:.10,ry:.09,ox:0,oy:0,lw:.5,a:.42},
-    ];
-
-    var rot=ease*Math.PI*.5;
-
     rings.forEach(function(r,i){
-      /* stagger — outer rings linger slightly longer */
-      var stagger=i*.04;
-      var rAlpha=Math.max(0,r.a*(1-(ease-stagger)*1.2));
-      if(rAlpha<=0)return;
-
-      var offX=base*r.ox*Math.cos(rot+i);
-      var offY=base*r.oy*Math.sin(rot*.9+i*.8);
-      ctx.globalAlpha=rAlpha;
-      ctx.lineWidth=r.lw*(1-ease*.5);
+      var passed=i<ringIdx;
+      var current=i===ringIdx;
+      var alpha=passed?0.08:current?0.55:0.35-i*.04;
+      if(alpha<=0)return;
+      var offX=base*r.ox;
+      var offY=base*r.oy;
+      ctx.globalAlpha=Math.max(0,alpha);
+      ctx.lineWidth=current?1.4:0.6;
+      ctx.setLineDash(passed?[2,6]:[]);
       ctx.beginPath();
-      ctx.ellipse(cx+offX,cy+offY,base*r.rx,base*r.ry,rot+i*.11,0,Math.PI*2);
+      ctx.ellipse(cx+offX,cy+offY,base*r.rx,base*r.ry,r.rot,0,Math.PI*2);
       ctx.stroke();
+      ctx.setLineDash([]);
     });
+
+    /* traveling point on current ring */
+    var r=rings[ringIdx];
+    var offX=base*r.ox;
+    var offY=base*r.oy;
+    var px=cx+offX+Math.cos(angleInRing)*base*r.rx;
+    var py=cy+offY+Math.sin(angleInRing)*base*r.ry;
+
+    /* glow trail */
+    for(var tr=20;tr>=0;tr--){
+      var ta=angleInRing-tr*0.06;
+      var tx=cx+offX+Math.cos(ta)*base*r.rx;
+      var ty=cy+offY+Math.sin(ta)*base*r.ry;
+      var trAlpha=(1-tr/21)*0.4;
+      var trR=2.5*(1-tr/21);
+      ctx.globalAlpha=trAlpha;
+      ctx.fillStyle='#FCFBF4';
+      ctx.beginPath();
+      ctx.arc(tx,ty,trR,0,Math.PI*2);
+      ctx.fill();
+    }
+
+    /* lead point */
+    ctx.globalAlpha=1;
+    ctx.fillStyle='#FCFBF4';
+    ctx.beginPath();
+    ctx.arc(px,py,3.5,0,Math.PI*2);
+    ctx.fill();
+
+    /* subtle glow around lead point */
+    var grd=ctx.createRadialGradient(px,py,0,px,py,18);
+    grd.addColorStop(0,'rgba(252,251,244,.25)');
+    grd.addColorStop(1,'rgba(252,251,244,0)');
+    ctx.fillStyle=grd;
+    ctx.beginPath();
+    ctx.arc(px,py,18,0,Math.PI*2);
+    ctx.fill();
 
     ctx.globalAlpha=1;
 
     if(raw<1){requestAnimationFrame(anim);}
-    else{
-      /* hold on black for a beat then go */
-      setTimeout(function(){window.location.href=PORTAL_URL;},350);
-    }
+    else{setTimeout(function(){window.location.href=PORTAL_URL;},300);}
   })(performance.now());
 }
 
