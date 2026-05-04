@@ -15,17 +15,21 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:24px 48px;display:fl
 .nav-tag{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--off);opacity:.28}
 
 .hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:120px 64px 80px;position:relative;overflow:hidden}
-canvas#sw{position:absolute;right:0;top:0;width:52%;height:100%;opacity:.18;pointer-events:none}
+
+canvas#sw{
+  position:absolute;right:0;top:0;
+  width:48%;height:100%;
+  opacity:.15;pointer-events:none;
+}
+
 .htag{font-size:10px;letter-spacing:.26em;text-transform:uppercase;color:var(--off);margin-bottom:28px;opacity:0;animation:up .8s ease forwards .2s}
-h1{font-family:'Noto Serif','DejaVu Serif',Georgia,serif;font-size:clamp(32px,4.8vw,62px);font-weight:400;font-style:italic;line-height:1.08;letter-spacing:-.02em;max-width:560px;opacity:0;animation:up 1s ease forwards .4s}
-.hsub{margin-top:24px;font-family:'Noto Serif','DejaVu Serif',Georgia,serif;font-size:clamp(18px,2.4vw,30px);font-weight:400;font-style:italic;line-height:1.2;letter-spacing:-.01em;max-width:440px;opacity:0;animation:up 1s ease forwards .72s;color:var(--off)}
-.hcta{margin-top:44px;opacity:0;animation:up 1s ease forwards 1s}
+h1{font-family:'Noto Serif','DejaVu Serif',Georgia,serif;font-size:clamp(30px,4.2vw,56px);font-weight:400;font-style:italic;line-height:1.08;letter-spacing:-.02em;max-width:520px;opacity:0;animation:up 1s ease forwards .4s}
+.hsub{margin-top:22px;font-family:'Noto Serif','DejaVu Serif',Georgia,serif;font-size:clamp(16px,2vw,26px);font-weight:400;font-style:italic;line-height:1.2;letter-spacing:-.01em;max-width:400px;opacity:0;animation:up 1s ease forwards .72s}
+.hero-btns{margin-top:44px;display:flex;gap:16px;flex-wrap:wrap;opacity:0;animation:up 1s ease forwards 1s}
 
 .rule{height:1px;background:var(--line)}
-
 .blk{max-width:1040px;margin:0 auto;padding:100px 64px}
 .lbl{font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--off);opacity:.38;margin-bottom:48px}
-
 .hgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line)}
 .hc{background:var(--bg);padding:52px 40px}
 .hn{font-size:10px;letter-spacing:.2em;color:var(--off);opacity:.28;margin-bottom:32px}
@@ -47,16 +51,16 @@ canvas#rc{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;o
 .btn:hover::before{height:100%}
 .btn:hover span{color:var(--bg)}
 .btn-sm{padding:12px 32px}
+.btn-ghost{border-color:rgba(252,251,244,.18)}
 
 .en{margin-top:20px;font-size:11px;letter-spacing:.1em;color:var(--off);opacity:.28;position:relative}
 footer{padding:30px 64px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
 footer span{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--off);opacity:.22}
 
-/* PORTAL */
 .portal-overlay{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:0;background:var(--bg)}
 .portal-overlay.active{pointer-events:all}
 canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
-.portal-text{position:relative;z-index:2;font-family:'Noto Serif','DejaVu Serif',Georgia,serif;font-size:clamp(28px,5vw,56px);font-weight:400;font-style:italic;color:var(--off);opacity:0;letter-spacing:-.02em}
+.portal-text{position:relative;z-index:2;font-family:'Noto Serif','DejaVu Serif',Georgia,serif;font-size:clamp(28px,5vw,56px);font-weight:400;font-style:italic;color:var(--off);opacity:0;letter-spacing:-.02em;transform:scale(.96)}
 
 @keyframes up{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
 .rev{opacity:0;transform:translateY(20px);transition:opacity .7s ease,transform .7s ease}
@@ -72,6 +76,7 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
   .hc{padding:36px 24px}
   footer{padding:24px 20px;flex-direction:column;gap:10px;text-align:center}
   .enter{padding:60px 24px}
+  .hero-btns{flex-direction:column}
 }
 </style>
 </head>
@@ -92,8 +97,9 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
   <p class="htag">A recognition system</p>
   <h1>Most people never stop to ask where they are.</h1>
   <p class="hsub">Are you ready to find out?</p>
-  <div class="hcta">
+  <div class="hero-btns">
     <a href="#how" class="btn btn-sm"><span>See how</span></a>
+    <a href="#" class="btn btn-sm btn-ghost portal-trigger"><span>Enter Sound Portal</span></a>
   </div>
 </section>
 
@@ -126,18 +132,18 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
   <h2 class="close-h rev">Most people carry this without ever naming it.</h2>
   <p class="close-s rev d1">Sound can name it. This is where you find out.</p>
   <div class="rev d2">
-    <a href="#" class="btn" id="enter-btn1"><span>Enter Sound Portal</span></a>
+    <a href="#enter" class="btn btn-sm"><span>Press Play on Today</span></a>
   </div>
 </div>
 
 <div class="rule"></div>
 
-<div class="enter">
+<div class="enter" id="enter">
   <canvas id="rc"></canvas>
   <h2 class="eh rev">Press Play on Today.</h2>
   <p class="es rev d1">Start anywhere.</p>
   <div class="rev d2">
-    <a href="#" class="btn" id="enter-btn2"><span>Enter Sound Portal</span></a>
+    <a href="#" class="btn portal-trigger"><span>Enter Sound Portal</span></a>
   </div>
   <p class="en rev d3">Free. No account needed to start.</p>
 </div>
@@ -151,13 +157,17 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
 <script>
 var PORTAL_URL='/today';
 
-/* SCROLL WAVE — bigger, fuller */
+/* SCROLL WAVE — tall narrow bars, elegant */
 (function(){
   var c=document.getElementById('sw');if(!c)return;
-  var N=64,bars=[];
+  var N=72,bars=[];
   for(var i=0;i<N;i++){
     var d=Math.abs(i-N/2)/(N/2);
-    bars.push({maxH:c.offsetHeight||480,phase:Math.random()*Math.PI*2,envelope:1-d*0.45});
+    bars.push({
+      envelope:Math.pow(1-d,0.6),
+      phase:Math.random()*Math.PI*2,
+      speed:0.7+Math.random()*0.6
+    });
   }
   var sy=0;
   window.addEventListener('scroll',function(){sy=window.scrollY;},{passive:true});
@@ -165,20 +175,21 @@ var PORTAL_URL='/today';
     c.width=c.offsetWidth;c.height=c.offsetHeight;
     var ctx=c.getContext('2d');
     ctx.clearRect(0,0,c.width,c.height);
-    var bw=3,gap=4,total=N*(bw+gap)-gap;
-    var sx=(c.width-total)/2,cy=c.height/2,t=sy*.003;
+    var bw=2,gap=3,total=N*(bw+gap)-gap;
+    var sx=(c.width-total)/2,cy=c.height/2;
+    var t=sy*0.0028;
     ctx.fillStyle='#FCFBF4';
     for(var i=0;i<N;i++){
       var b=bars[i];
-      var sc=.06+.94*Math.abs(Math.sin(t+b.phase+i*.15));
-      var h=c.height*b.envelope*sc;
+      var sc=0.04+0.96*Math.abs(Math.sin(t*b.speed+b.phase+i*0.14));
+      var h=c.height*0.92*b.envelope*sc;
       ctx.fillRect(sx+i*(bw+gap),cy-h/2,bw,h);
     }
     requestAnimationFrame(frame);
   })();
 })();
 
-/* ROSE — offset elliptical rings */
+/* ROSE */
 (function(){
   var c=document.getElementById('rc');if(!c)return;
   var t=0;
@@ -212,17 +223,29 @@ var PORTAL_URL='/today';
   })();
 })();
 
-/* PORTAL — spiral inward along rose shape, calm arrival */
+/* PORTAL — dot rides inward along ring paths like a rollercoaster */
 function triggerPortal(){
   var overlay=document.getElementById('portal');
   var pc=document.getElementById('portal-c');
   var ptxt=document.getElementById('portal-text');
+  if(overlay.classList.contains('active'))return;
   overlay.classList.add('active');
-  var start=null,dur=2800;
+
+  var start=null,dur=3000;
+  var rings=[
+    {rx:1.00,ry:.82,ox:-.04,oy:.06},
+    {rx:.84,ry:.70,ox:.05,oy:-.04},
+    {rx:.66,ry:.56,ox:-.03,oy:.05},
+    {rx:.50,ry:.44,ox:.04,oy:-.03},
+    {rx:.35,ry:.31,ox:-.02,oy:.03},
+    {rx:.22,ry:.20,ox:.02,oy:-.02},
+    {rx:.10,ry:.09,ox:0,oy:0},
+  ];
 
   (function anim(ts){
     if(!start)start=ts;
     var p=Math.min((ts-start)/dur,1);
+    /* smooth ease in-out */
     var ease=p<.5?2*p*p:1-Math.pow(-2*p+2,2)/2;
 
     pc.width=window.innerWidth;pc.height=window.innerHeight;
@@ -231,64 +254,72 @@ function triggerPortal(){
 
     var cx=pc.width/2,cy=pc.height/2;
     var base=Math.min(pc.width,pc.height)*.42;
+    var t=ease*Math.PI*5; /* angle traversed along the rings */
 
-    /* fade background in gently */
-    overlay.style.opacity=Math.min(ease*1.4,1);
+    /* background fades in gently */
+    overlay.style.opacity=Math.min(ease*1.6,1);
 
-    /* spiral petals drawing inward */
-    var rings=[
-      {rx:1.00,ry:.82,ox:-.04,oy:.06},
-      {rx:.84,ry:.70,ox:.05,oy:-.04},
-      {rx:.66,ry:.56,ox:-.03,oy:.05},
-      {rx:.50,ry:.44,ox:.04,oy:-.03},
-      {rx:.35,ry:.31,ox:-.02,oy:.03},
-      {rx:.22,ry:.20,ox:.02,oy:-.02},
-      {rx:.10,ry:.09,ox:0,oy:0},
-    ];
-
+    /* draw the rings fading as we approach center */
     ctx.strokeStyle='#FCFBF4';
-    var t=p*3.5;
-
     rings.forEach(function(r,i){
-      /* each ring shrinks inward as p progresses */
-      var delay=i*.08;
-      var rp=Math.max(0,Math.min((p-delay)/(1-delay),1));
-      var shrink=1-rp*.88;
-      if(shrink<=0)return;
-
-      var breathe=1+.04*Math.sin(t-i*.6);
-      var offX=base*r.ox*Math.cos(t*.28+i)*shrink;
-      var offY=base*r.oy*Math.sin(t*.22+i*.8)*shrink;
-      var alpha=(1-rp*.7)*.9;
-      ctx.globalAlpha=Math.max(0,alpha);
-      ctx.lineWidth=1.2-rp*.6;
+      var ringFade=Math.max(0,1-ease*1.3+i*.15);
+      if(ringFade<=0)return;
+      var shrink=1-ease*i*.12;
+      var offX=base*r.ox*Math.cos(t*.1+i)*shrink;
+      var offY=base*r.oy*Math.sin(t*.08+i*.8)*shrink;
+      ctx.globalAlpha=ringFade*r.a*(1-ease*.4);
+      ctx.lineWidth=1+ringFade*.6;
       ctx.beginPath();
-      ctx.ellipse(
-        cx+offX,cy+offY,
-        base*r.rx*breathe*shrink,
-        base*r.ry*breathe*shrink,
-        t*.035+i*.11,0,Math.PI*2
-      );
+      ctx.ellipse(cx+offX,cy+offY,base*r.rx*shrink,base*r.ry*shrink,ease*.4+i*.11,0,Math.PI*2);
       ctx.stroke();
     });
 
+    /* dot that rides along the outermost ring inward */
+    var dotRing=Math.min(Math.floor(ease*rings.length),rings.length-1);
+    var r=rings[dotRing];
+    var localP=(ease*rings.length)-dotRing;
+    var shrink=1-ease*dotRing*.12;
+    var angle=t-dotRing*Math.PI*.7;
+    var offX=base*r.ox*Math.cos(t*.1+dotRing)*shrink;
+    var offY=base*r.oy*Math.sin(t*.08+dotRing*.8)*shrink;
+    var dotX=cx+offX+Math.cos(angle)*base*r.rx*shrink;
+    var dotY=cy+offY+Math.sin(angle)*base*r.ry*shrink;
+    var dotAlpha=Math.max(0,1-ease*.5);
+    ctx.globalAlpha=dotAlpha;
+    ctx.fillStyle='#FCFBF4';
+    ctx.beginPath();
+    ctx.arc(dotX,dotY,3,0,Math.PI*2);
+    ctx.fill();
+
+    /* trail behind the dot */
+    for(var tr=1;tr<=6;tr++){
+      var ta=angle-tr*0.18;
+      var tx=cx+offX+Math.cos(ta)*base*r.rx*shrink;
+      var ty=cy+offY+Math.sin(ta)*base*r.ry*shrink;
+      ctx.globalAlpha=dotAlpha*(1-tr/7)*.5;
+      ctx.beginPath();
+      ctx.arc(tx,ty,2-tr*.2,0,Math.PI*2);
+      ctx.fill();
+    }
+
     ctx.globalAlpha=1;
 
-    /* Today. fades in softly at the end */
-    if(p>.72){
-      var tp=(p-.72)/.28;
-      var tease=tp*tp;
-      ptxt.style.opacity=tease;
-      ptxt.style.transform='scale('+(0.94+tease*.06)+')';
+    /* Today. arrives softly */
+    if(p>.74){
+      var tp=(p-.74)/.26;
+      var te=tp*tp;
+      ptxt.style.opacity=te;
+      ptxt.style.transform='scale('+(0.95+te*.05)+')';
     }
 
     if(p<1){requestAnimationFrame(anim);}
-    else{setTimeout(function(){window.location.href=PORTAL_URL;},400);}
+    else{setTimeout(function(){window.location.href=PORTAL_URL;},450);}
   })(performance.now());
 }
 
-document.getElementById('enter-btn1').addEventListener('click',function(e){e.preventDefault();triggerPortal();});
-document.getElementById('enter-btn2').addEventListener('click',function(e){e.preventDefault();triggerPortal();});
+document.querySelectorAll('.portal-trigger').forEach(function(el){
+  el.addEventListener('click',function(e){e.preventDefault();triggerPortal();});
+});
 
 var io=new IntersectionObserver(function(e){
   e.forEach(function(x){if(x.isIntersecting)x.target.classList.add('on');});
