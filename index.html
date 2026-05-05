@@ -455,27 +455,20 @@ function triggerPortal(){
   if(portal.classList.contains('active'))return;
   portal.classList.add('active');
   var start=null;
+  var travelDur=3200,fadeDur=900,totalDur=travelDur+fadeDur;
 
-  /* ring definitions — outermost to innermost */
   var rings=[
-    {rx:1.00,ry:.80,ox:-.04,oy:.05},
-    {rx:.82,ry:.68,ox:.05,oy:-.04},
-    {rx:.64,ry:.54,ox:-.03,oy:.05},
-    {rx:.48,ry:.42,ox:.04,oy:-.03},
-    {rx:.34,ry:.30,ox:-.02,oy:.03},
-    {rx:.21,ry:.19,ox:.02,oy:-.02},
-    {rx:.10,ry:.09,ox:0,oy:0},
+    {rx:1.00,ry:.80,ox:-.04,oy:.05,lw:1.4,a:.92},
+    {rx:.82,ry:.68,ox:.05,oy:-.04,lw:1.1,a:.82},
+    {rx:.64,ry:.54,ox:-.03,oy:.05,lw:.9,a:.73},
+    {rx:.48,ry:.42,ox:.04,oy:-.03,lw:.75,a:.63},
+    {rx:.34,ry:.30,ox:-.02,oy:.03,lw:.6,a:.53},
+    {rx:.21,ry:.19,ox:.02,oy:-.02,lw:.45,a:.43},
+    {rx:.09,ry:.08,ox:0,oy:0,lw:.35,a:.34},
   ];
 
-  /* stylus fixed angle — upper right, where the groove passes under the tip */
+  /* stylus fixed at upper-right */
   var stylusA=-Math.PI*0.25;
-
-  /* each ring gets a base rotation speed — inner rings slightly faster */
-  /* one full rotation per ring takes ~(travelDur/rings.length) ms */
-  var travelDur=3000,fadeDur=900,totalDur=travelDur+fadeDur;
-  /* time for outermost ring to complete loopsPerRing loops */
-  var loopsPerRing=1.3;
-  var ringDur=travelDur/rings.length; /* each ring active for this long */
 
   (function anim(ts){
     if(!start)start=ts;
@@ -489,48 +482,40 @@ function triggerPortal(){
     var base=Math.min(pc.width,pc.height)*.44;
 
     var tp=Math.min(el/travelDur,1);
-    var te=tp<.5?2*tp*tp:1-Math.pow(-2*tp+2,2)/2;
+    /* ease in then constant */
+    var te=tp<.3?(tp/.3)*(.3):(tp);
 
-    /* which ring the "needle" is currently on */
-    var ri=Math.min(Math.floor(te*rings.length),rings.length-1);
-    /* progress within current ring 0-1 */
-    var ringProgress=(te*rings.length)-Math.floor(te*rings.length);
+    /* record spin angle — all rings rotate together at same speed */
+    var spinAngle=te*Math.PI*10;
 
-    /* stylus tip is fixed — computed from outermost ring geometry at stylusA */
-    /* we anchor it to the outermost ring position so it sits on the groove */
+    /* stylus tip fixed position — on outermost ring at stylusA */
     var tipX=cx+base*rings[0].ox+Math.cos(stylusA)*base*rings[0].rx;
     var tipY=cy+base*rings[0].oy+Math.sin(stylusA)*base*rings[0].ry;
 
-    /* draw rings */
+    /* draw all rings rotating together */
     ctx.strokeStyle='#FCFBF4';
     rings.forEach(function(r,i){
-      /* rotation: each ring has completed (i * loopsPerRing) full rotations before current ring starts */
-      /* current ring rotates from stylusA through loopsPerRing full loops */
-      var rot;
-      if(i<ri){
-        /* completed rings: fully rotated, faded to dashed ghost */
-        rot=stylusA+loopsPerRing*Math.PI*2;
-      } else if(i===ri){
-        /* active ring: rotating under stylus */
-        rot=stylusA+ringProgress*loopsPerRing*Math.PI*2;
-      } else {
-        /* upcoming rings: static, waiting */
-        rot=stylusA;
-      }
-
-      var passed=i<ri,curr=i===ri;
-      var alpha=passed?0.06:curr?0.75-ringProgress*0.3:0.32-i*.04;
-      if(alpha<=0)return;
-      ctx.globalAlpha=Math.max(0,alpha);
-      ctx.lineWidth=curr?1.2:.5;
-      ctx.setLineDash(passed?[2,8]:[]);
+      /* all rings spin at same rate — same angle, like one record */
+      /* as time passes rings shrink from outside in — stylus moves inward */
+      var outerDone=Math.max(0,tp*rings.length-i);
+      var scale=Math.max(0,1-outerDone*.15);
+      var alpha=r.a*Math.max(0,1-outerDone*.4);
+      if(alpha<=0.02)return;
+      ctx.globalAlpha=alpha;
+      ctx.lineWidth=r.lw;
       ctx.beginPath();
-      ctx.ellipse(cx+base*r.ox,cy+base*r.oy,base*r.rx,base*r.ry,rot,0,Math.PI*2);
+      ctx.ellipse(
+        cx+base*r.ox*scale,
+        cy+base*r.oy*scale,
+        base*r.rx*scale,
+        base*r.ry*scale,
+        spinAngle+i*.11, /* slight phase offset per ring like real vinyl grooves */
+        0,Math.PI*2
+      );
       ctx.stroke();
-      ctx.setLineDash([]);
     });
 
-    /* draw fixed stylus */
+    /* fixed stylus */
     var armLen=Math.min(pc.width,pc.height)*.13;
     var armAngle=stylusA-Math.PI*0.30;
     var armX=tipX+Math.cos(armAngle)*armLen;
@@ -556,7 +541,6 @@ function triggerPortal(){
     ctx.moveTo(tipX,tipY-ds);ctx.lineTo(tipX+ds*.55,tipY);
     ctx.lineTo(tipX,tipY+ds);ctx.lineTo(tipX-ds*.55,tipY);
     ctx.closePath();ctx.fill();
-
     ctx.globalAlpha=1;
 
     /* radial bloom */
