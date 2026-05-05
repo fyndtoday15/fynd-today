@@ -71,6 +71,8 @@ canvas.cw{
 .algo-left h3{font-size:clamp(22px,3vw,40px);line-height:1.12;letter-spacing:-.02em;margin-bottom:20px}
 .algo-left p{font-size:14px;line-height:1.85;color:var(--off);margin-bottom:16px}
 .algo-right{border:1px solid rgba(252,251,244,.1);padding:40px 36px}
+/* button spans full width below both columns on desktop */
+.algo-fwd{grid-column:1/-1;margin-top:8px}
 .algo-stat{margin-bottom:32px}
 .algo-stat:last-child{margin-bottom:0}
 .algo-stat-n{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--off);margin-bottom:8px;display:block}
@@ -135,20 +137,22 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
 
   /* mobile sections: natural height, clear nav with padding-top */
   .blk{padding:80px 20px 56px;min-height:auto;justify-content:flex-start}
-  .close-blk{padding:80px 20px 56px;min-height:auto;justify-content:flex-start}
-  .enter{padding:80px 20px 56px;min-height:auto}
+  .close-blk{padding:80px 20px 56px;min-height:100vh;justify-content:center;display:flex;flex-direction:column}
+  .enter{padding:80px 20px 56px;min-height:100vh}
 
-  /* algo on mobile: flex column, text first then box */
+  /* algo on mobile: flex column — text, box, button in that order */
   .algo-blk{
     grid-template-columns:1fr;
     padding:80px 20px 56px;
-    gap:36px;
+    gap:32px;
     min-height:auto;
     display:flex;
     flex-direction:column;
   }
   .algo-left{order:1}
   .algo-right{order:2}
+  .algo-fwd{order:3;margin-top:0}
+  .algo-fwd .btn{display:block;text-align:center}
 
   /* cards stack */
   .hgrid{grid-template-columns:1fr;gap:14px}
@@ -245,9 +249,6 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
     <h3 class="serif rev">Built on human behavior. Not artificial intelligence.</h3>
     <p class="rev d1">Every response inside the sound portal is a real person making a real choice in a real moment. That data builds something no algorithm can manufacture.</p>
     <p class="rev d2">Music has always done this. It meets you where you are. This is built to surface that encounter and listen to what it tells us.</p>
-    <div class="section-fwd rev d3">
-      <a href="#close" class="btn btn-sm"><span>What this names</span></a>
-    </div>
   </div>
   <div class="algo-right rev d1">
     <div class="algo-stat">
@@ -262,6 +263,9 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
       <span class="algo-stat-n">The result</span>
       <div class="algo-stat-t serif">Sound that knows where you are before you say it.</div>
     </div>
+  </div>
+  <div class="algo-fwd rev d3">
+    <a href="#close" class="btn btn-sm"><span>What this names</span></a>
   </div>
 </div>
 
@@ -519,15 +523,16 @@ document.querySelectorAll('.portal-trigger').forEach(function(el){
   el.addEventListener('click',function(e){e.preventDefault();triggerPortal();});
 });
 
-/* native scroll-margin-top handles section landing */
-/* JS fallback for iOS Safari scroll-padding inconsistency */
+/* JS scroll with nav clearance for iOS Safari */
 document.querySelectorAll('a[href^="#"]').forEach(function(a){
   a.addEventListener('click',function(e){
-    var target=document.querySelector(this.getAttribute('href'));
+    var hash=this.getAttribute('href');
+    var target=document.querySelector(hash);
     if(!target)return;
     e.preventDefault();
     var navH=document.querySelector('nav').offsetHeight||60;
-    var top=target.getBoundingClientRect().top+window.scrollY-navH-4;
+    /* extra 8px breathing room below nav */
+    var top=target.getBoundingClientRect().top+window.scrollY-navH-8;
     window.scrollTo({top:Math.max(0,top),behavior:'smooth'});
   });
 });
