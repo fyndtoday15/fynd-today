@@ -14,8 +14,8 @@
 ::-webkit-scrollbar{width:5px}
 ::-webkit-scrollbar-track{background:var(--bg)}
 ::-webkit-scrollbar-thumb{background:var(--off)}
-html{scroll-behavior:smooth;scrollbar-color:var(--off) var(--bg);scroll-padding-top:60px}
-#how,#algo,#close,#enter{scroll-margin-top:60px}
+html{scroll-behavior:smooth;scrollbar-color:var(--off) var(--bg);scroll-padding-top:64px}
+#how,#algo,#close,#enter{scroll-margin-top:64px}
 body{background:var(--bg);color:var(--off);font-family:'DejaVu Sans',Arial,sans-serif;font-weight:400;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;overflow-x:hidden}
 .serif{font-family:'Noto Serif','Georgia',serif;font-style:italic;font-weight:400}
 
@@ -37,7 +37,7 @@ h1{font-size:clamp(30px,4.2vw,56px);line-height:1.07;letter-spacing:-.02em;opaci
 .rule{height:1px;background:rgba(252,251,244,.08)}
 
 /* HOW */
-.blk{max-width:1060px;margin:0 auto;padding:0 48px;min-height:100vh;display:flex;flex-direction:column;justify-content:center}
+.blk{max-width:1060px;margin:0 auto;padding:80px 48px 48px;min-height:100vh;display:flex;flex-direction:column;justify-content:center}
 .lbl{font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--off);margin-bottom:36px}
 .section-fwd{margin-top:48px}
 
@@ -61,13 +61,13 @@ canvas.cw{
 .hb{font-size:13px;line-height:1.8;color:var(--off)}
 
 /* CLOSE */
-.close-blk{max-width:760px;margin:0 auto;padding:0 48px;text-align:center;min-height:100vh;display:flex;flex-direction:column;justify-content:center}
+.close-blk{max-width:760px;margin:0 auto;padding:80px 48px 48px;text-align:center;min-height:100vh;display:flex;flex-direction:column;justify-content:center}
 .close-h{font-size:clamp(26px,4vw,50px);line-height:1.08;letter-spacing:-.02em;margin-bottom:24px}
 .close-mid{font-size:clamp(15px,1.55vw,18px);line-height:1.8;color:var(--off);margin-bottom:14px}
 .close-s{font-size:clamp(14px,1.4vw,17px);line-height:1.8;color:var(--off);margin-bottom:44px}
 
 /* HUMAN ALGO SECTION */
-.algo-blk{max-width:1060px;margin:0 auto;padding:0 48px;display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center;min-height:100vh}
+.algo-blk{max-width:1060px;margin:0 auto;padding:80px 48px 48px;display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center;min-height:100vh}
 .algo-left h3{font-size:clamp(22px,3vw,40px);line-height:1.12;letter-spacing:-.02em;margin-bottom:20px}
 .algo-left p{font-size:14px;line-height:1.85;color:var(--off);margin-bottom:16px}
 .algo-right{border:1px solid rgba(252,251,244,.1);padding:40px 36px}
@@ -133,29 +133,27 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
   /* hero — accounts for fixed nav */
   .hero{padding:80px 20px 60px;min-height:100vh}
 
-  /* on mobile sections use auto height with comfortable padding, no overflow */
-  .blk{padding:72px 20px 64px;min-height:auto}
-  .close-blk{padding:72px 20px 64px;min-height:auto}
-  .enter{padding:72px 20px 64px;min-height:auto}
+  /* mobile sections: natural height, clear nav with padding-top */
+  .blk{padding:80px 20px 56px;min-height:auto;justify-content:flex-start}
+  .close-blk{padding:80px 20px 56px;min-height:auto;justify-content:flex-start}
+  .enter{padding:80px 20px 56px;min-height:auto}
 
-  /* algo on mobile: stack, but reorder so box comes AFTER text+btn */
+  /* algo on mobile: flex column, text first then box */
   .algo-blk{
     grid-template-columns:1fr;
-    padding:72px 20px 64px;
-    gap:40px;
+    padding:80px 20px 56px;
+    gap:36px;
     min-height:auto;
-    /* flip order so signal/source/result box shows below button */
     display:flex;
     flex-direction:column;
   }
   .algo-left{order:1}
   .algo-right{order:2}
 
-  /* cards stack, no fixed height */
-  .hgrid{grid-template-columns:1fr;gap:16px}
-  .hc{min-height:220px}
+  /* cards stack */
+  .hgrid{grid-template-columns:1fr;gap:14px}
+  .hc{min-height:200px}
 
-  /* section forward buttons full width on mobile */
   .section-fwd .btn{display:block;text-align:center}
 
   footer{padding:28px 20px;gap:20px}
@@ -522,6 +520,17 @@ document.querySelectorAll('.portal-trigger').forEach(function(el){
 });
 
 /* native scroll-margin-top handles section landing */
+/* JS fallback for iOS Safari scroll-padding inconsistency */
+document.querySelectorAll('a[href^="#"]').forEach(function(a){
+  a.addEventListener('click',function(e){
+    var target=document.querySelector(this.getAttribute('href'));
+    if(!target)return;
+    e.preventDefault();
+    var navH=document.querySelector('nav').offsetHeight||60;
+    var top=target.getBoundingClientRect().top+window.scrollY-navH-4;
+    window.scrollTo({top:Math.max(0,top),behavior:'smooth'});
+  });
+});
 
 /* REVEAL */
 var io=new IntersectionObserver(function(e){
