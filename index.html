@@ -458,14 +458,16 @@ function triggerPortal(){
   var travelDur=3200,fadeDur=900,totalDur=travelDur+fadeDur;
 
   var rings=[
-    {rx:1.00,ry:.82,ox:-.04,oy:.05,lw:1.4,a:.92},
-    {rx:.83,ry:.70,ox:.05,oy:-.04,lw:1.1,a:.82},
-    {rx:.65,ry:.56,ox:-.03,oy:.05,lw:.9,a:.73},
-    {rx:.49,ry:.43,ox:.04,oy:-.03,lw:.75,a:.63},
-    {rx:.34,ry:.30,ox:-.02,oy:.03,lw:.6,a:.53},
-    {rx:.21,ry:.19,ox:.02,oy:-.02,lw:.45,a:.43},
-    {rx:.09,ry:.08,ox:0,oy:0,lw:.35,a:.34},
+    {rx:1.00,ry:.82,ox:-.04,oy:.06,lw:1.6,a:.95},
+    {rx:.84,ry:.70,ox:.05,oy:-.04,lw:1.2,a:.85},
+    {rx:.66,ry:.56,ox:-.03,oy:.05,lw:.95,a:.75},
+    {rx:.50,ry:.44,ox:.04,oy:-.03,lw:.8,a:.65},
+    {rx:.35,ry:.31,ox:-.02,oy:.03,lw:.65,a:.55},
+    {rx:.22,ry:.20,ox:.02,oy:-.02,lw:.5,a:.45},
+    {rx:.10,ry:.09,ox:0,oy:0,lw:.4,a:.38},
   ];
+
+  var t=0;
 
   (function anim(ts){
     if(!start)start=ts;
@@ -479,63 +481,60 @@ function triggerPortal(){
     var cx=pc.width/2,cy=pc.height/2;
     var base=Math.min(pc.width,pc.height)*.44;
 
+    /* progress 0-1 over travel duration */
     var tp=Math.min(el/travelDur,1);
-    /* ease — slow start, smooth through */
-    var te=tp<.5?2*tp*tp:1-Math.pow(-2*tp+2,2)/2;
+    /* speed increases over time so it feels like accelerating inward */
+    t+=.004+tp*.012;
 
-    /* rotation angle — record spinning */
-    var rot=te*Math.PI*8;
-
-    /* stylus fixed position: upper-right of center */
-    var stylusAngle=-Math.PI*0.28; /* ~-50deg from right = upper right */
-    /* stylus tip sits on the outermost ring */
-    var tipX=cx+base*rings[0].rx*Math.cos(stylusAngle);
-    var tipY=cy+base*rings[0].ry*Math.sin(stylusAngle);
-    /* cantilever arm goes toward upper-right corner */
-    var armLen=Math.min(pc.width,pc.height)*.18;
-    var armAngle=stylusAngle-Math.PI*0.32;
-    var armX=tipX+Math.cos(armAngle)*armLen;
-    var armY=tipY+Math.sin(armAngle)*armLen;
-
-    /* draw spinning rose rings */
+    /* ROSE — exact same animation as the static rose, rings breathe and orbit */
     ctx.strokeStyle='#FCFBF4';
     rings.forEach(function(r,i){
-      /* rings shrink inward as animation progresses */
-      var shrink=1-te*i*.10;
-      var fadeOut=Math.max(0,r.a*(1-te*i*.18));
-      if(fadeOut<=0)return;
-      ctx.globalAlpha=fadeOut;
-      ctx.lineWidth=r.lw*(1-te*.3);
+      var breathe=1+.045*Math.sin(t*1.1-i*.6);
+      var offX=base*r.ox*Math.cos(t*.28+i);
+      var offY=base*r.oy*Math.sin(t*.22+i*.8);
+      /* rings gradually shrink toward center as animation progresses */
+      var shrink=1-tp*i*.08;
+      ctx.globalAlpha=r.a*(1-tp*i*.12);
+      if(ctx.globalAlpha<=0)return;
+      ctx.lineWidth=r.lw;
       ctx.beginPath();
       ctx.ellipse(
-        cx+base*r.ox*shrink,
-        cy+base*r.oy*shrink,
-        base*r.rx*shrink,
-        base*r.ry*shrink,
-        rot+i*.11,
-        0,Math.PI*2
+        cx+offX*shrink, cy+offY*shrink,
+        base*r.rx*breathe*shrink,
+        base*r.ry*breathe*shrink,
+        t*.035+i*.11,
+        0, Math.PI*2
       );
       ctx.stroke();
     });
 
-    /* fixed stylus */
-    ctx.globalAlpha=.9;
+    /* FIXED STYLUS — upper right, never moves */
+    var stylusAngle=-Math.PI*0.25;
+    var tipX=cx+base*rings[0].rx*Math.cos(stylusAngle)*0.96;
+    var tipY=cy+base*rings[0].ry*Math.sin(stylusAngle)*0.96;
+    var armLen=Math.min(pc.width,pc.height)*.15;
+    var armAngle=stylusAngle-Math.PI*0.30;
+    var armX=tipX+Math.cos(armAngle)*armLen;
+    var armY=tipY+Math.sin(armAngle)*armLen;
+
+    /* cantilever line */
+    ctx.globalAlpha=.85;
     ctx.strokeStyle='#FCFBF4';
-    /* cantilever arm */
     ctx.lineWidth=1;
     ctx.beginPath();
     ctx.moveTo(armX,armY);
     ctx.lineTo(tipX,tipY);
     ctx.stroke();
+
     /* cartridge body */
-    ctx.globalAlpha=.7;
+    ctx.globalAlpha=.65;
     ctx.fillStyle='#FCFBF4';
-    var ang=Math.atan2(tipY-armY,tipX-armX);
     ctx.save();
     ctx.translate(armX,armY);
-    ctx.rotate(ang);
+    ctx.rotate(Math.atan2(tipY-armY,tipX-armX));
     ctx.fillRect(-10,-4,20,8);
     ctx.restore();
+
     /* diamond tip */
     ctx.globalAlpha=.95;
     ctx.fillStyle='#FCFBF4';
