@@ -498,27 +498,20 @@ function triggerPortal(){
       ctx.setLineDash([]);
     });
 
-    /* FIXED STYLUS — sits where the dot would have been on ring 0 at angle ~-0.25pi */
-    /* compute once from outermost ring at a fixed angle upper-right */
-    var stylusRing=rings[0];
+    /* FIXED STYLUS — constant position, upper right, never moves */
     var stylusA=-Math.PI*0.25;
-    var tipX=cx+base*stylusRing.ox+Math.cos(stylusA)*base*stylusRing.rx;
-    var tipY=cy+base*stylusRing.oy+Math.sin(stylusA)*base*stylusRing.ry;
-    var armLen=Math.min(pc.width,pc.height)*.14;
+    var tipX=cx+base*rings[0].ox+Math.cos(stylusA)*base*rings[0].rx;
+    var tipY=cy+base*rings[0].oy+Math.sin(stylusA)*base*rings[0].ry;
+    var armLen=Math.min(pc.width,pc.height)*.13;
     var armAngle=stylusA-Math.PI*0.30;
     var armX=tipX+Math.cos(armAngle)*armLen;
     var armY=tipY+Math.sin(armAngle)*armLen;
 
-    /* cantilever arm */
     ctx.globalAlpha=.85;
     ctx.strokeStyle='#FCFBF4';
     ctx.lineWidth=1;
-    ctx.beginPath();
-    ctx.moveTo(armX,armY);
-    ctx.lineTo(tipX,tipY);
-    ctx.stroke();
+    ctx.beginPath();ctx.moveTo(armX,armY);ctx.lineTo(tipX,tipY);ctx.stroke();
 
-    /* cartridge body */
     ctx.globalAlpha=.65;
     ctx.fillStyle='#FCFBF4';
     ctx.save();
@@ -527,17 +520,13 @@ function triggerPortal(){
     ctx.fillRect(-10,-4,20,8);
     ctx.restore();
 
-    /* diamond tip */
     ctx.globalAlpha=.95;
     ctx.fillStyle='#FCFBF4';
     var ds=5;
     ctx.beginPath();
-    ctx.moveTo(tipX,tipY-ds);
-    ctx.lineTo(tipX+ds*.55,tipY);
-    ctx.lineTo(tipX,tipY+ds);
-    ctx.lineTo(tipX-ds*.55,tipY);
-    ctx.closePath();
-    ctx.fill();
+    ctx.moveTo(tipX,tipY-ds);ctx.lineTo(tipX+ds*.55,tipY);
+    ctx.lineTo(tipX,tipY+ds);ctx.lineTo(tipX-ds*.55,tipY);
+    ctx.closePath();ctx.fill();
 
     ctx.globalAlpha=1;
 
