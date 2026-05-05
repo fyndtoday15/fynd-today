@@ -36,7 +36,7 @@ h1{font-size:clamp(30px,4.2vw,56px);line-height:1.07;letter-spacing:-.02em;opaci
 .rule{height:1px;background:rgba(252,251,244,.08)}
 
 /* HOW */
-.blk{max-width:1060px;margin:0 auto;padding:56px 48px 72px;scroll-margin-top:72px}
+.blk{max-width:1060px;margin:0 auto;padding:0 48px;min-height:100vh;display:flex;flex-direction:column;justify-content:center}
 .lbl{font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--off);margin-bottom:36px}
 .section-fwd{margin-top:48px}
 
@@ -60,13 +60,13 @@ canvas.cw{
 .hb{font-size:13px;line-height:1.8;color:var(--off)}
 
 /* CLOSE */
-.close-blk{max-width:760px;margin:0 auto;padding:52px 48px 72px;text-align:center;scroll-margin-top:72px}
+.close-blk{max-width:760px;margin:0 auto;padding:0 48px;text-align:center;min-height:100vh;display:flex;flex-direction:column;justify-content:center}
 .close-h{font-size:clamp(26px,4vw,50px);line-height:1.08;letter-spacing:-.02em;margin-bottom:24px}
 .close-mid{font-size:clamp(15px,1.55vw,18px);line-height:1.8;color:var(--off);margin-bottom:14px}
 .close-s{font-size:clamp(14px,1.4vw,17px);line-height:1.8;color:var(--off);margin-bottom:44px}
 
 /* HUMAN ALGO SECTION */
-.algo-blk{max-width:1060px;margin:0 auto;padding:56px 48px 64px;display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center;scroll-margin-top:72px}
+.algo-blk{max-width:1060px;margin:0 auto;padding:0 48px;display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center;min-height:100vh}
 .algo-left h3{font-size:clamp(22px,3vw,40px);line-height:1.12;letter-spacing:-.02em;margin-bottom:20px}
 .algo-left p{font-size:14px;line-height:1.85;color:var(--off);margin-bottom:16px}
 .algo-right{border:1px solid rgba(252,251,244,.1);padding:40px 36px}
@@ -76,7 +76,7 @@ canvas.cw{
 .algo-stat-t{font-size:clamp(18px,2.2vw,26px);line-height:1.2;letter-spacing:-.01em}
 
 /* ENTER */
-.enter{min-height:62vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:88px 48px;position:relative;overflow:hidden}
+.enter{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:88px 48px;position:relative;overflow:hidden}
 canvas#rc{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;opacity:.17}
 .eh{font-size:clamp(32px,5.5vw,64px);line-height:1.05;margin-bottom:14px;position:relative}
 .es{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--off);margin-bottom:48px;position:relative}
@@ -129,9 +129,9 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
 @media(max-width:720px){
   nav{padding:18px 20px}
   .hero{padding:90px 20px 72px}
-  .blk{padding:52px 20px 64px}
-  .close-blk{padding:48px 20px 60px}
-  .algo-blk{grid-template-columns:1fr;padding:0 20px 60px;gap:36px}
+  .blk{padding:0 20px}
+  .close-blk{padding:0 20px}
+  .algo-blk{grid-template-columns:1fr;padding:0 20px;gap:36px}
   .hgrid{grid-template-columns:1fr;gap:16px}
   .hc{min-height:260px}
   footer{padding:28px 20px;gap:20px}
@@ -175,7 +175,7 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
   </div>
 </section>
 
-<div class="rule"></div>
+
 
 <div class="blk" id="how">
   <p class="lbl rev">How it works</p>
@@ -216,7 +216,7 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
   </div>
 </div>
 
-<div class="rule"></div>
+
 
 <!-- HUMAN ALGORITHM -->
 <div class="algo-blk" id="algo">
@@ -244,7 +244,7 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
   </div>
 </div>
 
-<div class="rule"></div>
+
 
 <div class="close-blk" id="close">
   <h2 class="close-h serif rev">Most people carry this without ever naming it.</h2>
@@ -255,7 +255,7 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
   </div>
 </div>
 
-<div class="rule"></div>
+
 
 <div class="enter" id="enter">
   <canvas id="rc"></canvas>
@@ -503,7 +503,7 @@ document.querySelectorAll('.portal-trigger').forEach(function(el){
 /* REVEAL */
 var io=new IntersectionObserver(function(e){
   e.forEach(function(x){if(x.isIntersecting)x.target.classList.add('on');});
-},{threshold:.06,rootMargin:'0px 0px -20px 0px'});
+},{threshold:.04,rootMargin:'0px 0px 0px 0px'});
 document.querySelectorAll('.rev').forEach(function(el){io.observe(el);});
 </script>
 </body>
