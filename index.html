@@ -455,93 +455,102 @@ function triggerPortal(){
   if(portal.classList.contains('active'))return;
   portal.classList.add('active');
   var start=null;
+  var travelDur=3200,fadeDur=900,totalDur=travelDur+fadeDur;
+
   var rings=[
-    {rx:1.00,ry:.80,ox:-.04,oy:.05,rot:.00},
-    {rx:.82,ry:.68,ox:.05,oy:-.04,rot:.11},
-    {rx:.64,ry:.54,ox:-.03,oy:.05,rot:.22},
-    {rx:.48,ry:.42,ox:.04,oy:-.03,rot:.33},
-    {rx:.34,ry:.30,ox:-.02,oy:.03,rot:.44},
-    {rx:.21,ry:.19,ox:.02,oy:-.02,rot:.55},
-    {rx:.10,ry:.09,ox:0,oy:0,rot:.66},
+    {rx:1.00,ry:.82,ox:-.04,oy:.05,lw:1.4,a:.92},
+    {rx:.83,ry:.70,ox:.05,oy:-.04,lw:1.1,a:.82},
+    {rx:.65,ry:.56,ox:-.03,oy:.05,lw:.9,a:.73},
+    {rx:.49,ry:.43,ox:.04,oy:-.03,lw:.75,a:.63},
+    {rx:.34,ry:.30,ox:-.02,oy:.03,lw:.6,a:.53},
+    {rx:.21,ry:.19,ox:.02,oy:-.02,lw:.45,a:.43},
+    {rx:.09,ry:.08,ox:0,oy:0,lw:.35,a:.34},
   ];
-  var loopsPerRing=1.3;
-  var totalAngle=rings.length*loopsPerRing*Math.PI*2;
-  var travelDur=3000,fadeDur=900,totalDur=travelDur+fadeDur;
 
   (function anim(ts){
     if(!start)start=ts;
     var el=ts-start;
     var raw=Math.min(el/totalDur,1);
+
     pc.width=window.innerWidth;pc.height=window.innerHeight;
     var ctx=pc.getContext('2d');
     ctx.clearRect(0,0,pc.width,pc.height);
+
     var cx=pc.width/2,cy=pc.height/2;
     var base=Math.min(pc.width,pc.height)*.44;
+
     var tp=Math.min(el/travelDur,1);
+    /* ease — slow start, smooth through */
     var te=tp<.5?2*tp*tp:1-Math.pow(-2*tp+2,2)/2;
-    var traveled=te*totalAngle;
-    var ri=Math.min(Math.floor(traveled/(loopsPerRing*Math.PI*2)),rings.length-1);
-    var air=traveled%(loopsPerRing*Math.PI*2);
-    /* draw rings */
+
+    /* rotation angle — record spinning */
+    var rot=te*Math.PI*8;
+
+    /* stylus fixed position: upper-right of center */
+    var stylusAngle=-Math.PI*0.28; /* ~-50deg from right = upper right */
+    /* stylus tip sits on the outermost ring */
+    var tipX=cx+base*rings[0].rx*Math.cos(stylusAngle);
+    var tipY=cy+base*rings[0].ry*Math.sin(stylusAngle);
+    /* cantilever arm goes toward upper-right corner */
+    var armLen=Math.min(pc.width,pc.height)*.18;
+    var armAngle=stylusAngle-Math.PI*0.32;
+    var armX=tipX+Math.cos(armAngle)*armLen;
+    var armY=tipY+Math.sin(armAngle)*armLen;
+
+    /* draw spinning rose rings */
     ctx.strokeStyle='#FCFBF4';
     rings.forEach(function(r,i){
-      var passed=i<ri,curr=i===ri;
-      var a=passed?.05:curr?.55:.28-i*.03;
-      if(a<=0)return;
-      ctx.globalAlpha=Math.max(0,a);
-      ctx.lineWidth=curr?1.1:.45;
-      ctx.setLineDash(passed?[1,7]:[]);
+      /* rings shrink inward as animation progresses */
+      var shrink=1-te*i*.10;
+      var fadeOut=Math.max(0,r.a*(1-te*i*.18));
+      if(fadeOut<=0)return;
+      ctx.globalAlpha=fadeOut;
+      ctx.lineWidth=r.lw*(1-te*.3);
       ctx.beginPath();
-      ctx.ellipse(cx+base*r.ox,cy+base*r.oy,base*r.rx,base*r.ry,r.rot,0,Math.PI*2);
-      ctx.stroke();
-      ctx.setLineDash([]);
-    });
-    /* stylus riding the groove */
-    if(tp<1){
-      var r=rings[ri];
-      var a=Math.min(air,loopsPerRing*Math.PI*2-.02);
-      var px=cx+base*r.ox+Math.cos(a)*base*r.rx;
-      var py=cy+base*r.oy+Math.sin(a)*base*r.ry;
-
-      /* tangent angle at this point on the ellipse */
-      var tangent=Math.atan2(
-        -base*r.ry*Math.sin(a),
-        base*r.rx*Math.cos(a)
+      ctx.ellipse(
+        cx+base*r.ox*shrink,
+        cy+base*r.oy*shrink,
+        base*r.rx*shrink,
+        base*r.ry*shrink,
+        rot+i*.11,
+        0,Math.PI*2
       );
-      /* cantilever arm: angled ~35deg from tangent, length ~28px */
-      var armLen=28;
-      var armAngle=tangent-Math.PI*0.38;
-      var ax=px+Math.cos(armAngle)*armLen;
-      var ay=py+Math.sin(armAngle)*armLen;
-
-      ctx.globalAlpha=.85;
-      ctx.strokeStyle='#FCFBF4';
-
-      /* cantilever line */
-      ctx.lineWidth=1;
-      ctx.beginPath();
-      ctx.moveTo(ax,ay);
-      ctx.lineTo(px,py);
       ctx.stroke();
+    });
 
-      /* diamond tip at stylus contact point */
-      var ds=4;
-      ctx.fillStyle='#FCFBF4';
-      ctx.beginPath();
-      ctx.moveTo(px, py-ds);
-      ctx.lineTo(px+ds*.6, py);
-      ctx.lineTo(px, py+ds);
-      ctx.lineTo(px-ds*.6, py);
-      ctx.closePath();
-      ctx.fill();
+    /* fixed stylus */
+    ctx.globalAlpha=.9;
+    ctx.strokeStyle='#FCFBF4';
+    /* cantilever arm */
+    ctx.lineWidth=1;
+    ctx.beginPath();
+    ctx.moveTo(armX,armY);
+    ctx.lineTo(tipX,tipY);
+    ctx.stroke();
+    /* cartridge body */
+    ctx.globalAlpha=.7;
+    ctx.fillStyle='#FCFBF4';
+    var ang=Math.atan2(tipY-armY,tipX-armX);
+    ctx.save();
+    ctx.translate(armX,armY);
+    ctx.rotate(ang);
+    ctx.fillRect(-10,-4,20,8);
+    ctx.restore();
+    /* diamond tip */
+    ctx.globalAlpha=.95;
+    ctx.fillStyle='#FCFBF4';
+    var ds=5;
+    ctx.beginPath();
+    ctx.moveTo(tipX,tipY-ds);
+    ctx.lineTo(tipX+ds*.55,tipY);
+    ctx.lineTo(tipX,tipY+ds);
+    ctx.lineTo(tipX-ds*.55,tipY);
+    ctx.closePath();
+    ctx.fill();
 
-      /* cartridge body at top of arm */
-      ctx.globalAlpha=.6;
-      ctx.fillStyle='#FCFBF4';
-      ctx.fillRect(ax-5,ay-3,10,6);
-    }
     ctx.globalAlpha=1;
-    /* radial bloom from center outward */
+
+    /* radial bloom from center at end */
     if(el>travelDur){
       var fp=Math.min((el-travelDur)/fadeDur,1);
       var fe=fp*fp;
@@ -551,6 +560,7 @@ function triggerPortal(){
       grd.addColorStop(Math.min(fe+.25,1),'rgba(252,251,244,0)');
       ctx.fillStyle=grd;ctx.fillRect(0,0,pc.width,pc.height);
     }
+
     if(raw<1){requestAnimationFrame(anim);}
     else{window.location.href=PORTAL_URL;}
   })(performance.now());
