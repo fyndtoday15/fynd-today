@@ -36,8 +36,9 @@ h1{font-size:clamp(30px,4.2vw,56px);line-height:1.07;letter-spacing:-.02em;opaci
 .rule{height:1px;background:rgba(252,251,244,.08)}
 
 /* HOW */
-.blk{max-width:1060px;margin:0 auto;padding:56px 48px 72px}
+.blk{max-width:1060px;margin:0 auto;padding:56px 48px 72px;scroll-margin-top:72px}
 .lbl{font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--off);margin-bottom:36px}
+.section-fwd{margin-top:48px}
 
 /* Album cover cards — square on desktop, auto-height on mobile */
 .hgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
@@ -59,13 +60,13 @@ canvas.cw{
 .hb{font-size:13px;line-height:1.8;color:var(--off)}
 
 /* CLOSE */
-.close-blk{max-width:760px;margin:0 auto;padding:52px 48px 72px;text-align:center}
+.close-blk{max-width:760px;margin:0 auto;padding:52px 48px 72px;text-align:center;scroll-margin-top:72px}
 .close-h{font-size:clamp(26px,4vw,50px);line-height:1.08;letter-spacing:-.02em;margin-bottom:24px}
 .close-mid{font-size:clamp(15px,1.55vw,18px);line-height:1.8;color:var(--off);margin-bottom:14px}
 .close-s{font-size:clamp(14px,1.4vw,17px);line-height:1.8;color:var(--off);margin-bottom:44px}
 
 /* HUMAN ALGO SECTION */
-.algo-blk{max-width:1060px;margin:0 auto;padding:0 48px 64px;display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center}
+.algo-blk{max-width:1060px;margin:0 auto;padding:56px 48px 64px;display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center;scroll-margin-top:72px}
 .algo-left h3{font-size:clamp(22px,3vw,40px);line-height:1.12;letter-spacing:-.02em;margin-bottom:20px}
 .algo-left p{font-size:14px;line-height:1.85;color:var(--off);margin-bottom:16px}
 .algo-right{border:1px solid rgba(252,251,244,.1);padding:40px 36px}
@@ -210,16 +211,22 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
       <canvas class="cw" data-wave="2"></canvas>
     </div>
   </div>
+  <div class="section-fwd rev d3">
+    <a href="#algo" class="btn btn-sm"><span>Why it works</span></a>
+  </div>
 </div>
 
 <div class="rule"></div>
 
 <!-- HUMAN ALGORITHM -->
-<div class="algo-blk">
+<div class="algo-blk" id="algo">
   <div class="algo-left">
     <h3 class="serif rev">Built on human behavior. Not artificial intelligence.</h3>
     <p class="rev d1">Every response inside the sound portal is a real person making a real choice in a real moment. That data builds something no algorithm can manufacture.</p>
     <p class="rev d2">Music has always done this. It meets you where you are. This is built to surface that encounter and listen to what it tells us.</p>
+    <div class="section-fwd rev d3">
+      <a href="#close" class="btn btn-sm"><span>What this names</span></a>
+    </div>
   </div>
   <div class="algo-right rev d1">
     <div class="algo-stat">
@@ -239,7 +246,7 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
 
 <div class="rule"></div>
 
-<div class="close-blk">
+<div class="close-blk" id="close">
   <h2 class="close-h serif rev">Most people carry this without ever naming it.</h2>
   <p class="close-mid rev d1">The moment between where you were and where you are going. The weight you carry into a room. The feeling just before something shifts. It has always been there. It just has not had a name.</p>
   <p class="close-s rev d2">Sound can name it. This is where you find out.</p>
@@ -491,14 +498,7 @@ document.querySelectorAll('.portal-trigger').forEach(function(el){
   el.addEventListener('click',function(e){e.preventDefault();triggerPortal();});
 });
 
-/* scroll to see glimpse of card 3 */
-document.querySelector('a[href="#how"]').addEventListener('click',function(e){
-  e.preventDefault();
-  var el=document.getElementById('how');
-  if(!el)return;
-  var top=el.getBoundingClientRect().top+window.scrollY-60;
-  window.scrollTo({top:top,behavior:'smooth'});
-});
+/* native scroll-margin-top handles section landing */
 
 /* REVEAL */
 var io=new IntersectionObserver(function(e){
