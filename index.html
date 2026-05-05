@@ -147,14 +147,14 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
   .hero{padding:80px 20px 60px;min-height:100vh}
 
   /* mobile sections: natural height, clear nav with padding-top */
-  .blk{padding:80px 20px 56px;min-height:auto;justify-content:flex-start}
-  .close-blk{padding:80px 20px 56px;min-height:100vh;justify-content:center;display:flex;flex-direction:column}
-  .enter{padding:80px 20px 56px;min-height:100vh}
+  .blk{padding:80px 20px 80px;min-height:auto;justify-content:flex-start}
+  .close-blk{padding:80px 20px 80px;min-height:100vh;justify-content:center;display:flex;flex-direction:column}
+  .enter{padding:80px 20px 80px;min-height:100vh}
 
   /* algo on mobile: flex column — text, box, button in that order */
   .algo-blk{
     grid-template-columns:1fr;
-    padding:80px 20px 56px;
+    padding:80px 20px 80px;
     gap:32px;
     min-height:auto;
     display:flex;
@@ -370,11 +370,11 @@ function shareVia(type){
     var ctx=c.getContext('2d');
     ctx.scale(dpr,dpr);
     ctx.clearRect(0,0,w,h);
-    /* on narrow screens use fewer bars so they stay thin */
-    var n=w<500?70:N;
-    var bw=w<500?.7:1;
+    /* on narrow screens use fewer bars, thinner, shorter */
+    var n=w<500?60:N;
+    var bw=w<500?.6:1;
     var gap=(w-n*bw)/(n-1);
-    var cy=h/2,maxH=h*.5;
+    var cy=h/2,maxH=w<500?h*.32:h*.5;
     t+=.010;
     ctx.fillStyle='#FCFBF4';
     for(var i=0;i<n;i++){
@@ -496,23 +496,49 @@ function triggerPortal(){
       ctx.stroke();
       ctx.setLineDash([]);
     });
-    /* traveling point */
+    /* stylus riding the groove */
     if(tp<1){
       var r=rings[ri];
       var a=Math.min(air,loopsPerRing*Math.PI*2-.02);
       var px=cx+base*r.ox+Math.cos(a)*base*r.rx;
       var py=cy+base*r.oy+Math.sin(a)*base*r.ry;
-      /* trail */
-      for(var tr=10;tr>=0;tr--){
-        var ta2=a-tr*.045;
-        ctx.globalAlpha=(1-tr/11)*.3;
-        ctx.fillStyle='#FCFBF4';
-        ctx.beginPath();
-        ctx.arc(cx+base*r.ox+Math.cos(ta2)*base*r.rx,cy+base*r.oy+Math.sin(ta2)*base*r.ry,1.8*(1-tr/11),0,Math.PI*2);
-        ctx.fill();
-      }
-      ctx.globalAlpha=.85;ctx.fillStyle='#FCFBF4';
-      ctx.beginPath();ctx.arc(px,py,2.2,0,Math.PI*2);ctx.fill();
+
+      /* tangent angle at this point on the ellipse */
+      var tangent=Math.atan2(
+        -base*r.ry*Math.sin(a),
+        base*r.rx*Math.cos(a)
+      );
+      /* cantilever arm: angled ~35deg from tangent, length ~28px */
+      var armLen=28;
+      var armAngle=tangent-Math.PI*0.38;
+      var ax=px+Math.cos(armAngle)*armLen;
+      var ay=py+Math.sin(armAngle)*armLen;
+
+      ctx.globalAlpha=.85;
+      ctx.strokeStyle='#FCFBF4';
+
+      /* cantilever line */
+      ctx.lineWidth=1;
+      ctx.beginPath();
+      ctx.moveTo(ax,ay);
+      ctx.lineTo(px,py);
+      ctx.stroke();
+
+      /* diamond tip at stylus contact point */
+      var ds=4;
+      ctx.fillStyle='#FCFBF4';
+      ctx.beginPath();
+      ctx.moveTo(px, py-ds);
+      ctx.lineTo(px+ds*.6, py);
+      ctx.lineTo(px, py+ds);
+      ctx.lineTo(px-ds*.6, py);
+      ctx.closePath();
+      ctx.fill();
+
+      /* cartridge body at top of arm */
+      ctx.globalAlpha=.6;
+      ctx.fillStyle='#FCFBF4';
+      ctx.fillRect(ax-5,ay-3,10,6);
     }
     ctx.globalAlpha=1;
     /* radial bloom from center outward */
