@@ -455,95 +455,67 @@ function triggerPortal(){
   if(portal.classList.contains('active'))return;
   portal.classList.add('active');
   var start=null;
-  var travelDur=3200,fadeDur=900,totalDur=travelDur+fadeDur;
-
   var rings=[
-    {rx:1.00,ry:.80,ox:-.04,oy:.05,lw:1.4,a:.92},
-    {rx:.82,ry:.68,ox:.05,oy:-.04,lw:1.1,a:.82},
-    {rx:.64,ry:.54,ox:-.03,oy:.05,lw:.9,a:.73},
-    {rx:.48,ry:.42,ox:.04,oy:-.03,lw:.75,a:.63},
-    {rx:.34,ry:.30,ox:-.02,oy:.03,lw:.6,a:.53},
-    {rx:.21,ry:.19,ox:.02,oy:-.02,lw:.45,a:.43},
-    {rx:.09,ry:.08,ox:0,oy:0,lw:.35,a:.34},
+    {rx:1.00,ry:.80,ox:-.04,oy:.05,rot:.00},
+    {rx:.82,ry:.68,ox:.05,oy:-.04,rot:.11},
+    {rx:.64,ry:.54,ox:-.03,oy:.05,rot:.22},
+    {rx:.48,ry:.42,ox:.04,oy:-.03,rot:.33},
+    {rx:.34,ry:.30,ox:-.02,oy:.03,rot:.44},
+    {rx:.21,ry:.19,ox:.02,oy:-.02,rot:.55},
+    {rx:.10,ry:.09,ox:0,oy:0,rot:.66},
   ];
-
-  /* stylus fixed at upper-right */
-  var stylusA=-Math.PI*0.25;
+  var loopsPerRing=1.3;
+  var totalAngle=rings.length*loopsPerRing*Math.PI*2;
+  var travelDur=3000,fadeDur=900,totalDur=travelDur+fadeDur;
 
   (function anim(ts){
     if(!start)start=ts;
     var el=ts-start;
     var raw=Math.min(el/totalDur,1);
-
     pc.width=window.innerWidth;pc.height=window.innerHeight;
     var ctx=pc.getContext('2d');
     ctx.clearRect(0,0,pc.width,pc.height);
     var cx=pc.width/2,cy=pc.height/2;
     var base=Math.min(pc.width,pc.height)*.44;
-
     var tp=Math.min(el/travelDur,1);
-    /* ease in then constant */
-    var te=tp<.3?(tp/.3)*(.3):(tp);
-
-    /* record spin angle — all rings rotate together at same speed */
-    var spinAngle=te*Math.PI*10;
-
-    /* stylus tip fixed position — on outermost ring at stylusA */
-    var tipX=cx+base*rings[0].ox+Math.cos(stylusA)*base*rings[0].rx;
-    var tipY=cy+base*rings[0].oy+Math.sin(stylusA)*base*rings[0].ry;
-
-    /* draw all rings rotating together */
+    var te=tp<.5?2*tp*tp:1-Math.pow(-2*tp+2,2)/2;
+    var traveled=te*totalAngle;
+    var ri=Math.min(Math.floor(traveled/(loopsPerRing*Math.PI*2)),rings.length-1);
+    var air=traveled%(loopsPerRing*Math.PI*2);
+    /* draw rings */
     ctx.strokeStyle='#FCFBF4';
     rings.forEach(function(r,i){
-      /* all rings spin at same rate — same angle, like one record */
-      /* as time passes rings shrink from outside in — stylus moves inward */
-      var outerDone=Math.max(0,tp*rings.length-i);
-      var scale=Math.max(0,1-outerDone*.15);
-      var alpha=r.a*Math.max(0,1-outerDone*.4);
-      if(alpha<=0.02)return;
-      ctx.globalAlpha=alpha;
-      ctx.lineWidth=r.lw;
+      var passed=i<ri,curr=i===ri;
+      var a=passed?.05:curr?.55:.28-i*.03;
+      if(a<=0)return;
+      ctx.globalAlpha=Math.max(0,a);
+      ctx.lineWidth=curr?1.1:.45;
+      ctx.setLineDash(passed?[1,7]:[]);
       ctx.beginPath();
-      ctx.ellipse(
-        cx+base*r.ox*scale,
-        cy+base*r.oy*scale,
-        base*r.rx*scale,
-        base*r.ry*scale,
-        spinAngle+i*.11, /* slight phase offset per ring like real vinyl grooves */
-        0,Math.PI*2
-      );
+      ctx.ellipse(cx+base*r.ox,cy+base*r.oy,base*r.rx,base*r.ry,r.rot,0,Math.PI*2);
       ctx.stroke();
+      ctx.setLineDash([]);
     });
-
-    /* fixed stylus */
-    var armLen=Math.min(pc.width,pc.height)*.13;
-    var armAngle=stylusA-Math.PI*0.30;
-    var armX=tipX+Math.cos(armAngle)*armLen;
-    var armY=tipY+Math.sin(armAngle)*armLen;
-
-    ctx.globalAlpha=.88;
-    ctx.strokeStyle='#FCFBF4';
-    ctx.lineWidth=1;
-    ctx.beginPath();ctx.moveTo(armX,armY);ctx.lineTo(tipX,tipY);ctx.stroke();
-
-    ctx.globalAlpha=.65;
-    ctx.fillStyle='#FCFBF4';
-    ctx.save();
-    ctx.translate(armX,armY);
-    ctx.rotate(Math.atan2(tipY-armY,tipX-armX));
-    ctx.fillRect(-10,-4,20,8);
-    ctx.restore();
-
-    ctx.globalAlpha=.95;
-    ctx.fillStyle='#FCFBF4';
-    var ds=5;
-    ctx.beginPath();
-    ctx.moveTo(tipX,tipY-ds);ctx.lineTo(tipX+ds*.55,tipY);
-    ctx.lineTo(tipX,tipY+ds);ctx.lineTo(tipX-ds*.55,tipY);
-    ctx.closePath();ctx.fill();
+    /* traveling point */
+    if(tp<1){
+      var r=rings[ri];
+      var a=Math.min(air,loopsPerRing*Math.PI*2-.02);
+      var px=cx+base*r.ox+Math.cos(a)*base*r.rx;
+      var py=cy+base*r.oy+Math.sin(a)*base*r.ry;
+      /* trail */
+      for(var tr=10;tr>=0;tr--){
+        var ta2=a-tr*.045;
+        ctx.globalAlpha=(1-tr/11)*.3;
+        ctx.fillStyle='#FCFBF4';
+        ctx.beginPath();
+        ctx.arc(cx+base*r.ox+Math.cos(ta2)*base*r.rx,cy+base*r.oy+Math.sin(ta2)*base*r.ry,1.8*(1-tr/11),0,Math.PI*2);
+        ctx.fill();
+      }
+      ctx.globalAlpha=.85;ctx.fillStyle='#FCFBF4';
+      ctx.beginPath();ctx.arc(px,py,2.2,0,Math.PI*2);ctx.fill();
+    }
     ctx.globalAlpha=1;
-
-    /* radial bloom */
+    /* radial bloom from center outward */
     if(el>travelDur){
       var fp=Math.min((el-travelDur)/fadeDur,1);
       var fe=fp*fp;
