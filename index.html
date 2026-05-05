@@ -36,8 +36,8 @@ h1{font-size:clamp(30px,4.2vw,56px);line-height:1.07;letter-spacing:-.02em;opaci
 .rule{height:1px;background:rgba(252,251,244,.08)}
 
 /* HOW */
-.blk{max-width:1060px;margin:0 auto;padding:88px 48px}
-.lbl{font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--off);margin-bottom:44px}
+.blk{max-width:1060px;margin:0 auto;padding:56px 48px 72px}
+.lbl{font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--off);margin-bottom:36px}
 
 /* Album cover cards — square on desktop, auto-height on mobile */
 .hgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
@@ -59,13 +59,13 @@ canvas.cw{
 .hb{font-size:13px;line-height:1.8;color:var(--off)}
 
 /* CLOSE */
-.close-blk{max-width:760px;margin:0 auto;padding:72px 48px 88px;text-align:center}
+.close-blk{max-width:760px;margin:0 auto;padding:52px 48px 72px;text-align:center}
 .close-h{font-size:clamp(26px,4vw,50px);line-height:1.08;letter-spacing:-.02em;margin-bottom:24px}
 .close-mid{font-size:clamp(15px,1.55vw,18px);line-height:1.8;color:var(--off);margin-bottom:14px}
 .close-s{font-size:clamp(14px,1.4vw,17px);line-height:1.8;color:var(--off);margin-bottom:44px}
 
 /* HUMAN ALGO SECTION */
-.algo-blk{max-width:1060px;margin:0 auto;padding:0 48px 88px;display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center}
+.algo-blk{max-width:1060px;margin:0 auto;padding:0 48px 64px;display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center}
 .algo-left h3{font-size:clamp(22px,3vw,40px);line-height:1.12;letter-spacing:-.02em;margin-bottom:20px}
 .algo-left p{font-size:14px;line-height:1.85;color:var(--off);margin-bottom:16px}
 .algo-right{border:1px solid rgba(252,251,244,.1);padding:40px 36px}
@@ -89,12 +89,13 @@ canvas#rc{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;o
 .btn-sm{padding:11px 28px}
 
 /* FOOTER */
-footer{padding:36px 48px;border-top:1px solid rgba(252,251,244,.08);display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap}
+footer{padding:36px 48px;border-top:1px solid rgba(252,251,244,.08);display:flex;flex-direction:column;gap:28px}
+.footer-top{text-align:center;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--off)}
+.footer-bot{display:flex;align-items:flex-start;justify-content:space-between;gap:24px}
 .footer-contact{display:flex;flex-direction:column;gap:8px}
 .footer-contact-lbl{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--off)}
 .footer-email{font-size:11px;letter-spacing:.06em;color:var(--off);text-decoration:none;border:1px solid rgba(252,251,244,.22);padding:9px 20px;display:inline-block;transition:background .25s,color .25s;font-family:'DejaVu Sans',Arial,sans-serif}
 .footer-email:hover{background:var(--off);color:var(--bg)}
-.footer-mid{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--off);text-align:center}
 .footer-share{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
 .footer-share-lbl{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--off)}
 .share-btn{font-size:11px;letter-spacing:.06em;color:var(--off);background:transparent;border:1px solid rgba(252,251,244,.22);padding:9px 20px;cursor:pointer;font-family:'DejaVu Sans',Arial,sans-serif;transition:background .25s,color .25s}
@@ -127,14 +128,14 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
 @media(max-width:720px){
   nav{padding:18px 20px}
   .hero{padding:90px 20px 72px}
-  .blk{padding:72px 20px}
-  .close-blk{padding:60px 20px 72px}
-  .algo-blk{grid-template-columns:1fr;padding:0 20px 72px;gap:40px}
+  .blk{padding:52px 20px 64px}
+  .close-blk{padding:48px 20px 60px}
+  .algo-blk{grid-template-columns:1fr;padding:0 20px 60px;gap:36px}
   .hgrid{grid-template-columns:1fr;gap:16px}
   .hc{min-height:260px}
-  footer{padding:28px 20px;flex-direction:column;align-items:flex-start;gap:28px}
+  footer{padding:28px 20px;gap:20px}
+  .footer-bot{flex-direction:column;gap:20px}
   .footer-share{align-items:flex-start}
-  .footer-mid{text-align:left}
   .share-sheet{padding:24px 20px 32px}
   .enter{padding:72px 20px}
 }
@@ -218,7 +219,7 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
   <div class="algo-left">
     <h3 class="serif rev">Built on human behavior. Not artificial intelligence.</h3>
     <p class="rev d1">Every response inside the sound portal is a real person making a real choice in a real moment. That data builds something no algorithm can manufacture.</p>
-    <p class="rev d2">Music has always done this. It meets you where you are. FYND TODAY is built to surface that encounter and listen to what it tells us.</p>
+    <p class="rev d2">Music has always done this. It meets you where you are. This is built to surface that encounter and listen to what it tells us.</p>
   </div>
   <div class="algo-right rev d1">
     <div class="algo-stat">
@@ -260,14 +261,16 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
 </div>
 
 <footer>
-  <div class="footer-contact">
-    <span class="footer-contact-lbl">Contact us</span>
-    <a class="footer-email" href="mailto:hello@fyndtoday.com">hello@fyndtoday.com</a>
-  </div>
-  <div class="footer-mid">Life sounds better in color.</div>
-  <div class="footer-share">
-    <span class="footer-share-lbl">Share</span>
-    <button class="share-btn" onclick="openShare()">fyndtoday.com</button>
+  <div class="footer-top">Life sounds better in color.</div>
+  <div class="footer-bot">
+    <div class="footer-contact">
+      <span class="footer-contact-lbl">Contact us</span>
+      <a class="footer-email" href="mailto:hello@fyndtoday.com">hello@fyndtoday.com</a>
+    </div>
+    <div class="footer-share">
+      <span class="footer-share-lbl">Share</span>
+      <button class="share-btn" onclick="openShare()">fyndtoday.com</button>
+    </div>
   </div>
 </footer>
 
@@ -308,7 +311,7 @@ function shareVia(type){
   }
 }
 
-/* HERO WAVE — full width, continuous, left to right */
+/* HERO WAVE — full width, continuous, crisp on all screens */
 (function(){
   var c=document.getElementById('sw');if(!c)return;
   var N=110,bars=[],t=0;
@@ -317,19 +320,26 @@ function shareVia(type){
     bars.push({env:Math.pow(1-d*d,.45),phase:Math.random()*Math.PI*2,speed:.45+Math.random()*.9});
   }
   (function frame(){
-    c.width=c.offsetWidth;c.height=c.offsetHeight;
+    var dpr=window.devicePixelRatio||1;
+    var w=c.offsetWidth,h=c.offsetHeight;
+    c.width=w*dpr;c.height=h*dpr;
+    c.style.width=w+'px';c.style.height=h+'px';
     var ctx=c.getContext('2d');
-    ctx.clearRect(0,0,c.width,c.height);
-    var bw=1;
-    var gap=(c.width-N*bw)/(N-1);
-    var cy=c.height/2,maxH=c.height*.5;
+    ctx.scale(dpr,dpr);
+    ctx.clearRect(0,0,w,h);
+    /* on narrow screens use fewer bars so they stay thin */
+    var n=w<500?70:N;
+    var bw=w<500?.7:1;
+    var gap=(w-n*bw)/(n-1);
+    var cy=h/2,maxH=h*.5;
     t+=.010;
     ctx.fillStyle='#FCFBF4';
-    for(var i=0;i<N;i++){
-      var b=bars[i];
+    for(var i=0;i<n;i++){
+      var idx=Math.floor(i*N/n);
+      var b=bars[idx];
       var sc=.04+.96*Math.abs(Math.sin(t*b.speed+b.phase+i*.10));
-      var h=maxH*b.env*sc;
-      ctx.fillRect(i*(bw+gap),cy-h/2,bw,h);
+      var hh=maxH*b.env*sc;
+      ctx.fillRect(i*(bw+gap),cy-hh/2,bw,hh);
     }
     requestAnimationFrame(frame);
   })();
