@@ -482,8 +482,7 @@ function triggerPortal(){
     var traveled=te*totalAngle;
     var ri=Math.min(Math.floor(traveled/(loopsPerRing*Math.PI*2)),rings.length-1);
     var air=traveled%(loopsPerRing*Math.PI*2);
-
-    /* draw rings — exact from landing1 */
+    /* draw rings */
     ctx.strokeStyle='#FCFBF4';
     rings.forEach(function(r,i){
       var passed=i<ri,curr=i===ri;
@@ -497,39 +496,25 @@ function triggerPortal(){
       ctx.stroke();
       ctx.setLineDash([]);
     });
-
-    /* FIXED STYLUS — constant position, upper right, never moves */
-    var stylusA=-Math.PI*0.25;
-    var tipX=cx+base*rings[0].ox+Math.cos(stylusA)*base*rings[0].rx;
-    var tipY=cy+base*rings[0].oy+Math.sin(stylusA)*base*rings[0].ry;
-    var armLen=Math.min(pc.width,pc.height)*.13;
-    var armAngle=stylusA-Math.PI*0.30;
-    var armX=tipX+Math.cos(armAngle)*armLen;
-    var armY=tipY+Math.sin(armAngle)*armLen;
-
-    ctx.globalAlpha=.85;
-    ctx.strokeStyle='#FCFBF4';
-    ctx.lineWidth=1;
-    ctx.beginPath();ctx.moveTo(armX,armY);ctx.lineTo(tipX,tipY);ctx.stroke();
-
-    ctx.globalAlpha=.65;
-    ctx.fillStyle='#FCFBF4';
-    ctx.save();
-    ctx.translate(armX,armY);
-    ctx.rotate(Math.atan2(tipY-armY,tipX-armX));
-    ctx.fillRect(-10,-4,20,8);
-    ctx.restore();
-
-    ctx.globalAlpha=.95;
-    ctx.fillStyle='#FCFBF4';
-    var ds=5;
-    ctx.beginPath();
-    ctx.moveTo(tipX,tipY-ds);ctx.lineTo(tipX+ds*.55,tipY);
-    ctx.lineTo(tipX,tipY+ds);ctx.lineTo(tipX-ds*.55,tipY);
-    ctx.closePath();ctx.fill();
-
+    /* traveling point */
+    if(tp<1){
+      var r=rings[ri];
+      var a=Math.min(air,loopsPerRing*Math.PI*2-.02);
+      var px=cx+base*r.ox+Math.cos(a)*base*r.rx;
+      var py=cy+base*r.oy+Math.sin(a)*base*r.ry;
+      /* trail */
+      for(var tr=10;tr>=0;tr--){
+        var ta2=a-tr*.045;
+        ctx.globalAlpha=(1-tr/11)*.3;
+        ctx.fillStyle='#FCFBF4';
+        ctx.beginPath();
+        ctx.arc(cx+base*r.ox+Math.cos(ta2)*base*r.rx,cy+base*r.oy+Math.sin(ta2)*base*r.ry,1.8*(1-tr/11),0,Math.PI*2);
+        ctx.fill();
+      }
+      ctx.globalAlpha=.85;ctx.fillStyle='#FCFBF4';
+      ctx.beginPath();ctx.arc(px,py,2.2,0,Math.PI*2);ctx.fill();
+    }
     ctx.globalAlpha=1;
-
     /* radial bloom from center outward */
     if(el>travelDur){
       var fp=Math.min((el-travelDur)/fadeDur,1);
