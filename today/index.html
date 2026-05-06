@@ -1984,28 +1984,29 @@ document.getElementById('signin-verify').addEventListener('click', function(e) {
     btn.dataset.inflight = 'false';
     btn.textContent = 'Verify';
     btn.disabled = false;
-    if (result.success && result.state !== undefined) {
-      // Restore all state into localStorage
+    if (result.success) {
+      // Restore state if available
       var s = result.state;
-      if (s.email) LS.set('email', s.email);
-      if (s.firstName) LS.set('firstName', s.firstName);
-      if (s.completedSets) LS.set('completedSets', s.completedSets);
-      if (s.entryState) { try { localStorage.setItem('fynd_entryState', s.entryState); } catch(ee) {} }
-      if (s.entryStateTime) { try { localStorage.setItem('fynd_entryStateTime', s.entryStateTime); } catch(ee) {} }
-      if (s.completedSets && s.completedSets.length > 0) {
-        // Restore abandoned set state so initUserState can route correctly
-        var all = LS.get('abandonedSets') || {};
-        if (s.playlist && s.cur !== undefined && s.tOrder) {
-          all[s.playlist] = {
-            sessionId: sess.id,
-            playlist: s.playlist,
-            cur: s.cur,
-            tOrder: s.tOrder,
-            entryState: s.entryState || '',
-            log: s.log || [],
-            timestamp: Date.now(),
-          };
-          LS.set('abandonedSets', all);
+      if (s) {
+        if (s.email) LS.set('email', s.email);
+        if (s.firstName) LS.set('firstName', s.firstName);
+        if (s.completedSets) LS.set('completedSets', s.completedSets);
+        if (s.entryState) { try { localStorage.setItem('fynd_entryState', s.entryState); } catch(ee) {} }
+        if (s.entryStateTime) { try { localStorage.setItem('fynd_entryStateTime', s.entryStateTime); } catch(ee) {} }
+        if (s.completedSets && s.completedSets.length > 0) {
+          var all = LS.get('abandonedSets') || {};
+          if (s.playlist && s.cur !== undefined && s.tOrder) {
+            all[s.playlist] = {
+              sessionId: sess.id,
+              playlist: s.playlist,
+              cur: s.cur,
+              tOrder: s.tOrder,
+              entryState: s.entryState || '',
+              log: s.log || [],
+              timestamp: Date.now(),
+            };
+            LS.set('abandonedSets', all);
+          }
         }
       }
       LS.set('returning', true);
@@ -2015,7 +2016,6 @@ document.getElementById('signin-verify').addEventListener('click', function(e) {
       document.getElementById('signin-trigger').textContent = 'signed in \u2713';
       document.getElementById('signin-trigger').style.opacity = '0.55';
       restoreS1();
-      // Re-run initUserState with restored state
       initUserState();
     } else {
       err.textContent = 'Code didn\'t match. Try again.';
