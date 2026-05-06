@@ -274,8 +274,8 @@ html.assign-top, body.assign-top { background: var(--black); }
 /* SIGN-IN PANEL */
 .signin-trigger { position: absolute; bottom: clamp(40px,8vh,64px); left: 50%; transform: translateX(-50%); display: block; font-size: 11px; color: var(--black); opacity: 0.35; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; background: none; border: none; font-family: var(--f); padding: 8px 16px; white-space: nowrap; z-index: 10; }
 .signin-trigger:hover { opacity: 0.55; }
-.signin-panel { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: none; flex-direction: column; align-items: center; width: calc(100% - 64px); max-width: 260px; z-index: 10; }
-.signin-panel.open { display: flex; }
+.signin-panel { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: none; flex-direction: column; align-items: center; width: calc(100% - 64px); max-width: 260px; z-index: 10; pointer-events: none; }
+.signin-panel.open { display: flex; pointer-events: all; }
 .signin-input { width: 100%; font-family: var(--f); font-size: 16px; color: var(--black); background: transparent; border: none; border-bottom: 1px solid rgba(0,0,0,0.25); padding: 8px 0; outline: none; text-align: center; border-radius: 0; -webkit-appearance: none; margin-bottom: 20px; }
 .signin-input::placeholder { color: var(--black); opacity: 0.2; font-size: 14px; }
 .signin-otp-row { display: none; flex-direction: column; align-items: center; width: 100%; }
@@ -1123,7 +1123,7 @@ document.getElementById('s1').addEventListener('click', function() {
     if (!panel.classList.contains('open')) {
       panel.classList.add('open');
       hideS1();
-      document.getElementById('signin-trigger').style.visibility = 'hidden';
+      document.getElementById('signin-trigger').style.display = 'none';
       var msg = document.getElementById('signin-msg');
       if (msg) {
         msg.textContent = 'Sign in to continue where you left off.';
@@ -1905,10 +1905,10 @@ document.getElementById('signin-trigger').addEventListener('click', function(e) 
   panel.classList.toggle('open');
   if (!isOpen) {
     hideS1();
-    document.getElementById('signin-trigger').style.visibility = 'hidden';
+    document.getElementById('signin-trigger').style.display = 'none';
   } else {
     restoreS1();
-    document.getElementById('signin-trigger').style.visibility = 'visible';
+    document.getElementById('signin-trigger').style.display = 'block';
   }
 });
 
@@ -1920,7 +1920,7 @@ document.getElementById('signin-back').addEventListener('click', function(e) {
   document.getElementById('signin-err').style.display = 'none';
   document.getElementById('signin-back').classList.remove('show');
   document.getElementById('signin-email').value = '';
-  document.getElementById('signin-trigger').style.visibility = 'visible';
+  document.getElementById('signin-trigger').style.display = 'block';
   restoreS1();
 });
 
