@@ -268,6 +268,19 @@ html.assign-top, body.assign-top { background: var(--black); }
 #dots.dark .dot { background: var(--bg); }
 
 #sc-wrap { position: absolute; top: -9999px; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+
+/* SIGN-IN PANEL — sits below s1 hint, hidden by default */
+.signin-trigger { display: block; margin-top: 24px; font-size: 12px; color: var(--black); opacity: 0.4; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; background: none; border: none; font-family: var(--f); padding: 8px; }
+.signin-trigger:hover { opacity: 0.65; }
+.signin-panel { display: none; flex-direction: column; align-items: center; width: 100%; max-width: 300px; margin-top: 16px; }
+.signin-panel.open { display: flex; }
+.signin-input { width: 100%; font-family: var(--f); font-size: 16px; color: var(--black); background: transparent; border: none; border-bottom: 1px solid rgba(0,0,0,0.35); padding: 10px 0; outline: none; text-align: center; border-radius: 0; -webkit-appearance: none; margin-bottom: 12px; }
+.signin-input::placeholder { color: var(--black); opacity: 0.22; }
+.signin-otp-row { display: none; flex-direction: column; align-items: center; width: 100%; }
+.signin-otp-row.show { display: flex; }
+.signin-msg { font-size: 12px; color: var(--black); opacity: 0.5; letter-spacing: 0.06em; margin-bottom: 12px; text-align: center; line-height: 1.6; }
+.signin-btn { font-family: var(--f); font-size: 13px; color: var(--black); background: none; border: 1px solid rgba(0,0,0,0.3); border-radius: 2px; padding: 12px 32px; cursor: pointer; letter-spacing: 0.1em; text-transform: uppercase; width: 100%; margin-top: 4px; }
+.signin-err { font-size: 11px; color: rgba(0,0,0,0.55); letter-spacing: 0.04em; margin-top: 6px; display: none; text-align: center; }
 </style>
 </head>
 <body>
@@ -287,6 +300,19 @@ html.assign-top, body.assign-top { background: var(--black); }
   <span class="s1-word">Today.</span>
   <p class="s1-intro">Find out where the music takes you.</p>
   <span class="s1-hint">tap to begin</span>
+</div>
+
+  <button class="signin-trigger" id="signin-trigger">returning? sign in</button>
+  <div class="signin-panel" id="signin-panel">
+    <input class="signin-input" id="signin-email" type="email" placeholder="your email" autocomplete="email" autocapitalize="none">
+    <button class="signin-btn" id="signin-send">Send sign-in code</button>
+    <div class="signin-otp-row" id="signin-otp-row">
+      <div class="signin-msg" id="signin-msg">Code sent. Check your email.</div>
+      <input class="signin-input" id="signin-otp" type="text" inputmode="numeric" placeholder="6-digit code" autocomplete="one-time-code" maxlength="6">
+      <button class="signin-btn" id="signin-verify">Verify</button>
+    </div>
+    <div class="signin-err" id="signin-err">Something didn't match. Try again.</div>
+  </div>
 </div>
 
 <!-- S2 ENTRY -->
@@ -850,6 +876,8 @@ function playTrack(idx) {
     if (sess.cur > 4) sess.cur = 0;
     document.getElementById('tc').textContent = (sess.cur + 1) + ' — 5';
     setDots(sess.cur);
+    // Persist session state for cross-browser sign-in restore
+    saveSessionState();
   }
   if (widgetReady) {
     go();
@@ -1066,6 +1094,8 @@ function doReveal(ps) {
     saveAbandoned();
     sess.cur--;
   }
+  // Persist session state for cross-browser sign-in restore
+  saveSessionState();
 }
 
 // S1 tap
@@ -1782,6 +1812,149 @@ function sendRecapEmail(email, firstName, playlist, log, entryState) {
     body: JSON.stringify({ email: email, firstName: firstName, playlist: playlist, log: log, entryState: entryState || '' }),
   }).catch(function(err) { console.error('Recap email error:', err); });
 }
+
+// ── BACK BUTTON ─────────────────────────────────────────
+window.addEventListener('popstate', function() {
+  window.location.href = 'https://fyndtoday.com';
+});
+history.pushState(null, '', window.location.href);
+
+// ── SAVE SESSION STATE (cross-browser restore) ──────────
+function saveSessionState() {
+  var email = LS.get('email') || '';
+  if (!email) return; // no email yet — nothing to key state on
+  var completed = LS.get('completedSets') || [];
+  var state = {
+    email: email,
+    firstName: LS.get('firstName') || '',
+    entryState: sess.entryState || '',
+    entryStateTime: (function() { try { return localStorage.getItem('fynd_entryStateTime') || ''; } catch(e) { return ''; } })(),
+    completedSets: completed,
+    playlist: sess.playlist,
+    cur: Math.min(sess.cur, 4),
+    tOrder: sess.tOrder,
+    log: sess.log || [],
+    visitNumber: window._visitNumber || 1,
+    updatedAt: Date.now(),
+  };
+  fetch('/.netlify/functions/save-state', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: email, state: state }),
+  }).catch(function(err) { console.error('Save state error:', err); });
+}
+
+// ── SIGN-IN UI HANDLERS ──────────────────────────────────
+document.getElementById('signin-trigger').addEventListener('click', function(e) {
+  e.stopPropagation();
+  var panel = document.getElementById('signin-panel');
+  panel.classList.toggle('open');
+});
+
+document.getElementById('signin-panel').addEventListener('click', function(e) {
+  e.stopPropagation(); // prevent s1 tap handler from firing
+});
+
+document.getElementById('signin-send').addEventListener('click', function(e) {
+  e.stopPropagation();
+  var emailVal = document.getElementById('signin-email').value.trim();
+  var err = document.getElementById('signin-err');
+  var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  if (!emailVal || !emailRegex.test(emailVal)) {
+    err.textContent = 'Enter a valid email address.';
+    err.style.display = 'block';
+    return;
+  }
+  err.style.display = 'none';
+  var btn = document.getElementById('signin-send');
+  btn.textContent = 'Sending...';
+  btn.disabled = true;
+  fetch('/.netlify/functions/send-signin', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: emailVal }),
+  }).then(function(r) { return r.json(); }).then(function(result) {
+    btn.textContent = 'Send sign-in code';
+    btn.disabled = false;
+    if (result.success) {
+      document.getElementById('signin-otp-row').classList.add('show');
+      document.getElementById('signin-msg').textContent = 'Code sent. Check your email.';
+    } else {
+      err.textContent = result.error || 'Could not send code. Try again.';
+      err.style.display = 'block';
+    }
+  }).catch(function() {
+    btn.textContent = 'Send sign-in code';
+    btn.disabled = false;
+    err.textContent = 'Something went wrong. Try again.';
+    err.style.display = 'block';
+  });
+});
+
+document.getElementById('signin-verify').addEventListener('click', function(e) {
+  e.stopPropagation();
+  var emailVal = document.getElementById('signin-email').value.trim();
+  var otpVal = document.getElementById('signin-otp').value.trim();
+  var err = document.getElementById('signin-err');
+  if (!otpVal || otpVal.length !== 6) {
+    err.textContent = 'Enter the 6-digit code from your email.';
+    err.style.display = 'block';
+    return;
+  }
+  err.style.display = 'none';
+  var btn = document.getElementById('signin-verify');
+  btn.textContent = 'Verifying...';
+  btn.disabled = true;
+  fetch('/.netlify/functions/verify-signin', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: emailVal, code: otpVal }),
+  }).then(function(r) { return r.json(); }).then(function(result) {
+    btn.textContent = 'Verify';
+    btn.disabled = false;
+    if (result.success && result.state) {
+      // Restore all state into localStorage
+      var s = result.state;
+      if (s.email) LS.set('email', s.email);
+      if (s.firstName) LS.set('firstName', s.firstName);
+      if (s.completedSets) LS.set('completedSets', s.completedSets);
+      if (s.entryState) { try { localStorage.setItem('fynd_entryState', s.entryState); } catch(ee) {} }
+      if (s.entryStateTime) { try { localStorage.setItem('fynd_entryStateTime', s.entryStateTime); } catch(ee) {} }
+      if (s.completedSets && s.completedSets.length > 0) {
+        // Restore abandoned set state so initUserState can route correctly
+        var all = LS.get('abandonedSets') || {};
+        if (s.playlist && s.cur !== undefined && s.tOrder) {
+          all[s.playlist] = {
+            sessionId: sess.id,
+            playlist: s.playlist,
+            cur: s.cur,
+            tOrder: s.tOrder,
+            entryState: s.entryState || '',
+            log: s.log || [],
+            timestamp: Date.now(),
+          };
+          LS.set('abandonedSets', all);
+        }
+      }
+      LS.set('returning', true);
+      document.getElementById('signin-msg').textContent = 'Signed in. Tap Today. to continue.';
+      document.getElementById('signin-otp-row').classList.remove('show');
+      document.getElementById('signin-panel').classList.remove('open');
+      document.getElementById('signin-trigger').textContent = 'signed in \u2713';
+      document.getElementById('signin-trigger').style.opacity = '0.55';
+      // Re-run initUserState with restored state
+      initUserState();
+    } else {
+      err.textContent = 'Code didn\'t match. Try again.';
+      err.style.display = 'block';
+    }
+  }).catch(function() {
+    btn.textContent = 'Verify';
+    btn.disabled = false;
+    err.textContent = 'Something went wrong. Try again.';
+    err.style.display = 'block';
+  });
+});
 
 initUserState();
 
