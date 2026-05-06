@@ -1123,6 +1123,39 @@ document.getElementById('s1').addEventListener('click', function() {
     return;
   }
 
+  // If a set is loaded and ready to play — skip all gates and go directly
+  if (window._skipEntry) {
+    window._skipEntry = false;
+    console.log('FYND: skipEntry firing, playlist=' + sess.playlist + ' widgetReady=' + widgetReady);
+    try { sess.entryState = localStorage.getItem('fynd_entryState') || sess.entryState || ''; } catch(e) {}
+    if (window._resumeMode && window._resumeCur !== undefined) {
+      sess.cur = window._resumeCur;
+      window._resumeMode = false;
+      window._resumeCur = undefined;
+      try {
+        var silentAudioR = new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAEAS' +
+          'AAQARAAAAAgABAAIAZGF0YQAAAAA=');
+        silentAudioR.volume = 0;
+        silentAudioR.play().catch(function(){});
+      } catch(e) {}
+      if (widgetReady) { widget.skip(sess.tOrder[sess.cur]); sess._primedIdx = sess.tOrder[sess.cur]; }
+      show('s3');
+      setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 300);
+      return;
+    }
+    sess.tOrder = shuffle([0,1,2,3,4]);
+    try {
+      var silentAudioP = new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAEAS' +
+        'AAQARAAAAAgABAAIAZGF0YQAAAAA=');
+      silentAudioP.volume = 0;
+      silentAudioP.play().catch(function(){});
+    } catch(e) {}
+    if (widgetReady) { widget.skip(sess.tOrder[0]); sess._primedIdx = sess.tOrder[0]; }
+    show('s3');
+    setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 300);
+    return;
+  }
+
   // Gate: only block tap-to-begin if user has submitted their email (has an account)
   if (window._signinBypass) { window._signinBypass = false; }
   else {
@@ -1279,39 +1312,6 @@ document.getElementById('s1').addEventListener('click', function() {
     }
     if (entryExpired) { showEntryThenRoute(goToAllComplete); return; }
     goToAllComplete();
-    return;
-  }
-
-  if (window._skipEntry) {
-    console.log('FYND: _skipEntry true, playlist=' + sess.playlist + ' widgetReady=' + widgetReady);
-    window._skipEntry = false;
-    // Restore entryState from localStorage — not re-selected on Sets 2-5
-    try { sess.entryState = localStorage.getItem('fynd_entryState') || sess.entryState || ''; } catch(e) {}
-    if (window._resumeMode && window._resumeCur !== undefined) {
-      sess.cur = window._resumeCur;
-      window._resumeMode = false;
-      window._resumeCur = undefined;
-      try {
-        var silentAudioR = new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAA' +
-          'EAAQARAAAAAgABAAIAZGF0YQAAAAA=');
-        silentAudioR.volume = 0;
-        silentAudioR.play().catch(function(){});
-      } catch(e) {}
-      if (widgetReady) { widget.skip(sess.tOrder[sess.cur]); sess._primedIdx = sess.tOrder[sess.cur]; }
-      show('s3');
-      setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 300);
-      return;
-    }
-    sess.tOrder = shuffle([0,1,2,3,4]);
-    try {
-      var silentAudioP = new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAA' +
-        'EAAQARAAAAAgABAAIAZGF0YQAAAAA=');
-      silentAudioP.volume = 0;
-      silentAudioP.play().catch(function(){});
-    } catch(e) {}
-    if (widgetReady) { widget.skip(sess.tOrder[0]); sess._primedIdx = sess.tOrder[0]; }
-    show('s3');
-    setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 300);
     return;
   }
 
