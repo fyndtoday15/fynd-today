@@ -1961,6 +1961,8 @@ document.getElementById('signin-send').addEventListener('click', function(e) {
 
 document.getElementById('signin-verify').addEventListener('click', function(e) {
   e.stopPropagation();
+  var btn = document.getElementById('signin-verify');
+  if (btn.dataset.inflight === 'true') return; // block double-tap
   var emailVal = document.getElementById('signin-email').value.trim();
   var otpVal = document.getElementById('signin-otp').value.trim();
   var err = document.getElementById('signin-err');
@@ -1973,14 +1975,16 @@ document.getElementById('signin-verify').addEventListener('click', function(e) {
   var btn = document.getElementById('signin-verify');
   btn.textContent = 'Verifying...';
   btn.disabled = true;
+  btn.dataset.inflight = 'true';
   fetch('/.netlify/functions/verify-signin', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email: emailVal, code: otpVal }),
   }).then(function(r) { return r.json(); }).then(function(result) {
+    btn.dataset.inflight = 'false';
     btn.textContent = 'Verify';
     btn.disabled = false;
-    if (result.success && result.state) {
+    if (result.success && result.state !== undefined) {
       // Restore all state into localStorage
       var s = result.state;
       if (s.email) LS.set('email', s.email);
@@ -2018,6 +2022,7 @@ document.getElementById('signin-verify').addEventListener('click', function(e) {
       err.style.display = 'block';
     }
   }).catch(function() {
+    btn.dataset.inflight = 'false';
     btn.textContent = 'Verify';
     btn.disabled = false;
     err.textContent = 'Something went wrong. Try again.';
