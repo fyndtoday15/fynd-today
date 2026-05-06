@@ -53,11 +53,11 @@ exports.handler = async function(event, context) {
     };
   }
 
-  // Look up OTP record in Airtable
+  // Query OTP records by email only — validate code in JS to avoid Airtable type-matching issues
   try {
-    const filterFormula = encodeURIComponent(`AND({Email}="${email}",{Code}="${code}")`);
+    const filterFormula = encodeURIComponent(`{Email}="${email}"`);
     const otpRes = await fetch(
-      AIRTABLE_BASE + encodeURIComponent('OTP') + '?filterByFormula=' + filterFormula + '&sort%5B0%5D%5Bfield%5D=Expires&sort%5B0%5D%5Bdirection%5D=desc&maxRecords=1',
+      AIRTABLE_BASE + encodeURIComponent('OTP') + '?filterByFormula=' + filterFormula + '&sort%5B0%5D%5Bfield%5D=Expires&sort%5B0%5D%5Bdirection%5D=desc&maxRecords=5',
       { headers: AIRTABLE_HEADERS }
     );
     const otpData = await otpRes.json();
@@ -70,18 +70,29 @@ exports.handler = async function(event, context) {
       };
     }
 
-    const record = otpData.records[0];
-    const expires = record.fields['Expires'];
-    if (!expires || Date.now() > expires) {
+    // Find a record where code matches and is not expired
+    const now = Date.now();
+    let matchedRecord = null;
+    for (var i = 0; i < otpData.records.length; i++) {
+      var rec = otpData.records[i];
+      var storedCode = String(rec.fields['Code'] || '').trim();
+      var expires = Number(rec.fields['Expires'] || 0);
+      if (storedCode === String(code).trim() && now <= expires) {
+        matchedRecord = rec;
+        break;
+      }
+    }
+
+    if (!matchedRecord) {
       return {
         statusCode: 200,
         headers: { 'Access-Control-Allow-Origin': allowedOrigin },
-        body: JSON.stringify({ success: false, error: 'Code expired' }),
+        body: JSON.stringify({ success: false, error: 'Code did not match or expired' }),
       };
     }
 
     // Delete used OTP record (fire-and-forget)
-    fetch(AIRTABLE_BASE + encodeURIComponent('OTP') + '/' + record.id, {
+    fetch(AIRTABLE_BASE + encodeURIComponent('OTP') + '/' + matchedRecord.id, {
       method: 'DELETE',
       headers: AIRTABLE_HEADERS,
     }).catch(function(e) { console.error('OTP delete error:', e); });
@@ -97,7 +108,7 @@ exports.handler = async function(event, context) {
 
   // OTP valid — look up session state from Sessions table by email
   try {
-    const filterFormula2 = encodeURIComponent(`AND({Email}="${email}",{Session State}!="")`);
+    const filterFormula2 = encodeURIComponent(`AND({Email}="${email}",{Track ID}="SESSION_STATE")`);
     const sessRes = await fetch(
       AIRTABLE_BASE + encodeURIComponent('Sessions') + '?filterByFormula=' + filterFormula2 + '&sort%5B0%5D%5Bfield%5D=State+Updated&sort%5B0%5D%5Bdirection%5D=desc&maxRecords=1',
       { headers: AIRTABLE_HEADERS }
@@ -121,7 +132,6 @@ exports.handler = async function(event, context) {
 
   } catch(err) {
     console.error('Session state lookup error:', err);
-    // OTP was valid — return success even if state lookup fails
     return {
       statusCode: 200,
       headers: { 'Access-Control-Allow-Origin': allowedOrigin },
