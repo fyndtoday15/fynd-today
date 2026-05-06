@@ -272,9 +272,9 @@ html.assign-top, body.assign-top { background: var(--black); }
 #sc-wrap { position: absolute; top: -9999px; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
 
 /* SIGN-IN PANEL — sits below s1 hint, hidden by default */
-.signin-trigger { position: absolute; bottom: clamp(48px,9vh,72px); left: 50%; transform: translateX(-50%); display: block; font-size: 12px; color: var(--black); opacity: 0.4; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; background: none; border: none; font-family: var(--f); padding: 8px; white-space: nowrap; z-index: 10; }
+.signin-trigger { position: absolute; bottom: clamp(36px,6vh,52px); left: 50%; transform: translateX(-50%); display: block; font-size: 12px; color: var(--black); opacity: 0.4; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; background: none; border: none; font-family: var(--f); padding: 8px; white-space: nowrap; z-index: 10; }
 .signin-trigger:hover { opacity: 0.65; }
-.signin-panel { position: absolute; bottom: clamp(80px,14vh,110px); left: 50%; transform: translateX(-50%); display: none; flex-direction: column; align-items: center; width: calc(100% - 64px); max-width: 300px; z-index: 10; }
+.signin-panel { position: fixed; bottom: 0; left: 0; right: 0; display: none; flex-direction: column; align-items: center; background: var(--bg); padding: 24px 32px calc(env(safe-area-inset-bottom) + 32px); border-top: 1px solid rgba(0,0,0,0.08); z-index: 200; }
 .signin-panel.open { display: flex; }
 .signin-input { width: 100%; font-family: var(--f); font-size: 16px; color: var(--black); background: transparent; border: none; border-bottom: 1px solid rgba(0,0,0,0.35); padding: 10px 0; outline: none; text-align: center; border-radius: 0; -webkit-appearance: none; margin-bottom: 12px; }
 .signin-input::placeholder { color: var(--black); opacity: 0.22; }
@@ -1850,7 +1850,20 @@ function saveSessionState() {
 document.getElementById('signin-trigger').addEventListener('click', function(e) {
   e.stopPropagation();
   var panel = document.getElementById('signin-panel');
+  var isOpen = panel.classList.contains('open');
   panel.classList.toggle('open');
+  var word = document.querySelector('.s1-word');
+  var intro = document.querySelector('.s1-intro');
+  var hint = document.querySelector('.s1-hint');
+  if (!isOpen) {
+    if (word) word.style.display = 'none';
+    if (intro) intro.style.display = 'none';
+    if (hint) hint.style.display = 'none';
+  } else {
+    if (word) word.style.display = '';
+    if (intro) intro.style.display = '';
+    if (hint) hint.style.display = '';
+  }
 });
 
 document.getElementById('signin-panel').addEventListener('click', function(e) {
@@ -1944,6 +1957,13 @@ document.getElementById('signin-verify').addEventListener('click', function(e) {
       document.getElementById('signin-panel').classList.remove('open');
       document.getElementById('signin-trigger').textContent = 'signed in \u2713';
       document.getElementById('signin-trigger').style.opacity = '0.55';
+      // Restore s1 text
+      var word = document.querySelector('.s1-word');
+      var intro = document.querySelector('.s1-intro');
+      var hint = document.querySelector('.s1-hint');
+      if (word) word.style.display = '';
+      if (intro) intro.style.display = '';
+      if (hint) hint.style.display = '';
       // Re-run initUserState with restored state
       initUserState();
     } else {
