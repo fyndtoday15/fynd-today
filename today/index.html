@@ -2019,28 +2019,10 @@ document.getElementById('signin-verify').addEventListener('click', function(e) {
       document.getElementById('signin-panel').classList.remove('open');
       document.getElementById('signin-trigger').style.display = 'none';
       restoreS1();
-      // Route directly — set the restore flag and call the existing screen restore logic
+      // Set restore flag and bypass gate, then fire s1 tap to run full routing
       window._restoreSetScreen = true;
-      // Use a short delay so screen transition is clean
-      setTimeout(function() {
-        if (window._restoreSetScreen) {
-          window._restoreSetScreen = false;
-          showScreen('s6');
-          document.getElementById('listen-again').style.display = 'block';
-          // Mark all completed sets as used on buttons
-          var completed = LS.get('completedSets') || [];
-          document.querySelectorAll('.set-btn').forEach(function(b) {
-            var pl = b.getAttribute('onclick') ? b.getAttribute('onclick').replace("loadSet('","").replace("')","") : '';
-            if (completed.indexOf(pl) !== -1) b.classList.add('used');
-          });
-          // Label resume buttons for abandoned sets
-          var ab = LS.get('abandonedSets') || {};
-          document.querySelectorAll('.set-btn').forEach(function(b) {
-            var pl = b.getAttribute('onclick') ? b.getAttribute('onclick').replace("loadSet('","").replace("')","") : '';
-            if (ab[pl]) b.textContent = 'Resume ' + b.textContent;
-          });
-        }
-      }, 50);
+      window._signinBypass = true;
+      document.getElementById('s1').click();
     } else {
       err.textContent = 'Code didn\'t match. Try again.';
       err.style.display = 'block';
