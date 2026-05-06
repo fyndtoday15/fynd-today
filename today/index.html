@@ -1163,6 +1163,8 @@ document.getElementById('s1').addEventListener('click', function() {
       panel.classList.add('open');
       hideS1();
       document.getElementById('signin-trigger').style.display = 'none';
+      _screenHistory.push('signin');
+      history.pushState({ screen: 'signin' }, '', window.location.href);
       var msg = document.getElementById('signin-msg');
       if (msg) {
         msg.textContent = 'Sign in to continue where you left off.';
@@ -1910,13 +1912,22 @@ window.addEventListener('popstate', function(e) {
     _panel.style.display = 'none';
     document.getElementById('signin-trigger').style.display = 'block';
     restoreS1();
-    history.pushState({ screen: 's1' }, '', window.location.href);
     _screenHistory = ['s1'];
     _navLock = false;
     return;
   }
 
-  if (prev === 's1') {
+  if (prev === 'signin') {
+    // Close panel, go back to s1
+    var _sp = document.getElementById('signin-panel');
+    if (_sp) { _sp.classList.remove('open'); _sp.style.display = 'none'; }
+    document.getElementById('signin-trigger').style.display = 'block';
+    restoreS1();
+    _origShow('s1');
+  } else if (prev === 's3') {
+    // From listen — always go to sets page
+    _origShow('s6');
+  } else if (prev === 's1') {
     var s1el = document.getElementById('s1');
     if (s1el) {
       s1el.classList.remove('set-reload');
@@ -1986,6 +1997,8 @@ document.getElementById('signin-trigger').addEventListener('click', function(e) 
   panel.classList.add('open');
   hideS1();
   document.getElementById('signin-trigger').style.display = 'none';
+  _screenHistory.push('signin');
+  history.pushState({ screen: 'signin' }, '', window.location.href);
 });
 
 document.getElementById('signin-back').addEventListener('click', function(e) {
