@@ -1115,9 +1115,13 @@ function doReveal(ps) {
 
 // S1 tap
 document.getElementById('s1').addEventListener('click', function() {
-  // Block tap-to-begin if sign-in panel is open
+  // If sign-in panel is open, close it and do nothing else
   var _panel = document.getElementById('signin-panel');
-  if (_panel.classList.contains('open') || _panel.style.display === 'flex') return;
+  if (_panel.classList.contains('open') || _panel.style.display === 'flex') {
+    _panel.classList.remove('open');
+    _panel.style.display = 'none';
+    return;
+  }
 
   // Gate: only block tap-to-begin if user has submitted their email (has an account)
   if (window._signinBypass) { window._signinBypass = false; }
@@ -1565,6 +1569,9 @@ function setLabel(playlistName) {
 }
 
 function showSetsScreen() {
+  // Force clear sign-in panel state
+  var _sp = document.getElementById('signin-panel');
+  if (_sp) { _sp.classList.remove('open'); _sp.style.display = 'none'; }
   var h = document.getElementById('email-head');
   if (h) { h.textContent = "You'll hear when something new arrives."; h.style.fontSize = '18px'; h.style.opacity = '0.6'; }
   var emailIn = document.getElementById('email-in'); if (emailIn) emailIn.style.display = 'none';
@@ -2057,6 +2064,22 @@ document.getElementById('signin-verify').addEventListener('click', function(e) {
     err.style.display = 'block';
   });
 });
+
+// DEBUG: catch anything adding open class to signin-panel
+(function() {
+  var obs = new MutationObserver(function(mutations) {
+    mutations.forEach(function(m) {
+      if (m.attributeName === 'class') {
+        var el = m.target;
+        if (el.classList.contains('open')) {
+          console.error('FYND DEBUG: signin-panel got open class', new Error().stack);
+        }
+      }
+    });
+  });
+  var panel = document.getElementById('signin-panel');
+  if (panel) obs.observe(panel, { attributes: true });
+})();
 
 initUserState();
 
