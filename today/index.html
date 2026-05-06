@@ -1107,10 +1107,10 @@ function doReveal(ps) {
   } else {
     sess.cur++;
     saveAbandoned();
+    // Save state at incremented position — this is where they resume next
+    saveSessionState();
     sess.cur--;
   }
-  // Persist session state for cross-browser sign-in restore
-  saveSessionState();
 }
 
 // S1 tap
