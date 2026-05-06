@@ -1123,6 +1123,7 @@ document.getElementById('s1').addEventListener('click', function() {
     if (!panel.classList.contains('open')) {
       panel.classList.add('open');
       hideS1();
+      document.getElementById('signin-trigger').style.visibility = 'hidden';
       var msg = document.getElementById('signin-msg');
       if (msg) {
         msg.textContent = 'Sign in to continue where you left off.';
@@ -1901,7 +1902,13 @@ document.getElementById('signin-trigger').addEventListener('click', function(e) 
   var panel = document.getElementById('signin-panel');
   var isOpen = panel.classList.contains('open');
   panel.classList.toggle('open');
-  if (!isOpen) { hideS1(); } else { restoreS1(); }
+  if (!isOpen) {
+    hideS1();
+    document.getElementById('signin-trigger').style.visibility = 'hidden';
+  } else {
+    restoreS1();
+    document.getElementById('signin-trigger').style.visibility = 'visible';
+  }
 });
 
 document.getElementById('signin-back').addEventListener('click', function(e) {
@@ -1912,6 +1919,7 @@ document.getElementById('signin-back').addEventListener('click', function(e) {
   document.getElementById('signin-err').style.display = 'none';
   document.getElementById('signin-back').classList.remove('show');
   document.getElementById('signin-email').value = '';
+  document.getElementById('signin-trigger').style.visibility = 'visible';
   restoreS1();
 });
 
@@ -2011,17 +2019,28 @@ document.getElementById('signin-verify').addEventListener('click', function(e) {
       document.getElementById('signin-panel').classList.remove('open');
       document.getElementById('signin-trigger').style.display = 'none';
       restoreS1();
-      // Route based on restored state
-      var completedAfterSignin = (LS.get('completedSets') || []).length > 0;
-      var abandonedAfterSignin = (function() { var ab = LS.get('abandonedSets') || {}; return Object.keys(ab).length > 0; })();
-      if (completedAfterSignin || abandonedAfterSignin) {
-        // Has real session data — let initUserState route
-        initUserState();
-      } else {
-        // Verified but no saved cross-browser state — proceed as fresh tap
-        window._signinBypass = true;
-        document.getElementById('s1').click();
-      }
+      // Route directly — set the restore flag and call the existing screen restore logic
+      window._restoreSetScreen = true;
+      // Use a short delay so screen transition is clean
+      setTimeout(function() {
+        if (window._restoreSetScreen) {
+          window._restoreSetScreen = false;
+          showScreen('s6');
+          document.getElementById('listen-again').style.display = 'block';
+          // Mark all completed sets as used on buttons
+          var completed = LS.get('completedSets') || [];
+          document.querySelectorAll('.set-btn').forEach(function(b) {
+            var pl = b.getAttribute('onclick') ? b.getAttribute('onclick').replace("loadSet('","").replace("')","") : '';
+            if (completed.indexOf(pl) !== -1) b.classList.add('used');
+          });
+          // Label resume buttons for abandoned sets
+          var ab = LS.get('abandonedSets') || {};
+          document.querySelectorAll('.set-btn').forEach(function(b) {
+            var pl = b.getAttribute('onclick') ? b.getAttribute('onclick').replace("loadSet('","").replace("')","") : '';
+            if (ab[pl]) b.textContent = 'Resume ' + b.textContent;
+          });
+        }
+      }, 50);
     } else {
       err.textContent = 'Code didn\'t match. Try again.';
       err.style.display = 'block';
