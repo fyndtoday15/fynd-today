@@ -1875,22 +1875,48 @@ function sendRecapEmail(email, firstName, playlist, log, entryState) {
 // ── BACK BUTTON ─────────────────────────────────────────
 // Two history states: s1 (inner) and fyndtoday.com (outer)
 // Listen screen → s1 → fyndtoday.com
-var _currentScreen = 's1';
+// ── BACK BUTTON — real navigation history ───────────────
+var _screenHistory = ['s1'];
+var _navLock = false;
+
 var _origShow = show;
 show = function(id) {
-  _currentScreen = id;
+  if (_screenHistory[_screenHistory.length - 1] !== id) {
+    _screenHistory.push(id);
+    history.pushState({ screen: id }, '', window.location.href);
+  }
   _origShow(id);
 };
 
-history.pushState({ screen: 'home' }, '', window.location.href); // outer boundary
-history.pushState({ screen: 's1' }, '', window.location.href);   // current position
+history.pushState({ screen: 'boundary' }, '', window.location.href);
+history.pushState({ screen: 's1' }, '', window.location.href);
 
 window.addEventListener('popstate', function(e) {
-  if (_currentScreen !== 's1') {
-    // On listen/reveal/recap screen — go back to s1
+  if (_navLock) return;
+  _navLock = true;
+  setTimeout(function() { _navLock = false; }, 300);
+
+  if (_screenHistory.length > 1) _screenHistory.pop();
+  var prev = _screenHistory[_screenHistory.length - 1] || 's1';
+
+  if (!e.state || e.state.screen === 'boundary') {
+    window.location.href = 'https://fyndtoday.com';
+    return;
+  }
+
+  var _panel = document.getElementById('signin-panel');
+  if (_panel && _panel.classList.contains('open')) {
+    _panel.classList.remove('open');
+    _panel.style.display = 'none';
+    document.getElementById('signin-trigger').style.display = 'block';
+    restoreS1();
     history.pushState({ screen: 's1' }, '', window.location.href);
-    show('s1');
-    // Restore s1 to default state
+    _screenHistory = ['s1'];
+    _navLock = false;
+    return;
+  }
+
+  if (prev === 's1') {
     var s1el = document.getElementById('s1');
     if (s1el) {
       s1el.classList.remove('set-reload');
@@ -1900,9 +1926,9 @@ window.addEventListener('popstate', function(e) {
     document.body.style.background = '';
     var tc = document.getElementById('theme-color');
     if (tc) tc.content = '#FCFBF4';
+    _origShow('s1');
   } else {
-    // On s1 — go to fyndtoday.com
-    window.location.href = 'https://fyndtoday.com';
+    _origShow(prev);
   }
 });
 
