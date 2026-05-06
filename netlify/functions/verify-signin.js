@@ -52,12 +52,12 @@ exports.handler = async function(event, context) {
     };
   }
 
-  // Step 1: Query OTP table by email
+  // Step 1: Validate OTP
   let matchedRecord = null;
   try {
     const filterFormula = encodeURIComponent(`{Email}="${email}"`);
     const otpUrl = AIRTABLE_BASE + encodeURIComponent('OTP') + '?filterByFormula=' + filterFormula + '&maxRecords=10';
-    console.log('OTP query URL:', otpUrl);
+    console.log('OTP query:', otpUrl);
 
     const otpRes = await fetch(otpUrl, { headers: AIRTABLE_HEADERS });
     const otpData = await otpRes.json();
@@ -78,7 +78,7 @@ exports.handler = async function(event, context) {
       var rec = otpData.records[i];
       var storedCode = String(rec.fields['Code'] || '').trim();
       var expires = Number(rec.fields['Expires'] || 0);
-      console.log('Comparing: stored=' + storedCode + ' submitted=' + submittedCode + ' expires=' + expires + ' now=' + now + ' expired=' + (now > expires));
+      console.log('Comparing: stored=' + storedCode + ' submitted=' + submittedCode + ' now=' + now + ' expires=' + expires);
       if (storedCode === submittedCode && now <= expires) {
         matchedRecord = rec;
         break;
@@ -93,7 +93,7 @@ exports.handler = async function(event, context) {
       };
     }
 
-    console.log('Match found, record id:', matchedRecord.id);
+    console.log('OTP matched, record:', matchedRecord.id);
   } catch(err) {
     console.error('OTP lookup error:', err);
     return {
@@ -103,31 +103,30 @@ exports.handler = async function(event, context) {
     };
   }
 
-  // Step 2: Delete used OTP (fire-and-forget, fully wrapped)
+  // Step 2: Delete used OTP
   try {
-    console.log('Deleting OTP record:', matchedRecord.id);
     fetch(AIRTABLE_BASE + encodeURIComponent('OTP') + '/' + matchedRecord.id, {
       method: 'DELETE',
       headers: AIRTABLE_HEADERS,
     }).then(function(r) {
       console.log('OTP delete status:', r.status);
     }).catch(function(e) {
-      console.error('OTP delete fetch error:', e);
+      console.error('OTP delete error:', e);
     });
   } catch(e) {
     console.error('OTP delete setup error:', e);
   }
 
-  // Step 3: Look up session state — return success regardless of outcome
-  console.log('Looking up session state for:', email);
+  // Step 3: Look up session state by email on SESSION_STATE record
+  console.log('Looking up session state for email:', email);
   try {
     const filterFormula2 = encodeURIComponent(`AND({Email}="${email}",{Track ID}="SESSION_STATE")`);
     const sessRes = await fetch(
-      AIRTABLE_BASE + encodeURIComponent('Sessions') + '?filterByFormula=' + filterFormula2 + '&maxRecords=1',
+      AIRTABLE_BASE + encodeURIComponent('Sessions') + '?filterByFormula=' + filterFormula2 + '&sort%5B0%5D%5Bfield%5D=State+Updated&sort%5B0%5D%5Bdirection%5D=desc&maxRecords=1',
       { headers: AIRTABLE_HEADERS }
     );
     const sessData = await sessRes.json();
-    console.log('Session state response:', JSON.stringify(sessData));
+    console.log('Session state lookup:', JSON.stringify(sessData));
 
     let state = null;
     if (sessData.records && sessData.records.length > 0) {
@@ -146,7 +145,6 @@ exports.handler = async function(event, context) {
 
   } catch(err) {
     console.error('Session lookup error:', err);
-    // Still return success — OTP was valid
     return {
       statusCode: 200,
       headers: { 'Access-Control-Allow-Origin': allowedOrigin },
