@@ -890,6 +890,10 @@ function playTrack(idx) {
     // Persist session state for cross-browser sign-in restore
     saveSessionState();
   }
+  // Show UI immediately regardless of widget state
+  document.getElementById('tc').textContent = (sess.cur + 1) + ' — 5';
+  setDots(sess.cur);
+
   if (widgetReady) {
     go();
   } else {
@@ -1560,6 +1564,19 @@ function setLabel(playlistName) {
   return labels[playlistName] || '';
 }
 
+function showSetsScreen() {
+  var h = document.getElementById('email-head');
+  if (h) { h.textContent = "You'll hear when something new arrives."; h.style.fontSize = '18px'; h.style.opacity = '0.6'; }
+  var emailIn = document.getElementById('email-in'); if (emailIn) emailIn.style.display = 'none';
+  var nameIn = document.getElementById('name-in'); if (nameIn) nameIn.style.display = 'none';
+  var emailSub = document.getElementById('email-sub'); if (emailSub) emailSub.style.display = 'none';
+  var cl1 = document.getElementById('consent-label'); if (cl1) cl1.style.display = 'none';
+  var rn1 = document.getElementById('return-note'); if (rn1) rn1.style.display = 'none';
+  var again = document.getElementById('listen-again');
+  if (again) { again.style.display = 'block'; updateSetButtons(); }
+  show('s6');
+}
+
 function updateSetButtons() {
   var completed = LS.get('completedSets') || [];
   var setNames = { 'MVP 1': 'Set 1', 'MVP 1.2': 'Set 2', 'MVP 1.3': 'Set 3', 'MVP 1.4': 'Set 4', 'MVP 1.5': 'Set 5' };
@@ -2027,12 +2044,7 @@ document.getElementById('signin-verify').addEventListener('click', function(e) {
       signinPanel.style.display = 'none';
       document.getElementById('signin-trigger').style.display = 'none';
       restoreS1();
-      window._restoreSetScreen = true;
-      window._signinBypass = true;
-      // Small delay to ensure panel is fully closed before s1 tap fires
-      setTimeout(function() {
-        document.getElementById('s1').click();
-      }, 50);
+      showSetsScreen();
     } else {
       err.textContent = 'Code didn\'t match. Try again.';
       err.style.display = 'block';
