@@ -1161,6 +1161,7 @@ document.getElementById('s1').addEventListener('click', function() {
     var panel = document.getElementById('signin-panel');
     if (!panel.classList.contains('open')) {
       panel.classList.add('open');
+      panel.style.display = '';
       hideS1();
       document.getElementById('signin-trigger').style.display = 'none';
       _screenHistory.push('signin');
@@ -1995,6 +1996,7 @@ document.getElementById('signin-trigger').addEventListener('click', function(e) 
   // Only open — never close via trigger. Use back button to close.
   if (panel.classList.contains('open')) return;
   panel.classList.add('open');
+  panel.style.display = '';
   hideS1();
   document.getElementById('signin-trigger').style.display = 'none';
   _screenHistory.push('signin');
