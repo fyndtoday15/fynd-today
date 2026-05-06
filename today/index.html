@@ -1114,16 +1114,11 @@ document.getElementById('s1').addEventListener('click', function() {
   // Block tap-to-begin if sign-in panel is open
   if (document.getElementById('signin-panel').classList.contains('open')) return;
 
-  // Gate: if prior session data exists, user must sign in — cannot tap to begin
+  // Gate: only block tap-to-begin if user has submitted their email (has an account)
   if (window._signinBypass) { window._signinBypass = false; }
   else {
   var hasEmail = !!(LS.get('email'));
-  var hasCompleted = (LS.get('completedSets') || []).length > 0;
-  var hasAbandoned = (function() {
-    var ab = LS.get('abandonedSets') || {};
-    return Object.keys(ab).length > 0;
-  })();
-  if (hasEmail || hasCompleted || hasAbandoned) {
+  if (hasEmail) {
     var panel = document.getElementById('signin-panel');
     if (!panel.classList.contains('open')) {
       panel.classList.add('open');
