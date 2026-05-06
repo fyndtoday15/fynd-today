@@ -1115,18 +1115,19 @@ function doReveal(ps) {
 
 // S1 tap
 document.getElementById('s1').addEventListener('click', function() {
-  // If sign-in panel is open, close it and do nothing else
+  // If sign-in panel is open, close it and restore s1 content
   var _panel = document.getElementById('signin-panel');
   if (_panel.classList.contains('open') || _panel.style.display === 'flex') {
     _panel.classList.remove('open');
     _panel.style.display = 'none';
+    document.getElementById('signin-trigger').style.display = 'block';
+    restoreS1();
     return;
   }
 
   // If a set is loaded and ready to play — skip all gates and go directly
   if (window._skipEntry) {
     window._skipEntry = false;
-    console.log('FYND: skipEntry firing, playlist=' + sess.playlist + ' widgetReady=' + widgetReady);
     try { sess.entryState = localStorage.getItem('fynd_entryState') || sess.entryState || ''; } catch(e) {}
     if (window._resumeMode && window._resumeCur !== undefined) {
       sess.cur = window._resumeCur;
@@ -1531,7 +1532,7 @@ document.getElementById('email-sub').addEventListener('click', function() {
       emailUpdate: true,
     }),
   }).then(function(r) { return r.json(); })
-  .then(function(result) { console.log('Email logged:', result); })
+  .then(function(result) { })
   .catch(function(err) { console.error('Email log error:', err); });
 
   // Send welcome email
@@ -1876,10 +1877,38 @@ function sendRecapEmail(email, firstName, playlist, log, entryState) {
 }
 
 // ── BACK BUTTON ─────────────────────────────────────────
-window.addEventListener('popstate', function() {
-  window.location.href = 'https://fyndtoday.com';
+// Two history states: s1 (inner) and fyndtoday.com (outer)
+// Listen screen → s1 → fyndtoday.com
+var _currentScreen = 's1';
+var _origShow = show;
+show = function(id) {
+  _currentScreen = id;
+  _origShow(id);
+};
+
+history.pushState({ screen: 'home' }, '', window.location.href); // outer boundary
+history.pushState({ screen: 's1' }, '', window.location.href);   // current position
+
+window.addEventListener('popstate', function(e) {
+  if (_currentScreen !== 's1') {
+    // On listen/reveal/recap screen — go back to s1
+    history.pushState({ screen: 's1' }, '', window.location.href);
+    show('s1');
+    // Restore s1 to default state
+    var s1el = document.getElementById('s1');
+    if (s1el) {
+      s1el.classList.remove('set-reload');
+      var hint = s1el.querySelector('.s1-hint');
+      if (hint) hint.textContent = 'tap to begin';
+    }
+    document.body.style.background = '';
+    var tc = document.getElementById('theme-color');
+    if (tc) tc.content = '#FCFBF4';
+  } else {
+    // On s1 — go to fyndtoday.com
+    window.location.href = 'https://fyndtoday.com';
+  }
 });
-history.pushState(null, '', window.location.href);
 
 // ── SAVE SESSION STATE (cross-browser restore) ──────────
 function saveSessionState() {
@@ -2065,21 +2094,22 @@ document.getElementById('signin-verify').addEventListener('click', function(e) {
   });
 });
 
-// DEBUG: catch anything adding open class to signin-panel
-(function() {
-  var obs = new MutationObserver(function(mutations) {
-    mutations.forEach(function(m) {
-      if (m.attributeName === 'class') {
-        var el = m.target;
-        if (el.classList.contains('open')) {
-          console.error('FYND DEBUG: signin-panel got open class', new Error().stack);
-        }
-      }
-    });
-  });
-  var panel = document.getElementById('signin-panel');
-  if (panel) obs.observe(panel, { attributes: true });
-})();
+// ── ENTER KEY HANDLERS ──────────────────────────────────
+// Sign-in email input → send code button
+document.getElementById('signin-email').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') { e.preventDefault(); document.getElementById('signin-send').click(); }
+});
+// Sign-in OTP input → verify button
+document.getElementById('signin-otp').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') { e.preventDefault(); document.getElementById('signin-verify').click(); }
+});
+// Email screen name/email inputs → submit button
+document.getElementById('name-in').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') { e.preventDefault(); document.getElementById('email-sub').click(); }
+});
+document.getElementById('email-in').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') { e.preventDefault(); document.getElementById('email-sub').click(); }
+});
 
 initUserState();
 
