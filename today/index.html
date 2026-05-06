@@ -1274,6 +1274,7 @@ document.getElementById('s1').addEventListener('click', function() {
   }
 
   if (window._skipEntry) {
+    console.log('FYND: _skipEntry true, playlist=' + sess.playlist + ' widgetReady=' + widgetReady);
     window._skipEntry = false;
     // Restore entryState from localStorage — not re-selected on Sets 2-5
     try { sess.entryState = localStorage.getItem('fynd_entryState') || sess.entryState || ''; } catch(e) {}
