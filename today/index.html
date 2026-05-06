@@ -1112,7 +1112,8 @@ function doReveal(ps) {
 // S1 tap
 document.getElementById('s1').addEventListener('click', function() {
   // Block tap-to-begin if sign-in panel is open
-  if (document.getElementById('signin-panel').classList.contains('open')) return;
+  var _panel = document.getElementById('signin-panel');
+  if (_panel.classList.contains('open') || _panel.style.display === 'flex') return;
 
   // Gate: only block tap-to-begin if user has submitted their email (has an account)
   if (window._signinBypass) { window._signinBypass = false; }
@@ -1488,6 +1489,8 @@ document.getElementById('email-sub').addEventListener('click', function() {
   LS.set('email', email);
   LS.set('firstName', firstName);
   LS.set('onEmailScreen', false);
+  // Link this sessionId to the email immediately — enables cross-browser restore
+  saveSessionState();
   document.getElementById('name-in').style.display = 'none';
   document.getElementById('email-in').style.display = 'none';
   document.getElementById('email-sub').style.display = 'none';
@@ -1856,10 +1859,12 @@ history.pushState(null, '', window.location.href);
 
 // ── SAVE SESSION STATE (cross-browser restore) ──────────
 function saveSessionState() {
+  var sessionId = sess.id;
+  if (!sessionId) return;
   var email = LS.get('email') || '';
-  if (!email) return; // no email yet — nothing to key state on
   var completed = LS.get('completedSets') || [];
   var state = {
+    sessionId: sessionId,
     email: email,
     firstName: LS.get('firstName') || '',
     entryState: sess.entryState || '',
@@ -1875,7 +1880,7 @@ function saveSessionState() {
   fetch('/.netlify/functions/save-state', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: email, state: state }),
+    body: JSON.stringify({ sessionId: sessionId, email: email, state: state }),
   }).catch(function(err) { console.error('Save state error:', err); });
 }
 
@@ -2017,13 +2022,17 @@ document.getElementById('signin-verify').addEventListener('click', function(e) {
       }
       LS.set('returning', true);
       document.getElementById('signin-otp-row').classList.remove('show');
-      document.getElementById('signin-panel').classList.remove('open');
+      var signinPanel = document.getElementById('signin-panel');
+      signinPanel.classList.remove('open');
+      signinPanel.style.display = 'none';
       document.getElementById('signin-trigger').style.display = 'none';
       restoreS1();
-      // Set restore flag and bypass gate, then fire s1 tap to run full routing
       window._restoreSetScreen = true;
       window._signinBypass = true;
-      document.getElementById('s1').click();
+      // Small delay to ensure panel is fully closed before s1 tap fires
+      setTimeout(function() {
+        document.getElementById('s1').click();
+      }, 50);
     } else {
       err.textContent = 'Code didn\'t match. Try again.';
       err.style.display = 'block';
