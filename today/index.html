@@ -600,6 +600,10 @@ function show(id) {
     dots.classList.remove('show');
     dots.classList.remove('dark');
   }
+
+  // Only show sign-in trigger on s1
+  var trigger = document.getElementById('signin-trigger');
+  if (trigger) trigger.style.display = (id === 's1') ? '' : 'none';
 }
 
 function setDots(cur) {
