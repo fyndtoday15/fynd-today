@@ -54,32 +54,41 @@ exports.handler = async function(event, context) {
     };
   }
 
-  // Check if this email has any records in Sessions
+  // Check if email exists as a Brevo contact
   try {
-    const filterFormula = encodeURIComponent(`{Email}="${email}"`);
-    const checkRes = await fetch(
-      AIRTABLE_BASE + encodeURIComponent('Sessions') + '?filterByFormula=' + filterFormula + '&maxRecords=1&fields%5B%5D=Email',
-      { headers: AIRTABLE_HEADERS }
+    const brevoCheckRes = await fetch(
+      'https://api.brevo.com/v3/contacts/' + encodeURIComponent(email),
+      {
+        method: 'GET',
+        headers: {
+          'api-key': BREVO_API_KEY,
+          'Content-Type': 'application/json',
+        },
+      }
     );
-    const checkData = await checkRes.json();
 
-    if (!checkData.records || checkData.records.length === 0) {
+    if (brevoCheckRes.status === 404) {
       return {
         statusCode: 200,
         headers: { 'Access-Control-Allow-Origin': allowedOrigin },
-        body: JSON.stringify({ success: false, error: "We don\u2019t have an account for that email. Try a different one, or tap to begin." }),
+        body: JSON.stringify({
+          success: false,
+          error: "We don\u2019t have an account for that email. Try a different one, or tap to begin.",
+        }),
       };
     }
+
+    // Any other non-ok status — don't block, proceed
   } catch(err) {
-    console.error('Email check error:', err);
-    // Don't block — proceed and let it fail gracefully
+    console.error('Brevo contact check error:', err);
+    // Don't block on check failure — proceed to send code
   }
 
   // Generate 6-digit OTP
   const code = String(Math.floor(100000 + Math.random() * 900000));
   const expires = Date.now() + 10 * 60 * 1000; // 10 minutes
 
-  // Store OTP in Airtable
+  // Store OTP in Airtable OTP table
   try {
     const atRes = await fetch(AIRTABLE_BASE + encodeURIComponent('OTP'), {
       method: 'POST',
