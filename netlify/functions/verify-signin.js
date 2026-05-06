@@ -53,14 +53,17 @@ exports.handler = async function(event, context) {
     };
   }
 
-  // Query OTP records by email only — validate code in JS to avoid Airtable type-matching issues
+  // Query OTP records by email only — no sort, no extra params that could cause Airtable errors
   try {
     const filterFormula = encodeURIComponent(`{Email}="${email}"`);
-    const otpRes = await fetch(
-      AIRTABLE_BASE + encodeURIComponent('OTP') + '?filterByFormula=' + filterFormula + '&sort%5B0%5D%5Bfield%5D=Expires&sort%5B0%5D%5Bdirection%5D=desc&maxRecords=5',
-      { headers: AIRTABLE_HEADERS }
-    );
+    const otpUrl = AIRTABLE_BASE + encodeURIComponent('OTP') + '?filterByFormula=' + filterFormula + '&maxRecords=10';
+    
+    console.log('OTP query URL:', otpUrl);
+    
+    const otpRes = await fetch(otpUrl, { headers: AIRTABLE_HEADERS });
     const otpData = await otpRes.json();
+    
+    console.log('OTP response:', JSON.stringify(otpData));
 
     if (!otpData.records || otpData.records.length === 0) {
       return {
@@ -70,14 +73,19 @@ exports.handler = async function(event, context) {
       };
     }
 
-    // Find a record where code matches and is not expired
+    // Find a matching, non-expired record — compare as strings
     const now = Date.now();
+    const submittedCode = String(code).trim();
     let matchedRecord = null;
+
     for (var i = 0; i < otpData.records.length; i++) {
       var rec = otpData.records[i];
       var storedCode = String(rec.fields['Code'] || '').trim();
       var expires = Number(rec.fields['Expires'] || 0);
-      if (storedCode === String(code).trim() && now <= expires) {
+      
+      console.log('Comparing: stored=' + storedCode + ' submitted=' + submittedCode + ' expires=' + expires + ' now=' + now + ' expired=' + (now > expires));
+      
+      if (storedCode === submittedCode && now <= expires) {
         matchedRecord = rec;
         break;
       }
@@ -106,19 +114,18 @@ exports.handler = async function(event, context) {
     };
   }
 
-  // OTP valid — look up session state from Sessions table by email
+  // OTP valid — look up session state from Sessions table
   try {
     const filterFormula2 = encodeURIComponent(`AND({Email}="${email}",{Track ID}="SESSION_STATE")`);
     const sessRes = await fetch(
-      AIRTABLE_BASE + encodeURIComponent('Sessions') + '?filterByFormula=' + filterFormula2 + '&sort%5B0%5D%5Bfield%5D=State+Updated&sort%5B0%5D%5Bdirection%5D=desc&maxRecords=1',
+      AIRTABLE_BASE + encodeURIComponent('Sessions') + '?filterByFormula=' + filterFormula2 + '&maxRecords=1',
       { headers: AIRTABLE_HEADERS }
     );
     const sessData = await sessRes.json();
 
     let state = null;
     if (sessData.records && sessData.records.length > 0) {
-      const sessRecord = sessData.records[0];
-      const rawState = sessRecord.fields['Session State'];
+      const rawState = sessData.records[0].fields['Session State'];
       if (rawState) {
         try { state = JSON.parse(rawState); } catch(e) { console.error('State parse error:', e); }
       }
