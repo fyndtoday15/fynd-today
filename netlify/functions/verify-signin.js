@@ -56,12 +56,12 @@ exports.handler = async function(event, context) {
   let matchedRecord = null;
   try {
     const filterFormula = encodeURIComponent(`{Email}="${email}"`);
-    const otpUrl = AIRTABLE_BASE + encodeURIComponent('OTP') + '?filterByFormula=' + filterFormula + '&maxRecords=10';
-    console.log('OTP query:', otpUrl);
-
-    const otpRes = await fetch(otpUrl, { headers: AIRTABLE_HEADERS });
+    const otpRes = await fetch(
+      AIRTABLE_BASE + encodeURIComponent('OTP') + '?filterByFormula=' + filterFormula + '&maxRecords=10',
+      { headers: AIRTABLE_HEADERS }
+    );
     const otpData = await otpRes.json();
-    console.log('OTP response:', JSON.stringify(otpData));
+    console.log('OTP records found:', otpData.records ? otpData.records.length : 0);
 
     if (!otpData.records || otpData.records.length === 0) {
       return {
@@ -73,12 +73,10 @@ exports.handler = async function(event, context) {
 
     const now = Date.now();
     const submittedCode = String(code).trim();
-
     for (var i = 0; i < otpData.records.length; i++) {
       var rec = otpData.records[i];
       var storedCode = String(rec.fields['Code'] || '').trim();
       var expires = Number(rec.fields['Expires'] || 0);
-      console.log('Comparing: stored=' + storedCode + ' submitted=' + submittedCode + ' now=' + now + ' expires=' + expires);
       if (storedCode === submittedCode && now <= expires) {
         matchedRecord = rec;
         break;
@@ -92,8 +90,6 @@ exports.handler = async function(event, context) {
         body: JSON.stringify({ success: false, error: 'Code did not match or expired' }),
       };
     }
-
-    console.log('OTP matched, record:', matchedRecord.id);
   } catch(err) {
     console.error('OTP lookup error:', err);
     return {
@@ -108,39 +104,53 @@ exports.handler = async function(event, context) {
     fetch(AIRTABLE_BASE + encodeURIComponent('OTP') + '/' + matchedRecord.id, {
       method: 'DELETE',
       headers: AIRTABLE_HEADERS,
-    }).then(function(r) {
-      console.log('OTP delete status:', r.status);
-    }).catch(function(e) {
-      console.error('OTP delete error:', e);
-    });
-  } catch(e) {
-    console.error('OTP delete setup error:', e);
-  }
+    }).catch(function(e) { console.error('OTP delete error:', e); });
+  } catch(e) {}
 
-  // Step 3: Look up session state by email on SESSION_STATE record
-  console.log('Looking up session state for email:', email);
+  // Step 3: Get ALL session state records for this email, pick the best one
+  // "Best" = most completed sets, then highest cur, then most recent
+  console.log('Looking up all session states for:', email);
   try {
     const filterFormula2 = encodeURIComponent(`AND({Email}="${email}",{Track ID}="SESSION_STATE")`);
     const sessRes = await fetch(
-      AIRTABLE_BASE + encodeURIComponent('Sessions') + '?filterByFormula=' + filterFormula2 + '&sort%5B0%5D%5Bfield%5D=State+Updated&sort%5B0%5D%5Bdirection%5D=desc&maxRecords=1',
+      AIRTABLE_BASE + encodeURIComponent('Sessions') + '?filterByFormula=' + filterFormula2 + '&maxRecords=20',
       { headers: AIRTABLE_HEADERS }
     );
     const sessData = await sessRes.json();
-    console.log('Session state lookup:', JSON.stringify(sessData));
+    console.log('Session state records found:', sessData.records ? sessData.records.length : 0);
 
-    let state = null;
+    let bestState = null;
+    let bestScore = -1;
+
     if (sessData.records && sessData.records.length > 0) {
-      const rawState = sessData.records[0].fields['Session State'];
-      if (rawState) {
-        try { state = JSON.parse(rawState); } catch(e) { console.error('State parse error:', e); }
+      for (var j = 0; j < sessData.records.length; j++) {
+        var rawState = sessData.records[j].fields['Session State'];
+        if (!rawState) continue;
+        var parsed = null;
+        try { parsed = JSON.parse(rawState); } catch(e) { continue; }
+        if (!parsed) continue;
+
+        // Score: completed sets count * 100 + cur position
+        var completedCount = (parsed.completedSets || []).length;
+        var curPos = parsed.cur || 0;
+        var updatedAt = parsed.updatedAt || 0;
+        // Primary: most completed sets. Secondary: highest cur. Tertiary: most recent
+        var score = completedCount * 10000 + curPos * 100 + (updatedAt > 0 ? 1 : 0);
+
+        console.log('Record score:', score, 'completed:', completedCount, 'cur:', curPos, 'sessionId:', parsed.sessionId);
+
+        if (score > bestScore || (score === bestScore && updatedAt > (bestState ? bestState.updatedAt || 0 : 0))) {
+          bestScore = score;
+          bestState = parsed;
+        }
       }
     }
 
-    console.log('Returning success, state:', state ? 'found' : 'null');
+    console.log('Best state sessionId:', bestState ? bestState.sessionId : 'none');
     return {
       statusCode: 200,
       headers: { 'Access-Control-Allow-Origin': allowedOrigin },
-      body: JSON.stringify({ success: true, state: state }),
+      body: JSON.stringify({ success: true, state: bestState }),
     };
 
   } catch(err) {
