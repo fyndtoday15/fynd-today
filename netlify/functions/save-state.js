@@ -1,4 +1,3 @@
-// Allowed origins
 const ALLOWED_ORIGINS = [
   'https://fyndtoday.netlify.app',
   'https://fyndtoday.com',
@@ -49,21 +48,36 @@ exports.handler = async function(event, context) {
     return { statusCode: 400, body: 'Invalid JSON' };
   }
 
-  const { email, state } = data;
-  if (!email || !state) {
+  const { sessionId, email, state } = data;
+  if (!sessionId || !state) {
     return {
       statusCode: 400,
       headers: { 'Access-Control-Allow-Origin': allowedOrigin },
-      body: JSON.stringify({ success: false, error: 'Missing fields' }),
+      body: JSON.stringify({ success: false, error: 'Missing sessionId or state' }),
     };
   }
 
   const stateJson = JSON.stringify(state);
   const now = new Date().toISOString();
 
-  // Find existing state record for this email (track ID = 'SESSION_STATE')
+  // Build fields to write — always include sessionId, include email if provided
+  const fields = {
+    'Session State': stateJson,
+    'State Updated': now,
+    'Track ID': 'SESSION_STATE',
+    'Track Title': 'Session State Record',
+    'Session ID': sessionId,
+    'Playlist': state.playlist || '',
+    'First Name': state.firstName || '',
+    'Duration': 0,
+  };
+  if (email) {
+    fields['Email'] = email;
+  }
+
   try {
-    const filterFormula = encodeURIComponent(`AND({Email}="${email}",{Track ID}="SESSION_STATE")`);
+    // Look for existing state record by sessionId
+    const filterFormula = encodeURIComponent(`AND({Session ID}="${sessionId}",{Track ID}="SESSION_STATE")`);
     const findRes = await fetch(
       AIRTABLE_BASE + encodeURIComponent(TABLE_NAME) + '?filterByFormula=' + filterFormula + '&maxRecords=1',
       { headers: AIRTABLE_HEADERS }
@@ -76,33 +90,14 @@ exports.handler = async function(event, context) {
       await fetch(AIRTABLE_BASE + encodeURIComponent(TABLE_NAME) + '/' + recordId, {
         method: 'PATCH',
         headers: AIRTABLE_HEADERS,
-        body: JSON.stringify({
-          fields: {
-            'Session State': stateJson,
-            'State Updated': now,
-          }
-        }),
+        body: JSON.stringify({ fields }),
       });
     } else {
-      // Create new state record
+      // Create new record
       await fetch(AIRTABLE_BASE + encodeURIComponent(TABLE_NAME), {
         method: 'POST',
         headers: AIRTABLE_HEADERS,
-        body: JSON.stringify({
-          records: [{
-            fields: {
-              'Email': email,
-              'Track ID': 'SESSION_STATE',
-              'Track Title': 'Session State Record',
-              'Session State': stateJson,
-              'State Updated': now,
-              'Session ID': 'STATE-' + Date.now().toString(36).toUpperCase(),
-              'First Name': state.firstName || '',
-              'Playlist': state.playlist || '',
-              'Duration': 0,
-            }
-          }]
-        }),
+        body: JSON.stringify({ records: [{ fields }] }),
       });
     }
 
