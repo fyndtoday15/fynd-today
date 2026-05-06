@@ -1114,6 +1114,28 @@ document.getElementById('s1').addEventListener('click', function() {
   // Block tap-to-begin if sign-in panel is open
   if (document.getElementById('signin-panel').classList.contains('open')) return;
 
+  // Gate: if prior session data exists, user must sign in — cannot tap to begin
+  var hasEmail = !!(LS.get('email'));
+  var hasCompleted = (LS.get('completedSets') || []).length > 0;
+  var hasAbandoned = (function() {
+    var ab = LS.get('abandonedSets') || {};
+    return Object.keys(ab).length > 0;
+  })();
+  if (hasEmail || hasCompleted || hasAbandoned) {
+    // Show sign-in panel with message
+    var panel = document.getElementById('signin-panel');
+    if (!panel.classList.contains('open')) {
+      panel.classList.add('open');
+      hideS1();
+      var msg = document.getElementById('signin-msg');
+      if (msg) {
+        msg.textContent = 'Sign in to continue where you left off.';
+        msg.style.display = 'block';
+      }
+    }
+    return;
+  }
+
   // Unlock Web Audio API on user gesture for Safari
   // This primes the audio context without touching the SC widget
   try {
