@@ -51,6 +51,8 @@ html.assign-top, body.assign-top { background: var(--black); }
 #s1.set-reload .s1-word,
 #s1.set-reload .s1-intro { display: none; }
 #s1.set-reload .s1-hint { color: var(--bg); }
+#s1.set-reload .signin-trigger,
+#s1.set-reload .signin-panel { display: none !important; }
 @keyframes ph { 0%,100%{opacity:.4} 50%{opacity:.8} }
 
 /* S2 — ENTRY */
@@ -270,9 +272,9 @@ html.assign-top, body.assign-top { background: var(--black); }
 #sc-wrap { position: absolute; top: -9999px; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
 
 /* SIGN-IN PANEL — sits below s1 hint, hidden by default */
-.signin-trigger { display: block; margin-top: 24px; font-size: 12px; color: var(--black); opacity: 0.4; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; background: none; border: none; font-family: var(--f); padding: 8px; }
+.signin-trigger { position: absolute; bottom: clamp(48px,9vh,72px); left: 50%; transform: translateX(-50%); display: block; font-size: 12px; color: var(--black); opacity: 0.4; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; background: none; border: none; font-family: var(--f); padding: 8px; white-space: nowrap; z-index: 10; }
 .signin-trigger:hover { opacity: 0.65; }
-.signin-panel { display: none; flex-direction: column; align-items: center; width: 100%; max-width: 300px; margin-top: 16px; }
+.signin-panel { position: absolute; bottom: clamp(80px,14vh,110px); left: 50%; transform: translateX(-50%); display: none; flex-direction: column; align-items: center; width: calc(100% - 64px); max-width: 300px; z-index: 10; }
 .signin-panel.open { display: flex; }
 .signin-input { width: 100%; font-family: var(--f); font-size: 16px; color: var(--black); background: transparent; border: none; border-bottom: 1px solid rgba(0,0,0,0.35); padding: 10px 0; outline: none; text-align: center; border-radius: 0; -webkit-appearance: none; margin-bottom: 12px; }
 .signin-input::placeholder { color: var(--black); opacity: 0.22; }
