@@ -1,4 +1,3 @@
-// Allowed origins
 const ALLOWED_ORIGINS = [
   'https://fyndtoday.netlify.app',
   'https://fyndtoday.com',
@@ -53,16 +52,15 @@ exports.handler = async function(event, context) {
     };
   }
 
-  // Query OTP records by email only — no sort, no extra params that could cause Airtable errors
+  // Step 1: Query OTP table by email
+  let matchedRecord = null;
   try {
     const filterFormula = encodeURIComponent(`{Email}="${email}"`);
     const otpUrl = AIRTABLE_BASE + encodeURIComponent('OTP') + '?filterByFormula=' + filterFormula + '&maxRecords=10';
-    
     console.log('OTP query URL:', otpUrl);
-    
+
     const otpRes = await fetch(otpUrl, { headers: AIRTABLE_HEADERS });
     const otpData = await otpRes.json();
-    
     console.log('OTP response:', JSON.stringify(otpData));
 
     if (!otpData.records || otpData.records.length === 0) {
@@ -73,18 +71,14 @@ exports.handler = async function(event, context) {
       };
     }
 
-    // Find a matching, non-expired record — compare as strings
     const now = Date.now();
     const submittedCode = String(code).trim();
-    let matchedRecord = null;
 
     for (var i = 0; i < otpData.records.length; i++) {
       var rec = otpData.records[i];
       var storedCode = String(rec.fields['Code'] || '').trim();
       var expires = Number(rec.fields['Expires'] || 0);
-      
       console.log('Comparing: stored=' + storedCode + ' submitted=' + submittedCode + ' expires=' + expires + ' now=' + now + ' expired=' + (now > expires));
-      
       if (storedCode === submittedCode && now <= expires) {
         matchedRecord = rec;
         break;
@@ -99,22 +93,33 @@ exports.handler = async function(event, context) {
       };
     }
 
-    // Delete used OTP record (fire-and-forget)
-    fetch(AIRTABLE_BASE + encodeURIComponent('OTP') + '/' + matchedRecord.id, {
-      method: 'DELETE',
-      headers: AIRTABLE_HEADERS,
-    }).catch(function(e) { console.error('OTP delete error:', e); });
-
+    console.log('Match found, record id:', matchedRecord.id);
   } catch(err) {
     console.error('OTP lookup error:', err);
     return {
       statusCode: 500,
       headers: { 'Access-Control-Allow-Origin': allowedOrigin },
-      body: JSON.stringify({ success: false, error: 'Server error' }),
+      body: JSON.stringify({ success: false, error: 'Server error during OTP lookup' }),
     };
   }
 
-  // OTP valid — look up session state from Sessions table
+  // Step 2: Delete used OTP (fire-and-forget, fully wrapped)
+  try {
+    console.log('Deleting OTP record:', matchedRecord.id);
+    fetch(AIRTABLE_BASE + encodeURIComponent('OTP') + '/' + matchedRecord.id, {
+      method: 'DELETE',
+      headers: AIRTABLE_HEADERS,
+    }).then(function(r) {
+      console.log('OTP delete status:', r.status);
+    }).catch(function(e) {
+      console.error('OTP delete fetch error:', e);
+    });
+  } catch(e) {
+    console.error('OTP delete setup error:', e);
+  }
+
+  // Step 3: Look up session state — return success regardless of outcome
+  console.log('Looking up session state for:', email);
   try {
     const filterFormula2 = encodeURIComponent(`AND({Email}="${email}",{Track ID}="SESSION_STATE")`);
     const sessRes = await fetch(
@@ -122,6 +127,7 @@ exports.handler = async function(event, context) {
       { headers: AIRTABLE_HEADERS }
     );
     const sessData = await sessRes.json();
+    console.log('Session state response:', JSON.stringify(sessData));
 
     let state = null;
     if (sessData.records && sessData.records.length > 0) {
@@ -131,6 +137,7 @@ exports.handler = async function(event, context) {
       }
     }
 
+    console.log('Returning success, state:', state ? 'found' : 'null');
     return {
       statusCode: 200,
       headers: { 'Access-Control-Allow-Origin': allowedOrigin },
@@ -138,7 +145,8 @@ exports.handler = async function(event, context) {
     };
 
   } catch(err) {
-    console.error('Session state lookup error:', err);
+    console.error('Session lookup error:', err);
+    // Still return success — OTP was valid
     return {
       statusCode: 200,
       headers: { 'Access-Control-Allow-Origin': allowedOrigin },
