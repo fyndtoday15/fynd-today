@@ -2024,26 +2024,24 @@ document.getElementById('signin-verify').addEventListener('click', function(e) {
       var s = result.state;
       if (s) {
         if (s.email) LS.set('email', s.email);
-        // Adopt the restored session ID so future saves update the original record
         if (s.sessionId) sess.id = s.sessionId;
         if (s.firstName) LS.set('firstName', s.firstName);
         if (s.completedSets) LS.set('completedSets', s.completedSets);
         if (s.entryState) { try { localStorage.setItem('fynd_entryState', s.entryState); } catch(ee) {} }
         if (s.entryStateTime) { try { localStorage.setItem('fynd_entryStateTime', s.entryStateTime); } catch(ee) {} }
-        if (s.completedSets && s.completedSets.length > 0) {
+        // Always restore abandoned set if we have valid position data — regardless of completedSets
+        if (s.playlist && s.cur !== undefined && s.tOrder && s.tOrder.length > 0) {
           var all = LS.get('abandonedSets') || {};
-          if (s.playlist && s.cur !== undefined && s.tOrder) {
-            all[s.playlist] = {
-              sessionId: sess.id,
-              playlist: s.playlist,
-              cur: s.cur,
-              tOrder: s.tOrder,
-              entryState: s.entryState || '',
-              log: s.log || [],
-              timestamp: Date.now(),
-            };
-            LS.set('abandonedSets', all);
-          }
+          all[s.playlist] = {
+            sessionId: s.sessionId || sess.id,
+            playlist: s.playlist,
+            cur: s.cur,
+            tOrder: s.tOrder,
+            entryState: s.entryState || '',
+            log: s.log || [],
+            timestamp: Date.now(),
+          };
+          LS.set('abandonedSets', all);
         }
       }
       LS.set('returning', true);
