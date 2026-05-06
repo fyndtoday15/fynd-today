@@ -32,7 +32,6 @@ exports.handler = async function(event, context) {
   const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
   const BREVO_API_KEY = process.env.BREVO_API_KEY;
   const BASE_ID = 'app6jfIbr50JLlJTi';
-  const OTP_TABLE = 'OTP';
   const AIRTABLE_BASE = 'https://api.airtable.com/v0/' + BASE_ID + '/';
   const AIRTABLE_HEADERS = {
     'Authorization': 'Bearer ' + AIRTABLE_API_KEY,
@@ -55,13 +54,34 @@ exports.handler = async function(event, context) {
     };
   }
 
+  // Check if this email has any records in Sessions
+  try {
+    const filterFormula = encodeURIComponent(`{Email}="${email}"`);
+    const checkRes = await fetch(
+      AIRTABLE_BASE + encodeURIComponent('Sessions') + '?filterByFormula=' + filterFormula + '&maxRecords=1&fields%5B%5D=Email',
+      { headers: AIRTABLE_HEADERS }
+    );
+    const checkData = await checkRes.json();
+
+    if (!checkData.records || checkData.records.length === 0) {
+      return {
+        statusCode: 200,
+        headers: { 'Access-Control-Allow-Origin': allowedOrigin },
+        body: JSON.stringify({ success: false, error: "We don\u2019t have an account for that email. Try a different one, or tap to begin." }),
+      };
+    }
+  } catch(err) {
+    console.error('Email check error:', err);
+    // Don't block — proceed and let it fail gracefully
+  }
+
   // Generate 6-digit OTP
   const code = String(Math.floor(100000 + Math.random() * 900000));
   const expires = Date.now() + 10 * 60 * 1000; // 10 minutes
 
   // Store OTP in Airtable
   try {
-    const atRes = await fetch(AIRTABLE_BASE + encodeURIComponent(OTP_TABLE), {
+    const atRes = await fetch(AIRTABLE_BASE + encodeURIComponent('OTP'), {
       method: 'POST',
       headers: AIRTABLE_HEADERS,
       body: JSON.stringify({
@@ -92,7 +112,7 @@ exports.handler = async function(event, context) {
     };
   }
 
-  // Send OTP via Brevo transactional email
+  // Send OTP via Brevo
   try {
     const brevoRes = await fetch('https://api.brevo.com/v3/smtp/email', {
       method: 'POST',
@@ -105,11 +125,11 @@ exports.handler = async function(event, context) {
         to: [{ email: email }],
         subject: 'Your FYND TODAY sign-in code',
         htmlContent: `
-          <div style="font-family:Arial,sans-serif;max-width:400px;margin:0 auto;padding:32px;color:#000;">
-            <p style="font-size:13px;letter-spacing:0.12em;text-transform:uppercase;opacity:0.6;margin-bottom:24px;">FYND TODAY</p>
-            <p style="font-size:18px;margin-bottom:8px;">Your sign-in code:</p>
-            <p style="font-size:42px;font-weight:700;letter-spacing:0.15em;margin:24px 0;">${code}</p>
-            <p style="font-size:13px;opacity:0.55;line-height:1.6;">This code expires in 10 minutes. If you didn't request this, ignore this email.</p>
+          <div style="font-family:Arial,sans-serif;max-width:400px;margin:0 auto;padding:40px 32px;color:#000;background:#faf9f6;">
+            <p style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;opacity:0.4;margin:0 0 32px;">FYND TODAY</p>
+            <p style="font-size:15px;margin:0 0 8px;opacity:0.7;">Your sign-in code</p>
+            <p style="font-size:44px;font-weight:600;letter-spacing:0.18em;margin:20px 0 24px;">${code}</p>
+            <p style="font-size:12px;opacity:0.4;line-height:1.7;margin:0;">Expires in 10 minutes.<br>If you didn\u2019t request this, ignore this email.</p>
           </div>
         `,
       }),
