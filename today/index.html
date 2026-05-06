@@ -284,7 +284,7 @@ html.assign-top, body.assign-top { background: var(--black); }
 .signin-btn { font-family: var(--f); font-size: 11px; color: var(--black); background: none; border: 1px solid rgba(0,0,0,0.25); border-radius: 1px; padding: 10px 28px; cursor: pointer; letter-spacing: 0.12em; text-transform: uppercase; width: auto; margin-top: 0; }
 .signin-btn:hover { border-color: rgba(0,0,0,0.5); }
 .signin-err { font-size: 11px; color: rgba(0,0,0,0.5); letter-spacing: 0.04em; margin-top: 10px; display: none; text-align: center; line-height: 1.6; }
-.signin-back { display: none; font-size: 11px; color: var(--black); opacity: 0.35; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; background: none; border: none; font-family: var(--f); padding: 12px 0 0; }
+.signin-back { display: block; font-size: 11px; color: var(--black); opacity: 0.35; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; background: none; border: none; font-family: var(--f); padding: 12px 0 0; }
 .signin-back.show { display: block; }
 .signin-back:hover { opacity: 0.6; }
 </style>
@@ -1115,6 +1115,8 @@ document.getElementById('s1').addEventListener('click', function() {
   if (document.getElementById('signin-panel').classList.contains('open')) return;
 
   // Gate: if prior session data exists, user must sign in — cannot tap to begin
+  if (window._signinBypass) { window._signinBypass = false; }
+  else {
   var hasEmail = !!(LS.get('email'));
   var hasCompleted = (LS.get('completedSets') || []).length > 0;
   var hasAbandoned = (function() {
@@ -1122,7 +1124,6 @@ document.getElementById('s1').addEventListener('click', function() {
     return Object.keys(ab).length > 0;
   })();
   if (hasEmail || hasCompleted || hasAbandoned) {
-    // Show sign-in panel with message
     var panel = document.getElementById('signin-panel');
     if (!panel.classList.contains('open')) {
       panel.classList.add('open');
@@ -1134,6 +1135,7 @@ document.getElementById('s1').addEventListener('click', function() {
       }
     }
     return;
+  }
   }
 
   // Unlock Web Audio API on user gesture for Safari
@@ -2010,13 +2012,21 @@ document.getElementById('signin-verify').addEventListener('click', function(e) {
         }
       }
       LS.set('returning', true);
-      document.getElementById('signin-msg').textContent = 'Signed in. Tap Today. to continue.';
       document.getElementById('signin-otp-row').classList.remove('show');
       document.getElementById('signin-panel').classList.remove('open');
-      document.getElementById('signin-trigger').textContent = 'signed in \u2713';
-      document.getElementById('signin-trigger').style.opacity = '0.55';
+      document.getElementById('signin-trigger').style.display = 'none';
       restoreS1();
-      initUserState();
+      // Route based on restored state
+      var completedAfterSignin = (LS.get('completedSets') || []).length > 0;
+      var abandonedAfterSignin = (function() { var ab = LS.get('abandonedSets') || {}; return Object.keys(ab).length > 0; })();
+      if (completedAfterSignin || abandonedAfterSignin) {
+        // Has real session data — let initUserState route
+        initUserState();
+      } else {
+        // Verified but no saved cross-browser state — proceed as fresh tap
+        window._signinBypass = true;
+        document.getElementById('s1').click();
+      }
     } else {
       err.textContent = 'Code didn\'t match. Try again.';
       err.style.display = 'block';
