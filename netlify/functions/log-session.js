@@ -180,6 +180,62 @@ exports.handler = async function(event, context) {
     }
   }
 
+  // HEARTBEAT — upsert in-progress track record every 15s during playback
+  // Finds existing record by sessionId + trackId and updates it, or creates if not found
+  if (data.heartbeatUpdate) {
+    const hSessionId = sanitizeString(data.sessionId, 64);
+    const hTrackId = sanitizeString(data.trackId, 20);
+    const hFields = {
+      'Session ID': hSessionId,
+      'First Name': sanitizeString(data.firstName, 100),
+      'Email': sanitizeString(data.email, 200),
+      'Entry State': sanitizeString(data.entryState, 100),
+      'Track ID': hTrackId,
+      'Track Title': sanitizeString(data.trackTitle, 200),
+      'Playlist': sanitizeString(data.playlist, 50),
+      'Duration': Math.max(Number(data.duration) || 0, 0),
+      'Position': sanitizeString(data.postState || 'In Progress', 50),
+      'Date': sanitizeString(data.date, 10),
+      'Reaction': sanitizeString(data.reaction, 20),
+      'Visit Number': Math.min(Math.max(Number(data.visitNumber) || 1, 1), 9999),
+      'Days Since Last Visit': (data.daysSinceLastVisit !== undefined && data.daysSinceLastVisit !== null && data.daysSinceLastVisit !== '') ? Math.min(Number(data.daysSinceLastVisit), 9999) : null,
+      'Triggered': sanitizeString(data.triggered, 20),
+      'Replay': sanitizeString(data.replay, 5),
+    };
+    try {
+      // Look for existing record with this sessionId + trackId
+      const filterFormula = encodeURIComponent(`AND({Session ID}="${hSessionId}",{Track ID}="${hTrackId}")`);
+      const findRes = await fetch(BASE_URL + '?filterByFormula=' + filterFormula + '&maxRecords=1', { headers: HEADERS });
+      const findData = await findRes.json();
+      let response;
+      if (findData.records && findData.records.length > 0) {
+        // Update existing record
+        const recordId = findData.records[0].id;
+        response = await fetch(BASE_URL + '/' + recordId, {
+          method: 'PATCH',
+          headers: HEADERS,
+          body: JSON.stringify({ fields: hFields }),
+        });
+      } else {
+        // Create new record
+        response = await fetch(BASE_URL, {
+          method: 'POST',
+          headers: HEADERS,
+          body: JSON.stringify({ records: [{ fields: hFields }] }),
+        });
+      }
+      const result = await response.json();
+      if (!response.ok) {
+        console.error('Heartbeat upsert error:', result);
+        return { statusCode: 500, headers: { 'Access-Control-Allow-Origin': allowedOrigin }, body: JSON.stringify(result) };
+      }
+      return { statusCode: 200, headers: { 'Access-Control-Allow-Origin': allowedOrigin }, body: JSON.stringify({ success: true }) };
+    } catch(err) {
+      console.error('Heartbeat error:', err);
+      return { statusCode: 500, body: err.toString() };
+    }
+  }
+
   // TRACK LOG — create one record per track assignment
   const { sessionId, email, firstName, entryState, assignments } = data;
 
