@@ -28,7 +28,7 @@ exports.handler = async function(event, context) {
     return { statusCode: 403, body: 'Forbidden' };
   }
 
-  if (event.body && event.body.length > 20000) {
+  if (event.body && event.body.length > 50000) {
     return { statusCode: 413, body: 'Payload Too Large' };
   }
 
@@ -60,7 +60,6 @@ exports.handler = async function(event, context) {
   const stateJson = JSON.stringify(state);
   const now = new Date().toISOString();
 
-  // Build fields to write — always include sessionId, include email if provided
   const fields = {
     'Session State': stateJson,
     'State Updated': now,
@@ -76,7 +75,7 @@ exports.handler = async function(event, context) {
   }
 
   try {
-    // Look for existing state record by sessionId
+    // Find existing state record by sessionId
     const filterFormula = encodeURIComponent(`AND({Session ID}="${sessionId}",{Track ID}="SESSION_STATE")`);
     const findRes = await fetch(
       AIRTABLE_BASE + encodeURIComponent(TABLE_NAME) + '?filterByFormula=' + filterFormula + '&maxRecords=1',
@@ -85,7 +84,6 @@ exports.handler = async function(event, context) {
     const findData = await findRes.json();
 
     if (findData.records && findData.records.length > 0) {
-      // Update existing record
       const recordId = findData.records[0].id;
       await fetch(AIRTABLE_BASE + encodeURIComponent(TABLE_NAME) + '/' + recordId, {
         method: 'PATCH',
@@ -93,7 +91,6 @@ exports.handler = async function(event, context) {
         body: JSON.stringify({ fields }),
       });
     } else {
-      // Create new record
       await fetch(AIRTABLE_BASE + encodeURIComponent(TABLE_NAME), {
         method: 'POST',
         headers: AIRTABLE_HEADERS,
