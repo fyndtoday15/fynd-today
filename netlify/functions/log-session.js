@@ -203,8 +203,8 @@ exports.handler = async function(event, context) {
       'Replay': sanitizeString(data.replay, 5),
     };
     try {
-      // Look for existing record with this sessionId + trackId
-      const filterFormula = encodeURIComponent(`AND({Session ID}="${hSessionId}",{Track ID}="${hTrackId}")`);
+      // Look for existing IN-PROGRESS record only — never patch completed records
+      const filterFormula = encodeURIComponent(`AND({Session ID}="${hSessionId}",{Track ID}="${hTrackId}",{Position}="In Progress")`);
       const findRes = await fetch(BASE_URL + '?filterByFormula=' + filterFormula + '&maxRecords=1', { headers: HEADERS });
       const findData = await findRes.json();
       let response;
