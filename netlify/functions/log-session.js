@@ -8,7 +8,7 @@ const ALLOWED_ORIGINS = [
 // In-memory rate limit — per function instance
 const rateLimitMap = {};
 const RATE_LIMIT = 10;
-const RATE_WINDOW = 60000; 
+const RATE_WINDOW = 60000;
 
 function isRateLimited(ip) {
   const now = Date.now();
@@ -180,7 +180,74 @@ exports.handler = async function(event, context) {
     }
   }
 
-  // HEARTBEAT — upsert in-progress track record every 15s during playback
+  // TRACK START — create in-progress record immediately, return Airtable record ID
+  if (data.trackStart) {
+    const fields = {
+      'Session ID': sanitizeString(data.sessionId, 64),
+      'First Name': sanitizeString(data.firstName, 100),
+      'Email': sanitizeString(data.email, 200),
+      'Entry State': sanitizeString(data.entryState, 100),
+      'Track ID': sanitizeString(data.trackId, 20),
+      'Track Title': sanitizeString(data.trackTitle, 200),
+      'Playlist': sanitizeString(data.playlist, 50),
+      'Duration': 0,
+      'Position': 'In Progress',
+      'Date': sanitizeString(data.date, 10),
+      'Reaction': '',
+      'Visit Number': Math.min(Math.max(Number(data.visitNumber) || 1, 1), 9999),
+      'Days Since Last Visit': (data.daysSinceLastVisit !== undefined && data.daysSinceLastVisit !== null && data.daysSinceLastVisit !== '') ? Math.min(Number(data.daysSinceLastVisit), 9999) : null,
+      'Triggered': '',
+      'Replay': '',
+    };
+    try {
+      const response = await fetch(BASE_URL, {
+        method: 'POST',
+        headers: HEADERS,
+        body: JSON.stringify({ records: [{ fields }] }),
+      });
+      const result = await response.json();
+      if (!response.ok) {
+        console.error('Track start error:', result);
+        return { statusCode: 500, headers: { 'Access-Control-Allow-Origin': allowedOrigin }, body: JSON.stringify(result) };
+      }
+      const recordId = result.records[0].id;
+      return { statusCode: 200, headers: { 'Access-Control-Allow-Origin': allowedOrigin }, body: JSON.stringify({ success: true, recordId: recordId }) };
+    } catch(err) {
+      console.error('Track start error:', err);
+      return { statusCode: 500, body: err.toString() };
+    }
+  }
+
+  // TRACK PATCH — update specific record by Airtable record ID
+  if (data.trackPatch) {
+    const pFields = {
+      'Duration': Math.max(Number(data.duration) || 0, 0),
+      'Position': sanitizeString(data.postState || 'In Progress', 50),
+    };
+    if (data.reaction !== undefined) pFields['Reaction'] = sanitizeString(data.reaction, 20);
+    if (data.triggered) pFields['Triggered'] = sanitizeString(data.triggered, 20);
+    if (data.replay) pFields['Replay'] = sanitizeString(data.replay, 5);
+    if (data.email) pFields['Email'] = sanitizeString(data.email, 200);
+    if (data.firstName) pFields['First Name'] = sanitizeString(data.firstName, 100);
+    try {
+      const response = await fetch(BASE_URL + '/' + sanitizeString(data.recordId, 30), {
+        method: 'PATCH',
+        headers: HEADERS,
+        body: JSON.stringify({ fields: pFields }),
+      });
+      const result = await response.json();
+      if (!response.ok) {
+        console.error('Track patch error:', result);
+        return { statusCode: 500, headers: { 'Access-Control-Allow-Origin': allowedOrigin }, body: JSON.stringify(result) };
+      }
+      return { statusCode: 200, headers: { 'Access-Control-Allow-Origin': allowedOrigin }, body: JSON.stringify({ success: true }) };
+    } catch(err) {
+      console.error('Track patch error:', err);
+      return { statusCode: 500, body: err.toString() };
+    }
+  }
+
+  // HEARTBEAT — upsert in-progress track record (fallback when no recordId in memory)
   // Finds existing record by sessionId + trackId and updates it, or creates if not found
   if (data.heartbeatUpdate) {
     const hSessionId = sanitizeString(data.sessionId, 64);
