@@ -537,6 +537,7 @@ var sess = {
   reaction: '',
   triggered: '',
   replay: false,
+  _activeRecordId: null,
 };
 
 function shuffle(arr) {
@@ -726,6 +727,7 @@ function openPanel(cb) {
 
 function resetPanel() {
   clearInterval(heartbeatTimer);
+  sess._activeRecordId = null;
   var panel = document.getElementById('assign-panel');
   // Kill transition instantly so no white flash
   panel.style.transition = 'none';
@@ -826,8 +828,35 @@ function playTrack(idx) {
     sess.listenStart = Date.now();
     clearTimeout(readyTimer);
     clearTimeout(autoTimer);
-    // Start heartbeat — sends live duration to Airtable every 5s
-    // This ensures mobile tab-close captures data without relying on pagehide
+    // Immediately create in-progress record in Airtable and store the record ID
+    // All subsequent writes (heartbeat, close, resolve) patch this specific record
+    sess._activeRecordId = null;
+    (function() {
+      var _ti2 = sess.tOrder[sess.cur];
+      if (_ti2 === undefined) return;
+      var _tr2 = getTrack(sess.playlist, _ti2);
+      if (!_tr2) return;
+      fetch('/.netlify/functions/log-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          trackStart: true,
+          sessionId: sess.id,
+          email: LS.get('email') || '',
+          firstName: LS.get('firstName') || '',
+          entryState: sess.entryState || '',
+          trackId: 'T00' + (sess.cur + 1),
+          trackTitle: _tr2.title + ' \u2014 ' + _tr2.artist,
+          playlist: sess.playlist,
+          date: new Date().toISOString().slice(0,10),
+          visitNumber: window._visitNumber || 1,
+          daysSinceLastVisit: window._daysSinceLastVisit,
+        }),
+      }).then(function(r) { return r.json(); }).then(function(result) {
+        if (result.recordId) sess._activeRecordId = result.recordId;
+      }).catch(function() {});
+    })();
+    // Heartbeat — patches the active record every 5s with current duration
     clearInterval(heartbeatTimer);
     heartbeatTimer = setInterval(function() {
       if (!sess.listenStart) { clearInterval(heartbeatTimer); return; }
@@ -990,18 +1019,38 @@ document.getElementById('thumb-down').addEventListener('click', function() {
   var sessionTrackId = 'T00' + (sess.cur + 1);
   var trackTitle = tr.title + ' — ' + tr.artist;
   var date = new Date().toISOString().slice(0,10);
+  var _skipRid = sess._activeRecordId;
+  sess._activeRecordId = null;
 
-  fetch('/.netlify/functions/log-session', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      sessionId: sess.id,
-      email: LS.get('email') || '',
-      firstName: LS.get('firstName') || '',
-      entryState: sess.entryState,
-      assignments: [{ trackId: sessionTrackId, trackTitle: trackTitle, duration: dur, postState: 'Skipped', reaction: 'Down', date: date, playlist: sess.playlist, triggered: sess.triggered, replay: sess.replay ? 'Yes' : '', visitNumber: window._visitNumber || 1, daysSinceLastVisit: window._daysSinceLastVisit }],
-    }),
-  }).catch(function(err) { console.error('Skip log error:', err); });
+  if (_skipRid) {
+    fetch('/.netlify/functions/log-session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        trackPatch: true,
+        recordId: _skipRid,
+        duration: dur,
+        postState: 'Skipped',
+        reaction: 'Down',
+        triggered: sess.triggered,
+        replay: sess.replay ? 'Yes' : '',
+        email: LS.get('email') || '',
+        firstName: LS.get('firstName') || '',
+      }),
+    }).catch(function(err) { console.error('Skip log error:', err); });
+  } else {
+    fetch('/.netlify/functions/log-session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        sessionId: sess.id,
+        email: LS.get('email') || '',
+        firstName: LS.get('firstName') || '',
+        entryState: sess.entryState,
+        assignments: [{ trackId: sessionTrackId, trackTitle: trackTitle, duration: dur, postState: 'Skipped', reaction: 'Down', date: date, playlist: sess.playlist, triggered: sess.triggered, replay: sess.replay ? 'Yes' : '', visitNumber: window._visitNumber || 1, daysSinceLastVisit: window._daysSinceLastVisit }],
+      }),
+    }).catch(function(err) { console.error('Skip log error:', err); });
+  }
   sess.triggered = '';
   sess.replay = false;
   try { localStorage.removeItem('fynd_pendingAbandoned'); } catch(e) {}
@@ -1067,19 +1116,39 @@ function doReveal(ps) {
   var assignment = { sessionId:sess.id, trackId:sessionTrackId, trackTitle:trackTitle, entryState:sess.entryState, postState:ps, duration:sess.dur };
   sess.log.push(assignment);
 
-  // Send this track's data immediately — don't wait for email
+  // Send this track's data — patch active record if ID available, otherwise create
   var date = new Date().toISOString().slice(0,10);
-  fetch('/.netlify/functions/log-session', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      sessionId: sess.id,
-      email: LS.get('email') || '',
-      firstName: LS.get('firstName') || '',
-      entryState: sess.entryState,
-      assignments: [{ trackId: sessionTrackId, trackTitle: trackTitle, duration: assignment.duration, postState: assignment.postState, date: date, playlist: sess.playlist, reaction: sess.reaction, triggered: sess.triggered, replay: sess.replay ? 'Yes' : '', visitNumber: window._visitNumber || 1, daysSinceLastVisit: window._daysSinceLastVisit }],
-    }),
-  }).catch(function(err) { console.error('Track log error:', err); });
+  var _rid = sess._activeRecordId;
+  sess._activeRecordId = null; // clear immediately so no further writes go here
+  if (_rid) {
+    fetch('/.netlify/functions/log-session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        trackPatch: true,
+        recordId: _rid,
+        duration: assignment.duration,
+        postState: assignment.postState,
+        reaction: sess.reaction,
+        triggered: sess.triggered,
+        replay: sess.replay ? 'Yes' : '',
+        email: LS.get('email') || '',
+        firstName: LS.get('firstName') || '',
+      }),
+    }).catch(function(err) { console.error('Track log error:', err); });
+  } else {
+    fetch('/.netlify/functions/log-session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        sessionId: sess.id,
+        email: LS.get('email') || '',
+        firstName: LS.get('firstName') || '',
+        entryState: sess.entryState,
+        assignments: [{ trackId: sessionTrackId, trackTitle: trackTitle, duration: assignment.duration, postState: assignment.postState, date: date, playlist: sess.playlist, reaction: sess.reaction, triggered: sess.triggered, replay: sess.replay ? 'Yes' : '', visitNumber: window._visitNumber || 1, daysSinceLastVisit: window._daysSinceLastVisit }],
+      }),
+    }).catch(function(err) { console.error('Track log error:', err); });
+  }
 
   sess.reaction = '';
   sess.triggered = '';
@@ -1972,7 +2041,7 @@ window.addEventListener('popstate', function(e) {
   }
 });
 
-// ── HEARTBEAT — send live duration to Airtable every 15s ────────────────────
+// ── HEARTBEAT — patch active record every 5s ────────────────────────────────
 function sendHeartbeat() {
   if (!sess.listenStart) return;
   var dur = Math.round((Date.now() - sess.listenStart) / 1000);
@@ -1981,10 +2050,23 @@ function sendHeartbeat() {
   var tr = getTrack(sess.playlist, ti);
   if (!tr) return;
   var date = new Date().toISOString().slice(0,10);
-  fetch('/.netlify/functions/log-session', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
+  var body;
+  if (sess._activeRecordId) {
+    // Patch specific record by ID — no filter lookup, no risk of hitting old records
+    body = JSON.stringify({
+      trackPatch: true,
+      recordId: sess._activeRecordId,
+      duration: dur,
+      postState: 'In Progress',
+      reaction: sess.reaction || '',
+      replay: sess.replay ? 'Yes' : '',
+      triggered: sess.triggered || '',
+      email: LS.get('email') || '',
+      firstName: LS.get('firstName') || '',
+    });
+  } else {
+    // Fallback: upsert by sessionId+trackId if record ID not yet returned
+    body = JSON.stringify({
       heartbeatUpdate: true,
       sessionId: sess.id,
       email: LS.get('email') || '',
@@ -2000,7 +2082,12 @@ function sendHeartbeat() {
       triggered: sess.triggered || '',
       visitNumber: window._visitNumber || 1,
       daysSinceLastVisit: window._daysSinceLastVisit,
-    }),
+    });
+  }
+  fetch('/.netlify/functions/log-session', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: body,
   }).catch(function() {});
 }
 
@@ -2256,8 +2343,18 @@ document.addEventListener('visibilitychange', function() {
       }));
     }
   } catch(e) {}
-  // Fire beacon immediately via heartbeatUpdate path — upserts over in-progress record, no duplicates
-  var vcPayload = JSON.stringify({
+  // Fire beacon immediately — patch by record ID if available, otherwise upsert
+  var vcPayload = sess._activeRecordId ? JSON.stringify({
+    trackPatch: true,
+    recordId: sess._activeRecordId,
+    duration: dur,
+    postState: 'Abandoned',
+    reaction: sess.reaction || '',
+    replay: sess.replay ? 'Yes' : '',
+    triggered: sess.triggered || '',
+    email: LS.get('email') || '',
+    firstName: LS.get('firstName') || '',
+  }) : JSON.stringify({
     heartbeatUpdate: true,
     sessionId: sess.id,
     email: LS.get('email') || '',
@@ -2302,7 +2399,17 @@ window.addEventListener('pagehide', function() {
     var _pa = JSON.parse(localStorage.getItem('fynd_pendingAbandoned'));
     if (_pa) { _pa.endTime = now; localStorage.setItem('fynd_pendingAbandoned', JSON.stringify(_pa)); }
   } catch(e) {}
-  var payload = JSON.stringify({
+  var payload = sess._activeRecordId ? JSON.stringify({
+    trackPatch: true,
+    recordId: sess._activeRecordId,
+    duration: dur,
+    postState: 'Abandoned',
+    reaction: sess.reaction || '',
+    replay: sess.replay ? 'Yes' : '',
+    triggered: sess.triggered || '',
+    email: LS.get('email') || '',
+    firstName: LS.get('firstName') || '',
+  }) : JSON.stringify({
     heartbeatUpdate: true,
     sessionId: sess.id,
     email: LS.get('email') || '',
