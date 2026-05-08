@@ -2148,38 +2148,6 @@ initUserState();
 
 initSC();
 
-// ── VISIBILITY CHANGE — write pendingAbandoned on hide (Brave mobile safety net) ──
-document.addEventListener('visibilitychange', function() {
-  if (!document.hidden) return;
-  if (!sess.listenStart) return;
-  var dur = Math.round((Date.now() - sess.listenStart) / 1000);
-  var ti = sess.tOrder ? sess.tOrder[sess.cur] : undefined;
-  if (ti === undefined) return;
-  var tr = getTrack(sess.playlist, ti);
-  if (!tr) return;
-  var sessionTrackId = 'T00' + (sess.cur + 1);
-  var trackTitle = tr.title + ' \u2014 ' + tr.artist;
-  var date = new Date().toISOString().slice(0,10);
-  try {
-    localStorage.setItem('fynd_pendingAbandoned', JSON.stringify({
-      sessionId: sess.id,
-      email: LS.get('email') || '',
-      firstName: LS.get('firstName') || '',
-      entryState: sess.entryState || '',
-      trackId: sessionTrackId,
-      trackTitle: trackTitle,
-      startTime: sess.listenStart,
-      date: date,
-      playlist: sess.playlist,
-      reaction: sess.reaction || '',
-      replay: sess.replay ? 'Yes' : '',
-      triggered: sess.triggered || '',
-      visitNumber: window._visitNumber || 1,
-      daysSinceLastVisit: window._daysSinceLastVisit,
-    }));
-  } catch(e) {}
-});
-
 window.addEventListener('pagehide', function() {
   if (!sess.listenStart) return;
   try { localStorage.removeItem('fynd_pendingAbandoned'); } catch(e) {}
