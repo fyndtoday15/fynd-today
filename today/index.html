@@ -1838,8 +1838,15 @@ var PLAYLIST_VERSION = '1';
   try {
     var pending = JSON.parse(localStorage.getItem('fynd_pendingAbandoned'));
     if (pending) {
+      // Dedup: if record has an endTime use it directly, otherwise calculate but cap at 60s
+      var dur;
+      if (pending.endTime) {
+        dur = Math.round((pending.endTime - pending.startTime) / 1000);
+      } else {
+        dur = Math.round((Date.now() - pending.startTime) / 1000);
+        dur = Math.min(dur, 60); // cap at 60s — tracks never run longer in the system
+      }
       localStorage.removeItem('fynd_pendingAbandoned');
-      var dur = Math.round((Date.now() - pending.startTime) / 1000);
       fetch('/.netlify/functions/log-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1957,6 +1964,7 @@ function saveSessionState() {
     entryState: sess.entryState || '',
     entryStateTime: (function() { try { return localStorage.getItem('fynd_entryStateTime') || ''; } catch(e) { return ''; } })(),
     completedSets: completed,
+    abandonedSets: LS.get('abandonedSets') || {},
     playlist: sess.playlist,
     cur: Math.min(sess.cur, 4),
     tOrder: sess.tOrder,
@@ -2091,19 +2099,25 @@ document.getElementById('signin-verify').addEventListener('click', function(e) {
         if (s.completedSets) LS.set('completedSets', s.completedSets);
         if (s.entryState) { try { localStorage.setItem('fynd_entryState', s.entryState); } catch(ee) {} }
         if (s.entryStateTime) { try { localStorage.setItem('fynd_entryStateTime', s.entryStateTime); } catch(ee) {} }
-        // Always restore abandoned set if we have valid position data — regardless of completedSets
+        // Restore full abandonedSets from state — covers all sets not just the active one
+        if (s.abandonedSets && Object.keys(s.abandonedSets).length > 0) {
+          LS.set('abandonedSets', s.abandonedSets);
+        }
+        // Also restore current set position into abandonedSets if valid
         if (s.playlist && s.cur !== undefined && s.tOrder && s.tOrder.length > 0) {
           var all = LS.get('abandonedSets') || {};
-          all[s.playlist] = {
-            sessionId: s.sessionId || sess.id,
-            playlist: s.playlist,
-            cur: s.cur,
-            tOrder: s.tOrder,
-            entryState: s.entryState || '',
-            log: s.log || [],
-            timestamp: Date.now(),
-          };
-          LS.set('abandonedSets', all);
+          if (!all[s.playlist]) {
+            all[s.playlist] = {
+              sessionId: s.sessionId || sess.id,
+              playlist: s.playlist,
+              cur: s.cur,
+              tOrder: s.tOrder,
+              entryState: s.entryState || '',
+              log: s.log || [],
+              timestamp: Date.now(),
+            };
+            LS.set('abandonedSets', all);
+          }
         }
       }
       LS.set('returning', true);
@@ -2148,16 +2162,61 @@ initUserState();
 
 initSC();
 
+// ── VISIBILITY CHANGE — write endTime to pendingAbandoned on hide ──────────
+// Fires when tab is hidden/closed. Stores endTime so duration is accurate
+// even if the record is recovered minutes later on next page load.
+document.addEventListener('visibilitychange', function() {
+  if (!document.hidden) return;
+  if (!sess.listenStart) return;
+  var now = Date.now();
+  try {
+    var _pa = JSON.parse(localStorage.getItem('fynd_pendingAbandoned'));
+    if (_pa) {
+      // Update existing record with endTime
+      _pa.endTime = now;
+      localStorage.setItem('fynd_pendingAbandoned', JSON.stringify(_pa));
+    } else {
+      // No existing record — write one now (safety net for Chrome)
+      var ti = sess.tOrder ? sess.tOrder[sess.cur] : undefined;
+      if (ti === undefined) return;
+      var tr = getTrack(sess.playlist, ti);
+      if (!tr) return;
+      localStorage.setItem('fynd_pendingAbandoned', JSON.stringify({
+        sessionId: sess.id,
+        email: LS.get('email') || '',
+        firstName: LS.get('firstName') || '',
+        entryState: sess.entryState || '',
+        trackId: 'T00' + (sess.cur + 1),
+        trackTitle: tr.title + ' \u2014 ' + tr.artist,
+        startTime: sess.listenStart,
+        endTime: now,
+        date: new Date().toISOString().slice(0,10),
+        playlist: sess.playlist,
+        reaction: sess.reaction || '',
+        replay: sess.replay ? 'Yes' : '',
+        triggered: sess.triggered || '',
+        visitNumber: window._visitNumber || 1,
+        daysSinceLastVisit: window._daysSinceLastVisit,
+      }));
+    }
+  } catch(e) {}
+});
+
 window.addEventListener('pagehide', function() {
   if (!sess.listenStart) return;
-  try { localStorage.removeItem('fynd_pendingAbandoned'); } catch(e) {}
-  var dur = Math.round((Date.now() - sess.listenStart) / 1000);
+  var now = Date.now();
+  var dur = Math.round((now - sess.listenStart) / 1000);
   var ti = sess.tOrder[sess.cur];
   if (ti === undefined) return;
   var tr = getTrack(sess.playlist, ti);
   var sessionTrackId = 'T00' + (sess.cur + 1);
   var trackTitle = tr.title + ' — ' + tr.artist;
   var date = new Date().toISOString().slice(0,10);
+  // Update pendingAbandoned with endTime so recovery uses accurate duration not Date.now()
+  try {
+    var _pa = JSON.parse(localStorage.getItem('fynd_pendingAbandoned'));
+    if (_pa) { _pa.endTime = now; localStorage.setItem('fynd_pendingAbandoned', JSON.stringify(_pa)); }
+  } catch(e) {}
   var payload = JSON.stringify({
     sessionId: sess.id,
     email: LS.get('email') || '',
@@ -2169,8 +2228,11 @@ window.addEventListener('pagehide', function() {
     try {
       var sent = navigator.sendBeacon('/.netlify/functions/log-session', new Blob([payload], { type: 'application/json' }));
       if (!sent) throw new Error('sendBeacon returned false');
+      // Beacon sent — clear pending so recovery doesn't double-send
+      try { localStorage.removeItem('fynd_pendingAbandoned'); } catch(e) {}
     } catch(e) {
       // sendBeacon blocked (e.g. Brave) — fall back to fetch with keepalive
+      // Leave pendingAbandoned in localStorage for recovery on next load
       try {
         fetch('/.netlify/functions/log-session', {
           method: 'POST',
@@ -2182,6 +2244,7 @@ window.addEventListener('pagehide', function() {
     }
   } else {
     // No sendBeacon support — use fetch with keepalive
+    // Leave pendingAbandoned for recovery in case fetch is also killed
     try {
       fetch('/.netlify/functions/log-session', {
         method: 'POST',
