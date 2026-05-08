@@ -725,6 +725,7 @@ function openPanel(cb) {
 }
 
 function resetPanel() {
+  clearInterval(heartbeatTimer);
   var panel = document.getElementById('assign-panel');
   // Kill transition instantly so no white flash
   panel.style.transition = 'none';
@@ -750,7 +751,7 @@ function resetPanel() {
 }
 
 // SoundCloud
-var widget, widgetReady = false, readyTimer, autoTimer, thumbsTimer;
+var widget, widgetReady = false, readyTimer, autoTimer, thumbsTimer, heartbeatTimer;
 
 function initSC() {
   widget = SC.Widget(document.getElementById('sc'));
@@ -825,6 +826,13 @@ function playTrack(idx) {
     sess.listenStart = Date.now();
     clearTimeout(readyTimer);
     clearTimeout(autoTimer);
+    // Start heartbeat — sends live duration to Airtable every 5s
+    // This ensures mobile tab-close captures data without relying on pagehide
+    clearInterval(heartbeatTimer);
+    heartbeatTimer = setInterval(function() {
+      if (!sess.listenStart) { clearInterval(heartbeatTimer); return; }
+      sendHeartbeat();
+    }, 5000);
     // Save current position so refresh can resume here
     saveAbandoned();
     // Store pending abandoned to localStorage — sent on next page load
@@ -967,6 +975,7 @@ document.getElementById('thumb-down').addEventListener('click', function() {
   clearTimeout(thumbsTimer);
   clearTimeout(readyTimer);
   clearTimeout(autoTimer);
+  clearInterval(heartbeatTimer);
   // Hide instantly — remove show class and clear any inline styles
   var tw = document.getElementById('thumbs-wrap');
   tw.classList.remove('show');
@@ -1045,6 +1054,7 @@ document.getElementById('thumb-down').addEventListener('click', function() {
 function doReveal(ps) {
   clearTimeout(readyTimer);
   clearTimeout(autoTimer);
+  clearInterval(heartbeatTimer);
   if (widget) widget.pause();
   stopDot();
   sess.dur = sess.listenStart ? Math.round((Date.now() - sess.listenStart) / 1000) : 0;
@@ -1838,24 +1848,35 @@ var PLAYLIST_VERSION = '1';
   try {
     var pending = JSON.parse(localStorage.getItem('fynd_pendingAbandoned'));
     if (pending) {
-      // Dedup: if record has an endTime use it directly, otherwise calculate but cap at 60s
+      // Dedup: if record has an endTime use it directly, otherwise calculate from startTime
       var dur;
       if (pending.endTime) {
         dur = Math.round((pending.endTime - pending.startTime) / 1000);
       } else {
         dur = Math.round((Date.now() - pending.startTime) / 1000);
-        dur = Math.min(dur, 60); // cap at 60s — tracks never run longer in the system
       }
       localStorage.removeItem('fynd_pendingAbandoned');
+      // Send as heartbeatUpdate so it upserts over the existing in-progress heartbeat record
       fetch('/.netlify/functions/log-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          heartbeatUpdate: true,
           sessionId: pending.sessionId,
           email: pending.email || '',
           firstName: pending.firstName || '',
           entryState: pending.entryState,
-          assignments: [{ trackId: pending.trackId, trackTitle: pending.trackTitle, duration: dur, postState: 'Abandoned', date: pending.date, playlist: pending.playlist, reaction: pending.reaction || '', replay: pending.replay || '', triggered: pending.triggered || '', visitNumber: pending.visitNumber || 1, daysSinceLastVisit: pending.daysSinceLastVisit }],
+          trackId: pending.trackId,
+          trackTitle: pending.trackTitle,
+          duration: dur,
+          postState: 'Abandoned',
+          date: pending.date,
+          playlist: pending.playlist,
+          reaction: pending.reaction || '',
+          replay: pending.replay || '',
+          triggered: pending.triggered || '',
+          visitNumber: pending.visitNumber || 1,
+          daysSinceLastVisit: pending.daysSinceLastVisit,
         }),
       }).catch(function(){});
     }
@@ -1950,6 +1971,38 @@ window.addEventListener('popstate', function(e) {
     _origShow(prev);
   }
 });
+
+// ── HEARTBEAT — send live duration to Airtable every 15s ────────────────────
+function sendHeartbeat() {
+  if (!sess.listenStart) return;
+  var dur = Math.round((Date.now() - sess.listenStart) / 1000);
+  var ti = sess.tOrder ? sess.tOrder[sess.cur] : undefined;
+  if (ti === undefined) return;
+  var tr = getTrack(sess.playlist, ti);
+  if (!tr) return;
+  var date = new Date().toISOString().slice(0,10);
+  fetch('/.netlify/functions/log-session', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      heartbeatUpdate: true,
+      sessionId: sess.id,
+      email: LS.get('email') || '',
+      firstName: LS.get('firstName') || '',
+      entryState: sess.entryState || '',
+      trackId: 'T00' + (sess.cur + 1),
+      trackTitle: tr.title + ' \u2014 ' + tr.artist,
+      playlist: sess.playlist,
+      duration: dur,
+      date: date,
+      reaction: sess.reaction || '',
+      replay: sess.replay ? 'Yes' : '',
+      triggered: sess.triggered || '',
+      visitNumber: window._visitNumber || 1,
+      daysSinceLastVisit: window._daysSinceLastVisit,
+    }),
+  }).catch(function() {});
+}
 
 // ── SAVE SESSION STATE (cross-browser restore) ──────────
 function saveSessionState() {
@@ -2162,35 +2215,38 @@ initUserState();
 
 initSC();
 
-// ── VISIBILITY CHANGE — write endTime to pendingAbandoned on hide ──────────
-// Fires when tab is hidden/closed. Stores endTime so duration is accurate
-// even if the record is recovered minutes later on next page load.
+// ── VISIBILITY CHANGE — fire beacon + write endTime on hide ─────────────────
+// Fires when tab is hidden/backgrounded. Sends beacon immediately AND
+// writes endTime to localStorage so recovery has accurate duration.
 document.addEventListener('visibilitychange', function() {
   if (!document.hidden) return;
   if (!sess.listenStart) return;
   var now = Date.now();
+  var dur = Math.round((now - sess.listenStart) / 1000);
+  var ti = sess.tOrder ? sess.tOrder[sess.cur] : undefined;
+  if (ti === undefined) return;
+  var tr = getTrack(sess.playlist, ti);
+  if (!tr) return;
+  var sessionTrackId = 'T00' + (sess.cur + 1);
+  var trackTitle = tr.title + ' \u2014 ' + tr.artist;
+  var date = new Date().toISOString().slice(0,10);
+  // Update localStorage with endTime for recovery fallback
   try {
     var _pa = JSON.parse(localStorage.getItem('fynd_pendingAbandoned'));
     if (_pa) {
-      // Update existing record with endTime
       _pa.endTime = now;
       localStorage.setItem('fynd_pendingAbandoned', JSON.stringify(_pa));
     } else {
-      // No existing record — write one now (safety net for Chrome)
-      var ti = sess.tOrder ? sess.tOrder[sess.cur] : undefined;
-      if (ti === undefined) return;
-      var tr = getTrack(sess.playlist, ti);
-      if (!tr) return;
       localStorage.setItem('fynd_pendingAbandoned', JSON.stringify({
         sessionId: sess.id,
         email: LS.get('email') || '',
         firstName: LS.get('firstName') || '',
         entryState: sess.entryState || '',
-        trackId: 'T00' + (sess.cur + 1),
-        trackTitle: tr.title + ' \u2014 ' + tr.artist,
+        trackId: sessionTrackId,
+        trackTitle: trackTitle,
         startTime: sess.listenStart,
         endTime: now,
-        date: new Date().toISOString().slice(0,10),
+        date: date,
         playlist: sess.playlist,
         reaction: sess.reaction || '',
         replay: sess.replay ? 'Yes' : '',
@@ -2200,6 +2256,23 @@ document.addEventListener('visibilitychange', function() {
       }));
     }
   } catch(e) {}
+  // Fire beacon immediately — best effort, doesn't block
+  var vcPayload = JSON.stringify({
+    sessionId: sess.id,
+    email: LS.get('email') || '',
+    firstName: LS.get('firstName') || '',
+    entryState: sess.entryState,
+    assignments: [{ trackId: sessionTrackId, trackTitle: trackTitle, duration: dur, postState: 'Abandoned', date: date, playlist: sess.playlist, reaction: sess.reaction || '', replay: sess.replay ? 'Yes' : '', triggered: sess.triggered || '', visitNumber: window._visitNumber || 1, daysSinceLastVisit: window._daysSinceLastVisit }],
+  });
+  if (navigator.sendBeacon) {
+    try {
+      var sent = navigator.sendBeacon('/.netlify/functions/log-session', new Blob([vcPayload], { type: 'application/json' }));
+      if (sent) {
+        // Beacon queued — clear pending so pagehide/recovery don't double-send
+        try { localStorage.removeItem('fynd_pendingAbandoned'); } catch(e) {}
+      }
+    } catch(e) {}
+  }
 });
 
 window.addEventListener('pagehide', function() {
