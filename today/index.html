@@ -543,6 +543,7 @@ var sess = {
   replay: false,
   _activeRecordId: null,
   _revealFired: false,
+  _abandonSent: false,
 };
 
 function shuffle(arr) {
@@ -744,6 +745,7 @@ function resetPanel() {
   clearInterval(heartbeatTimer);
   sess._activeRecordId = null;
   sess._revealFired = false;
+  sess._abandonSent = false;
   var panel = document.getElementById('assign-panel');
   // Kill transition instantly so no white flash
   panel.style.transition = 'none';
@@ -2516,6 +2518,7 @@ document.addEventListener('visibilitychange', function() {
   if (!document.hidden) return;
   if (!sess.listenStart) return;
   var now = Date.now();
+  var dur = Math.round((now - sess.listenStart) / 1000);
   var ti = sess.tOrder ? sess.tOrder[sess.cur] : undefined;
   if (ti === undefined) return;
   var tr = getTrack(sess.playlist, ti);
@@ -2523,8 +2526,7 @@ document.addEventListener('visibilitychange', function() {
   var sessionTrackId = 'T00' + (sess.cur + 1);
   var trackTitle = tr.title + ' \u2014 ' + tr.artist;
   var date = new Date().toISOString().slice(0,10);
-  // Only write endTime snapshot to localStorage — pagehide handles the beacon
-  // On mobile pagehide may not fire, so this snapshot ensures accurate duration on recovery
+  // Write endTime snapshot to localStorage — recovery fallback for all browsers
   try {
     var _pa = JSON.parse(localStorage.getItem('fynd_pendingAbandoned'));
     if (_pa) {
@@ -2550,10 +2552,54 @@ document.addEventListener('visibilitychange', function() {
       }));
     }
   } catch(e) {}
+  // Fire beacon on mobile only — desktop pagehide is reliable so beacon not needed there
+  // On desktop, visibilitychange fires on window/tab switching which would write Abandoned incorrectly
+  var isMobile = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+  if (!isMobile) return;
+  if (sess._abandonSent) return;
+  var vcPayload = sess._activeRecordId ? JSON.stringify({
+    trackPatch: true,
+    recordId: sess._activeRecordId,
+    duration: dur,
+    postState: 'Abandoned',
+    reaction: sess.reaction || '',
+    replay: sess.replay ? 'Yes' : '',
+    triggered: sess.triggered || '',
+    email: LS.get('email') || '',
+    firstName: LS.get('firstName') || '',
+  }) : JSON.stringify({
+    heartbeatUpdate: true,
+    sessionId: sess.id,
+    email: LS.get('email') || '',
+    firstName: LS.get('firstName') || '',
+    entryState: sess.entryState || '',
+    trackId: sessionTrackId,
+    trackTitle: trackTitle,
+    playlist: sess.playlist,
+    duration: dur,
+    postState: 'Abandoned',
+    date: date,
+    reaction: sess.reaction || '',
+    replay: sess.replay ? 'Yes' : '',
+    triggered: sess.triggered || '',
+    visitNumber: window._visitNumber || 1,
+    daysSinceLastVisit: window._daysSinceLastVisit,
+  });
+  if (navigator.sendBeacon) {
+    try {
+      var sent = navigator.sendBeacon('/.netlify/functions/log-session', new Blob([vcPayload], { type: 'application/json' }));
+      if (sent) {
+        sess._abandonSent = true;
+        sess.listenStart = null;
+        try { localStorage.removeItem('fynd_pendingAbandoned'); } catch(e) {}
+      }
+    } catch(e) {}
+  }
 });
 
 window.addEventListener('pagehide', function() {
   if (!sess.listenStart) return;
+  if (sess._abandonSent) return;
   var now = Date.now();
   var dur = Math.round((now - sess.listenStart) / 1000);
   var ti = sess.tOrder[sess.cur];
@@ -2599,6 +2645,7 @@ window.addEventListener('pagehide', function() {
     try {
       var sent = navigator.sendBeacon('/.netlify/functions/log-session', new Blob([payload], { type: 'application/json' }));
       if (!sent) throw new Error('sendBeacon returned false');
+      sess._abandonSent = true;
       try { localStorage.removeItem('fynd_pendingAbandoned'); } catch(e) {}
     } catch(e) {
       try {
