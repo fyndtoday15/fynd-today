@@ -247,8 +247,8 @@ exports.handler = async function(event, context) {
     }
   }
 
-  // HEARTBEAT — upsert in-progress track record (fallback when no recordId in memory)
-  // Finds existing record by sessionId + trackId and updates it, or creates if not found
+  // HEARTBEAT — upsert in-progress record by sessionId+trackId
+  // Only matches In Progress records — never touches completed ones
   if (data.heartbeatUpdate) {
     const hSessionId = sanitizeString(data.sessionId, 64);
     const hTrackId = sanitizeString(data.trackId, 20);
@@ -270,21 +270,18 @@ exports.handler = async function(event, context) {
       'Replay': sanitizeString(data.replay, 5),
     };
     try {
-      // Look for existing IN-PROGRESS record only — never patch completed records
+      // Only match In Progress records — never patch completed ones
       const filterFormula = encodeURIComponent(`AND({Session ID}="${hSessionId}",{Track ID}="${hTrackId}",{Position}="In Progress")`);
       const findRes = await fetch(BASE_URL + '?filterByFormula=' + filterFormula + '&maxRecords=1', { headers: HEADERS });
       const findData = await findRes.json();
       let response;
       if (findData.records && findData.records.length > 0) {
-        // Update existing record
-        const recordId = findData.records[0].id;
-        response = await fetch(BASE_URL + '/' + recordId, {
+        response = await fetch(BASE_URL + '/' + findData.records[0].id, {
           method: 'PATCH',
           headers: HEADERS,
           body: JSON.stringify({ fields: hFields }),
         });
       } else {
-        // Create new record
         response = await fetch(BASE_URL, {
           method: 'POST',
           headers: HEADERS,
@@ -293,7 +290,7 @@ exports.handler = async function(event, context) {
       }
       const result = await response.json();
       if (!response.ok) {
-        console.error('Heartbeat upsert error:', result);
+        console.error('Heartbeat error:', result);
         return { statusCode: 500, headers: { 'Access-Control-Allow-Origin': allowedOrigin }, body: JSON.stringify(result) };
       }
       return { statusCode: 200, headers: { 'Access-Control-Allow-Origin': allowedOrigin }, body: JSON.stringify({ success: true }) };
