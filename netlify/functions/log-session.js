@@ -2,7 +2,7 @@
 const ALLOWED_ORIGINS = [
   'https://fyndtoday.netlify.app',
   'https://fyndtoday.com',
-  'https://www.fyndtoday.com',
+  'https://www.fyndtoday.com', 
 ];
 
 // In-memory rate limit — per function instance
