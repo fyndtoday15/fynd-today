@@ -1358,6 +1358,16 @@ document.getElementById('s1').addEventListener('click', function() {
   else {
   var hasEmail = !!(LS.get('email'));
   if (hasEmail) {
+    // Check if signed in within last 24h on this browser — skip panel if so
+    var _lastSignin = LS.get('lastSigninTime');
+    var _24h = 24 * 60 * 60 * 1000;
+    var _withinDay = _lastSignin && (Date.now() - _lastSignin) < _24h;
+    if (_withinDay) {
+      // Still within 24h — restore state silently, no sign-in required
+      window._signinBypass = true;
+      document.getElementById('s1').click();
+      return;
+    }
     var panel = document.getElementById('signin-panel');
     if (!panel.classList.contains('open')) {
       panel.classList.add('open');
@@ -2377,8 +2387,14 @@ document.getElementById('signin-verify').addEventListener('click', function(e) {
             LS.set('abandonedSets', all);
           }
         }
+        // Sync visitCount from Airtable — ensures consistent visit number across browsers
+        if (s.visitNumber && s.visitNumber > (LS.get('visitCount') || 0)) {
+          window._visitNumber = s.visitNumber + 1; // new visit on this browser
+          LS.set('visitCount', window._visitNumber);
+        }
       }
       LS.set('returning', true);
+      LS.set('lastSigninTime', Date.now());
       document.getElementById('signin-otp-row').classList.remove('show');
       var signinPanel = document.getElementById('signin-panel');
       signinPanel.classList.remove('open');
