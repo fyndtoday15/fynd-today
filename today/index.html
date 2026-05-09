@@ -779,14 +779,45 @@ function initSC() {
 }
 
 function startTrackTimers() {
-  // Set up timers and UI for current track without triggering play
-  // Used after loadSet auto_play handles the actual audio start
   resetPanel();
   startDot();
   sess.listenStart = Date.now();
   clearTimeout(readyTimer);
   clearTimeout(autoTimer);
   clearTimeout(thumbsTimer);
+  // Immediately create in-progress record — same as go() in playTrack
+  sess._activeRecordId = null;
+  (function() {
+    var _ti2 = sess.tOrder[sess.cur];
+    if (_ti2 === undefined) return;
+    var _tr2 = getTrack(sess.playlist, _ti2);
+    if (!_tr2) return;
+    fetch('/.netlify/functions/log-session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        trackStart: true,
+        sessionId: sess.id,
+        email: LS.get('email') || '',
+        firstName: LS.get('firstName') || '',
+        entryState: sess.entryState || '',
+        trackId: 'T00' + (sess.cur + 1),
+        trackTitle: _tr2.title + ' \u2014 ' + _tr2.artist,
+        playlist: sess.playlist,
+        date: new Date().toISOString().slice(0,10),
+        visitNumber: window._visitNumber || 1,
+        daysSinceLastVisit: window._daysSinceLastVisit,
+      }),
+    }).then(function(r) { return r.json(); }).then(function(result) {
+      if (result.recordId) sess._activeRecordId = result.recordId;
+    }).catch(function() {});
+  })();
+  // Heartbeat — patches active record every 5s
+  clearInterval(heartbeatTimer);
+  heartbeatTimer = setInterval(function() {
+    if (!sess.listenStart) { clearInterval(heartbeatTimer); return; }
+    sendHeartbeat();
+  }, 5000);
   thumbsTimer = setTimeout(function() {
     document.getElementById('thumbs-wrap').classList.add('show');
   }, 5000);
@@ -1242,6 +1273,7 @@ function doReveal(ps) {
   // Hide stop button on last track — no reason to stop now
   var stopBtn = document.getElementById('btn-stop');
   if (stopBtn) stopBtn.style.display = sess.cur === 4 ? 'none' : '';
+  // On last track don't push s5 to history — back from recap goes to Today.
   if (sess.cur === 4) {
     _origShow('s5');
   } else {
