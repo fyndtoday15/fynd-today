@@ -779,45 +779,14 @@ function initSC() {
 }
 
 function startTrackTimers() {
+  // Set up timers and UI for current track without triggering play
+  // Used after loadSet auto_play handles the actual audio start
   resetPanel();
   startDot();
   sess.listenStart = Date.now();
   clearTimeout(readyTimer);
   clearTimeout(autoTimer);
   clearTimeout(thumbsTimer);
-  // Immediately create in-progress record — same as go() in playTrack
-  sess._activeRecordId = null;
-  (function() {
-    var _ti2 = sess.tOrder[sess.cur];
-    if (_ti2 === undefined) return;
-    var _tr2 = getTrack(sess.playlist, _ti2);
-    if (!_tr2) return;
-    fetch('/.netlify/functions/log-session', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        trackStart: true,
-        sessionId: sess.id,
-        email: LS.get('email') || '',
-        firstName: LS.get('firstName') || '',
-        entryState: sess.entryState || '',
-        trackId: 'T00' + (sess.cur + 1),
-        trackTitle: _tr2.title + ' \u2014 ' + _tr2.artist,
-        playlist: sess.playlist,
-        date: new Date().toISOString().slice(0,10),
-        visitNumber: window._visitNumber || 1,
-        daysSinceLastVisit: window._daysSinceLastVisit,
-      }),
-    }).then(function(r) { return r.json(); }).then(function(result) {
-      if (result.recordId) sess._activeRecordId = result.recordId;
-    }).catch(function() {});
-  })();
-  // Heartbeat — patches active record every 5s
-  clearInterval(heartbeatTimer);
-  heartbeatTimer = setInterval(function() {
-    if (!sess.listenStart) { clearInterval(heartbeatTimer); return; }
-    sendHeartbeat();
-  }, 5000);
   thumbsTimer = setTimeout(function() {
     document.getElementById('thumbs-wrap').classList.add('show');
   }, 5000);
@@ -1174,7 +1143,6 @@ document.getElementById('thumb-down').addEventListener('click', function() {
   } else {
     markSetComplete(sess.playlist);
     clearAbandoned();
-    saveSessionState();
     LS.set('onEmailScreen', true);
     buildRecap();
     // Persist log so buildRecap works after refresh
@@ -1192,6 +1160,7 @@ document.getElementById('thumb-down').addEventListener('click', function() {
       var _rs = sess.entryState || '';
       if (_re) setTimeout(function() { sendRecapEmail(_re, _rn, _rp, _rl, _rs); }, 1000);
     })();
+    saveSessionState();
     try { localStorage.setItem('fynd_onRecapScreen', '1'); } catch(e) {}
     show('s7');
   }
@@ -1205,7 +1174,7 @@ document.getElementById('thumb-down').addEventListener('click', function() {
   };
 
 function doReveal(ps) {
-  if (sess._revealFired) return; // guard against double-call
+  if (sess._revealFired) return;
   sess._revealFired = true;
   clearTimeout(readyTimer);
   clearTimeout(autoTimer);
@@ -1273,7 +1242,6 @@ function doReveal(ps) {
   // Hide stop button on last track — no reason to stop now
   var stopBtn = document.getElementById('btn-stop');
   if (stopBtn) stopBtn.style.display = sess.cur === 4 ? 'none' : '';
-  // On last track don't push s5 to history — back from recap should go to s1
   if (sess.cur === 4) {
     _origShow('s5');
   } else {
@@ -1286,7 +1254,7 @@ function doReveal(ps) {
     sess.cur = 5; // mark complete
     markSetComplete(sess.playlist);
     clearAbandoned();
-    saveSessionState(); // persist completedSets to Airtable immediately
+    saveSessionState();
     LS.set('onEmailScreen', true);
     // Persist log so buildRecap works after refresh
     try { localStorage.setItem('fynd_completedLog', JSON.stringify({ log: sess.log, playlist: sess.playlist, entryState: sess.entryState || '' })); } catch(e) {}
@@ -1604,15 +1572,24 @@ document.getElementById('btn-continue').addEventListener('click', function() {
   } else {
     markSetComplete(sess.playlist);
     clearAbandoned();
-    saveSessionState();
     LS.set('onEmailScreen', true);
     buildRecap();
+    // Persist log so buildRecap works after refresh
+    try { localStorage.setItem('fynd_completedLog', JSON.stringify({ log: sess.log, playlist: sess.playlist, entryState: sess.entryState || '' })); } catch(e) {}
+    // Persist Set 1 recap to localStorage — sess may not survive until email submit on mobile
+    if (sess.playlist === 'MVP 1') {
+      try { localStorage.setItem('fynd_set1recap', JSON.stringify({ log: sess.log, playlist: sess.playlist, entryState: sess.entryState || '' })); } catch(e) {}
+    }
+    // Send recap email for Sets 2-5 (email already collected) — 10s delay
+    (function() {
+      var _re2 = LS.get('email') || '';
       var _rn2 = LS.get('firstName') || '';
       var _rp2 = sess.playlist;
       var _rl2 = sess.log.slice();
       var _rs2 = sess.entryState || '';
       if (_re2) setTimeout(function() { sendRecapEmail(_re2, _rn2, _rp2, _rl2, _rs2); }, 1000);
     })();
+    saveSessionState();
     try { localStorage.setItem('fynd_onRecapScreen', '1'); } catch(e) {}
     show('s7');
   }
