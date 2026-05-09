@@ -309,6 +309,10 @@ html.assign-top, body.assign-top { background: var(--black); }
 </div>
 
   <button class="signin-trigger" id="signin-trigger">returning? sign in</button>
+  <div id="welcome-bar" style="display:none; position:absolute; bottom:clamp(40px,8vh,64px); left:50%; transform:translateX(-50%); text-align:center; white-space:nowrap; z-index:10;">
+    <div id="welcome-name" style="font-size:11px; color:var(--black); opacity:0.55; letter-spacing:0.12em; text-transform:uppercase; margin-bottom:6px;"></div>
+    <button id="switch-account" style="font-size:11px; color:var(--black); opacity:0.3; letter-spacing:0.1em; text-transform:uppercase; cursor:pointer; background:none; border:none; font-family:var(--f); padding:4px 0;">switch account</button>
+  </div>
   <div class="signin-panel" id="signin-panel">
     <input class="signin-input" id="signin-email" type="email" placeholder="your email" autocomplete="email" autocapitalize="none">
     <button class="signin-btn" id="signin-send">Send sign-in code</button>
@@ -603,9 +607,11 @@ function show(id) {
     dots.classList.remove('dark');
   }
 
-  // Only show sign-in trigger on s1
+  // Only show sign-in trigger / welcome bar on s1
   var trigger = document.getElementById('signin-trigger');
+  var welcomeBar = document.getElementById('welcome-bar');
   if (trigger) trigger.style.display = (id === 's1') ? '' : 'none';
+  if (welcomeBar) welcomeBar.style.display = (id === 's1') ? '' : 'none';
 }
 
 function setDots(cur) {
@@ -1364,6 +1370,22 @@ document.getElementById('s1').addEventListener('click', function() {
     var _withinDay = _lastSignin && (Date.now() - _lastSignin) < _24h;
     if (_withinDay) {
       // Still within 24h — restore state silently, no sign-in required
+      // Check entry state expiry first — if expired, show entry screen before sets
+      var _esTime = parseInt(localStorage.getItem('fynd_entryStateTime') || '0', 10);
+      var _esVal = localStorage.getItem('fynd_entryState');
+      var _entryExpired = !_esVal || (_esTime && (Date.now() - _esTime) > _24h);
+      if (_entryExpired) {
+        try { localStorage.removeItem('fynd_entryState'); localStorage.removeItem('fynd_entryStateTime'); } catch(e) {}
+        markReturning();
+        buildList('entry-list', 'stmt', true, function(state) {
+          sess.entryState = state;
+          try { localStorage.setItem('fynd_entryState', state); } catch(e) {}
+          try { localStorage.setItem('fynd_entryStateTime', Date.now().toString()); } catch(e) {}
+          showSetsScreen();
+        });
+        show('s2');
+        return;
+      }
       window._signinBypass = true;
       document.getElementById('s1').click();
       return;
@@ -1935,6 +1957,24 @@ function initUserState() {
   var savedEmail = LS.get('email') || '';
   var savedName = LS.get('firstName') || '';
 
+  // Show welcome bar if signed in within 24h, otherwise show returning? sign in
+  (function() {
+    var _lastSignin = LS.get('lastSigninTime');
+    var _24h = 24 * 60 * 60 * 1000;
+    var _withinDay = savedEmail && savedName && _lastSignin && (Date.now() - _lastSignin) < _24h;
+    var trigger = document.getElementById('signin-trigger');
+    var welcomeBar = document.getElementById('welcome-bar');
+    var welcomeName = document.getElementById('welcome-name');
+    if (_withinDay) {
+      if (trigger) trigger.style.display = 'none';
+      if (welcomeName) welcomeName.textContent = 'welcome, ' + savedName.toLowerCase();
+      if (welcomeBar) welcomeBar.style.display = '';
+    } else {
+      if (trigger) trigger.style.display = '';
+      if (welcomeBar) welcomeBar.style.display = 'none';
+    }
+  })();
+
   // Track visit number and time since last visit
   // A new visit = new tab/browser session (sessionStorage cleared on tab close)
   // Refreshes and set reloads within the same tab do NOT increment
@@ -2255,6 +2295,20 @@ function restoreS1() {
   if (word) word.style.display = '';
   if (intro) intro.style.display = '';
   if (hint) hint.style.display = '';
+  // Restore correct bottom bar
+  var _lastSignin = LS.get('lastSigninTime');
+  var _24h = 24 * 60 * 60 * 1000;
+  var _name = LS.get('firstName') || '';
+  var _withinDay = _lastSignin && _name && (Date.now() - _lastSignin) < _24h;
+  var trigger = document.getElementById('signin-trigger');
+  var welcomeBar = document.getElementById('welcome-bar');
+  if (_withinDay) {
+    if (trigger) trigger.style.display = 'none';
+    if (welcomeBar) welcomeBar.style.display = '';
+  } else {
+    if (trigger) trigger.style.display = 'block';
+    if (welcomeBar) welcomeBar.style.display = 'none';
+  }
 }
 
 function hideS1() {
@@ -2265,6 +2319,18 @@ function hideS1() {
   if (intro) intro.style.display = 'none';
   if (hint) hint.style.display = 'none';
 }
+
+document.getElementById('switch-account').addEventListener('click', function(e) {
+  e.stopPropagation();
+  var panel = document.getElementById('signin-panel');
+  if (panel.classList.contains('open')) return;
+  panel.classList.add('open');
+  panel.style.display = '';
+  hideS1();
+  document.getElementById('welcome-bar').style.display = 'none';
+  _screenHistory.push('signin');
+  history.pushState({ screen: 'signin' }, '', window.location.href);
+});
 
 document.getElementById('signin-trigger').addEventListener('click', function(e) {
   e.stopPropagation();
