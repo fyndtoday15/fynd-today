@@ -11,7 +11,7 @@ const ENTRY_STATES = {
   'Drifting':    "You're moving. Nothing specific is pulling you forward.",
   'Unanchored':  'Everything keeps sliding past without landing.',
   'Before':      "Something is in front of you. You haven't stepped into it yet.",
-  'Something Else': 'Something else entirely.', 
+  'Something Else': 'Something else entirely.',
 };
 
 const DIRECTION = {
