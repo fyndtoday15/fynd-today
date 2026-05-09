@@ -9,7 +9,7 @@
 <title>FYND TODAY</title>
 <style>
 @font-face {
-  font-family: 'DejaVu Sans'; 
+  font-family: 'DejaVu Sans';
   src: url('/ttf/DejaVuSans.ttf') format('truetype');
   font-weight: 400;
   font-style: normal;
@@ -2056,9 +2056,12 @@ var _navLock = false;
 
 var _origShow = show;
 show = function(id) {
-  if (_screenHistory[_screenHistory.length - 1] !== id) {
-    _screenHistory.push(id);
-    history.pushState({ screen: id }, '', window.location.href);
+  // Never push s3 (listen) to history — no one should back into listen
+  if (id !== 's3') {
+    if (_screenHistory[_screenHistory.length - 1] !== id) {
+      _screenHistory.push(id);
+      history.pushState({ screen: id }, '', window.location.href);
+    }
   }
   _origShow(id);
 };
@@ -2069,15 +2072,15 @@ history.pushState({ screen: 's1' }, '', window.location.href);
 window.addEventListener('popstate', function(e) {
   if (_navLock) return;
   _navLock = true;
-  setTimeout(function() { _navLock = false; }, 300);
-
-  if (_screenHistory.length > 1) _screenHistory.pop();
-  var prev = _screenHistory[_screenHistory.length - 1] || 's1';
+  setTimeout(function() { _navLock = false; }, 500);
 
   if (!e.state || e.state.screen === 'boundary') {
     window.location.href = 'https://fyndtoday.com';
     return;
   }
+
+  if (_screenHistory.length > 1) _screenHistory.pop();
+  var prev = _screenHistory[_screenHistory.length - 1] || 's1';
 
   var _panel = document.getElementById('signin-panel');
   if (_panel && _panel.classList.contains('open')) {
@@ -2091,15 +2094,11 @@ window.addEventListener('popstate', function(e) {
   }
 
   if (prev === 'signin') {
-    // Close panel, go back to s1
     var _sp = document.getElementById('signin-panel');
     if (_sp) { _sp.classList.remove('open'); _sp.style.display = 'none'; }
     document.getElementById('signin-trigger').style.display = 'block';
     restoreS1();
     _origShow('s1');
-  } else if (prev === 's3') {
-    // From listen — always go to sets page
-    _origShow('s6');
   } else if (prev === 's1') {
     var s1el = document.getElementById('s1');
     if (s1el) {
