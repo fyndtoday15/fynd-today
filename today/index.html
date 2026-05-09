@@ -853,15 +853,41 @@ function playTrack(idx) {
           daysSinceLastVisit: window._daysSinceLastVisit,
         }),
       }).then(function(r) { return r.json(); }).then(function(result) {
-        if (result.recordId) sess._activeRecordId = result.recordId;
+        if (result.recordId) {
+          sess._activeRecordId = result.recordId;
+        } else {
+          // Retry once after 2s if record ID not returned (rate limit or transient error)
+          setTimeout(function() {
+            if (sess._activeRecordId) return; // already got it
+            fetch('/.netlify/functions/log-session', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                trackStart: true,
+                sessionId: sess.id,
+                email: LS.get('email') || '',
+                firstName: LS.get('firstName') || '',
+                entryState: sess.entryState || '',
+                trackId: 'T00' + (sess.cur + 1),
+                trackTitle: _tr2.title + ' \u2014 ' + _tr2.artist,
+                playlist: sess.playlist,
+                date: new Date().toISOString().slice(0,10),
+                visitNumber: window._visitNumber || 1,
+                daysSinceLastVisit: window._daysSinceLastVisit,
+              }),
+            }).then(function(r2) { return r2.json(); }).then(function(result2) {
+              if (result2.recordId) sess._activeRecordId = result2.recordId;
+            }).catch(function() {});
+          }, 2000);
+        }
       }).catch(function() {});
     })();
-    // Heartbeat — patches the active record every 5s with current duration
+    // Heartbeat — patches the active record every 10s with current duration
     clearInterval(heartbeatTimer);
     heartbeatTimer = setInterval(function() {
       if (!sess.listenStart) { clearInterval(heartbeatTimer); return; }
       sendHeartbeat();
-    }, 5000);
+    }, 10000);
     // Save current position so refresh can resume here
     saveAbandoned();
     // Store pending abandoned to localStorage — sent on next page load
