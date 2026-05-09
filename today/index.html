@@ -607,11 +607,19 @@ function show(id) {
     dots.classList.remove('dark');
   }
 
-  // Only show sign-in trigger / welcome bar on s1
+  // Only show sign-in trigger / welcome bar on s1 — show correct one based on 24h state
   var trigger = document.getElementById('signin-trigger');
   var welcomeBar = document.getElementById('welcome-bar');
-  if (trigger) trigger.style.display = (id === 's1') ? '' : 'none';
-  if (welcomeBar) welcomeBar.style.display = (id === 's1') ? '' : 'none';
+  if (id === 's1') {
+    var _ls = LS.get('lastSigninTime');
+    var _nm = LS.get('firstName') || '';
+    var _wb = _ls && _nm && (Date.now() - _ls) < 24 * 60 * 60 * 1000;
+    if (trigger) trigger.style.display = _wb ? 'none' : '';
+    if (welcomeBar) welcomeBar.style.display = _wb ? '' : 'none';
+  } else {
+    if (trigger) trigger.style.display = 'none';
+    if (welcomeBar) welcomeBar.style.display = 'none';
+  }
 }
 
 function setDots(cur) {
