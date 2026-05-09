@@ -538,6 +538,7 @@ var sess = {
   triggered: '',
   replay: false,
   _activeRecordId: null,
+  _revealFired: false,
 };
 
 function shuffle(arr) {
@@ -728,6 +729,7 @@ function openPanel(cb) {
 function resetPanel() {
   clearInterval(heartbeatTimer);
   sess._activeRecordId = null;
+  sess._revealFired = false;
   var panel = document.getElementById('assign-panel');
   // Kill transition instantly so no white flash
   panel.style.transition = 'none';
@@ -761,8 +763,11 @@ function initSC() {
   widget.bind(SC.Widget.Events.FINISH, function() {
     if (widget) widget.pause();
     stopDot();
-    document.getElementById('thumbs-wrap').classList.remove('show');
+    clearTimeout(readyTimer);
+    clearTimeout(autoTimer);
     clearTimeout(thumbsTimer);
+    clearInterval(heartbeatTimer);
+    document.getElementById('thumbs-wrap').classList.remove('show');
     if (!document.getElementById('assign-panel').classList.contains('open')) {
       openPanel(function(ps) { doReveal(ps); });
     }
@@ -1169,6 +1174,7 @@ document.getElementById('thumb-down').addEventListener('click', function() {
   } else {
     markSetComplete(sess.playlist);
     clearAbandoned();
+    saveSessionState();
     LS.set('onEmailScreen', true);
     buildRecap();
     // Persist log so buildRecap works after refresh
@@ -1199,6 +1205,8 @@ document.getElementById('thumb-down').addEventListener('click', function() {
   };
 
 function doReveal(ps) {
+  if (sess._revealFired) return; // guard against double-call
+  sess._revealFired = true;
   clearTimeout(readyTimer);
   clearTimeout(autoTimer);
   clearInterval(heartbeatTimer);
@@ -1265,7 +1273,12 @@ function doReveal(ps) {
   // Hide stop button on last track — no reason to stop now
   var stopBtn = document.getElementById('btn-stop');
   if (stopBtn) stopBtn.style.display = sess.cur === 4 ? 'none' : '';
-  show('s5');
+  // On last track don't push s5 to history — back from recap should go to s1
+  if (sess.cur === 4) {
+    _origShow('s5');
+  } else {
+    show('s5');
+  }
   sess.listenStart = null; // prevent pagehide beacon from double-logging
   try { localStorage.removeItem('fynd_pendingAbandoned'); } catch(e) {}
   // On last track — run full completion flow immediately so refresh can recover
@@ -1273,6 +1286,7 @@ function doReveal(ps) {
     sess.cur = 5; // mark complete
     markSetComplete(sess.playlist);
     clearAbandoned();
+    saveSessionState(); // persist completedSets to Airtable immediately
     LS.set('onEmailScreen', true);
     // Persist log so buildRecap works after refresh
     try { localStorage.setItem('fynd_completedLog', JSON.stringify({ log: sess.log, playlist: sess.playlist, entryState: sess.entryState || '' })); } catch(e) {}
@@ -1590,17 +1604,9 @@ document.getElementById('btn-continue').addEventListener('click', function() {
   } else {
     markSetComplete(sess.playlist);
     clearAbandoned();
+    saveSessionState();
     LS.set('onEmailScreen', true);
     buildRecap();
-    // Persist log so buildRecap works after refresh
-    try { localStorage.setItem('fynd_completedLog', JSON.stringify({ log: sess.log, playlist: sess.playlist, entryState: sess.entryState || '' })); } catch(e) {}
-    // Persist Set 1 recap to localStorage — sess may not survive until email submit on mobile
-    if (sess.playlist === 'MVP 1') {
-      try { localStorage.setItem('fynd_set1recap', JSON.stringify({ log: sess.log, playlist: sess.playlist, entryState: sess.entryState || '' })); } catch(e) {}
-    }
-    // Send recap email for Sets 2-5 (email already collected) — 10s delay
-    (function() {
-      var _re2 = LS.get('email') || '';
       var _rn2 = LS.get('firstName') || '';
       var _rp2 = sess.playlist;
       var _rl2 = sess.log.slice();
