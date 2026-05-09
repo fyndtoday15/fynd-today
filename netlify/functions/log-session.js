@@ -7,7 +7,7 @@ const ALLOWED_ORIGINS = [
 
 // In-memory rate limit — per function instance
 const rateLimitMap = {};
-const RATE_LIMIT = 10;
+const RATE_LIMIT = 60;
 const RATE_WINDOW = 60000;
 
 function isRateLimited(ip) {
