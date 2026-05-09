@@ -1394,8 +1394,9 @@ document.getElementById('s1').addEventListener('click', function() {
         show('s2');
         return;
       }
-      window._signinBypass = true;
-      document.getElementById('s1').click();
+      // Entry fresh and within 24h — go straight to sets page
+      markReturning();
+      showSetsScreen();
       return;
     }
     var panel = document.getElementById('signin-panel');
