@@ -374,7 +374,7 @@ html.assign-top, body.assign-top { background: var(--black); }
     try {
       // Run version check here too — before reading abandonedSets
       // so a song update doesn't cause src/track mismatch
-      var _pv = '1';
+      var _pv = '2';
       if (localStorage.getItem('fynd_playlistVersion') !== _pv) {
         localStorage.removeItem('fynd_completedSets');
         localStorage.removeItem('fynd_abandonedSets');
@@ -479,39 +479,39 @@ html.assign-top, body.assign-top { background: var(--black); }
 
 var PLAYLIST_TRACKS = {
   'MVP 1': [
-    { title:'Soul',                    artist:'Lee Brice'        },
-    { title:'I See Life',              artist:'thekidszn'        },
-    { title:'timebomb',                artist:'GVIN'             },
-    { title:"Places We Don't Know",    artist:'Kasbo'            },
-    { title:'Frozen',                  artist:'Tamera'           },
+    { title:'I See Life',                        artist:'thekidszn'            },
+    { title:'Frozen',                            artist:'Tamera'               },
+    { title:'Dark Rain',                         artist:'DRAMA'                },
+    { title:'What You Know',                     artist:'Two Door Cinema Club' },
+    { title:'Paranoia',                          artist:'Toby Hobart'          },
   ],
   'MVP 1.2': [
-    { title:'3am',                     artist:'Łaszewo'          },
-    { title:'Liquor Store In The Sky', artist:'BJ The Chicago Kid'},
-    { title:'Make This Easy',          artist:'The Blue Stones'  },
-    { title:'apartment',               artist:'Kareen Lomax'     },
-    { title:'Catching Bodies',         artist:'SEKOU'            },
+    { title:'Make This Easy',                    artist:'The Blue Stones'      },
+    { title:'apartment',                         artist:'Kareen Lomax'         },
+    { title:'Catching Bodies',                   artist:'SEKOU'                },
+    { title:'Red Velvet',                        artist:'Philip McHale'        },
+    { title:'Til U Hate Me',                     artist:'Łaszewo'              },
   ],
   'MVP 1.3': [
-    { title:'Redline',                 artist:'wdlmusic'         },
-    { title:'That Way',                artist:'XUITCASECITY'     },
-    { title:'Run Away!',               artist:'WEARETHEGOOD'     },
-    { title:'Hallelujah Moment',       artist:'The Snuts'        },
-    { title:'Feeling Alive',           artist:'Earl St. Clair'   },
+    { title:'Redline',                           artist:'wdlmusic'             },
+    { title:'Run Away!',                         artist:'WEARETHEGOOD'         },
+    { title:'Hallelujah Moment',                 artist:'The Snuts'            },
+    { title:'Feeling Alive',                     artist:'Earl St. Clair'       },
+    { title:'blind',                             artist:'Clubhouse'            },
   ],
   'MVP 1.4': [
-    { title:'You',                     artist:'Benjamin Steer'   },
-    { title:'Champagne Dial',          artist:'Col3trane'        },
-    { title:'Innocent',                artist:'Teenage Priest'   },
-    { title:'Stay Close',              artist:'Koastle'          },
-    { title:'When I Get Lonely',       artist:'WizTheMc'         },
+    { title:'You',                               artist:'Benjamin Steer'       },
+    { title:'Champagne Dial',                    artist:'Col3trane'            },
+    { title:'Innocent',                          artist:'Teenage Priest'       },
+    { title:'Stay Close',                        artist:'Koastle'              },
+    { title:'Oh No!',                            artist:'Cody Lovaas'          },
   ],
   'MVP 1.5': [
-    { title:'Home Alright',            artist:'Terry Zhong'      },
-    { title:'BLAME',                   artist:'Samuel Petra'     },
-    { title:'bluebonnets',             artist:'Austin George'    },
-    { title:'Sad in Hawaii',           artist:'Claire Rosinkranz'},
-    { title:'Numb',                    artist:'Fiji Blue'        },
+    { title:'Numb',                              artist:'Fiji Blue'            },
+    { title:'On the Low',                        artist:'Justin Park'          },
+    { title:'party in my head (ur not invited)', artist:'Alaina Castillo'      },
+    { title:'something real',                    artist:'remme'                },
+    { title:'Never Gonna Drink Again',           artist:'Carneyval'            },
   ],
 };
 
@@ -2083,7 +2083,7 @@ if (window.location.search.indexOf('reset=true') !== -1) {
 // On mismatch, completedSets and abandonedSets are cleared
 // so returning users can replay sets with new songs.
 // Email, name, and visit history are preserved.
-var PLAYLIST_VERSION = '1';
+var PLAYLIST_VERSION = '2';
 (function() {
   try {
     var storedVersion = localStorage.getItem('fynd_playlistVersion');
