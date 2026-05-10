@@ -2120,10 +2120,21 @@ var PLAYLIST_VERSION = '2';
 })();
 
 // Send any pending abandoned record from previous session (survives Brave tab close)
+// Skip if this is a same-tab refresh — the session is still active, heartbeat handles it
 (function() {
   try {
     var pending = JSON.parse(localStorage.getItem('fynd_pendingAbandoned'));
     if (pending) {
+      // If sessionStorage still has fynd_sessionActive this is a refresh not a new visit
+      // In that case don't send abandoned — the record is still In Progress and heartbeat will patch it
+      var isSameSession = !!sessionStorage.getItem('fynd_sessionActive');
+      if (isSameSession) {
+        // Just update endTime in case they close after this refresh
+        pending.startTime = Date.now();
+        delete pending.endTime;
+        localStorage.setItem('fynd_pendingAbandoned', JSON.stringify(pending));
+        return;
+      }
       var dur;
       if (pending.endTime) {
         dur = Math.round((pending.endTime - pending.startTime) / 1000);
