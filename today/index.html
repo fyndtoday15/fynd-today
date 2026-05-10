@@ -544,6 +544,7 @@ var sess = {
   _activeRecordId: null,
   _revealFired: false,
   _abandonSent: false,
+  _lastHeartbeatDur: 0,
 };
 
 function shuffle(arr) {
@@ -746,6 +747,7 @@ function resetPanel() {
   sess._activeRecordId = null;
   sess._revealFired = false;
   sess._abandonSent = false;
+  sess._lastHeartbeatDur = 0;
   var panel = document.getElementById('assign-panel');
   // Kill transition instantly so no white flash
   panel.style.transition = 'none';
@@ -1228,7 +1230,7 @@ function doReveal(ps) {
   clearInterval(heartbeatTimer);
   if (widget) widget.pause();
   stopDot();
-  sess.dur = sess.listenStart ? Math.round((Date.now() - sess.listenStart) / 1000) : 0;
+  sess.dur = sess.listenStart ? Math.round((Date.now() - sess.listenStart) / 1000) : (sess._lastHeartbeatDur || 0);
   var ti = sess.tOrder[sess.cur];
   var tr = getTrack(sess.playlist, ti);
   var sessionTrackId = 'T00' + (sess.cur + 1);
@@ -2327,6 +2329,7 @@ window.addEventListener('popstate', function(e) {
 function sendHeartbeat() {
   if (!sess.listenStart) return;
   var dur = Math.round((Date.now() - sess.listenStart) / 1000);
+  sess._lastHeartbeatDur = dur; // store as fallback for doReveal if listenStart gets cleared
   var ti = sess.tOrder ? sess.tOrder[sess.cur] : undefined;
   if (ti === undefined) return;
   var tr = getTrack(sess.playlist, ti);
