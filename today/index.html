@@ -351,7 +351,7 @@ html.assign-top, body.assign-top { background: var(--black); }
     </div>
   </div>
   <div class="assign-panel" id="assign-panel">
-    <div class="assign-label">Right now, this sound...</div>
+    <div class="assign-label">What's happening right now?</div>
     <div id="assign-list" style="padding-bottom: 32px;"></div>
   </div>
   <div class="legal-corner">Music streamed via <a href="https://soundcloud.com/fynd-today" target="_blank">SoundCloud</a>. All rights belong to their respective owners. No commercial use.</div>
@@ -720,9 +720,9 @@ function openPanel(cb) {
   var el = document.getElementById('assign-list');
   el.innerHTML = '';
   var positions = [
-    { text: 'Fit where I am.',                value: 'Stay' },
-    { text: 'Pointed me forward.',             value: 'Move' },
-    { text: 'Opened my eyes to something.',    value: 'Open' },
+    { text: 'Something in me wants to stay here.',        value: 'Stay' },
+    { text: 'Something in me wants to shift forward.',    value: 'Move' },
+    { text: 'Something in me just became clearer.',       value: 'Open' },
   ];
   positions.forEach(function(p) {
     var d = document.createElement('div');
