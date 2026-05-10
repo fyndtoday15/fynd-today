@@ -1396,9 +1396,33 @@ document.getElementById('s1').addEventListener('click', function() {
         show('s2');
         return;
       }
-      // Entry fresh and within 24h — go straight to sets page
+      // Entry fresh and within 24h — sync latest state from Airtable silently then go to sets
       markReturning();
-      showSetsScreen();
+      var _syncEmail = LS.get('email') || '';
+      if (_syncEmail) {
+        fetch('/.netlify/functions/sync-state', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: _syncEmail }),
+        }).then(function(r) { return r.json(); }).then(function(result) {
+          if (result.success && result.state) {
+            var s = result.state;
+            if (s.completedSets) LS.set('completedSets', s.completedSets);
+            if (s.abandonedSets && Object.keys(s.abandonedSets).length > 0) LS.set('abandonedSets', s.abandonedSets);
+            if (s.entryState) { try { localStorage.setItem('fynd_entryState', s.entryState); } catch(e) {} }
+            if (s.entryStateTime) { try { localStorage.setItem('fynd_entryStateTime', s.entryStateTime); } catch(e) {} }
+            if (s.visitNumber && s.visitNumber > (LS.get('visitCount') || 0)) {
+              window._visitNumber = s.visitNumber + 1;
+              LS.set('visitCount', window._visitNumber);
+            }
+          }
+          showSetsScreen();
+        }).catch(function() {
+          showSetsScreen();
+        });
+      } else {
+        showSetsScreen();
+      }
       return;
     }
     var panel = document.getElementById('signin-panel');
