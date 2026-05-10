@@ -2210,6 +2210,66 @@ window.addEventListener('popstate', function(e) {
     return;
   }
 
+  // If currently on listen screen — stop music and record abandoned before routing
+  var currentActive = document.querySelector('.screen.active');
+  if (currentActive && currentActive.id === 's3') {
+    clearTimeout(readyTimer);
+    clearTimeout(autoTimer);
+    clearTimeout(thumbsTimer);
+    clearInterval(heartbeatTimer);
+    if (widget) widget.pause();
+    stopDot();
+    if (sess.listenStart && !sess._abandonSent) {
+      var _now = Date.now();
+      var _dur = Math.round((_now - sess.listenStart) / 1000);
+      var _ti = sess.tOrder ? sess.tOrder[sess.cur] : undefined;
+      if (_ti !== undefined) {
+        var _tr = getTrack(sess.playlist, _ti);
+        var _sid = 'T00' + (sess.cur + 1);
+        var _tt = _tr.title + ' \u2014 ' + _tr.artist;
+        var _date = new Date().toISOString().slice(0,10);
+        sess._abandonSent = true;
+        var _bBody = sess._activeRecordId ? JSON.stringify({
+          trackPatch: true,
+          recordId: sess._activeRecordId,
+          duration: _dur,
+          postState: 'Abandoned',
+          reaction: sess.reaction || '',
+          replay: sess.replay ? 'Yes' : '',
+          triggered: sess.triggered || '',
+          email: LS.get('email') || '',
+          firstName: LS.get('firstName') || '',
+        }) : JSON.stringify({
+          heartbeatUpdate: true,
+          sessionId: sess.id,
+          email: LS.get('email') || '',
+          firstName: LS.get('firstName') || '',
+          entryState: sess.entryState || '',
+          trackId: _sid,
+          trackTitle: _tt,
+          playlist: sess.playlist,
+          duration: _dur,
+          postState: 'Abandoned',
+          date: _date,
+          reaction: sess.reaction || '',
+          replay: sess.replay ? 'Yes' : '',
+          triggered: sess.triggered || '',
+          visitNumber: window._visitNumber || 1,
+          daysSinceLastVisit: window._daysSinceLastVisit,
+        });
+        fetch('/.netlify/functions/log-session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: _bBody,
+        }).catch(function() {});
+        sess.listenStart = null;
+        sess._activeRecordId = null;
+        try { localStorage.removeItem('fynd_pendingAbandoned'); } catch(e) {}
+      }
+    }
+    resetPanel();
+  }
+
   if (_screenHistory.length > 1) _screenHistory.pop();
   var prev = _screenHistory[_screenHistory.length - 1] || 's1';
 
