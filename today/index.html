@@ -2691,7 +2691,6 @@ document.addEventListener('visibilitychange', function() {
       var sent = navigator.sendBeacon('/.netlify/functions/log-session', new Blob([vcPayload], { type: 'application/json' }));
       if (sent) {
         sess._abandonSent = true;
-        sess.listenStart = null;
         try { localStorage.removeItem('fynd_pendingAbandoned'); } catch(e) {}
       }
     } catch(e) {}
