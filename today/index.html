@@ -2268,6 +2268,8 @@ window.addEventListener('popstate', function(e) {
       }
     }
     resetPanel();
+    showSetsScreen();
+    return;
   }
 
   if (_screenHistory.length > 1) _screenHistory.pop();
