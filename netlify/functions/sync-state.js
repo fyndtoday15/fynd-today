@@ -1,7 +1,7 @@
 const ALLOWED_ORIGINS = [
   'https://fyndtoday.netlify.app',
   'https://fyndtoday.com',
-  'https://www.fyndtoday.com',
+  'https://www.fyndtoday.com', 
 ];
 
 exports.handler = async function(event, context) {
