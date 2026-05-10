@@ -2205,12 +2205,8 @@ window.addEventListener('popstate', function(e) {
   _navLock = true;
   setTimeout(function() { _navLock = false; }, 500);
 
-  if (!e.state || e.state.screen === 'boundary') {
-    window.location.href = 'https://fyndtoday.com';
-    return;
-  }
-
-  // If currently on listen screen — stop music and record abandoned before routing
+  // If currently on listen screen — stop music, record abandoned, go to sets page
+  // Must check BEFORE boundary so back from listen doesn't exit the app
   var currentActive = document.querySelector('.screen.active');
   if (currentActive && currentActive.id === 's3') {
     clearTimeout(readyTimer);
@@ -2268,7 +2264,15 @@ window.addEventListener('popstate', function(e) {
       }
     }
     resetPanel();
+    // Push s6 to history so back from sets → Today. works correctly
+    history.pushState({ screen: 's6' }, '', window.location.href);
+    _screenHistory.push('s6');
     showSetsScreen();
+    return;
+  }
+
+  if (!e.state || e.state.screen === 'boundary') {
+    window.location.href = 'https://fyndtoday.com';
     return;
   }
 
