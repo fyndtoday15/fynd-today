@@ -124,7 +124,12 @@ html.assign-top, body.assign-top { background: var(--black); }
 }
 .answer-stmt.arrived {
   transform: translateY(0);
-  animation: stmt-breathe 3.5s ease-in-out infinite;
+  opacity: 0.28;
+  transition: opacity 1.5s ease, transform 0.8s ease;
+}
+.answer-stmt.arrived.active {
+  opacity: 1;
+  animation: none;
 }
 .answer-stmt.tapped {
   opacity: 1 !important;
@@ -135,11 +140,7 @@ html.assign-top, body.assign-top { background: var(--black); }
   opacity: 0 !important;
   animation: none;
   pointer-events: none;
-  transition: opacity 0.4s ease;
-}
-@keyframes stmt-breathe {
-  0%, 100% { opacity: 0.28; }
-  50% { opacity: 0.48; }
+  transition: opacity 0.6s ease;
 }
 
 /* Song name reveal — fades in on black for 3s after answer, then auto-advances */
@@ -703,10 +704,13 @@ function openPanel(cb) {
     d.textContent = p.text;
     d.addEventListener('click', function() {
       if (d.classList.contains('tapped')) return;
+      // Stop rotation
+      if (window._stmtRotateTimer) { clearInterval(window._stmtRotateTimer); window._stmtRotateTimer = null; }
       // Confirm tap — full brightness, others dissolve
       stmts.forEach(function(s) {
-        if (s !== d) s.classList.add('faded');
+        if (s !== d) { s.classList.remove('active'); s.classList.add('faded'); }
       });
+      d.classList.remove('active');
       d.classList.add('tapped');
       setTimeout(function() { cb(p.value); }, 500);
     });
@@ -714,6 +718,9 @@ function openPanel(cb) {
     stmts.push(d);
   });
   document.getElementById('answer-wrap').classList.add('show');
+  // Change Listen label to Answer
+  var _lbl = document.querySelector('.listen-label');
+  if (_lbl) _lbl.textContent = 'Answer';
   // Hide pulse dot, track count and thumbs — answers take center stage
   var _pw = document.querySelector('.pulse-wrap');
   var _tw = document.getElementById('thumbs-wrap');
@@ -722,9 +729,20 @@ function openPanel(cb) {
   if (_tw) { _tw.classList.remove('show'); _tw.style.opacity = '0'; }
   if (_rb) _rb.classList.remove('show');
   // Stagger arrival — each sentence surfaces 1.4s apart for smooth flow
+  var _activeIdx = 0;
   stmts.forEach(function(s, i) {
     setTimeout(function() {
       s.classList.add('arrived');
+      if (i === 0) s.classList.add('active');
+      if (i === stmts.length - 1) {
+        window._stmtRotateTimer = setInterval(function() {
+          stmts.forEach(function(st) { st.classList.remove('active'); });
+          _activeIdx = (_activeIdx + 1) % stmts.length;
+          if (!stmts[_activeIdx].classList.contains('tapped') && !stmts[_activeIdx].classList.contains('faded')) {
+            stmts[_activeIdx].classList.add('active');
+          }
+        }, 2800);
+      }
     }, 300 + (i * 1400));
   });
 }
@@ -735,6 +753,7 @@ function resetPanel() {
   sess._revealFired = false;
   sess._abandonSent = false;
   sess._lastHeartbeatDur = 0;
+  if (window._stmtRotateTimer) { clearInterval(window._stmtRotateTimer); window._stmtRotateTimer = null; }
   var aw = document.getElementById('answer-wrap');
   if (aw) { aw.classList.remove('show'); }
   var al = document.getElementById('answer-list');
@@ -743,7 +762,9 @@ function resetPanel() {
   if (sr) sr.classList.remove('show');
   var rb = document.getElementById('replay-btn');
   if (rb) rb.classList.remove('show');
-  // Restore pulse wrap
+  // Restore listen label and pulse wrap
+  var _lbl = document.querySelector('.listen-label');
+  if (_lbl) _lbl.textContent = 'Listen';
   var _pw = document.querySelector('.pulse-wrap');
   if (_pw) _pw.style.opacity = '';
 }
