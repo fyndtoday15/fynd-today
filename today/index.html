@@ -2352,6 +2352,7 @@ show = function(id) {
 };
 
 history.pushState({ screen: 'boundary' }, '', window.location.href);
+history.pushState({ screen: 'boundary' }, '', window.location.href);
 history.pushState({ screen: 's1' }, '', window.location.href);
 
 window.addEventListener('popstate', function(e) {
@@ -2418,15 +2419,22 @@ window.addEventListener('popstate', function(e) {
       }
     }
     resetPanel();
-    // Push s6 to history so back from sets → Today. works correctly
-    history.pushState({ screen: 's6' }, '', window.location.href);
-    _screenHistory.push('s6');
-    showSetsScreen();
+    // If no email on file (first set) — back goes to Today. not sets
+    var _savedEmail = LS.get('email');
+    if (!_savedEmail) {
+      history.pushState({ screen: 's1' }, '', window.location.href);
+      _screenHistory.push('s1');
+      _origShow('s1');
+    } else {
+      history.pushState({ screen: 's6' }, '', window.location.href);
+      _screenHistory.push('s6');
+      showSetsScreen();
+    }
     return;
   }
 
   if (!e.state || e.state.screen === 'boundary') {
-    window.location.href = 'https://fyndtoday.com';
+    window.location.replace('https://fyndtoday.com');
     return;
   }
 
