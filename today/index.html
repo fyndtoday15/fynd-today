@@ -87,7 +87,17 @@ html.assign-top, body.assign-top { background: var(--black); }
 .thumb-btn:active { opacity: 0.4; }
 
 /* Replay — appears at 50s if no answer */
-.replay-btn { display: none; margin-top: 20px; background: none; border: none; cursor: pointer; font-family: var(--f); font-size: 12px; color: var(--bg); opacity: 0.4; letter-spacing: 0.12em; text-transform: uppercase; padding: 8px; }
+.replay-btn {
+  display: none;
+  position: absolute;
+  bottom: clamp(100px,14vh,130px);
+  left: 50%; transform: translateX(-50%);
+  background: none; border: none; cursor: pointer;
+  font-family: var(--f); font-size: 12px;
+  color: var(--bg); opacity: 0.38;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  padding: 8px 16px; white-space: nowrap;
+}
 .replay-btn.show { display: block; }
 
 /* Answer statements — staggered fade in, pulse with music, tap to confirm */
@@ -162,15 +172,15 @@ html.assign-top, body.assign-top { background: var(--black); }
 /* Stop for now — always visible, very subtle, bottom center */
 .btn-stop-listen {
   position: absolute;
-  bottom: clamp(32px,5.5vh,48px);
+  bottom: clamp(52px,8vh,72px);
   left: 50%; transform: translateX(-50%);
   font-family: var(--f); font-size: 11px;
   color: var(--bg); background: none; border: none;
   cursor: pointer; letter-spacing: 0.12em;
-  text-transform: uppercase; opacity: 0.22;
+  text-transform: uppercase; opacity: 0.38;
   padding: 10px 20px; white-space: nowrap;
 }
-.btn-stop-listen:active { opacity: 0.5; }
+.btn-stop-listen:active { opacity: 0.65; }
 
 /* S5 — kept in DOM for history/routing but hidden, no visible content needed */
 #s5 { background: var(--black); }
@@ -732,19 +742,24 @@ function openPanel(cb) {
   var _activeIdx = 0;
   stmts.forEach(function(s, i) {
     setTimeout(function() {
+      // Dim the previous one as this one arrives
+      if (i > 0) stmts[i - 1].classList.remove('active');
       s.classList.add('arrived');
-      s.classList.add('active'); // each arrives at full opacity
+      s.classList.add('active');
+      // After last one arrives, wait one interval then dim it and start rotation from first
       if (i === stmts.length - 1) {
-        // All arrived — start rotation after a beat
         setTimeout(function() {
+          stmts[i].classList.remove('active');
+          _activeIdx = 0;
+          stmts[0].classList.add('active');
           window._stmtRotateTimer = setInterval(function() {
             stmts.forEach(function(st) { st.classList.remove('active'); });
             _activeIdx = (_activeIdx + 1) % stmts.length;
             if (!stmts[_activeIdx].classList.contains('tapped') && !stmts[_activeIdx].classList.contains('faded')) {
               stmts[_activeIdx].classList.add('active');
             }
-          }, 2000);
-        }, 800);
+          }, 1400);
+        }, 1400);
       }
     }, 300 + (i * 1400));
   });
