@@ -80,16 +80,33 @@ html.assign-top, body.assign-top { background: var(--black); }
 @keyframes pd { 0%,100%{transform:scale(1);opacity:.6} 50%{transform:scale(1.5);opacity:1} }
 .track-count { font-size: 15px; color: var(--bg); opacity: 0.75; letter-spacing: 0.18em; }
 
-/* Thumbs — appear at 5s, grayscale, centered below pulse */
-.thumbs-wrap { display: flex; gap: 24px; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.5s ease; margin-top: 32px; }
+/* Thumbs — appear at 5s, boxed style matching other buttons */
+.thumbs-wrap { display: flex; gap: 12px; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.5s ease; margin-top: 32px; }
 .thumbs-wrap.show { opacity: 1; pointer-events: all; }
-.thumb-btn { background: transparent; border: 1px solid rgba(255,255,255,0.25); border-radius: 50%; width: 32px; height: 32px; font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1; -webkit-filter: grayscale(100%); filter: grayscale(100%); transition: opacity 0.2s ease; }
-.thumb-btn:active { opacity: 0.4; }
+.thumb-btn {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 8px;
+  color: var(--bg);
+  font-family: var(--f);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 10px 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  white-space: nowrap;
+  transition: background 0.15s ease;
+}
+.thumb-btn:active { background: rgba(255,255,255,0.15); }
 
 /* Utility corner — top right, thumb-down + replay as radio button group */
 .utility-corner {
   position: absolute;
-  top: clamp(24px, 4vh, 40px);
+  top: clamp(52px, 8vh, 72px);
   right: clamp(16px, 4vw, 28px);
   display: flex;
   flex-direction: column;
@@ -100,20 +117,20 @@ html.assign-top, body.assign-top { background: var(--black); }
   border: 1px solid rgba(255,255,255,0.25);
   border-radius: 8px;
   overflow: hidden;
-  min-width: 56px;
+  min-width: 64px;
 }
 .utility-corner.show { opacity: 1; pointer-events: all; }
 .utility-corner-btn {
-  background: rgba(255,255,255,0.06);
+  background: rgba(255,255,255,0.05);
   border: none;
   border-bottom: 1px solid rgba(255,255,255,0.15);
   color: var(--bg);
   cursor: pointer;
   font-family: var(--f);
   font-size: 10px;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  padding: 10px 12px;
+  padding: 11px 14px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -122,7 +139,7 @@ html.assign-top, body.assign-top { background: var(--black); }
   white-space: nowrap;
 }
 .utility-corner-btn:last-child { border-bottom: none; }
-.utility-corner-btn:active { background: rgba(255,255,255,0.15); }
+.utility-corner-btn:active { background: rgba(255,255,255,0.18); }
 
 /* Answer statements — staggered fade in, pulse with music, tap to confirm */
 .answer-wrap {
@@ -365,8 +382,8 @@ html.assign-top, body.assign-top { background: var(--black); }
       <div class="track-count" id="tc">1 — 5</div>
     </div>
     <div class="thumbs-wrap" id="thumbs-wrap">
-      <button class="thumb-btn" id="thumb-down">&#128078;</button>
-      <button class="thumb-btn" id="thumb-up">&#128077;</button>
+      <button class="thumb-btn" id="thumb-down">Skip</button>
+      <button class="thumb-btn" id="thumb-up">&#x2665;</button>
     </div>
   </div>
   <div class="utility-corner" id="utility-corner">
