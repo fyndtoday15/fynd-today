@@ -93,7 +93,7 @@ canvas.cw{
 .algo-stat-t{font-size:clamp(18px,2.2vw,26px);line-height:1.2;letter-spacing:-.01em}
 
 /* ENTER */
-.enter{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:88px 48px;position:relative;overflow:hidden;border-top:1px solid rgba(252,251,244,.06);}
+.enter{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:88px 48px;position:relative;overflow:hidden;}
 canvas#rc{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;opacity:.17}
 .eh{font-size:clamp(32px,5.5vw,64px);line-height:1.05;margin-bottom:14px;position:relative}
 .es{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--off);margin-bottom:48px;position:relative}
@@ -240,11 +240,9 @@ canvas#srf-wave {
   font-family: 'DejaVu Sans', Arial, sans-serif;
 }
 
-/* Experience it section */
-.exp-section {
+.srf-cta {
+  margin-top: 16px;
   text-align: center;
-  padding: 40px 48px 40px;
-  background: var(--bg);
 }
 
 @media(max-width:720px) {
@@ -329,12 +327,6 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
   <p class="rack-copy serif rev">This is a lifestyle built around sound and recognition. What you discover in the music carries forward. Into how you move. Into what you wear. Into today.</p>
   <div class="rack-frame rev d1">
     <img src="/rack.png" alt="" class="rack-img">
-    <div class="rack-states">
-      <span>Change</span>
-      <span>Attention</span>
-      <span>Capacity</span>
-      <span>Time</span>
-    </div>
   </div>
 </div>
 
@@ -354,13 +346,10 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
       <div class="srf-word">Form</div>
       <div class="srf-line">carries you.</div>
     </div>
+    <div class="srf-cta rev d4">
+      <button class="btn btn-sm srf-enter-btn"><span>Experience it</span></button>
+    </div>
   </div>
-</div>
-
-
-
-<div class="exp-section rev">
-  <a href="#enter" class="btn"><span>Experience it</span></a>
 </div>
 
 <div class="enter" id="enter">
@@ -604,6 +593,16 @@ function triggerPortal(){
 
 document.querySelectorAll('.portal-trigger').forEach(function(el){
   el.addEventListener('click',function(e){e.preventDefault();triggerPortal();});
+});
+
+/* Experience it — scroll enter section fully to top */
+document.querySelectorAll('.srf-enter-btn').forEach(function(btn){
+  btn.addEventListener('click', function(e){
+    e.preventDefault();
+    var target = document.getElementById('enter');
+    if(!target) return;
+    target.scrollIntoView({behavior:'smooth', block:'start'});
+  });
 });
 
 /* JS scroll with nav clearance for iOS Safari */
