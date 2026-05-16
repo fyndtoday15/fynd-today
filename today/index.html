@@ -128,16 +128,15 @@ html.assign-top, body.assign-top { background: var(--black); }
   color: var(--bg);
   cursor: pointer;
   font-family: var(--f);
-  font-size: 10px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  padding: 11px 14px;
+  font-size: 16px;
+  padding: 14px 18px;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: background 0.15s ease;
   line-height: 1;
-  white-space: nowrap;
+  min-width: 52px;
+  min-height: 44px;
 }
 .utility-corner-btn:last-child { border-bottom: none; }
 .utility-corner-btn:active { background: rgba(255,255,255,0.18); }
@@ -250,19 +249,46 @@ html.assign-top, body.assign-top { background: var(--black); }
   position: absolute;
   bottom: clamp(28px,5vh,44px);
   right: 12px;
-  font-size: 8px;
+  z-index: 10;
+}
+.legal-icon {
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.3);
   color: var(--bg);
-  opacity: 0.35;
+  font-size: 11px;
+  font-style: italic;
+  font-family: Georgia, serif;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  opacity: 0.4;
+  transition: opacity 0.2s ease;
+  user-select: none;
+}
+.legal-icon:hover, .legal-icon.active { opacity: 0.9; }
+.legal-tooltip {
+  display: none;
+  position: absolute;
+  bottom: 28px;
+  right: 0;
+  font-size: 9px;
+  color: var(--bg);
+  opacity: 0.7;
   letter-spacing: 0.03em;
   text-align: right;
-  pointer-events: none;
   max-width: 180px;
   line-height: 1.6;
-  z-index: 10;
   word-wrap: break-word;
-  overflow-wrap: break-word;
+  background: rgba(0,0,0,0.85);
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.12);
+  white-space: normal;
+  pointer-events: none;
 }
-.legal-corner a { pointer-events: all; color: inherit; text-decoration: none; }
+.legal-corner:hover .legal-tooltip,
+.legal-corner.active .legal-tooltip { display: block; }
+.legal-corner a { color: inherit; text-decoration: none; }
 
 .set-btn { font-family: var(--f); font-size: 13px; color: var(--black); background: none; border: 2px solid var(--black); border-radius: 2px; padding: 10px 20px; margin: 4px; cursor: pointer; letter-spacing: 0.1em; text-transform: uppercase; opacity: 1; transition: opacity 0.2s ease; }
 .set-btn:active { opacity: 0.6; }
@@ -399,7 +425,10 @@ html.assign-top, body.assign-top { background: var(--black); }
     <div id="answer-list"></div>
   </div>
   <button class="btn-stop-listen" id="btn-stop-listen">Stop for now</button>
-  <div class="legal-corner">Music streamed via <a href="https://soundcloud.com/fynd-today" target="_blank">SoundCloud</a>. All rights belong to their respective owners. No commercial use.</div>
+  <div class="legal-corner" id="legal-corner">
+    <div class="legal-icon" id="legal-icon">i</div>
+    <div class="legal-tooltip">Music streamed via <a href="https://soundcloud.com/fynd-today" target="_blank">SoundCloud</a>. All rights belong to their respective owners. No commercial use.</div>
+  </div>
   <div id="sc-wrap">
     <iframe id="sc" width="100%" height="166" scrolling="no" frameborder="no"
       allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen
@@ -1721,6 +1750,16 @@ document.getElementById('s1').addEventListener('click', function() {
 
 // Continue button
 // Stop for now — save state and go to sets/email
+document.getElementById('legal-icon').addEventListener('click', function(e) {
+  e.stopPropagation();
+  var lc = document.getElementById('legal-corner');
+  lc.classList.toggle('active');
+});
+document.addEventListener('click', function() {
+  var lc = document.getElementById('legal-corner');
+  if (lc) lc.classList.remove('active');
+});
+
 document.getElementById('btn-stop-listen').addEventListener('click', function() {
   clearTimeout(readyTimer);
   clearTimeout(autoTimer);
