@@ -122,9 +122,9 @@ html.assign-top, body.assign-top { background: var(--black); }
   pointer-events: none;
   transition: opacity 0.5s ease;
   border: 1px solid rgba(255,255,255,0.25);
-  border-radius: 8px;
+  border-radius: 2px;
   overflow: hidden;
-  min-width: 64px;
+  min-width: 52px;
   z-index: 10;
 }
 .utility-corner.show { opacity: 1; pointer-events: all; }
@@ -225,7 +225,7 @@ html.assign-top, body.assign-top { background: var(--black); }
   font-family: var(--f); font-size: 10px;
   color: var(--bg); background: rgba(255,255,255,0.05);
   border: 1px solid rgba(255,255,255,0.2);
-  border-radius: 8px;
+  border-radius: 2px;
   cursor: pointer; letter-spacing: 0.12em;
   text-transform: uppercase; opacity: 0.65;
   padding: 10px 20px; white-space: nowrap;
@@ -297,7 +297,7 @@ html.assign-top, body.assign-top { background: var(--black); }
 .legal-corner.active .legal-tooltip { display: block; }
 .legal-corner a { color: inherit; text-decoration: none; }
 
-.set-btn { font-family: var(--f); font-size: 13px; color: var(--black); background: none; border: 2px solid var(--black); border-radius: 2px; padding: 10px 20px; margin: 4px; cursor: pointer; letter-spacing: 0.1em; text-transform: uppercase; opacity: 1; transition: opacity 0.2s ease; }
+.set-btn { font-family: var(--f); font-size: 13px; color: var(--black); background: none; border: 1px solid rgba(0,0,0,0.35); border-radius: 2px; padding: 10px 20px; margin: 4px; cursor: pointer; letter-spacing: 0.1em; text-transform: uppercase; opacity: 1; transition: opacity 0.2s ease; }
 .set-btn:active { opacity: 0.6; }
 .set-btn.used { opacity: 0.25; pointer-events: none; border-color: rgba(0,0,0,0.25); cursor: default; }
 .email-head { font-size: clamp(30px,7vw,46px); font-weight: 400; color: var(--black); letter-spacing: -0.02em; margin-bottom: 44px; text-align: center; }
@@ -813,7 +813,7 @@ function openPanel(cb) {
   document.getElementById('answer-wrap').classList.add('show');
   // Change Listen label to Answer
   var _lbl = document.querySelector('.listen-label');
-  if (_lbl) _lbl.textContent = 'Answer';
+  if (_lbl) _lbl.textContent = 'Recognize';
   // Hide pulse wrap — answers take center stage
   var _pw = document.querySelector('.pulse-wrap');
   if (_pw) _pw.style.opacity = '0';
