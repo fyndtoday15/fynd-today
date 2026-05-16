@@ -381,14 +381,11 @@ html.assign-top, body.assign-top { background: var(--black); }
       <div class="pulse-dot" id="pulse-dot"></div>
       <div class="track-count" id="tc">1 — 5</div>
     </div>
-    <div class="thumbs-wrap" id="thumbs-wrap">
-      <button class="thumb-btn" id="thumb-down">Skip</button>
-      <button class="thumb-btn" id="thumb-up">&#x2665;</button>
-    </div>
   </div>
   <div class="utility-corner" id="utility-corner">
+    <button class="utility-corner-btn" id="thumb-up-corner">&#x2665;</button>
     <button class="utility-corner-btn" id="thumb-down-corner">Skip</button>
-    <button class="utility-corner-btn" id="replay-corner">Replay</button>
+    <button class="utility-corner-btn" id="replay-corner">&#8635;</button>
   </div>
   <button class="btn-stop-listen" id="btn-stop-listen">Stop for now</button>
   <div class="song-reveal" id="song-reveal">
@@ -779,11 +776,9 @@ function openPanel(cb) {
   // Change Listen label to Answer
   var _lbl = document.querySelector('.listen-label');
   if (_lbl) _lbl.textContent = 'Answer';
-  // Hide centered thumbs and replay — show utility corner instead
+  // Hide pulse wrap — answers take center stage
   var _pw = document.querySelector('.pulse-wrap');
-  var _tw = document.getElementById('thumbs-wrap');
   if (_pw) _pw.style.opacity = '0';
-  if (_tw) { _tw.classList.remove('show'); _tw.style.opacity = '0'; }
   // utility-corner stays visible — no change needed
   // Stagger arrival — each sentence surfaces 1.4s apart for smooth flow
   var _activeIdx = 0;
@@ -825,8 +820,6 @@ function resetPanel() {
   if (al) al.innerHTML = '';
   var sr = document.getElementById('song-reveal');
   if (sr) sr.classList.remove('show');
-  var tw = document.getElementById('thumbs-wrap');
-  if (tw) { tw.style.opacity = ''; tw.classList.remove('show'); }
   var uc = document.getElementById('utility-corner');
   if (uc) uc.classList.remove('show');
   // Restore listen label and pulse wrap
@@ -849,7 +842,7 @@ function initSC() {
     clearTimeout(autoTimer);
     clearTimeout(thumbsTimer);
     clearInterval(heartbeatTimer);
-    document.getElementById('thumbs-wrap').classList.remove('show');
+    
     if (!document.getElementById('answer-wrap').classList.contains('show')) {
       openPanel(function(ps) { doReveal(ps); });
     }
@@ -901,7 +894,7 @@ function startTrackTimers() {
     sendHeartbeat();
   }, 5000);
   thumbsTimer = setTimeout(function() {
-    document.getElementById('thumbs-wrap').classList.add('show');
+    
     var uc = document.getElementById('utility-corner');
     if (uc) uc.classList.add('show');
   }, 5000);
@@ -1025,7 +1018,7 @@ function playTrack(idx) {
     // At 5s — show thumbs and utility corner
     clearTimeout(thumbsTimer);
     thumbsTimer = setTimeout(function() {
-      document.getElementById('thumbs-wrap').classList.add('show');
+      
       var uc2 = document.getElementById('utility-corner');
       if (uc2) uc2.classList.add('show');
     }, 5000);
@@ -1102,15 +1095,13 @@ function doReplay() {
 }
 
 // Thumb up — hide thumbs, store reaction, music keeps playing
-document.getElementById('thumb-up').addEventListener('click', function() {
-  document.getElementById('thumbs-wrap').classList.remove('show');
-  clearTimeout(thumbsTimer);
+// Heart — corner ♥ button, records positive reaction
+document.getElementById('thumb-up-corner').addEventListener('click', function() {
   sess.reaction = 'Up';
   try {
     var _pa = JSON.parse(localStorage.getItem('fynd_pendingAbandoned'));
     if (_pa) { _pa.reaction = 'Up'; localStorage.setItem('fynd_pendingAbandoned', JSON.stringify(_pa)); }
   } catch(e) {}
-  // Immediate patch — reaction recorded in Airtable right now
   if (sess._activeRecordId) {
     fetch('/.netlify/functions/log-session', {
       method: 'POST',
@@ -1126,41 +1117,29 @@ document.getElementById('thumb-up').addEventListener('click', function() {
   }
 });
 
-// Corner thumb-down — fires same logic as main thumb-down
-document.getElementById('thumb-down-corner').addEventListener('click', function() {
-  document.getElementById('thumb-down').click();
-});
-
 // Corner replay — reset answers and replay, corner stays visible
 document.getElementById('replay-corner').addEventListener('click', function() {
-  // Reset answers so they re-appear
   var aw = document.getElementById('answer-wrap');
   if (aw) { aw.classList.remove('show'); aw.style.opacity = ''; aw.style.transition = ''; }
   var al = document.getElementById('answer-list');
   if (al) al.innerHTML = '';
   if (window._stmtRotateTimer) { clearInterval(window._stmtRotateTimer); window._stmtRotateTimer = null; }
-  // Restore listen label and pulse
   var _lbl = document.querySelector('.listen-label');
   if (_lbl) _lbl.textContent = 'Listen';
   var _pw = document.querySelector('.pulse-wrap');
   if (_pw) _pw.style.opacity = '';
-  // Restore centered thumbs
-  var _tw = document.getElementById('thumbs-wrap');
-  if (_tw) { _tw.style.opacity = ''; _tw.classList.add('show'); }
   doReplay();
 });
 
 // Thumb down — record skip, go straight to next track
-document.getElementById('thumb-down').addEventListener('click', function() {
+document.getElementById('thumb-down-corner').addEventListener('click', function() {
   clearTimeout(thumbsTimer);
   clearTimeout(readyTimer);
   clearTimeout(autoTimer);
   clearInterval(heartbeatTimer);
-  // Hide instantly — remove show class and clear any inline styles
-  var tw = document.getElementById('thumbs-wrap');
-  tw.classList.remove('show');
-  tw.style.opacity = '';
-  tw.style.transition = '';
+  // Hide utility corner
+  var uc = document.getElementById('utility-corner');
+  if (uc) uc.classList.remove('show');
   if (widget) widget.pause();
   stopDot();
 
@@ -1341,7 +1320,7 @@ function doReveal(ps) {
   // Step 1 — answers fade out (CSS transition 0.6s)
   if (_aw) _aw.style.transition = 'opacity 0.6s ease';
   if (_aw) _aw.style.opacity = '0';
-  document.getElementById('thumbs-wrap').classList.remove('show');
+  
   var _uc = document.getElementById('utility-corner');
   if (_uc) _uc.classList.remove('show');
 
