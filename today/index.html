@@ -90,25 +90,28 @@ html.assign-top, body.assign-top { background: var(--black); }
   letter-spacing: 0.12em;
   text-transform: uppercase;
   overflow: hidden;
-  height: 1.4em;
+  height: 1.5em;
+  min-width: 120px;
 }
 .listen-label-inner {
   display: block;
-  transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.45s ease;
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s ease;
   transform: translateY(0);
   opacity: 1;
+  white-space: nowrap;
 }
 .listen-label-inner.exit {
-  transform: translateY(110%);
+  transform: translateY(120%);
   opacity: 0;
 }
 .listen-label-next {
   display: block;
   position: absolute;
   top: 0; left: 0;
-  transform: translateY(-110%);
+  transform: translateY(-120%);
   opacity: 0;
-  transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.45s ease;
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s ease;
+  white-space: nowrap;
 }
 .listen-label-next.enter {
   transform: translateY(0);
@@ -816,21 +819,36 @@ function flipLabel(newText) {
   var inner = document.getElementById('listen-label-inner');
   var next = document.getElementById('listen-label-next');
   if (!inner || !next) return;
+  // Set next text before animating
   next.textContent = newText;
+  // Remove any lingering classes
   next.classList.remove('enter');
-  // Trigger reflow
+  inner.classList.remove('exit');
+  // Force reflow so transitions fire
   void next.offsetWidth;
+  // Animate both simultaneously
   inner.classList.add('exit');
   next.classList.add('enter');
-  // After animation swap the text and reset
+  // After animation completes, swap content and silently reset
   setTimeout(function() {
+    inner.style.transition = 'none';
+    next.style.transition = 'none';
     inner.textContent = newText;
     inner.classList.remove('exit');
     next.classList.remove('enter');
     next.textContent = '';
-    // Reset positions instantly
-    void inner.offsetWidth;
-  }, 460);
+    next.style.transform = 'translateY(-120%)';
+    next.style.opacity = '0';
+    inner.style.transform = 'translateY(0)';
+    inner.style.opacity = '1';
+    // Re-enable transitions after reset
+    setTimeout(function() {
+      inner.style.transition = '';
+      next.style.transition = '';
+      next.style.transform = '';
+      next.style.opacity = '';
+    }, 50);
+  }, 520);
 }
 
 function openPanel(cb) {
