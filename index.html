@@ -441,6 +441,15 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
 var PORTAL_URL='/today';
 var SITE_URL='https://fyndtoday.com';
 
+// Chrome mobile BFCache fix — if page is restored from back-forward cache
+// (e.g. after visiting /today and pressing back), force a full reload
+// so the portal animation canvas doesn't show as a blank frozen state
+window.addEventListener('pageshow', function(e) {
+  if (e.persisted) {
+    window.location.reload();
+  }
+});
+
 function footerCopy(){
   var btn = document.getElementById('footer-copy-btn');
   var span = btn ? btn.querySelector('span') : null;
