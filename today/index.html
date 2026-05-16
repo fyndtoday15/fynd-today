@@ -118,6 +118,7 @@ html.assign-top, body.assign-top { background: var(--black); }
   border-radius: 8px;
   overflow: hidden;
   min-width: 64px;
+  z-index: 10;
 }
 .utility-corner.show { opacity: 1; pointer-events: all; }
 .utility-corner-btn {
@@ -223,6 +224,7 @@ html.assign-top, body.assign-top { background: var(--black); }
   text-transform: uppercase; opacity: 0.65;
   padding: 10px 20px; white-space: nowrap;
   transition: background 0.2s ease;
+  z-index: 10;
 }
 .btn-stop-listen:active { background: rgba(255,255,255,0.12); }
 
@@ -383,9 +385,9 @@ html.assign-top, body.assign-top { background: var(--black); }
     </div>
   </div>
   <div class="utility-corner" id="utility-corner">
-    <button class="utility-corner-btn" id="thumb-up-corner">&#x2665;</button>
-    <button class="utility-corner-btn" id="thumb-down-corner">Skip</button>
-    <button class="utility-corner-btn" id="replay-corner">&#8635;</button>
+    <button class="utility-corner-btn" id="thumb-up-corner" title="Like">&#x2665;</button>
+    <button class="utility-corner-btn" id="thumb-down-corner" title="Skip">&#x2715;</button>
+    <button class="utility-corner-btn" id="replay-corner" title="Replay">&#8635;</button>
   </div>
   <button class="btn-stop-listen" id="btn-stop-listen">Stop for now</button>
   <div class="song-reveal" id="song-reveal">
@@ -822,6 +824,8 @@ function resetPanel() {
   if (sr) sr.classList.remove('show');
   var uc = document.getElementById('utility-corner');
   if (uc) uc.classList.remove('show');
+  var heartBtn = document.getElementById('thumb-up-corner');
+  if (heartBtn) { heartBtn.classList.remove('active'); heartBtn.style.background = ''; heartBtn.style.color = ''; }
   // Restore listen label and pulse wrap
   var _lbl = document.querySelector('.listen-label');
   if (_lbl) _lbl.textContent = 'Listen';
@@ -1095,25 +1099,37 @@ function doReplay() {
 }
 
 // Thumb up — hide thumbs, store reaction, music keeps playing
-// Heart — corner ♥ button, records positive reaction
+// Heart — corner ♥ button, records positive reaction, toggles filled state
 document.getElementById('thumb-up-corner').addEventListener('click', function() {
-  sess.reaction = 'Up';
-  try {
-    var _pa = JSON.parse(localStorage.getItem('fynd_pendingAbandoned'));
-    if (_pa) { _pa.reaction = 'Up'; localStorage.setItem('fynd_pendingAbandoned', JSON.stringify(_pa)); }
-  } catch(e) {}
-  if (sess._activeRecordId) {
-    fetch('/.netlify/functions/log-session', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        trackPatch: true,
-        recordId: sess._activeRecordId,
-        duration: sess.listenStart ? Math.round((Date.now() - sess.listenStart) / 1000) : 0,
-        postState: 'In Progress',
-        reaction: 'Up',
-      }),
-    }).catch(function() {});
+  var btn = this;
+  var isActive = btn.classList.contains('active');
+  if (isActive) {
+    btn.classList.remove('active');
+    btn.style.background = '';
+    btn.style.color = '';
+    sess.reaction = '';
+  } else {
+    btn.classList.add('active');
+    btn.style.background = 'rgba(255,255,255,0.9)';
+    btn.style.color = '#000';
+    sess.reaction = 'Up';
+    try {
+      var _pa = JSON.parse(localStorage.getItem('fynd_pendingAbandoned'));
+      if (_pa) { _pa.reaction = 'Up'; localStorage.setItem('fynd_pendingAbandoned', JSON.stringify(_pa)); }
+    } catch(e) {}
+    if (sess._activeRecordId) {
+      fetch('/.netlify/functions/log-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          trackPatch: true,
+          recordId: sess._activeRecordId,
+          duration: sess.listenStart ? Math.round((Date.now() - sess.listenStart) / 1000) : 0,
+          postState: 'In Progress',
+          reaction: 'Up',
+        }),
+      }).catch(function() {});
+    }
   }
 });
 
