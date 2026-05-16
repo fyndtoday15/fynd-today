@@ -43,7 +43,7 @@ html.assign-top, body.assign-top { background: var(--black); }
 .screen.active { opacity: 1; pointer-events: all; }
 
 /* S1 — ARRIVAL */
-#s1 { background: var(--bg); justify-content: center; cursor: pointer; }
+#s1 { background: var(--bg); justify-content: center; }
 .s1-word { font-size: clamp(52px,12vw,88px); font-weight: 400; color: var(--black); letter-spacing: -0.02em; user-select: none; margin-bottom: 32px; }
 .s1-intro { font-size: clamp(15px,3.8vw,18px); color: var(--black); opacity: 0.7; text-align: center; line-height: 1.6; max-width: 320px; margin-bottom: 48px; }
 .s1-hint {
@@ -80,7 +80,40 @@ html.assign-top, body.assign-top { background: var(--black); }
   pointer-events: none;
 }
 .listen-top > * { pointer-events: all; }
-.listen-label { position: absolute; top: clamp(36px,7vh,52px); left: 32px; font-size: 16px; color: var(--bg); opacity: 0.75; letter-spacing: 0.12em; text-transform: uppercase; }
+.listen-label {
+  position: absolute;
+  top: clamp(36px,7vh,52px);
+  left: 32px;
+  font-size: 16px;
+  color: var(--bg);
+  opacity: 0.75;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  overflow: hidden;
+  height: 1.4em;
+}
+.listen-label-inner {
+  display: block;
+  transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.45s ease;
+  transform: translateY(0);
+  opacity: 1;
+}
+.listen-label-inner.exit {
+  transform: translateY(110%);
+  opacity: 0;
+}
+.listen-label-next {
+  display: block;
+  position: absolute;
+  top: 0; left: 0;
+  transform: translateY(-110%);
+  opacity: 0;
+  transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.45s ease;
+}
+.listen-label-next.enter {
+  transform: translateY(0);
+  opacity: 1;
+}
 .pulse-wrap { display: flex; flex-direction: column; align-items: center; gap: 28px; }
 .pulse-dot { width: 28px; height: 28px; border-radius: 50%; background: var(--bg); opacity: 0.8; animation: pd 2s ease-in-out infinite; }
 .pulse-dot.stopped { animation-play-state: paused; opacity: 0.3; transform: scale(1); transition: opacity 0.3s ease; }
@@ -380,7 +413,7 @@ html.assign-top, body.assign-top { background: var(--black); }
 <!-- S1 ARRIVAL -->
 <div class="screen active" id="s1">
   <span class="s1-word">Today.</span>
-  <p class="s1-intro">Sound reveals what today actually is.</p>
+  <p class="s1-intro">Find out what the sound reveals.</p>
   <span class="s1-hint">Press Play</span>
 </div>
 
@@ -411,7 +444,10 @@ html.assign-top, body.assign-top { background: var(--black); }
 <!-- S3 LISTEN -->
 <div class="screen" id="s3">
   <div class="listen-top" id="listen-top">
-    <span class="listen-label">Listen</span>
+    <span class="listen-label">
+      <span class="listen-label-inner" id="listen-label-inner">Listen</span>
+      <span class="listen-label-next" id="listen-label-next"></span>
+    </span>
     <div class="pulse-wrap">
       <div class="pulse-dot" id="pulse-dot"></div>
       <div class="track-count" id="tc">1 — 5</div>
@@ -776,6 +812,27 @@ function buildList(elId, cls, includeNone, cb) {
   }
 }
 
+function flipLabel(newText) {
+  var inner = document.getElementById('listen-label-inner');
+  var next = document.getElementById('listen-label-next');
+  if (!inner || !next) return;
+  next.textContent = newText;
+  next.classList.remove('enter');
+  // Trigger reflow
+  void next.offsetWidth;
+  inner.classList.add('exit');
+  next.classList.add('enter');
+  // After animation swap the text and reset
+  setTimeout(function() {
+    inner.textContent = newText;
+    inner.classList.remove('exit');
+    next.classList.remove('enter');
+    next.textContent = '';
+    // Reset positions instantly
+    void inner.offsetWidth;
+  }, 460);
+}
+
 function openPanel(cb) {
   var el = document.getElementById('answer-list');
   el.innerHTML = '';
@@ -812,8 +869,7 @@ function openPanel(cb) {
   });
   document.getElementById('answer-wrap').classList.add('show');
   // Change Listen label to Answer
-  var _lbl = document.querySelector('.listen-label');
-  if (_lbl) _lbl.textContent = 'Recognize';
+  flipLabel('Recognize');
   // Hide pulse wrap — answers take center stage
   var _pw = document.querySelector('.pulse-wrap');
   if (_pw) _pw.style.opacity = '0';
@@ -863,8 +919,7 @@ function resetPanel() {
   var heartBtn = document.getElementById('thumb-up-corner');
   if (heartBtn) { heartBtn.classList.remove('active'); heartBtn.style.background = ''; heartBtn.style.color = ''; }
   // Restore listen label and pulse wrap
-  var _lbl = document.querySelector('.listen-label');
-  if (_lbl) _lbl.textContent = 'Listen';
+  flipLabel('Listen');
   var _pw = document.querySelector('.pulse-wrap');
   if (_pw) _pw.style.opacity = '';
 }
@@ -1175,8 +1230,7 @@ document.getElementById('replay-corner').addEventListener('click', function() {
   var answersShowing = aw && aw.classList.contains('show');
   if (!answersShowing) {
     // Answers not showing — restore pulse dot and listen label
-    var _lbl = document.querySelector('.listen-label');
-    if (_lbl) _lbl.textContent = 'Listen';
+    flipLabel('Listen');
     var _pw = document.querySelector('.pulse-wrap');
     if (_pw) _pw.style.opacity = '';
   }
@@ -1439,7 +1493,12 @@ function doReveal(ps) {
 } // end doReveal
 
 // S1 tap
-document.getElementById('s1').addEventListener('click', function() {
+document.getElementById('s1').addEventListener('click', function(e) {
+  // Only fire from the Press Play button or programmatic clicks — not anywhere on the screen
+  var hint = document.querySelector('.s1-hint');
+  if (hint && e.target !== hint && !hint.contains(e.target) && !window._signinBypass) {
+    return;
+  }
   // If sign-in panel is open, eat the click — do nothing
   var _panel = document.getElementById('signin-panel');
   if (_panel.classList.contains('open') || _panel.style.display === 'flex') {
