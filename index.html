@@ -696,7 +696,7 @@ function triggerPortal(){
       ctx.fillStyle=grd;ctx.fillRect(0,0,pc.width,pc.height);
     }
     if(raw<1){requestAnimationFrame(anim);}
-    else{window.location.href=PORTAL_URL;}
+    else{window.location.replace(PORTAL_URL);}
   })(performance.now());
 }
 
