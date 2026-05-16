@@ -67,11 +67,12 @@ html.assign-top, body.assign-top { background: var(--black); }
 #s3 { background: var(--black); padding: 0; justify-content: flex-start; overflow: hidden; position: relative; }
 
 .listen-top {
-  width: 100%; flex-grow: 1; flex-shrink: 1;
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  position: relative;
-  min-height: 0;
+  pointer-events: none;
 }
+.listen-top > * { pointer-events: all; }
 .listen-label { position: absolute; top: clamp(36px,7vh,52px); left: 32px; font-size: 16px; color: var(--bg); opacity: 0.75; letter-spacing: 0.12em; text-transform: uppercase; }
 .pulse-wrap { display: flex; flex-direction: column; align-items: center; gap: 28px; }
 .pulse-dot { width: 28px; height: 28px; border-radius: 50%; background: var(--bg); opacity: 0.8; animation: pd 2s ease-in-out infinite; }
