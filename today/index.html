@@ -712,6 +712,13 @@ function openPanel(cb) {
     stmts.push(d);
   });
   document.getElementById('answer-wrap').classList.add('show');
+  // Hide pulse dot, track count and thumbs — answers take center stage
+  var _pw = document.querySelector('.pulse-wrap');
+  var _tw = document.getElementById('thumbs-wrap');
+  var _rb = document.getElementById('replay-btn');
+  if (_pw) _pw.style.opacity = '0';
+  if (_tw) { _tw.classList.remove('show'); _tw.style.opacity = '0'; }
+  if (_rb) _rb.classList.remove('show');
   // Stagger arrival — each sentence surfaces 0.8s apart
   stmts.forEach(function(s, i) {
     setTimeout(function() {
@@ -734,6 +741,9 @@ function resetPanel() {
   if (sr) sr.classList.remove('show');
   var rb = document.getElementById('replay-btn');
   if (rb) rb.classList.remove('show');
+  // Restore pulse wrap
+  var _pw = document.querySelector('.pulse-wrap');
+  if (_pw) _pw.style.opacity = '';
 }
 
 // SoundCloud
