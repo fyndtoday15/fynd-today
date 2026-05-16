@@ -64,13 +64,12 @@ html.assign-top, body.assign-top { background: var(--black); }
 .stmt.tapped { opacity: 0.3; pointer-events: none; }
 
 /* S3 — LISTEN */
-#s3 { background: var(--black); padding: 0; justify-content: flex-start; overflow: hidden; }
+#s3 { background: var(--black); padding: 0; justify-content: flex-start; overflow: hidden; position: relative; }
 
 .listen-top {
   width: 100%; flex-grow: 1; flex-shrink: 1;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   position: relative;
-  transition: flex-grow 0.6s cubic-bezier(0.4,0,0.2,1);
   min-height: 0;
 }
 .listen-label { position: absolute; top: clamp(36px,7vh,52px); left: 32px; font-size: 16px; color: var(--bg); opacity: 0.75; letter-spacing: 0.12em; text-transform: uppercase; }
@@ -79,118 +78,79 @@ html.assign-top, body.assign-top { background: var(--black); }
 .pulse-dot.stopped { animation-play-state: paused; opacity: 0.3; transform: scale(1); transition: opacity 0.3s ease; }
 @keyframes pd { 0%,100%{transform:scale(1);opacity:.6} 50%{transform:scale(1.5);opacity:1} }
 .track-count { font-size: 15px; color: var(--bg); opacity: 0.75; letter-spacing: 0.18em; }
-.replay-btn { display: none; margin-top: 20px; background: none; border: none; cursor: pointer; font-family: var(--f); font-size: 12px; color: var(--bg); opacity: 0.45; letter-spacing: 0.12em; text-transform: uppercase; padding: 8px; animation: ph 3s ease-in-out infinite; }
+
+/* Thumbs — appear at 5s, grayscale, centered below pulse */
+.thumbs-wrap { display: flex; gap: 24px; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.5s ease; margin-top: 32px; }
+.thumbs-wrap.show { opacity: 1; pointer-events: all; }
+.thumb-btn { background: transparent; border: 1px solid rgba(255,255,255,0.25); border-radius: 50%; width: 32px; height: 32px; font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1; -webkit-filter: grayscale(100%); filter: grayscale(100%); transition: opacity 0.2s ease; }
+.thumb-btn:active { opacity: 0.4; }
+
+/* Replay — appears at 50s if no answer */
+.replay-btn { display: none; margin-top: 20px; background: none; border: none; cursor: pointer; font-family: var(--f); font-size: 12px; color: var(--bg); opacity: 0.4; letter-spacing: 0.12em; text-transform: uppercase; padding: 8px; }
 .replay-btn.show { display: block; }
 
-/* Ready prompt — appears at 30s */
-.ready-prompt {
+/* Answer statements — fade in at 30s on black, music still playing */
+.answer-wrap {
   position: absolute;
-  bottom: clamp(120px,20vh,150px);
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 12px;
-  color: var(--bg);
+  bottom: clamp(90px,15vh,120px);
+  left: 0; right: 0;
   opacity: 0;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  cursor: pointer;
-  padding: 16px 24px;
   pointer-events: none;
-  white-space: nowrap;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  transition: opacity 0.9s ease;
 }
-.ready-prompt.show {
-  pointer-events: all;
-  animation: ph-white 3s ease-in-out infinite;
-  animation-delay: 0s;
-}
-@keyframes ph-white { 0%{opacity:.45} 50%{opacity:.85} 100%{opacity:.45} }
-.ready-prompt-arrow { font-size: 16px; }
-
-/* ASSIGN PANEL — slides up as off-white */
-.assign-panel {
+.answer-wrap.show { opacity: 1; pointer-events: all; }
+.answer-stmt {
   width: 100%;
-  flex-shrink: 0;
-  max-height: 0;
-  overflow: hidden;
-  background: var(--bg);
-  transition: max-height 0.6s cubic-bezier(0.4,0,0.2,1);
-  display: flex;
-  flex-direction: column;
-  padding: 0 32px;
-  border-radius: 20px 20px 0 0;
-  position: relative;
-  z-index: 1000;
+  padding: 15px 32px;
+  font-size: clamp(14px,3.6vw,17px);
+  font-weight: 400;
+  color: var(--bg);
+  opacity: 0.7;
+  line-height: 1.55;
+  text-align: left;
+  cursor: pointer;
+  user-select: none;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  transition: opacity 0.15s ease;
 }
-.assign-panel.open {
-  height: auto;
-  max-height: 52vh;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
-  padding-bottom: 24px;
-}
-@media (min-width: 768px) {
-  .assign-panel.open {
-    height: auto;
-    max-height: 55vh;
-  }
-}
+.answer-stmt:first-of-type { border-top: 1px solid rgba(255,255,255,0.07); }
+.answer-stmt:active { opacity: 0.3; }
+.answer-stmt.tapped { opacity: 0.15; pointer-events: none; }
 
-.assign-label { font-size: 15px; color: var(--black); opacity: 0.75; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 20px; margin-top: 8px; flex-shrink: 0; }
-.assign-stmt { width: 100%; padding: 16px 0; font-size: clamp(17px,4.2vw,20px); font-weight: 400; color: var(--black); line-height: 1.5; border-bottom: 1px solid rgba(0,0,0,0.08); cursor: pointer; user-select: none; transition: opacity 0.15s ease; flex-shrink: 0; }
-.assign-stmt:first-of-type { border-top: 1px solid rgba(0,0,0,0.08); }
-.assign-stmt.tapped { opacity: 0.3; pointer-events: none; }
+/* Song name reveal — fades in on black for 3s after answer, then auto-advances */
+.song-reveal {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.7s ease;
+  width: 80%;
+}
+.song-reveal.show { opacity: 1; }
+.song-reveal-title { font-size: clamp(18px,4.5vw,26px); font-weight: 400; color: var(--bg); letter-spacing: -0.01em; line-height: 1.25; margin-bottom: 8px; }
+.song-reveal-artist { font-size: clamp(12px,3vw,15px); color: var(--bg); opacity: 0.5; letter-spacing: 0.04em; }
 
-/* S5 — REVEAL */
-#s5 { background: var(--bg); justify-content: center; gap: 12px; }
-.reveal-label { font-size: 15px; color: var(--black); opacity: 0.75; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 12px; }
+/* Stop for now — always visible, very subtle, bottom center */
+.btn-stop-listen {
+  position: absolute;
+  bottom: clamp(32px,5.5vh,48px);
+  left: 50%; transform: translateX(-50%);
+  font-family: var(--f); font-size: 11px;
+  color: var(--bg); background: none; border: none;
+  cursor: pointer; letter-spacing: 0.12em;
+  text-transform: uppercase; opacity: 0.22;
+  padding: 10px 20px; white-space: nowrap;
+}
+.btn-stop-listen:active { opacity: 0.5; }
+
+/* S5 — kept in DOM for history/routing but hidden, no visible content needed */
+#s5 { background: var(--black); }
+
+/* S5 REVEAL styles kept for recap reference */
 .reveal-title { font-size: clamp(26px,6vw,38px); font-weight: 400; color: var(--black); text-align: center; letter-spacing: -0.01em; line-height: 1.2; }
 .reveal-artist { font-size: clamp(16px,3.8vw,20px); color: var(--black); opacity: 0.65; text-align: center; }
-
-.reveal-actions {
-  position: absolute;
-  bottom: clamp(36px,8vh,60px);
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-  padding: 0 32px;
-}
-.btn-continue {
-  font-family: var(--f);
-  font-size: 14px;
-  color: var(--black);
-  background: none;
-  border: 1px solid rgba(0,0,0,0.25);
-  border-radius: 2px;
-  padding: 14px 40px;
-  cursor: pointer;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  width: 100%;
-  max-width: 280px;
-  transition: opacity 0.2s ease;
-  animation: ph 3s ease-in-out infinite;
-}
-.btn-stop {
-  font-family: var(--f);
-  font-size: 12px;
-  color: var(--black);
-  background: none;
-  border: none;
-  cursor: pointer;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  opacity: 0.35;
-  padding: 8px;
-  transition: opacity 0.2s ease;
-  animation: ph 3s ease-in-out infinite;
-}
-.reveal-cta { font-size: 12px; color: var(--black); opacity: 0.6; letter-spacing: 0.12em; text-transform: uppercase; }
 
 /* S7 — RECAP */
 #s7 { background: var(--bg); justify-content: flex-start; padding-top: clamp(56px,11vh,88px); overflow-y: auto; -webkit-overflow-scrolling: touch; }
@@ -345,15 +305,15 @@ html.assign-top, body.assign-top { background: var(--black); }
       <button class="thumb-btn" id="thumb-down">&#128078;</button>
       <button class="thumb-btn" id="thumb-up">&#128077;</button>
     </div>
-    <div class="ready-prompt" id="ready-prompt">
-      <span>Answer now</span>
-      <span class="ready-prompt-arrow">↑</span>
-    </div>
   </div>
-  <div class="assign-panel" id="assign-panel">
-    <div class="assign-label">What's happening right now?</div>
-    <div id="assign-list" style="padding-bottom: 32px;"></div>
+  <div class="song-reveal" id="song-reveal">
+    <div class="song-reveal-title" id="song-reveal-title"></div>
+    <div class="song-reveal-artist" id="song-reveal-artist"></div>
   </div>
+  <div class="answer-wrap" id="answer-wrap">
+    <div id="answer-list"></div>
+  </div>
+  <button class="btn-stop-listen" id="btn-stop-listen">Stop for now</button>
   <div class="legal-corner">Music streamed via <a href="https://soundcloud.com/fynd-today" target="_blank">SoundCloud</a>. All rights belong to their respective owners. No commercial use.</div>
   <div id="sc-wrap">
     <iframe id="sc" width="100%" height="166" scrolling="no" frameborder="no"
@@ -428,17 +388,8 @@ html.assign-top, body.assign-top { background: var(--black); }
   </script>
 </div>
 
-<!-- S5 REVEAL -->
-<div class="screen" id="s5">
-  <span class="reveal-label">That was</span>
-  <div class="reveal-title" id="r-title">—</div>
-  <div class="reveal-artist" id="r-artist">—</div>
-  <div class="reveal-actions">
-    <span class="reveal-cta">Press Play on Today.</span>
-    <button class="btn-continue" id="btn-continue">Continue</button>
-    <button class="btn-stop" id="btn-stop">Stop for now</button>
-  </div>
-</div>
+<!-- S5 — kept for routing only -->
+<div class="screen" id="s5"></div>
 
 <!-- S7 RECAP -->
 <div class="screen" id="s7">
@@ -601,9 +552,9 @@ function show(id) {
   }
 
   var dots = document.getElementById('dots');
-  if (id === 's3' || id === 's5') {
+  if (id === 's3') {
     dots.classList.add('show');
-    dots.classList.toggle('dark', id === 's3');
+    dots.classList.add('dark');
   } else {
     dots.classList.remove('show');
     dots.classList.remove('dark');
@@ -705,41 +656,25 @@ function buildList(elId, cls, includeNone, cb) {
 }
 
 function openPanel(cb) {
-  // Swap listen label to Answer
-  var lbl = document.querySelector('.listen-label');
-  if (lbl) lbl.textContent = 'Answer';
-  // Fix Safari scroll — prevent touch events bubbling to fixed parent
-  var panel = document.getElementById('assign-panel');
-  panel.addEventListener('touchmove', function(e) {
-    e.stopPropagation();
-  }, { passive: true });
-  // Safe area: top stays black, bottom becomes off-white
-  var sb = document.getElementById('safe-bot');
-  if (sb) { sb.style.transition = 'none'; sb.style.background = '#FCFBF4'; }
-  // Build three fixed position options
-  var el = document.getElementById('assign-list');
+  var el = document.getElementById('answer-list');
   el.innerHTML = '';
   var positions = [
-    { text: 'Something in me wants to stay here.',        value: 'Stay' },
-    { text: 'Something in me wants to shift forward.',    value: 'Move' },
-    { text: 'Something in me just became clearer.',       value: 'Open' },
+    { text: 'Something in me wants to stay here.',     value: 'Stay' },
+    { text: 'Something in me wants to shift forward.', value: 'Move' },
+    { text: 'Something in me just became clearer.',    value: 'Open' },
   ];
   positions.forEach(function(p) {
     var d = document.createElement('div');
-    d.className = 'assign-stmt';
+    d.className = 'answer-stmt';
     d.textContent = p.text;
     d.addEventListener('click', function() {
       if (d.classList.contains('tapped')) return;
       d.classList.add('tapped');
-      var val = p.value;
-      setTimeout(function() { cb(val); }, 150);
+      setTimeout(function() { cb(p.value); }, 150);
     });
     el.appendChild(d);
   });
-  // Hide ready prompt
-  document.getElementById('ready-prompt').classList.remove('show');
-  document.getElementById('ready-prompt').style.pointerEvents = 'none';
-  document.getElementById('assign-panel').classList.add('open');
+  document.getElementById('answer-wrap').classList.add('show');
 }
 
 function resetPanel() {
@@ -748,28 +683,14 @@ function resetPanel() {
   sess._revealFired = false;
   sess._abandonSent = false;
   sess._lastHeartbeatDur = 0;
-  var panel = document.getElementById('assign-panel');
-  // Kill transition instantly so no white flash
-  panel.style.transition = 'none';
-  panel.style.maxHeight = '0';
-  panel.classList.remove('open');
-  document.getElementById('assign-list').innerHTML = '';
-  document.getElementById('ready-prompt').classList.remove('show');
-  document.getElementById('ready-prompt').style.pointerEvents = 'none';
-  // Hide replay button
-  var rbReset = document.getElementById('replay-btn');
-  if (rbReset) rbReset.classList.remove('show');
-  // Restore listen label
-  var lbl = document.querySelector('.listen-label');
-  if (lbl) lbl.textContent = 'Listen';
-  // Safe area back to full black
-  var sb = document.getElementById('safe-bot');
-  if (sb) { sb.style.transition = 'none'; sb.style.background = '#000000'; }
-  // Restore transition after reset
-  setTimeout(function() {
-    panel.style.transition = '';
-    panel.style.maxHeight = '';
-  }, 100);
+  var aw = document.getElementById('answer-wrap');
+  if (aw) { aw.classList.remove('show'); }
+  var al = document.getElementById('answer-list');
+  if (al) al.innerHTML = '';
+  var sr = document.getElementById('song-reveal');
+  if (sr) sr.classList.remove('show');
+  var rb = document.getElementById('replay-btn');
+  if (rb) rb.classList.remove('show');
 }
 
 // SoundCloud
@@ -786,7 +707,7 @@ function initSC() {
     clearTimeout(thumbsTimer);
     clearInterval(heartbeatTimer);
     document.getElementById('thumbs-wrap').classList.remove('show');
-    if (!document.getElementById('assign-panel').classList.contains('open')) {
+    if (!document.getElementById('answer-wrap').classList.contains('show')) {
       openPanel(function(ps) { doReveal(ps); });
     }
   });
@@ -839,27 +760,19 @@ function startTrackTimers() {
   thumbsTimer = setTimeout(function() {
     document.getElementById('thumbs-wrap').classList.add('show');
   }, 5000);
+  // Answers fade in at 30s — music keeps playing
   readyTimer = setTimeout(function() {
-    var prompt = document.getElementById('ready-prompt');
-    prompt.classList.add('show');
-    prompt.style.pointerEvents = 'all';
-  }, 30000);
-  autoTimer = setTimeout(function() {
-    if (widget) widget.pause();
-    stopDot();
-    document.getElementById('thumbs-wrap').classList.remove('show');
-    clearTimeout(thumbsTimer);
-    var rb = document.getElementById('replay-btn');
-    if (rb) rb.classList.add('show');
-    if (!document.getElementById('assign-panel').classList.contains('open')) {
-      sess.triggered = 'auto';
-      try {
-        var _pa = JSON.parse(localStorage.getItem('fynd_pendingAbandoned'));
-        if (_pa) { _pa.triggered = 'auto'; localStorage.setItem('fynd_pendingAbandoned', JSON.stringify(_pa)); }
-      } catch(e) {}
+    if (!document.getElementById('answer-wrap').classList.contains('show')) {
       openPanel(function(ps) { doReveal(ps); });
     }
-  }, 60000);
+  }, 30000);
+  // Replay appears at 50s if still no answer
+  autoTimer = setTimeout(function() {
+    if (!document.getElementById('answer-wrap').classList.contains('show')) {
+      var rb = document.getElementById('replay-btn');
+      if (rb) rb.classList.add('show');
+    }
+  }, 50000);
   saveAbandoned();
   if (sess.cur > 4) sess.cur = 0;
   document.getElementById('tc').textContent = (sess.cur + 1) + ' — 5';
@@ -977,31 +890,20 @@ function playTrack(idx) {
       document.getElementById('thumbs-wrap').classList.add('show');
     }, 5000);
 
-    // At 30s — show ready prompt, keep thumbs visible
+    // At 30s — answers fade in on black, music keeps playing
     readyTimer = setTimeout(function() {
-      var prompt = document.getElementById('ready-prompt');
-      prompt.classList.add('show');
-      prompt.style.pointerEvents = 'all';
-    }, 30000);
-
-    // At 60s — hard open panel regardless
-    autoTimer = setTimeout(function() {
-      if (widget) widget.pause();
-      stopDot();
-      // Hide thumbs when panel auto-opens at 60s
-      document.getElementById('thumbs-wrap').classList.remove('show');
-      clearTimeout(thumbsTimer);
-      var rb2 = document.getElementById('replay-btn');
-      if (rb2) rb2.classList.add('show');
-      if (!document.getElementById('assign-panel').classList.contains('open')) {
-        sess.triggered = 'auto';
-        try {
-          var _pa = JSON.parse(localStorage.getItem('fynd_pendingAbandoned'));
-          if (_pa) { _pa.triggered = 'auto'; localStorage.setItem('fynd_pendingAbandoned', JSON.stringify(_pa)); }
-        } catch(e) {}
+      if (!document.getElementById('answer-wrap').classList.contains('show')) {
         openPanel(function(ps) { doReveal(ps); });
       }
-    }, 60000);
+    }, 30000);
+
+    // At 50s — replay appears if still no answer
+    autoTimer = setTimeout(function() {
+      if (!document.getElementById('answer-wrap').classList.contains('show')) {
+        var rb2 = document.getElementById('replay-btn');
+        if (rb2) rb2.classList.add('show');
+      }
+    }, 50000);
 
     // Cap cur to valid range 0-4
     if (sess.cur > 4) sess.cur = 0;
@@ -1040,22 +942,8 @@ function playTrack(idx) {
 }
 
 // Ready prompt tap — open panel immediately
-document.getElementById('ready-prompt').addEventListener('click', function() {
-  clearTimeout(autoTimer);
-  if (widget) widget.pause();
-  stopDot();
-  document.getElementById('thumbs-wrap').classList.remove('show');
-  clearTimeout(thumbsTimer);
-  sess.triggered = 'manual';
-  try {
-    var _pa = JSON.parse(localStorage.getItem('fynd_pendingAbandoned'));
-    if (_pa) { _pa.triggered = 'manual'; localStorage.setItem('fynd_pendingAbandoned', JSON.stringify(_pa)); }
-  } catch(e) {}
-  openPanel(function(ps) { doReveal(ps); });
-});
-
-// Replay button — restart audio only, keep panel open, no timer resets
-// Duration keeps counting from original start, no new prompts or thumbs
+// Replay button — restart audio only, no timer resets
+// Duration keeps counting from original start
 document.getElementById('replay-btn').addEventListener('click', function() {
   sess.replay = true;
   var rb = document.getElementById('replay-btn');
@@ -1286,34 +1174,36 @@ function doReveal(ps) {
   sess.reaction = '';
   sess.triggered = '';
   sess.replay = false;
-  document.getElementById('r-title').textContent = tr.title;
-  document.getElementById('r-artist').textContent = tr.artist;
-  // Hide stop button on last track — no reason to stop now
-  var stopBtn = document.getElementById('btn-stop');
-  if (stopBtn) stopBtn.style.display = sess.cur === 4 ? 'none' : '';
-  // On last track don't push s5 to history — back from recap goes to Today.
-  if (sess.cur === 4) {
-    _origShow('s5');
-  } else {
-    show('s5');
-  }
-  sess.listenStart = null; // prevent pagehide beacon from double-logging
+
+  // Hide answers, pause music, show song name for 3s then auto-advance
+  var _aw = document.getElementById('answer-wrap');
+  if (_aw) _aw.classList.remove('show');
+  if (widget) widget.pause();
+  stopDot();
+  document.getElementById('thumbs-wrap').classList.remove('show');
+
+  var _sr = document.getElementById('song-reveal');
+  var _srt = document.getElementById('song-reveal-title');
+  var _sra = document.getElementById('song-reveal-artist');
+  if (_srt) _srt.textContent = tr.title;
+  if (_sra) _sra.textContent = tr.artist;
+  if (_sr) _sr.classList.add('show');
+
+  sess.listenStart = null;
   try { localStorage.removeItem('fynd_pendingAbandoned'); } catch(e) {}
-  // On last track — run full completion flow immediately so refresh can recover
+
+  // On last track — run completion flow
   if (sess.cur === 4) {
-    sess.cur = 5; // mark complete
+    sess.cur = 5;
     markSetComplete(sess.playlist);
     clearAbandoned();
     saveSessionState();
     LS.set('onEmailScreen', true);
-    // Persist log so buildRecap works after refresh
     try { localStorage.setItem('fynd_completedLog', JSON.stringify({ log: sess.log, playlist: sess.playlist, entryState: sess.entryState || '' })); } catch(e) {}
     try { localStorage.setItem('fynd_onRecapScreen', '1'); } catch(e) {}
-    // Persist Set 1 recap for email submit path
     if (sess.playlist === 'MVP 1') {
       try { localStorage.setItem('fynd_set1recap', JSON.stringify({ log: sess.log, playlist: sess.playlist, entryState: sess.entryState || '' })); } catch(e) {}
     }
-    // Send recap email for Sets 2-5 (email already collected)
     (function() {
       var _re = LS.get('email') || '';
       var _rn = LS.get('firstName') || '';
@@ -1322,12 +1212,23 @@ function doReveal(ps) {
       var _rs = sess.entryState || '';
       if (_re) setTimeout(function() { sendRecapEmail(_re, _rn, _rp, _rl, _rs); }, 1000);
     })();
+    // After 3s show recap
+    setTimeout(function() {
+      if (_sr) _sr.classList.remove('show');
+      buildRecap();
+      show('s7');
+    }, 3000);
   } else {
     sess.cur++;
     saveAbandoned();
-    // Save state at incremented position — this is where they resume next
     saveSessionState();
     sess.cur--;
+    // After 3s auto-advance to next track
+    setTimeout(function() {
+      if (_sr) _sr.classList.remove('show');
+      resetPanel();
+      setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 200);
+    }, 3000);
   }
 }
 
@@ -1650,54 +1551,14 @@ document.getElementById('s1').addEventListener('click', function() {
 });
 
 // Continue button
-document.getElementById('btn-continue').addEventListener('click', function() {
-  // If completion already ran in doReveal (last track), just show recap
-  if (sess.cur === 5) {
-    buildRecap();
-    show('s7');
-    return;
-  }
-  sess.cur++;
-  if (sess.cur < 5) {
-    resetPanel();
-    document.body.style.background = '#000000';
-    var s3c = document.getElementById('s3');
-    if (s3c) s3c.style.background = '#000000';
-    var stC = document.getElementById('safe-top');
-    var sbC = document.getElementById('safe-bot');
-    if (stC) { stC.style.transition = 'none'; stC.style.background = '#000000'; }
-    if (sbC) { sbC.style.transition = 'none'; sbC.style.background = '#000000'; }
-    show('s3');
-    if (widgetReady) { sess._gestureUnlocked = true; }
-    setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 100);
-  } else {
-    markSetComplete(sess.playlist);
-    clearAbandoned();
-    LS.set('onEmailScreen', true);
-    buildRecap();
-    // Persist log so buildRecap works after refresh
-    try { localStorage.setItem('fynd_completedLog', JSON.stringify({ log: sess.log, playlist: sess.playlist, entryState: sess.entryState || '' })); } catch(e) {}
-    // Persist Set 1 recap to localStorage — sess may not survive until email submit on mobile
-    if (sess.playlist === 'MVP 1') {
-      try { localStorage.setItem('fynd_set1recap', JSON.stringify({ log: sess.log, playlist: sess.playlist, entryState: sess.entryState || '' })); } catch(e) {}
-    }
-    // Send recap email for Sets 2-5 (email already collected) — 10s delay
-    (function() {
-      var _re2 = LS.get('email') || '';
-      var _rn2 = LS.get('firstName') || '';
-      var _rp2 = sess.playlist;
-      var _rl2 = sess.log.slice();
-      var _rs2 = sess.entryState || '';
-      if (_re2) setTimeout(function() { sendRecapEmail(_re2, _rn2, _rp2, _rl2, _rs2); }, 1000);
-    })();
-    saveSessionState();
-    try { localStorage.setItem('fynd_onRecapScreen', '1'); } catch(e) {}
-    show('s7');
-  }
-});
-
-// Stop for now — go to email
-document.getElementById('btn-stop').addEventListener('click', function() {
+// Stop for now — save state and go to sets/email
+document.getElementById('btn-stop-listen').addEventListener('click', function() {
+  clearTimeout(readyTimer);
+  clearTimeout(autoTimer);
+  clearTimeout(thumbsTimer);
+  clearInterval(heartbeatTimer);
+  if (widget) widget.pause();
+  stopDot();
   sess.cur++;
   saveAbandoned();
   sess.cur--;
@@ -2780,17 +2641,6 @@ window.addEventListener('pagehide', function() {
 document.getElementById('s7').addEventListener('touchmove', function(e) {
   e.stopPropagation();
 }, { passive: true });
-
-// Prevent s3 from swallowing touchmove so assign panel can scroll on Safari
-document.getElementById('s3').addEventListener('touchmove', function(e) {
-  var panel = document.getElementById('assign-panel');
-  if (panel && panel.classList.contains('open')) {
-    // Allow scroll only inside the panel
-    if (!panel.contains(e.target)) {
-      e.preventDefault();
-    }
-  }
-}, { passive: false });
 </script>
 </body>
 </html>
