@@ -97,44 +97,32 @@ html.assign-top, body.assign-top { background: var(--black); }
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.5s ease;
-  border: 1px solid rgba(255,255,255,0.22);
+  border: 1px solid rgba(255,255,255,0.25);
   border-radius: 8px;
   overflow: hidden;
-  min-width: 44px;
+  min-width: 56px;
 }
 .utility-corner.show { opacity: 1; pointer-events: all; }
 .utility-corner-btn {
-  background: rgba(255,255,255,0.05);
+  background: rgba(255,255,255,0.06);
   border: none;
-  border-bottom: 1px solid rgba(255,255,255,0.12);
+  border-bottom: 1px solid rgba(255,255,255,0.15);
   color: var(--bg);
   cursor: pointer;
-  font-size: 15px;
-  padding: 11px 14px;
+  font-family: var(--f);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 10px 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: background 0.15s ease;
   line-height: 1;
-  -webkit-filter: grayscale(100%);
-  filter: grayscale(100%);
+  white-space: nowrap;
 }
 .utility-corner-btn:last-child { border-bottom: none; }
 .utility-corner-btn:active { background: rgba(255,255,255,0.15); }
-
-/* Replay — centered, appears at 5s with thumbs, hides when answers appear */
-.replay-btn {
-  display: none;
-  position: absolute;
-  bottom: clamp(100px,14vh,130px);
-  left: 50%; transform: translateX(-50%);
-  background: none; border: none; cursor: pointer;
-  font-family: var(--f); font-size: 12px;
-  color: var(--bg); opacity: 0.38;
-  letter-spacing: 0.12em; text-transform: uppercase;
-  padding: 8px 16px; white-space: nowrap;
-}
-.replay-btn.show { display: block; }
 
 /* Answer statements — staggered fade in, pulse with music, tap to confirm */
 .answer-wrap {
@@ -210,13 +198,16 @@ html.assign-top, body.assign-top { background: var(--black); }
   position: absolute;
   bottom: clamp(52px,8vh,72px);
   left: 50%; transform: translateX(-50%);
-  font-family: var(--f); font-size: 11px;
-  color: var(--bg); background: none; border: none;
+  font-family: var(--f); font-size: 10px;
+  color: var(--bg); background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 8px;
   cursor: pointer; letter-spacing: 0.12em;
-  text-transform: uppercase; opacity: 0.38;
+  text-transform: uppercase; opacity: 0.65;
   padding: 10px 20px; white-space: nowrap;
+  transition: background 0.2s ease;
 }
-.btn-stop-listen:active { opacity: 0.65; }
+.btn-stop-listen:active { background: rgba(255,255,255,0.12); }
 
 /* S5 — kept in DOM for history/routing but hidden, no visible content needed */
 #s5 { background: var(--black); }
@@ -378,11 +369,11 @@ html.assign-top, body.assign-top { background: var(--black); }
       <button class="thumb-btn" id="thumb-up">&#128077;</button>
     </div>
   </div>
-  <button class="replay-btn" id="replay-btn">&#8635; Replay song</button>
   <div class="utility-corner" id="utility-corner">
-    <button class="utility-corner-btn" id="thumb-down-corner">&#128078;</button>
-    <button class="utility-corner-btn" id="replay-corner">&#8635;</button>
+    <button class="utility-corner-btn" id="thumb-down-corner">Skip</button>
+    <button class="utility-corner-btn" id="replay-corner">Replay</button>
   </div>
+  <button class="btn-stop-listen" id="btn-stop-listen">Stop for now</button>
   <div class="song-reveal" id="song-reveal">
     <div class="song-reveal-label">That was</div>
     <div class="song-reveal-title" id="song-reveal-title"></div>
@@ -774,10 +765,8 @@ function openPanel(cb) {
   // Hide centered thumbs and replay — show utility corner instead
   var _pw = document.querySelector('.pulse-wrap');
   var _tw = document.getElementById('thumbs-wrap');
-  var _rb = document.getElementById('replay-btn');
   if (_pw) _pw.style.opacity = '0';
   if (_tw) { _tw.classList.remove('show'); _tw.style.opacity = '0'; }
-  if (_rb) { _rb.classList.remove('show'); }
   // utility-corner stays visible — no change needed
   // Stagger arrival — each sentence surfaces 1.4s apart for smooth flow
   var _activeIdx = 0;
@@ -819,8 +808,6 @@ function resetPanel() {
   if (al) al.innerHTML = '';
   var sr = document.getElementById('song-reveal');
   if (sr) sr.classList.remove('show');
-  var rb = document.getElementById('replay-btn');
-  if (rb) rb.classList.remove('show');
   var tw = document.getElementById('thumbs-wrap');
   if (tw) { tw.style.opacity = ''; tw.classList.remove('show'); }
   var uc = document.getElementById('utility-corner');
@@ -898,8 +885,6 @@ function startTrackTimers() {
   }, 5000);
   thumbsTimer = setTimeout(function() {
     document.getElementById('thumbs-wrap').classList.add('show');
-    var rb = document.getElementById('replay-btn');
-    if (rb) rb.classList.add('show');
     var uc = document.getElementById('utility-corner');
     if (uc) uc.classList.add('show');
   }, 5000);
@@ -1020,12 +1005,10 @@ function playTrack(idx) {
     } catch(e) {}
 
 
-    // At 5s — show thumbs and replay together
+    // At 5s — show thumbs and utility corner
     clearTimeout(thumbsTimer);
     thumbsTimer = setTimeout(function() {
       document.getElementById('thumbs-wrap').classList.add('show');
-      var rb2 = document.getElementById('replay-btn');
-      if (rb2) rb2.classList.add('show');
       var uc2 = document.getElementById('utility-corner');
       if (uc2) uc2.classList.add('show');
     }, 5000);
@@ -1076,18 +1059,14 @@ function playTrack(idx) {
 // Ready prompt tap — open panel immediately
 // Replay button — restart audio only, no timer resets
 // Duration keeps counting from original start
-document.getElementById('replay-btn').addEventListener('click', function() {
+// Shared replay logic — used by corner replay button
+function doReplay() {
   sess.replay = true;
-  var rb = document.getElementById('replay-btn');
-  if (rb) rb.classList.remove('show');
-  document.getElementById('thumbs-wrap').classList.add('show');
   startDot();
-  // Update pending abandoned record with replay flag
   try {
     var _pa = JSON.parse(localStorage.getItem('fynd_pendingAbandoned'));
     if (_pa) { _pa.replay = 'Yes'; localStorage.setItem('fynd_pendingAbandoned', JSON.stringify(_pa)); }
   } catch(e) {}
-  // Immediate patch — replay recorded in Airtable right now
   if (sess._activeRecordId) {
     fetch('/.netlify/functions/log-session', {
       method: 'POST',
@@ -1103,7 +1082,7 @@ document.getElementById('replay-btn').addEventListener('click', function() {
   }
   widget.seekTo(0);
   setTimeout(function() { widget.play(); }, 200);
-});
+}
 
 // Thumb up — hide thumbs, store reaction, music keeps playing
 document.getElementById('thumb-up').addEventListener('click', function() {
@@ -1151,8 +1130,7 @@ document.getElementById('replay-corner').addEventListener('click', function() {
   // Restore centered thumbs
   var _tw = document.getElementById('thumbs-wrap');
   if (_tw) { _tw.style.opacity = ''; _tw.classList.add('show'); }
-  // Fire the main replay
-  document.getElementById('replay-btn').click();
+  doReplay();
 });
 
 // Thumb down — record skip, go straight to next track
