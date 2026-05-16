@@ -807,35 +807,33 @@ function flipLabel(newText) {
   var inner = document.getElementById('listen-label-inner');
   var next = document.getElementById('listen-label-next');
   if (!inner || !next) return;
-  // Phase 1 — current word exits downward
-  inner.style.transition = 'transform 0.25s ease-in, opacity 0.25s ease-in';
+  // Phase 1 — inner exits downward (0.22s)
+  inner.style.transition = 'transform 0.22s ease-in, opacity 0.22s ease-in';
   inner.style.transform = 'translateY(100%)';
   inner.style.opacity = '0';
-  // Phase 2 — after exit, snap next word in from above and animate down
+  // Phase 2 — after exit, inner hidden, next animates in from above
   setTimeout(function() {
     inner.style.transition = 'none';
     inner.style.transform = 'translateY(0)';
-    inner.style.opacity = '1';
+    inner.style.opacity = '0';
     inner.textContent = newText;
-    // Position new word above and animate in
     next.textContent = newText;
     next.style.transition = 'none';
     next.style.transform = 'translateY(-100%)';
     next.style.opacity = '0';
     void next.offsetWidth;
-    next.style.transition = 'transform 0.3s ease-out, opacity 0.3s ease-out';
+    next.style.transition = 'transform 0.28s ease-out, opacity 0.28s ease-out';
     next.style.transform = 'translateY(0)';
     next.style.opacity = '1';
-    // Phase 3 — after entrance, swap to inner and hide next
+    // Phase 3 — snap inner visible, hide next
     setTimeout(function() {
-      inner.style.transition = 'none';
       inner.style.opacity = '1';
       next.style.transition = 'none';
-      next.style.transform = 'translateY(-100%)';
       next.style.opacity = '0';
+      next.style.transform = 'translateY(-100%)';
       next.textContent = '';
-    }, 320);
-  }, 270);
+    }, 300);
+  }, 240);
 }
 
 function openPanel(cb) {
@@ -2351,7 +2349,7 @@ show = function(id) {
   _origShow(id);
 };
 
-history.pushState({ screen: 'boundary' }, '', window.location.href);
+history.replaceState({ screen: 'boundary' }, '', window.location.href);
 history.pushState({ screen: 'boundary' }, '', window.location.href);
 history.pushState({ screen: 's1' }, '', window.location.href);
 
@@ -2434,6 +2432,11 @@ window.addEventListener('popstate', function(e) {
   }
 
   if (!e.state || e.state.screen === 'boundary') {
+    // On mobile Chrome the portal animation may be in the history stack
+    // Use replace to clear current entry then redirect
+    try {
+      history.replaceState(null, '', window.location.href);
+    } catch(ex) {}
     window.location.replace('https://fyndtoday.com');
     return;
   }
