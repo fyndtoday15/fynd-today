@@ -49,7 +49,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:22px 48px;display:fl
 .nav-portal-btn{display:none}
 .hero-portal-btn{
   position:fixed;
-  top:72px;
+  top:90px;
   right:48px;
   z-index:99;
   display:inline-block;
@@ -66,6 +66,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:22px 48px;display:fl
   cursor:pointer;
   opacity:0;
   animation:up .8s ease forwards 1.2s;
+  transition:opacity 0.3s ease;
   white-space:nowrap;
   width:auto;
 }
@@ -693,6 +694,26 @@ function triggerPortal(){
 document.querySelectorAll('.portal-trigger').forEach(function(el){
   el.addEventListener('click',function(e){e.preventDefault();triggerPortal();});
 });
+
+/* Hide hero portal button when scrolling past hero */
+(function(){
+  var btn = document.querySelector('.hero-portal-btn');
+  var hero = document.getElementById('top');
+  if(!btn || !hero) return;
+  function checkScroll(){
+    var heroBottom = hero.getBoundingClientRect().bottom;
+    if(heroBottom <= 0){
+      btn.style.opacity = '0';
+      btn.style.pointerEvents = 'none';
+    } else {
+      btn.style.pointerEvents = 'all';
+      // Only restore opacity after initial animation has played
+      if(btn.style.opacity !== '0' || window.scrollY === 0) return;
+      btn.style.opacity = '1';
+    }
+  }
+  window.addEventListener('scroll', checkScroll, {passive:true});
+})();
 
 /* Experience it — scroll enter section fully to top */
 document.querySelectorAll('.srf-enter-btn').forEach(function(btn){
