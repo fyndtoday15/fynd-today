@@ -185,6 +185,7 @@ html.assign-top, body.assign-top { background: var(--black); }
   transition: opacity 1.2s ease;
   gap: clamp(20px, 4vh, 36px);
   padding: 0 clamp(24px, 8vw, 64px);
+  z-index: 1;
 }
 .answer-wrap.show { opacity: 1; pointer-events: all; }
 
@@ -458,7 +459,6 @@ html.assign-top, body.assign-top { background: var(--black); }
   <div class="answer-wrap" id="answer-wrap">
     <div id="answer-list"></div>
   </div>
-  <button class="btn-stop-listen" id="btn-stop-listen">Stop for now</button>
   <div class="legal-corner" id="legal-corner">
     <div class="legal-icon" id="legal-icon">i</div>
     <div class="legal-tooltip">Music streamed via <a href="https://soundcloud.com/fynd-today" target="_blank">SoundCloud</a>. All rights belong to their respective owners. No commercial use.</div>
@@ -899,10 +899,10 @@ function openPanel(cb) {
             if (!stmts[_activeIdx].classList.contains('tapped') && !stmts[_activeIdx].classList.contains('faded')) {
               stmts[_activeIdx].classList.add('active');
             }
-          }, 1400);
-        }, 1400);
+          }, 2200);
+        }, 1800);
       }
-    }, 300 + (i * 1400));
+    }, 300 + (i * 1800));
   });
 }
 
