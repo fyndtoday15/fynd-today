@@ -90,33 +90,57 @@ html.assign-top, body.assign-top { background: var(--black); }
 .replay-btn { display: none; margin-top: 20px; background: none; border: none; cursor: pointer; font-family: var(--f); font-size: 12px; color: var(--bg); opacity: 0.4; letter-spacing: 0.12em; text-transform: uppercase; padding: 8px; }
 .replay-btn.show { display: block; }
 
-/* Answer statements — fade in at 30s on black, music still playing */
+/* Answer statements — staggered fade in, pulse with music, tap to confirm */
 .answer-wrap {
   position: absolute;
-  bottom: clamp(90px,15vh,120px);
-  left: 0; right: 0;
+  top: 0; left: 0; right: 0; bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.9s ease;
+  transition: opacity 1.2s ease;
+  gap: clamp(20px, 4vh, 36px);
+  padding: 0 clamp(24px, 8vw, 64px);
 }
 .answer-wrap.show { opacity: 1; pointer-events: all; }
+
 .answer-stmt {
   width: 100%;
-  padding: 15px 32px;
-  font-size: clamp(14px,3.6vw,17px);
+  max-width: 420px;
+  text-align: center;
+  font-size: clamp(15px, 3.8vw, 20px);
   font-weight: 400;
   color: var(--bg);
-  opacity: 0.7;
-  line-height: 1.55;
-  text-align: left;
+  line-height: 1.5;
   cursor: pointer;
   user-select: none;
-  border-bottom: 1px solid rgba(255,255,255,0.07);
-  transition: opacity 0.15s ease;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  padding: 12px 0;
+  letter-spacing: 0.01em;
 }
-.answer-stmt:first-of-type { border-top: 1px solid rgba(255,255,255,0.07); }
-.answer-stmt:active { opacity: 0.3; }
-.answer-stmt.tapped { opacity: 0.15; pointer-events: none; }
+.answer-stmt.arrived {
+  transform: translateY(0);
+  animation: stmt-breathe 3.5s ease-in-out infinite;
+}
+.answer-stmt.tapped {
+  opacity: 1 !important;
+  animation: none;
+  pointer-events: none;
+}
+.answer-stmt.faded {
+  opacity: 0 !important;
+  animation: none;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+@keyframes stmt-breathe {
+  0%, 100% { opacity: 0.45; }
+  50% { opacity: 0.85; }
+}
 
 /* Song name reveal — fades in on black for 3s after answer, then auto-advances */
 .song-reveal {
@@ -659,23 +683,41 @@ function buildList(elId, cls, includeNone, cb) {
 function openPanel(cb) {
   var el = document.getElementById('answer-list');
   el.innerHTML = '';
+  // Randomize order every track — never feels like A B C
   var positions = [
-    { text: 'Something in me wants to stay here.',     value: 'Stay' },
-    { text: 'Something in me wants to shift forward.', value: 'Move' },
-    { text: 'Something in me just became clearer.',    value: 'Open' },
+    { text: 'This sound showed me where I am.',      value: 'Stay' },
+    { text: 'This sound showed me a way forward.',   value: 'Move' },
+    { text: 'This sound showed me something new.',   value: 'Open' },
   ];
+  // Fisher-Yates shuffle
+  for (var i = positions.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var tmp = positions[i]; positions[i] = positions[j]; positions[j] = tmp;
+  }
+  var stmts = [];
   positions.forEach(function(p) {
     var d = document.createElement('div');
     d.className = 'answer-stmt';
     d.textContent = p.text;
     d.addEventListener('click', function() {
       if (d.classList.contains('tapped')) return;
+      // Confirm tap — full brightness, others dissolve
+      stmts.forEach(function(s) {
+        if (s !== d) s.classList.add('faded');
+      });
       d.classList.add('tapped');
-      setTimeout(function() { cb(p.value); }, 150);
+      setTimeout(function() { cb(p.value); }, 500);
     });
     el.appendChild(d);
+    stmts.push(d);
   });
   document.getElementById('answer-wrap').classList.add('show');
+  // Stagger arrival — each sentence surfaces 0.8s apart
+  stmts.forEach(function(s, i) {
+    setTimeout(function() {
+      s.classList.add('arrived');
+    }, 300 + (i * 800));
+  });
 }
 
 function resetPanel() {
@@ -1176,13 +1218,22 @@ function doReveal(ps) {
   sess.triggered = '';
   sess.replay = false;
 
-  // Hide answers, pause music, show song name for 3s then auto-advance
+  // Hide answers and thumbs
   var _aw = document.getElementById('answer-wrap');
   if (_aw) _aw.classList.remove('show');
-  if (widget) widget.pause();
-  stopDot();
   document.getElementById('thumbs-wrap').classList.remove('show');
 
+  // Hide pulse dot and track count during reveal
+  var _pd = document.getElementById('pulse-dot');
+  var _tc = document.getElementById('tc');
+  if (_pd) _pd.style.opacity = '0';
+  if (_tc) _tc.style.opacity = '0';
+
+  // Pause music
+  if (widget) widget.pause();
+  stopDot();
+
+  // Show song name centered on black
   var _sr = document.getElementById('song-reveal');
   var _srt = document.getElementById('song-reveal-title');
   var _sra = document.getElementById('song-reveal-artist');
@@ -1213,22 +1264,25 @@ function doReveal(ps) {
       var _rs = sess.entryState || '';
       if (_re) setTimeout(function() { sendRecapEmail(_re, _rn, _rp, _rl, _rs); }, 1000);
     })();
-    // After 3s show recap
     setTimeout(function() {
       if (_sr) _sr.classList.remove('show');
+      if (_pd) _pd.style.opacity = '';
+      if (_tc) _tc.style.opacity = '';
       buildRecap();
       show('s7');
     }, 3000);
   } else {
+    // Increment now, save, then advance
     sess.cur++;
     saveAbandoned();
     saveSessionState();
-    sess.cur--;
-    // After 3s auto-advance to next track
+    var _nextCur = sess.cur; // capture before any async changes
     setTimeout(function() {
       if (_sr) _sr.classList.remove('show');
       resetPanel();
-      setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 200);
+      if (_pd) _pd.style.opacity = '';
+      if (_tc) _tc.style.opacity = '';
+      playTrack(sess.tOrder[_nextCur]);
     }, 3000);
   }
 }
