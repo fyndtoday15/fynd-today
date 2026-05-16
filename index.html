@@ -376,7 +376,10 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
   <div class="footer-bot">
     <div class="footer-contact">
       <span class="footer-contact-lbl">Contact us</span>
-      <a class="btn btn-sm" href="mailto:hello@fyndtoday.com"><span>hello@fyndtoday.com</span></a>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <a class="btn btn-sm" href="mailto:hello@fyndtoday.com"><span>Email us</span></a>
+        <button class="btn btn-sm" id="copy-email-btn" onclick="copyEmail()"><span>Copy email</span></button>
+      </div>
     </div>
     <div class="footer-share">
       <span class="footer-share-lbl">Share</span>
@@ -402,6 +405,54 @@ function footerCopy(){
     if(span){ span.textContent = 'Copied'; }
     setTimeout(function(){ if(span){ span.textContent = 'fyndtoday.com'; } }, 2000);
   });
+}
+
+function copyEmail(){
+  var email = 'hello@fyndtoday.com';
+  var btn = document.getElementById('copy-email-btn');
+  var span = btn ? btn.querySelector('span') : null;
+  navigator.clipboard.writeText(email).then(function(){
+    if(span){ span.textContent = 'Copied'; }
+    setTimeout(function(){ if(span){ span.textContent = 'Copy email'; } }, 2000);
+  }).catch(function(){
+    var ta = document.createElement('textarea');
+    ta.value = email; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+    if(span){ span.textContent = 'Copied'; }
+    setTimeout(function(){ if(span){ span.textContent = 'Copy email'; } }, 2000);
+  });
+}
+
+function openShare(){document.getElementById('share-sheet').classList.add('open')}
+function closeShare(){document.getElementById('share-sheet').classList.remove('open')}
+function shareVia(type){
+  var url = SITE_URL;
+  var msg = 'Life sounds better in color. ' + url;
+  if(type==='copy'){
+    navigator.clipboard.writeText(url).then(function(){
+      closeShare();
+      var toast=document.getElementById('copied-toast');
+      toast.classList.add('show');
+      setTimeout(function(){toast.classList.remove('show');},2000);
+    }).catch(function(){
+      var ta=document.createElement('textarea');
+      ta.value=url;document.body.appendChild(ta);ta.select();
+      document.execCommand('copy');document.body.removeChild(ta);
+      closeShare();
+      var toast=document.getElementById('copied-toast');
+      toast.classList.add('show');
+      setTimeout(function(){toast.classList.remove('show');},2000);
+    });
+    return;
+  }
+  if(type==='message'){
+    window.open('sms:?body='+encodeURIComponent(msg));
+    closeShare();return;
+  }
+  if(type==='email'){
+    window.open('mailto:?subject='+encodeURIComponent('Life sounds better in color.')+'&body='+encodeURIComponent(msg));
+    closeShare();return;
+  }
 }
 
 /* HERO WAVE — full width, continuous, crisp on all screens */
