@@ -46,7 +46,14 @@ html.assign-top, body.assign-top { background: var(--black); }
 #s1 { background: var(--bg); justify-content: center; cursor: pointer; }
 .s1-word { font-size: clamp(52px,12vw,88px); font-weight: 400; color: var(--black); letter-spacing: -0.02em; user-select: none; margin-bottom: 32px; }
 .s1-intro { font-size: clamp(15px,3.8vw,18px); color: var(--black); opacity: 0.7; text-align: center; line-height: 1.6; max-width: 320px; margin-bottom: 48px; }
-.s1-hint { font-size: 15px; color: var(--black); opacity: 0.7; letter-spacing: 0.12em; text-transform: uppercase; animation: ph 3s ease-in-out infinite; }
+.s1-hint {
+  font-size: 13px; color: var(--black); letter-spacing: 0.14em; text-transform: uppercase;
+  border: 1px solid rgba(0,0,0,0.25); border-radius: 2px;
+  padding: 14px 40px; cursor: pointer;
+  animation: ph 3s ease-in-out infinite;
+  background: none; font-family: var(--f);
+  display: inline-block;
+}
 #s1.set-reload { background: var(--black); }
 #s1.set-reload .s1-word,
 #s1.set-reload .s1-intro { display: none; }
@@ -373,8 +380,8 @@ html.assign-top, body.assign-top { background: var(--black); }
 <!-- S1 ARRIVAL -->
 <div class="screen active" id="s1">
   <span class="s1-word">Today.</span>
-  <p class="s1-intro">Find out where the music takes you.</p>
-  <span class="s1-hint">tap to begin</span>
+  <p class="s1-intro">Sound reveals what today actually is.</p>
+  <span class="s1-hint">Press Play</span>
 </div>
 
   <button class="signin-trigger" id="signin-trigger">returning? sign in</button>
@@ -465,7 +472,7 @@ html.assign-top, body.assign-top { background: var(--black); }
         if (s1el) {
           s1el.classList.add('set-reload');
           var hint = s1el.querySelector('.s1-hint');
-          if (hint) hint.textContent = 'tap to listen';
+          if (hint) hint.textContent = 'Press Play';
         }
         var tc = document.getElementById('theme-color');
         if (tc) tc.content = '#000000';
@@ -507,9 +514,9 @@ html.assign-top, body.assign-top { background: var(--black); }
 
 <!-- S7 RECAP -->
 <div class="screen" id="s7">
-  <span class="recap-head">Come back to these:</span>
+  <span class="recap-head">Here's where you landed.</span>
   <div id="recap-list"></div>
-  <button class="recap-continue" id="recap-continue">Continue</button>
+  <button class="recap-continue" id="recap-continue">What's next</button>
 </div>
 
 <!-- S6 EMAIL -->
@@ -1281,10 +1288,10 @@ document.getElementById('thumb-down-corner').addEventListener('click', function(
 });
 
   var DIRECTION = {
-    'Stay': 'When you want to stay with the moment.',
-    'Move': "When you're ready to shift from the moment.",
-    'Open': 'When the moment reveals something new.',
-    'Something Else': 'When none of these landed — keep listening.',
+    'Stay': 'This sound showed you where you are.',
+    'Move': 'This sound showed you a way forward.',
+    'Open': 'This sound showed you something new.',
+    'Something Else': 'Nothing landed — keep listening.',
   };
 
 function doReveal(ps) {
@@ -2384,7 +2391,7 @@ window.addEventListener('popstate', function(e) {
     if (s1el) {
       s1el.classList.remove('set-reload');
       var hint = s1el.querySelector('.s1-hint');
-      if (hint) hint.textContent = 'tap to begin';
+      if (hint) hint.textContent = 'Press Play';
     }
     document.body.style.background = '';
     var tc = document.getElementById('theme-color');
