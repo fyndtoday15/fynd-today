@@ -86,27 +86,41 @@ html.assign-top, body.assign-top { background: var(--black); }
 .thumb-btn { background: transparent; border: 1px solid rgba(255,255,255,0.25); border-radius: 50%; width: 32px; height: 32px; font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1; -webkit-filter: grayscale(100%); filter: grayscale(100%); transition: opacity 0.2s ease; }
 .thumb-btn:active { opacity: 0.4; }
 
-/* Utility corner — top right, holds thumb-down + replay when answers are showing */
+/* Utility corner — top right, thumb-down + replay as radio button group */
 .utility-corner {
   position: absolute;
-  top: clamp(28px, 5vh, 44px);
-  right: clamp(20px, 5vw, 36px);
+  top: clamp(24px, 4vh, 40px);
+  right: clamp(16px, 4vw, 28px);
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 14px;
+  align-items: stretch;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.4s ease;
+  transition: opacity 0.5s ease;
+  border: 1px solid rgba(255,255,255,0.22);
+  border-radius: 8px;
+  overflow: hidden;
+  min-width: 44px;
 }
 .utility-corner.show { opacity: 1; pointer-events: all; }
-.utility-corner .thumb-btn { width: 28px; height: 28px; font-size: 11px; border-color: rgba(255,255,255,0.2); }
-.utility-corner .replay-small {
-  background: none; border: none; cursor: pointer;
-  font-size: 16px; color: var(--bg); opacity: 0.35;
-  padding: 4px; line-height: 1;
+.utility-corner-btn {
+  background: rgba(255,255,255,0.05);
+  border: none;
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+  color: var(--bg);
+  cursor: pointer;
+  font-size: 15px;
+  padding: 11px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease;
+  line-height: 1;
+  -webkit-filter: grayscale(100%);
+  filter: grayscale(100%);
 }
-.utility-corner .replay-small:active { opacity: 0.7; }
+.utility-corner-btn:last-child { border-bottom: none; }
+.utility-corner-btn:active { background: rgba(255,255,255,0.15); }
 
 /* Replay — centered, appears at 5s with thumbs, hides when answers appear */
 .replay-btn {
@@ -366,8 +380,8 @@ html.assign-top, body.assign-top { background: var(--black); }
   </div>
   <button class="replay-btn" id="replay-btn">&#8635; Replay song</button>
   <div class="utility-corner" id="utility-corner">
-    <button class="thumb-btn" id="thumb-down-corner">&#128078;</button>
-    <button class="replay-small" id="replay-corner">&#8635;</button>
+    <button class="utility-corner-btn" id="thumb-down-corner">&#128078;</button>
+    <button class="utility-corner-btn" id="replay-corner">&#8635;</button>
   </div>
   <div class="song-reveal" id="song-reveal">
     <div class="song-reveal-label">That was</div>
@@ -764,8 +778,7 @@ function openPanel(cb) {
   if (_pw) _pw.style.opacity = '0';
   if (_tw) { _tw.classList.remove('show'); _tw.style.opacity = '0'; }
   if (_rb) { _rb.classList.remove('show'); }
-  var _uc = document.getElementById('utility-corner');
-  if (_uc) _uc.classList.add('show');
+  // utility-corner stays visible — no change needed
   // Stagger arrival — each sentence surfaces 1.4s apart for smooth flow
   var _activeIdx = 0;
   stmts.forEach(function(s, i) {
@@ -887,6 +900,8 @@ function startTrackTimers() {
     document.getElementById('thumbs-wrap').classList.add('show');
     var rb = document.getElementById('replay-btn');
     if (rb) rb.classList.add('show');
+    var uc = document.getElementById('utility-corner');
+    if (uc) uc.classList.add('show');
   }, 5000);
   // Answers fade in at 30s — music keeps playing
   readyTimer = setTimeout(function() {
@@ -1011,6 +1026,8 @@ function playTrack(idx) {
       document.getElementById('thumbs-wrap').classList.add('show');
       var rb2 = document.getElementById('replay-btn');
       if (rb2) rb2.classList.add('show');
+      var uc2 = document.getElementById('utility-corner');
+      if (uc2) uc2.classList.add('show');
     }, 5000);
 
     // At 30s — answers fade in on black, music keeps playing
@@ -1118,12 +1135,9 @@ document.getElementById('thumb-down-corner').addEventListener('click', function(
   document.getElementById('thumb-down').click();
 });
 
-// Corner replay — fires same logic as main replay
+// Corner replay — reset answers and replay, corner stays visible
 document.getElementById('replay-corner').addEventListener('click', function() {
-  // Hide utility corner, restore answers aren't showing anymore
-  var uc = document.getElementById('utility-corner');
-  if (uc) uc.classList.remove('show');
-  // Reset answers so they re-appear on replay
+  // Reset answers so they re-appear
   var aw = document.getElementById('answer-wrap');
   if (aw) { aw.classList.remove('show'); aw.style.opacity = ''; aw.style.transition = ''; }
   var al = document.getElementById('answer-list');
@@ -1134,6 +1148,9 @@ document.getElementById('replay-corner').addEventListener('click', function() {
   if (_lbl) _lbl.textContent = 'Listen';
   var _pw = document.querySelector('.pulse-wrap');
   if (_pw) _pw.style.opacity = '';
+  // Restore centered thumbs
+  var _tw = document.getElementById('thumbs-wrap');
+  if (_tw) { _tw.style.opacity = ''; _tw.classList.add('show'); }
   // Fire the main replay
   document.getElementById('replay-btn').click();
 });
@@ -1330,6 +1347,8 @@ function doReveal(ps) {
   if (_aw) _aw.style.transition = 'opacity 0.6s ease';
   if (_aw) _aw.style.opacity = '0';
   document.getElementById('thumbs-wrap').classList.remove('show');
+  var _uc = document.getElementById('utility-corner');
+  if (_uc) _uc.classList.remove('show');
 
   // Step 2 — after answers gone, show song reveal
   setTimeout(function() {
