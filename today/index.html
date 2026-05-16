@@ -1162,17 +1162,18 @@ document.getElementById('thumb-up-corner').addEventListener('click', function() 
   }
 });
 
-// Corner replay — reset answers and replay, corner stays visible
+// Corner replay — keep answers if showing, restore pulse if not
 document.getElementById('replay-corner').addEventListener('click', function() {
   var aw = document.getElementById('answer-wrap');
-  if (aw) { aw.classList.remove('show'); aw.style.opacity = ''; aw.style.transition = ''; }
-  var al = document.getElementById('answer-list');
-  if (al) al.innerHTML = '';
-  if (window._stmtRotateTimer) { clearInterval(window._stmtRotateTimer); window._stmtRotateTimer = null; }
-  var _lbl = document.querySelector('.listen-label');
-  if (_lbl) _lbl.textContent = 'Listen';
-  var _pw = document.querySelector('.pulse-wrap');
-  if (_pw) _pw.style.opacity = '';
+  var answersShowing = aw && aw.classList.contains('show');
+  if (!answersShowing) {
+    // Answers not showing — restore pulse dot and listen label
+    var _lbl = document.querySelector('.listen-label');
+    if (_lbl) _lbl.textContent = 'Listen';
+    var _pw = document.querySelector('.pulse-wrap');
+    if (_pw) _pw.style.opacity = '';
+  }
+  // If answers are showing — leave them exactly as they are, music just restarts
   doReplay();
 });
 
