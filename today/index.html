@@ -337,12 +337,12 @@ html.assign-top, body.assign-top { background: var(--black); }
       <div class="pulse-dot" id="pulse-dot"></div>
       <div class="track-count" id="tc">1 — 5</div>
     </div>
-    <button class="replay-btn" id="replay-btn">&#8635; Replay song</button>
     <div class="thumbs-wrap" id="thumbs-wrap">
       <button class="thumb-btn" id="thumb-down">&#128078;</button>
       <button class="thumb-btn" id="thumb-up">&#128077;</button>
     </div>
   </div>
+  <button class="replay-btn" id="replay-btn">&#8635; Replay song</button>
   <div class="song-reveal" id="song-reveal">
     <div class="song-reveal-label">That was</div>
     <div class="song-reveal-title" id="song-reveal-title"></div>
@@ -722,7 +722,7 @@ function openPanel(cb) {
       });
       d.classList.remove('active');
       d.classList.add('tapped');
-      setTimeout(function() { cb(p.value); }, 500);
+      setTimeout(function() { cb(p.value); }, 1500);
     });
     el.appendChild(d);
     stmts.push(d);
@@ -1269,74 +1269,81 @@ function doReveal(ps) {
   sess.triggered = '';
   sess.replay = false;
 
-  // Hide answers and thumbs
-  var _aw = document.getElementById('answer-wrap');
-  if (_aw) _aw.classList.remove('show');
-  document.getElementById('thumbs-wrap').classList.remove('show');
-
-  // Hide pulse dot and track count during reveal
-  var _pd = document.getElementById('pulse-dot');
-  var _tc = document.getElementById('tc');
-  if (_pd) _pd.style.opacity = '0';
-  if (_tc) _tc.style.opacity = '0';
-
-  // Pause music
-  if (widget) widget.pause();
-  stopDot();
-
-  // Show song name centered on black
-  var _sr = document.getElementById('song-reveal');
-  var _srt = document.getElementById('song-reveal-title');
-  var _sra = document.getElementById('song-reveal-artist');
-  if (_srt) _srt.textContent = tr.title;
-  if (_sra) _sra.textContent = tr.artist;
-  if (_sr) _sr.classList.add('show');
-
   sess.listenStart = null;
   try { localStorage.removeItem('fynd_pendingAbandoned'); } catch(e) {}
 
-  // On last track — run completion flow
-  if (sess.cur === 4) {
-    sess.cur = 5;
-    markSetComplete(sess.playlist);
-    clearAbandoned();
-    saveSessionState();
-    LS.set('onEmailScreen', true);
-    try { localStorage.setItem('fynd_completedLog', JSON.stringify({ log: sess.log, playlist: sess.playlist, entryState: sess.entryState || '' })); } catch(e) {}
-    try { localStorage.setItem('fynd_onRecapScreen', '1'); } catch(e) {}
-    if (sess.playlist === 'MVP 1') {
-      try { localStorage.setItem('fynd_set1recap', JSON.stringify({ log: sess.log, playlist: sess.playlist, entryState: sess.entryState || '' })); } catch(e) {}
+  // TRANSITION CHAIN — clean sequential handoffs, nothing overlaps
+  var _aw = document.getElementById('answer-wrap');
+  var _pd = document.getElementById('pulse-dot');
+  var _tc = document.getElementById('tc');
+  var _sr = document.getElementById('song-reveal');
+  var _srt = document.getElementById('song-reveal-title');
+  var _sra = document.getElementById('song-reveal-artist');
+
+  // Step 1 — answers fade out (CSS transition 0.6s)
+  if (_aw) _aw.style.transition = 'opacity 0.6s ease';
+  if (_aw) _aw.style.opacity = '0';
+  document.getElementById('thumbs-wrap').classList.remove('show');
+
+  // Step 2 — after answers gone, show song reveal
+  setTimeout(function() {
+    if (_aw) { _aw.classList.remove('show'); _aw.style.opacity = ''; _aw.style.transition = ''; }
+    // Prep song reveal
+    if (_srt) _srt.textContent = tr.title;
+    if (_sra) _sra.textContent = tr.artist;
+    if (_sr) {
+      _sr.style.transition = 'opacity 0.7s ease';
+      _sr.style.opacity = '0';
+      _sr.classList.add('show');
+      // Fade in
+      setTimeout(function() { if (_sr) _sr.style.opacity = '1'; }, 50);
     }
-    (function() {
-      var _re = LS.get('email') || '';
-      var _rn = LS.get('firstName') || '';
-      var _rp = sess.playlist;
-      var _rl = sess.log.slice();
-      var _rs = sess.entryState || '';
-      if (_re) setTimeout(function() { sendRecapEmail(_re, _rn, _rp, _rl, _rs); }, 1000);
-    })();
+
+    // Step 3 — after 5s, fade song reveal out
     setTimeout(function() {
-      if (_sr) _sr.classList.remove('show');
-      if (_pd) _pd.style.opacity = '';
-      if (_tc) _tc.style.opacity = '';
-      buildRecap();
-      show('s7');
-    }, 5000);
-  } else {
-    // Increment now, save, then advance
-    sess.cur++;
-    saveAbandoned();
-    saveSessionState();
-    var _nextCur = sess.cur; // capture before any async changes
-    setTimeout(function() {
-      if (_sr) _sr.classList.remove('show');
-      resetPanel();
-      if (_pd) _pd.style.opacity = '';
-      if (_tc) _tc.style.opacity = '';
-      playTrack(sess.tOrder[_nextCur]);
-    }, 5000);
-  }
-}
+      if (_sr) _sr.style.opacity = '0';
+
+      // Step 4 — after song reveal fully gone, restore pulse dot and advance
+      setTimeout(function() {
+        if (_sr) { _sr.classList.remove('show'); _sr.style.opacity = ''; _sr.style.transition = ''; }
+
+        if (sess.cur === 4) {
+          sess.cur = 5;
+          markSetComplete(sess.playlist);
+          clearAbandoned();
+          saveSessionState();
+          LS.set('onEmailScreen', true);
+          try { localStorage.setItem('fynd_completedLog', JSON.stringify({ log: sess.log, playlist: sess.playlist, entryState: sess.entryState || '' })); } catch(e) {}
+          try { localStorage.setItem('fynd_onRecapScreen', '1'); } catch(e) {}
+          if (sess.playlist === 'MVP 1') {
+            try { localStorage.setItem('fynd_set1recap', JSON.stringify({ log: sess.log, playlist: sess.playlist, entryState: sess.entryState || '' })); } catch(e) {}
+          }
+          (function() {
+            var _re = LS.get('email') || '';
+            var _rn = LS.get('firstName') || '';
+            var _rp = sess.playlist;
+            var _rl = sess.log.slice();
+            var _rs = sess.entryState || '';
+            if (_re) setTimeout(function() { sendRecapEmail(_re, _rn, _rp, _rl, _rs); }, 1000);
+          })();
+          buildRecap();
+          show('s7');
+        } else {
+          sess.cur++;
+          saveAbandoned();
+          saveSessionState();
+          var _nextCur = sess.cur;
+          // Fade pulse dot back in
+          if (_pd) { _pd.style.transition = 'opacity 0.5s ease'; _pd.style.opacity = '1'; }
+          if (_tc) { _tc.style.transition = 'opacity 0.5s ease'; _tc.style.opacity = '1'; }
+          resetPanel();
+          playTrack(sess.tOrder[_nextCur]);
+        }
+      }, 700); // wait for song reveal fade out
+
+    }, 5000); // song reveal visible for 5s
+
+  }, 700); // wait for answers to fade out
 
 // S1 tap
 document.getElementById('s1').addEventListener('click', function() {
