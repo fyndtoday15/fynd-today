@@ -2432,12 +2432,7 @@ window.addEventListener('popstate', function(e) {
   }
 
   if (!e.state || e.state.screen === 'boundary') {
-    // On mobile Chrome the portal animation may be in the history stack
-    // Use replace to clear current entry then redirect
-    try {
-      history.replaceState(null, '', window.location.href);
-    } catch(ex) {}
-    window.location.replace('https://fyndtoday.com');
+    window.location.href = 'https://fyndtoday.com';
     return;
   }
 
