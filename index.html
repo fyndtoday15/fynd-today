@@ -46,9 +46,17 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:22px 48px;display:fl
   visibility: hidden;
   pointer-events: none;
 }
+.nav-portal-btn{display:none}
+.hero-portal-btn{
+  position:fixed;
+  top:80px;
+  right:48px;
+  z-index:50;
+  opacity:0;
+  animation:up .8s ease forwards 1.2s;
+}
 .nav-logo{font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:var(--off);cursor:pointer;text-decoration:none;background:none;border:none;font-family:'DejaVu Sans',Arial,sans-serif}
 .nav-tag{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--off)}
-.hero-portal-btn{position:absolute;top:22px;right:48px;z-index:2;}
 
 /* HERO */
 .hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:100px 48px 80px;position:relative;overflow:hidden}
@@ -135,9 +143,9 @@ footer{padding:12px 48px 20px;border-top:1px solid rgba(252,251,244,.08);display
 .share-sheet.open{transform:translateY(0)}
 .share-lbl{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--off);margin-bottom:16px;display:block}
 .share-opts{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-.share-opt{padding:10px 22px;border:1px solid rgba(252,251,244,.22);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--off);cursor:pointer;background:transparent;font-family:'DejaVu Sans',Arial,sans-serif;transition:background .25s,color .25s;position:relative}
+.share-opt{padding:11px 28px;border:1px solid rgba(252,251,244,.35);border-radius:2px;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--off);cursor:pointer;background:transparent;font-family:'DejaVu Sans',Arial,sans-serif;transition:background .25s,color .25s;position:relative;overflow:hidden}
 .share-opt:hover{background:var(--off);color:var(--bg)}
-.share-close{margin-left:auto;padding:10px 18px;border:1px solid rgba(252,251,244,.14);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--off);cursor:pointer;background:transparent;font-family:'DejaVu Sans',Arial,sans-serif}
+.share-close{margin-left:auto;padding:11px 28px;border:1px solid rgba(252,251,244,.2);border-radius:2px;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--off);cursor:pointer;background:transparent;font-family:'DejaVu Sans',Arial,sans-serif;opacity:0.5}
 /* copied toast */
 .copied-toast{position:fixed;bottom:110px;left:50%;transform:translateX(-50%) translateY(12px);background:var(--off);color:var(--bg);font-family:'DejaVu Sans',Arial,sans-serif;font-size:10px;letter-spacing:.2em;text-transform:uppercase;padding:10px 24px;opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;z-index:300}
 .copied-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
@@ -274,7 +282,7 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
 @media(max-width:720px){
   nav{padding:18px 20px}
   .nav-portal-btn{display:none}
-  .hero-portal-btn{display:none}
+  .hero-portal-btn{top:72px;right:20px;}
   .hero{padding:80px 20px 48px;min-height:100vh;text-align:left;align-items:flex-start}
   h1{font-size:clamp(24px,7vw,36px);text-align:left}
   .hero-content{align-items:flex-start}
@@ -320,19 +328,26 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
   </div>
 </div>
 
+<div class="share-sheet" id="contact-sheet">
+  <span class="share-lbl">Contact us</span>
+  <div class="share-opts">
+    <button class="share-opt" onclick="contactVia('email')">Email us</button>
+    <button class="share-opt" id="copy-email-btn" onclick="contactVia('copy')">Copy email</button>
+    <button class="share-close" onclick="closeContact()">Close</button>
+  </div>
+</div>
+
 <nav id="main-nav">
   <a href="/" style="display:flex;align-items:center;text-decoration:none;">
     <img src="/logo.png" alt="FYND TODAY" style="height:56px;width:auto;display:block;">
   </a>
-  <div style="display:flex;align-items:center;gap:20px;">
-    <span class="nav-tag">Early Access</span>
-    <a href="#" class="btn btn-sm portal-trigger nav-portal-btn"><span>Enter Sound Portal</span></a>
-  </div>
+  <span class="nav-tag">Early Access</span>
 </nav>
+
+<a href="#" class="btn btn-sm portal-trigger hero-portal-btn"><span>Enter Sound Portal</span></a>
 
 <section class="hero" id="top">
   <canvas id="sw"></canvas>
-  <a href="#" class="btn btn-sm portal-trigger hero-portal-btn"><span>Enter Sound Portal</span></a>
   <div class="hero-content">
     <p class="htag">Music-powered lifestyle</p>
     <h1 class="serif">You know where you need to go.<br>Sound is what gets you there.</h1>
@@ -390,10 +405,7 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
   <div class="footer-bot">
     <div class="footer-contact">
       <span class="footer-contact-lbl">Contact us</span>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <a class="btn btn-sm" href="mailto:hello@fyndtoday.com"><span>Email us</span></a>
-        <button class="btn btn-sm" id="copy-email-btn" onclick="copyEmail()"><span>Copy email</span></button>
-      </div>
+      <button class="btn btn-sm" onclick="openContact()"><span>hello@fyndtoday.com</span></button>
     </div>
     <div class="footer-share">
       <span class="footer-share-lbl">Share</span>
@@ -435,6 +447,26 @@ function copyEmail(){
     if(span){ span.textContent = 'Copied'; }
     setTimeout(function(){ if(span){ span.textContent = 'Copy email'; } }, 2000);
   });
+}
+
+function openContact(){document.getElementById('contact-sheet').classList.add('open')}
+function closeContact(){document.getElementById('contact-sheet').classList.remove('open')}
+function contactVia(type){
+  var email = 'hello@fyndtoday.com';
+  if(type==='email'){
+    window.open('mailto:'+email);
+    closeContact();return;
+  }
+  if(type==='copy'){
+    var btn = document.getElementById('copy-email-btn');
+    navigator.clipboard.writeText(email).then(function(){
+      if(btn){var orig=btn.textContent;btn.textContent='Copied';setTimeout(function(){btn.textContent=orig;},2000);}
+    }).catch(function(){
+      var ta=document.createElement('textarea');ta.value=email;document.body.appendChild(ta);ta.select();
+      document.execCommand('copy');document.body.removeChild(ta);
+      if(btn){var orig=btn.textContent;btn.textContent='Copied';setTimeout(function(){btn.textContent=orig;},2000);}
+    });
+  }
 }
 
 function openShare(){document.getElementById('share-sheet').classList.add('open')}
