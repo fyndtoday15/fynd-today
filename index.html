@@ -36,6 +36,16 @@ p,span,a,button,div,li,td,th,label,input{font-family:'DejaVu Sans',Arial,sans-se
 
 /* NAV */
 nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:22px 48px;display:flex;justify-content:space-between;align-items:center}
+.nav-portal-btn {
+  transition: opacity 0.4s ease, visibility 0.4s ease;
+  opacity: 1;
+  visibility: visible;
+}
+.nav-portal-btn.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
 .nav-logo{font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:var(--off);cursor:pointer;text-decoration:none;background:none;border:none;font-family:'DejaVu Sans',Arial,sans-serif}
 .nav-tag{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--off)}
 
@@ -209,8 +219,8 @@ canvas#srf-wave {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: clamp(48px, 10vh, 80px);
-  padding: 80px 48px;
+  gap: clamp(48px, 10vh, 96px);
+  padding: 100px 48px 120px;
   text-align: center;
 }
 .srf-item {
@@ -261,6 +271,7 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
 /* MOBILE */
 @media(max-width:720px){
   nav{padding:18px 20px}
+  .nav-portal-btn{display:none}
   .hero{padding:80px 20px 48px;min-height:100vh;text-align:left;align-items:flex-start}
   h1{font-size:clamp(24px,7vw,36px);text-align:left}
   .hero-content{align-items:flex-start}
@@ -281,7 +292,8 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
   .rack-frame{max-width:180px}
   .rack-copy{font-size:clamp(15px,4vw,19px)}
   .srf-section{min-height:auto}
-  .srf-inner{padding:60px 20px;gap:20px}
+  .srf-inner{padding:80px 20px 100px;gap:clamp(40px,8vh,72px)}
+  .srf-cta{margin-top:8px}
   footer{padding:20px 20px 16px;gap:14px}
   .footer-top{padding:8px 0}
   .footer-bot{flex-direction:column;gap:16px}
@@ -293,23 +305,15 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
 <body>
 
 <div id="portal"><canvas id="portal-c"></canvas></div>
-<div class="copied-toast" id="copied-toast">Copied</div>
 
-<div class="share-sheet" id="share-sheet">
-  <span class="share-lbl">Share FYND TODAY</span>
-  <div class="share-opts">
-    <button class="share-opt" id="copy-btn" onclick="shareVia('copy')">Copy Link</button>
-    <button class="share-opt" onclick="shareVia('message')">Message</button>
-    <button class="share-opt" onclick="shareVia('email')">Email</button>
-    <button class="share-close" onclick="closeShare()">Close</button>
-  </div>
-</div>
-
-<nav>
+<nav id="main-nav">
   <a href="/" style="display:flex;align-items:center;text-decoration:none;">
     <img src="/logo.png" alt="FYND TODAY" style="height:56px;width:auto;display:block;">
   </a>
-  <span class="nav-tag">Early Access</span>
+  <div style="display:flex;align-items:center;gap:20px;">
+    <span class="nav-tag">Early Access</span>
+    <a href="#" class="btn btn-sm portal-trigger nav-portal-btn"><span>Enter Sound Portal</span></a>
+  </div>
 </nav>
 
 <section class="hero" id="top">
@@ -372,11 +376,11 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
   <div class="footer-bot">
     <div class="footer-contact">
       <span class="footer-contact-lbl">Contact us</span>
-      <a class="footer-email" href="mailto:hello@fyndtoday.com">hello@fyndtoday.com</a>
+      <a class="btn btn-sm" href="mailto:hello@fyndtoday.com"><span>hello@fyndtoday.com</span></a>
     </div>
     <div class="footer-share">
       <span class="footer-share-lbl">Share</span>
-      <button class="share-btn" onclick="openShare()">fyndtoday.com</button>
+      <button class="btn btn-sm" id="footer-copy-btn" onclick="footerCopy()"><span>fyndtoday.com</span></button>
     </div>
   </div>
 </footer>
@@ -385,37 +389,19 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
 var PORTAL_URL='/today';
 var SITE_URL='https://fyndtoday.com';
 
-/* SHARE */
-function openShare(){document.getElementById('share-sheet').classList.add('open')}
-function closeShare(){document.getElementById('share-sheet').classList.remove('open')}
-function shareVia(type){
-  var url=SITE_URL;
-  if(type==='copy'){
-    navigator.clipboard.writeText(url).then(function(){
-      closeShare();
-      var toast=document.getElementById('copied-toast');
-      toast.classList.add('show');
-      setTimeout(function(){toast.classList.remove('show');},2000);
-    }).catch(function(){
-      /* fallback */
-      var ta=document.createElement('textarea');
-      ta.value=url;document.body.appendChild(ta);ta.select();
-      document.execCommand('copy');document.body.removeChild(ta);
-      closeShare();
-      var toast=document.getElementById('copied-toast');
-      toast.classList.add('show');
-      setTimeout(function(){toast.classList.remove('show');},2000);
-    });
-    return;
-  }
-  if(type==='message'){
-    window.open('sms:?body='+encodeURIComponent('Check this out — '+url));
-    closeShare();return;
-  }
-  if(type==='email'){
-    window.open('mailto:?subject='+encodeURIComponent('Check this out')+'&body='+encodeURIComponent('I found this and thought of you — '+url));
-    closeShare();return;
-  }
+function footerCopy(){
+  var btn = document.getElementById('footer-copy-btn');
+  var span = btn ? btn.querySelector('span') : null;
+  navigator.clipboard.writeText(SITE_URL).then(function(){
+    if(span){ span.textContent = 'Copied'; }
+    setTimeout(function(){ if(span){ span.textContent = 'fyndtoday.com'; } }, 2000);
+  }).catch(function(){
+    var ta = document.createElement('textarea');
+    ta.value = SITE_URL; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+    if(span){ span.textContent = 'Copied'; }
+    setTimeout(function(){ if(span){ span.textContent = 'fyndtoday.com'; } }, 2000);
+  });
 }
 
 /* HERO WAVE — full width, continuous, crisp on all screens */
@@ -597,6 +583,21 @@ function triggerPortal(){
 document.querySelectorAll('.portal-trigger').forEach(function(el){
   el.addEventListener('click',function(e){e.preventDefault();triggerPortal();});
 });
+
+/* Nav portal button — fade out after scrolling past hero */
+(function(){
+  var btn = document.querySelector('.nav-portal-btn');
+  if(!btn) return;
+  var hero = document.getElementById('top');
+  window.addEventListener('scroll', function(){
+    var heroBottom = hero ? hero.getBoundingClientRect().bottom : window.innerHeight;
+    if(heroBottom < 0) {
+      btn.classList.add('hidden');
+    } else {
+      btn.classList.remove('hidden');
+    }
+  }, {passive: true});
+})();
 
 /* Experience it — scroll enter section fully to top */
 document.querySelectorAll('.srf-enter-btn').forEach(function(btn){
