@@ -48,16 +48,26 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:22px 48px;display:fl
 }
 .nav-portal-btn{display:none}
 .hero-portal-btn{
-  position:absolute;
-  top:76px;
+  position:fixed;
+  top:72px;
   right:48px;
-  left:auto;
-  z-index:2;
+  z-index:99;
+  display:inline-block;
+  padding:8px 16px;
+  border:1px solid rgba(252,251,244,.35);
+  border-radius:2px;
+  font-family:'DejaVu Sans',Arial,sans-serif;
+  font-size:9px;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:#FCFBF4;
+  text-decoration:none;
+  background:transparent;
+  cursor:pointer;
   opacity:0;
   animation:up .8s ease forwards 1.2s;
-  font-size:9px;
-  padding:8px 16px;
-  letter-spacing:.18em;
+  white-space:nowrap;
+  width:auto;
 }
 .nav-logo{font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:var(--off);cursor:pointer;text-decoration:none;background:none;border:none;font-family:'DejaVu Sans',Arial,sans-serif}
 .nav-tag{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--off)}
@@ -286,7 +296,7 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
 @media(max-width:720px){
   nav{padding:18px 20px}
   .nav-portal-btn{display:none}
-  .hero-portal-btn{top:66px;right:20px;left:auto;font-size:8px;padding:7px 12px;}
+  .hero-portal-btn{top:64px;right:20px;font-size:8px;padding:6px 12px;}
   .hero{padding:80px 20px 48px;min-height:100vh;text-align:left;align-items:flex-start}
   h1{font-size:clamp(24px,7vw,36px);text-align:left}
   .hero-content{align-items:flex-start}
@@ -347,10 +357,10 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
   </a>
   <span class="nav-tag">Early Access</span>
 </nav>
+<a href="#" class="portal-trigger hero-portal-btn">Enter Sound Portal</a>
 
 <section class="hero" id="top">
   <canvas id="sw"></canvas>
-  <a href="#" class="btn btn-sm portal-trigger hero-portal-btn"><span>Enter Sound Portal</span></a>
   <div class="hero-content">
     <p class="htag">Music-powered lifestyle</p>
     <h1 class="serif">You know where you need to go.<br>Sound is what gets you there.</h1>
