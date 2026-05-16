@@ -138,8 +138,8 @@ html.assign-top, body.assign-top { background: var(--black); }
   transition: opacity 0.4s ease;
 }
 @keyframes stmt-breathe {
-  0%, 100% { opacity: 0.45; }
-  50% { opacity: 0.85; }
+  0%, 100% { opacity: 0.28; }
+  50% { opacity: 0.48; }
 }
 
 /* Song name reveal — fades in on black for 3s after answer, then auto-advances */
@@ -154,6 +154,7 @@ html.assign-top, body.assign-top { background: var(--black); }
   width: 80%;
 }
 .song-reveal.show { opacity: 1; }
+.song-reveal-label { font-size: 11px; color: var(--bg); opacity: 0.4; letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 16px; }
 .song-reveal-title { font-size: clamp(18px,4.5vw,26px); font-weight: 400; color: var(--bg); letter-spacing: -0.01em; line-height: 1.25; margin-bottom: 8px; }
 .song-reveal-artist { font-size: clamp(12px,3vw,15px); color: var(--bg); opacity: 0.5; letter-spacing: 0.04em; }
 
@@ -332,6 +333,7 @@ html.assign-top, body.assign-top { background: var(--black); }
     </div>
   </div>
   <div class="song-reveal" id="song-reveal">
+    <div class="song-reveal-label">That was</div>
     <div class="song-reveal-title" id="song-reveal-title"></div>
     <div class="song-reveal-artist" id="song-reveal-artist"></div>
   </div>
@@ -719,11 +721,11 @@ function openPanel(cb) {
   if (_pw) _pw.style.opacity = '0';
   if (_tw) { _tw.classList.remove('show'); _tw.style.opacity = '0'; }
   if (_rb) _rb.classList.remove('show');
-  // Stagger arrival — each sentence surfaces 0.8s apart
+  // Stagger arrival — each sentence surfaces 1.4s apart for smooth flow
   stmts.forEach(function(s, i) {
     setTimeout(function() {
       s.classList.add('arrived');
-    }, 300 + (i * 800));
+    }, 300 + (i * 1400));
   });
 }
 
@@ -1280,7 +1282,7 @@ function doReveal(ps) {
       if (_tc) _tc.style.opacity = '';
       buildRecap();
       show('s7');
-    }, 3000);
+    }, 5000);
   } else {
     // Increment now, save, then advance
     sess.cur++;
@@ -1293,7 +1295,7 @@ function doReveal(ps) {
       if (_pd) _pd.style.opacity = '';
       if (_tc) _tc.style.opacity = '';
       playTrack(sess.tOrder[_nextCur]);
-    }, 3000);
+    }, 5000);
   }
 }
 
