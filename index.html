@@ -696,7 +696,11 @@ function triggerPortal(){
       ctx.fillStyle=grd;ctx.fillRect(0,0,pc.width,pc.height);
     }
     if(raw<1){requestAnimationFrame(anim);}
-    else{window.location.replace(PORTAL_URL);}
+    else{
+      // Push landing page back into history so back button works on Chrome mobile
+      history.pushState(null, '', 'https://fyndtoday.com');
+      window.location.replace(PORTAL_URL);
+    }
   })(performance.now());
 }
 
