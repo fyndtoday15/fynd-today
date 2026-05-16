@@ -688,9 +688,9 @@ function openPanel(cb) {
   el.innerHTML = '';
   // Randomize order every track — never feels like A B C
   var positions = [
-    { text: 'This sound showed me where I am.',      value: 'Stay' },
-    { text: 'This sound showed me a way forward.',   value: 'Move' },
-    { text: 'This sound showed me something new.',   value: 'Open' },
+    { text: 'This sound shows me where I am.',      value: 'Stay' },
+    { text: 'This sound shows me a way forward.',   value: 'Move' },
+    { text: 'This sound shows me something new.',   value: 'Open' },
   ];
   // Fisher-Yates shuffle
   for (var i = positions.length - 1; i > 0; i--) {
@@ -733,15 +733,18 @@ function openPanel(cb) {
   stmts.forEach(function(s, i) {
     setTimeout(function() {
       s.classList.add('arrived');
-      if (i === 0) s.classList.add('active');
+      s.classList.add('active'); // each arrives at full opacity
       if (i === stmts.length - 1) {
-        window._stmtRotateTimer = setInterval(function() {
-          stmts.forEach(function(st) { st.classList.remove('active'); });
-          _activeIdx = (_activeIdx + 1) % stmts.length;
-          if (!stmts[_activeIdx].classList.contains('tapped') && !stmts[_activeIdx].classList.contains('faded')) {
-            stmts[_activeIdx].classList.add('active');
-          }
-        }, 2800);
+        // All arrived — start rotation after a beat
+        setTimeout(function() {
+          window._stmtRotateTimer = setInterval(function() {
+            stmts.forEach(function(st) { st.classList.remove('active'); });
+            _activeIdx = (_activeIdx + 1) % stmts.length;
+            if (!stmts[_activeIdx].classList.contains('tapped') && !stmts[_activeIdx].classList.contains('faded')) {
+              stmts[_activeIdx].classList.add('active');
+            }
+          }, 2000);
+        }, 800);
       }
     }, 300 + (i * 1400));
   });
