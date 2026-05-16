@@ -29,6 +29,8 @@ html{scroll-behavior:smooth;scrollbar-color:var(--off) var(--bg);scroll-padding-
 #how,#algo,#close,#enter{scroll-margin-top:64px}
 body{background:var(--bg);color:var(--off);font-family:'DejaVu Sans',Arial,sans-serif;font-weight:400;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;overflow-x:hidden}
 .serif{font-family:'Noto Serif','Georgia',serif;font-style:italic;font-weight:400}
+/* Force DejaVu on all non-serif elements */
+p,span,a,button,div,li,td,th,label,input{font-family:'DejaVu Sans',Arial,sans-serif}
 
 /* NAV */
 nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:22px 48px;display:flex;justify-content:space-between;align-items:center}
@@ -95,8 +97,8 @@ canvas#rc{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;o
 .eh{font-size:clamp(32px,5.5vw,64px);line-height:1.05;margin-bottom:14px;position:relative}
 .es{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--off);margin-bottom:48px;position:relative}
 
-/* BUTTONS */
-.btn{display:inline-block;padding:15px 44px;border:1px solid rgba(252,251,244,.3);font-family:'DejaVu Sans',Arial,sans-serif;font-size:10px;font-weight:400;letter-spacing:.24em;text-transform:uppercase;color:var(--off);text-decoration:none;background:transparent;cursor:pointer;position:relative;overflow:hidden;white-space:nowrap}
+/* BUTTONS — matching portal exactly */
+.btn{display:inline-block;padding:12px 36px;border:1px solid rgba(252,251,244,.3);font-family:'DejaVu Sans',Arial,sans-serif;font-size:10px;font-weight:400;letter-spacing:.24em;text-transform:uppercase;color:var(--off);text-decoration:none;background:transparent;cursor:pointer;position:relative;overflow:hidden;white-space:nowrap;border-radius:2px}
 .btn::before{content:'';position:absolute;left:0;bottom:0;right:0;height:0;background:var(--off);transition:height .3s ease}
 .btn span{position:relative;z-index:1;transition:color .3s ease}
 .btn:hover::before{height:100%}
@@ -128,15 +130,56 @@ footer{padding:36px 48px;border-top:1px solid rgba(252,251,244,.08);display:flex
 .copied-toast{position:fixed;bottom:110px;left:50%;transform:translateX(-50%) translateY(12px);background:var(--off);color:var(--bg);font-family:'DejaVu Sans',Arial,sans-serif;font-size:10px;letter-spacing:.2em;text-transform:uppercase;padding:10px 24px;opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;z-index:300}
 .copied-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
+/* RACK SECTION */
+.rack-section {
+  padding: 80px 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+}
+.rack-frame {
+  position: relative;
+  width: 100%;
+  max-width: 640px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.rack-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: invert(1) opacity(0.2);
+  pointer-events: none;
+  user-select: none;
+}
+.rack-text {
+  position: relative;
+  z-index: 1;
+  padding: clamp(90px,18%,130px) clamp(36px,9%,72px) clamp(70px,14%,110px);
+  text-align: center;
+  width: 100%;
+}
+.rack-copy {
+  font-size: clamp(17px,2.2vw,26px);
+  line-height: 1.6;
+  letter-spacing: -0.01em;
+  color: var(--off);
+}
+
 /* SRF — Sound Recognition Form scroll section */
 .srf-section {
   position: relative;
-  min-height: 100vh;
+  min-height: 90vh;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
   background: var(--bg);
+  scroll-margin-top: 80px;
 }
 canvas#srf-wave {
   position: absolute;
@@ -175,11 +218,12 @@ canvas#srf-wave {
   margin-bottom: 12px;
 }
 .srf-line {
-  font-size: clamp(14px, 1.8vw, 18px);
-  letter-spacing: 0.18em;
+  font-size: clamp(11px, 1.4vw, 14px);
+  letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--off);
-  opacity: 0.5;
+  opacity: 0.45;
+  font-family: 'DejaVu Sans', Arial, sans-serif;
 }
 
 /* Experience it section */
@@ -205,35 +249,23 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
 /* MOBILE */
 @media(max-width:720px){
   nav{padding:18px 20px}
-
-  /* hero — accounts for fixed nav */
-  .hero{padding:80px 20px 60px;min-height:100vh}
-
-  /* mobile sections: natural height, clear nav with padding-top */
-  .blk{padding:80px 20px 80px;min-height:auto;justify-content:flex-start}
-  .close-blk{padding:80px 20px 80px;min-height:100vh;justify-content:center;display:flex;flex-direction:column}
-  .enter{padding:80px 20px 80px;min-height:100vh}
-
-  /* algo on mobile: flex column — text, box, button in that order */
-  .algo-blk{
-    grid-template-columns:1fr;
-    padding:80px 20px 80px;
-    gap:32px;
-    min-height:auto;
-    display:flex;
-    flex-direction:column;
-  }
-  .algo-left{order:1}
-  .algo-right{order:2}
-  .algo-fwd{order:3;margin-top:0}
+  .hero{padding:80px 20px 48px;min-height:100vh}
+  .blk{padding:48px 20px;min-height:auto;justify-content:flex-start}
+  .close-blk{padding:48px 20px;min-height:auto}
+  .enter{padding:60px 20px;min-height:100vh}
+  .algo-blk{grid-template-columns:1fr;padding:48px 20px;gap:24px;min-height:auto;display:flex;flex-direction:column}
+  .algo-left{order:1}.algo-right{order:2}.algo-fwd{order:3;margin-top:0}
   .algo-fwd .btn{display:block;text-align:center}
-
-  /* cards stack */
   .hgrid{grid-template-columns:1fr;gap:14px}
   .hc{min-height:200px}
-
   .section-fwd .btn{display:block;text-align:center}
-
+  .srf-inner{padding:48px 20px;gap:28px}
+  .srf-section{min-height:auto}
+  .srf-word{font-size:clamp(36px,10vw,56px)}
+  .exp-section{padding:32px 20px}
+  .rack-section{padding:48px 20px}
+  .rack-text{padding:72px 28px 56px}
+  .rack-copy{font-size:clamp(15px,4vw,20px)}
   footer{padding:28px 20px;gap:20px}
   .footer-bot{flex-direction:column;gap:20px}
   .footer-share{align-items:flex-start}
@@ -257,7 +289,9 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
 </div>
 
 <nav>
-  <button class="nav-logo" onclick="window.scrollTo({top:0,behavior:'smooth'})">FYND TODAY</button>
+  <a href="/" style="display:flex;align-items:center;text-decoration:none;">
+    <img src="/Transparent_White_Logo_1024X1024.png" alt="FYND TODAY" style="height:32px;width:auto;display:block;">
+  </a>
   <span class="nav-tag">Early Access</span>
 </nav>
 
@@ -274,9 +308,13 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
 
 
 
-<div class="blk" id="how">
-  <p class="close-h serif rev" style="margin-bottom:24px;">This is a lifestyle built around sound and recognition.</p>
-  <p class="close-mid rev d1">What you discover in the music carries forward. Into how you move. Into what you wear. Into today.</p>
+<div class="rack-section" id="how">
+  <div class="rack-frame rev">
+    <div class="rack-text">
+      <p class="rack-copy serif">This is a lifestyle built around sound and recognition. What you discover in the music carries forward. Into how you move. Into what you wear. Into today.</p>
+    </div>
+    <img src="/ChatGPT_Image_May_16__2026__03_42_32_PM.png" alt="" class="rack-img">
+  </div>
 </div>
 
 <!-- SOUND RECOGNITION FORM -->
@@ -315,7 +353,9 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
 </div>
 
 <footer>
-  <div class="footer-top">Life sounds better in color.</div>
+  <div class="footer-top">
+    <img src="/FYND_TODAY_SLOGAN_FOR_Social_Media.png" alt="Life sounds better in color." style="max-width:min(560px,80vw);width:100%;height:auto;opacity:0.9;display:block;margin:0 auto;">
+  </div>
   <div class="footer-bot">
     <div class="footer-contact">
       <span class="footer-contact-lbl">Contact us</span>
@@ -609,7 +649,7 @@ document.querySelectorAll('a[href^="#"]').forEach(function(a){
 /* SRF ITEMS — staggered scroll reveal with delays */
 (function(){
   var items = document.querySelectorAll('.srf-item');
-  var delays = [0, 200, 400];
+  var delays = [0, 250, 500];
   var io2 = new IntersectionObserver(function(entries){
     entries.forEach(function(e){
       if(e.isIntersecting){
@@ -618,7 +658,7 @@ document.querySelectorAll('a[href^="#"]').forEach(function(a){
         io2.unobserve(e.target);
       }
     });
-  }, {threshold: 0.15});
+  }, {threshold: 0.4, rootMargin: '0px 0px -15% 0px'});
   items.forEach(function(el){ io2.observe(el); });
 })();
 
