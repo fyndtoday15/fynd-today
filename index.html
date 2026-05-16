@@ -52,14 +52,33 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:22px 48px;display:fl
   top:90px;
   right:48px;
   z-index:2;
-  font-size:9px;
+  display:inline-block;
   padding:8px 16px;
+  border:1px solid rgba(252,251,244,.35);
+  border-radius:2px;
+  font-family:'DejaVu Sans',Arial,sans-serif;
+  font-size:9px;
   letter-spacing:.18em;
+  text-transform:uppercase;
+  color:#FCFBF4;
+  text-decoration:none;
+  background:transparent;
+  cursor:pointer;
   opacity:0;
   animation:up .8s ease forwards 1.2s;
-  align-self:auto;
+  white-space:nowrap;
   width:auto;
+  overflow:hidden;
 }
+.hero-portal-btn::before{
+  content:'';
+  position:absolute;
+  left:0;bottom:0;right:0;height:0;
+  background:#FCFBF4;
+  transition:height .3s ease;
+}
+.hero-portal-btn:hover::before{height:100%}
+.hero-portal-btn:hover{color:#080808;position:absolute;}
 .nav-logo{font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:var(--off);cursor:pointer;text-decoration:none;background:none;border:none;font-family:'DejaVu Sans',Arial,sans-serif}
 .nav-tag{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--off)}
 
@@ -351,7 +370,7 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
 
 <section class="hero" id="top">
   <canvas id="sw"></canvas>
-  <a href="#" class="btn btn-sm portal-trigger hero-portal-btn"><span>Enter Sound Portal</span></a>
+  <a href="#" class="portal-trigger hero-portal-btn"><span style="position:relative;z-index:1;transition:color .3s ease;">Enter Sound Portal</span></a>
   <div class="hero-content">
     <p class="htag">Music-powered lifestyle</p>
     <h1 class="serif">You know where you need to go.<br>Sound is what gets you there.</h1>
