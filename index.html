@@ -52,11 +52,11 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:22px 48px;display:fl
   top:76px;
   right:48px;
   left:auto;
-  z-index:50;
+  z-index:2;
   opacity:0;
   animation:up .8s ease forwards 1.2s;
-  font-size:9px !important;
-  padding:8px 18px !important;
+  font-size:9px;
+  padding:8px 16px;
   letter-spacing:.18em;
 }
 .nav-logo{font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:var(--off);cursor:pointer;text-decoration:none;background:none;border:none;font-family:'DejaVu Sans',Arial,sans-serif}
@@ -64,6 +64,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:22px 48px;display:fl
 
 /* HERO */
 .hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:100px 48px 80px;position:relative;overflow:hidden}
+canvas#sw{position:absolute;left:0;top:0;width:100%;height:100%;opacity:.13;pointer-events:none}
 .hero-content{position:relative;z-index:1;max-width:560px}
 .htag{font-size:10px;letter-spacing:.26em;text-transform:uppercase;color:var(--off);margin-bottom:28px;opacity:0;animation:up .8s ease forwards .2s}
 h1{font-size:clamp(30px,4vw,54px);line-height:1.08;letter-spacing:-.02em;opacity:0;animation:up 1s ease forwards .4s}
@@ -285,7 +286,7 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
 @media(max-width:720px){
   nav{padding:18px 20px}
   .nav-portal-btn{display:none}
-  .hero-portal-btn{top:68px;right:20px;left:auto;font-size:8px !important;padding:7px 12px !important;}
+  .hero-portal-btn{top:66px;right:20px;left:auto;font-size:8px;padding:7px 12px;}
   .hero{padding:80px 20px 48px;min-height:100vh;text-align:left;align-items:flex-start}
   h1{font-size:clamp(24px,7vw,36px);text-align:left}
   .hero-content{align-items:flex-start}
