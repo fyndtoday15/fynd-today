@@ -86,7 +86,29 @@ html.assign-top, body.assign-top { background: var(--black); }
 .thumb-btn { background: transparent; border: 1px solid rgba(255,255,255,0.25); border-radius: 50%; width: 32px; height: 32px; font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1; -webkit-filter: grayscale(100%); filter: grayscale(100%); transition: opacity 0.2s ease; }
 .thumb-btn:active { opacity: 0.4; }
 
-/* Replay — appears at 50s if no answer */
+/* Utility corner — top right, holds thumb-down + replay when answers are showing */
+.utility-corner {
+  position: absolute;
+  top: clamp(28px, 5vh, 44px);
+  right: clamp(20px, 5vw, 36px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+.utility-corner.show { opacity: 1; pointer-events: all; }
+.utility-corner .thumb-btn { width: 28px; height: 28px; font-size: 11px; border-color: rgba(255,255,255,0.2); }
+.utility-corner .replay-small {
+  background: none; border: none; cursor: pointer;
+  font-size: 16px; color: var(--bg); opacity: 0.35;
+  padding: 4px; line-height: 1;
+}
+.utility-corner .replay-small:active { opacity: 0.7; }
+
+/* Replay — centered, appears at 5s with thumbs, hides when answers appear */
 .replay-btn {
   display: none;
   position: absolute;
@@ -343,6 +365,10 @@ html.assign-top, body.assign-top { background: var(--black); }
     </div>
   </div>
   <button class="replay-btn" id="replay-btn">&#8635; Replay song</button>
+  <div class="utility-corner" id="utility-corner">
+    <button class="thumb-btn" id="thumb-down-corner">&#128078;</button>
+    <button class="replay-small" id="replay-corner">&#8635;</button>
+  </div>
   <div class="song-reveal" id="song-reveal">
     <div class="song-reveal-label">That was</div>
     <div class="song-reveal-title" id="song-reveal-title"></div>
@@ -731,13 +757,15 @@ function openPanel(cb) {
   // Change Listen label to Answer
   var _lbl = document.querySelector('.listen-label');
   if (_lbl) _lbl.textContent = 'Answer';
-  // Hide pulse dot, track count and thumbs — answers take center stage
+  // Hide centered thumbs and replay — show utility corner instead
   var _pw = document.querySelector('.pulse-wrap');
   var _tw = document.getElementById('thumbs-wrap');
   var _rb = document.getElementById('replay-btn');
   if (_pw) _pw.style.opacity = '0';
   if (_tw) { _tw.classList.remove('show'); _tw.style.opacity = '0'; }
-  if (_rb) _rb.classList.remove('show');
+  if (_rb) { _rb.classList.remove('show'); }
+  var _uc = document.getElementById('utility-corner');
+  if (_uc) _uc.classList.add('show');
   // Stagger arrival — each sentence surfaces 1.4s apart for smooth flow
   var _activeIdx = 0;
   stmts.forEach(function(s, i) {
@@ -780,6 +808,10 @@ function resetPanel() {
   if (sr) sr.classList.remove('show');
   var rb = document.getElementById('replay-btn');
   if (rb) rb.classList.remove('show');
+  var tw = document.getElementById('thumbs-wrap');
+  if (tw) { tw.style.opacity = ''; tw.classList.remove('show'); }
+  var uc = document.getElementById('utility-corner');
+  if (uc) uc.classList.remove('show');
   // Restore listen label and pulse wrap
   var _lbl = document.querySelector('.listen-label');
   if (_lbl) _lbl.textContent = 'Listen';
@@ -853,6 +885,8 @@ function startTrackTimers() {
   }, 5000);
   thumbsTimer = setTimeout(function() {
     document.getElementById('thumbs-wrap').classList.add('show');
+    var rb = document.getElementById('replay-btn');
+    if (rb) rb.classList.add('show');
   }, 5000);
   // Answers fade in at 30s — music keeps playing
   readyTimer = setTimeout(function() {
@@ -860,13 +894,6 @@ function startTrackTimers() {
       openPanel(function(ps) { doReveal(ps); });
     }
   }, 30000);
-  // Replay appears at 50s if still no answer
-  autoTimer = setTimeout(function() {
-    if (!document.getElementById('answer-wrap').classList.contains('show')) {
-      var rb = document.getElementById('replay-btn');
-      if (rb) rb.classList.add('show');
-    }
-  }, 50000);
   saveAbandoned();
   if (sess.cur > 4) sess.cur = 0;
   document.getElementById('tc').textContent = (sess.cur + 1) + ' — 5';
@@ -978,10 +1005,12 @@ function playTrack(idx) {
     } catch(e) {}
 
 
-    // At 5s — show thumbs
+    // At 5s — show thumbs and replay together
     clearTimeout(thumbsTimer);
     thumbsTimer = setTimeout(function() {
       document.getElementById('thumbs-wrap').classList.add('show');
+      var rb2 = document.getElementById('replay-btn');
+      if (rb2) rb2.classList.add('show');
     }, 5000);
 
     // At 30s — answers fade in on black, music keeps playing
@@ -990,14 +1019,6 @@ function playTrack(idx) {
         openPanel(function(ps) { doReveal(ps); });
       }
     }, 30000);
-
-    // At 50s — replay appears if still no answer
-    autoTimer = setTimeout(function() {
-      if (!document.getElementById('answer-wrap').classList.contains('show')) {
-        var rb2 = document.getElementById('replay-btn');
-        if (rb2) rb2.classList.add('show');
-      }
-    }, 50000);
 
     // Cap cur to valid range 0-4
     if (sess.cur > 4) sess.cur = 0;
@@ -1090,6 +1111,31 @@ document.getElementById('thumb-up').addEventListener('click', function() {
       }),
     }).catch(function() {});
   }
+});
+
+// Corner thumb-down — fires same logic as main thumb-down
+document.getElementById('thumb-down-corner').addEventListener('click', function() {
+  document.getElementById('thumb-down').click();
+});
+
+// Corner replay — fires same logic as main replay
+document.getElementById('replay-corner').addEventListener('click', function() {
+  // Hide utility corner, restore answers aren't showing anymore
+  var uc = document.getElementById('utility-corner');
+  if (uc) uc.classList.remove('show');
+  // Reset answers so they re-appear on replay
+  var aw = document.getElementById('answer-wrap');
+  if (aw) { aw.classList.remove('show'); aw.style.opacity = ''; aw.style.transition = ''; }
+  var al = document.getElementById('answer-list');
+  if (al) al.innerHTML = '';
+  if (window._stmtRotateTimer) { clearInterval(window._stmtRotateTimer); window._stmtRotateTimer = null; }
+  // Restore listen label and pulse
+  var _lbl = document.querySelector('.listen-label');
+  if (_lbl) _lbl.textContent = 'Listen';
+  var _pw = document.querySelector('.pulse-wrap');
+  if (_pw) _pw.style.opacity = '';
+  // Fire the main replay
+  document.getElementById('replay-btn').click();
 });
 
 // Thumb down — record skip, go straight to next track
@@ -1341,7 +1387,7 @@ function doReveal(ps) {
         }
       }, 700); // wait for song reveal fade out
 
-    }, 5000); // song reveal visible for 5s
+    }, 4000); // song reveal visible for 4s
 
   }, 700); // wait for answers to fade out
 } // end doReveal
