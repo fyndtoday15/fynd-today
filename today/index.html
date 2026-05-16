@@ -2349,8 +2349,10 @@ show = function(id) {
   _origShow(id);
 };
 
+// On Chrome mobile the portal animation frame may be in history between
+// fyndtoday.com and /today. We replaceState to overwrite it, then push
+// an extra boundary so back always lands on fyndtoday.com
 history.replaceState({ screen: 'boundary' }, '', window.location.href);
-history.pushState({ screen: 'boundary' }, '', window.location.href);
 history.pushState({ screen: 's1' }, '', window.location.href);
 
 window.addEventListener('popstate', function(e) {
@@ -2432,6 +2434,8 @@ window.addEventListener('popstate', function(e) {
   }
 
   if (!e.state || e.state.screen === 'boundary') {
+    // history.back() goes to fyndtoday.com — the entry before the animation frame
+    // which replaceState overwrote on portal load
     window.location.href = 'https://fyndtoday.com';
     return;
   }
