@@ -38,13 +38,12 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:22px 48px;display:fl
 .nav-tag{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--off)}
 
 /* HERO */
-.hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:100px 48px 80px;position:relative;overflow:hidden}
+.hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:100px 48px 80px;position:relative;overflow:hidden;text-align:center}
 canvas#sw{position:absolute;left:0;top:0;width:100%;height:100%;opacity:.13;pointer-events:none}
-.hero-content{position:relative;z-index:1;max-width:520px}
+.hero-content{position:relative;z-index:1;max-width:680px;display:flex;flex-direction:column;align-items:center}
 .htag{font-size:10px;letter-spacing:.26em;text-transform:uppercase;color:var(--off);margin-bottom:28px;opacity:0;animation:up .8s ease forwards .2s}
-h1{font-size:clamp(30px,4.2vw,56px);line-height:1.07;letter-spacing:-.02em;opacity:0;animation:up 1s ease forwards .4s}
-.hsub{margin-top:20px;font-size:clamp(17px,2.1vw,28px);line-height:1.18;letter-spacing:-.01em;opacity:0;animation:up 1s ease forwards .72s}
-.hero-btns{margin-top:44px;display:flex;gap:14px;flex-wrap:wrap;opacity:0;animation:up 1s ease forwards 1s}
+h1{font-size:clamp(28px,3.8vw,52px);line-height:1.1;letter-spacing:-.02em;opacity:0;animation:up 1s ease forwards .4s;text-align:center}
+.hero-btns{margin-top:44px;display:flex;gap:14px;flex-wrap:wrap;justify-content:center;opacity:0;animation:up 1s ease forwards 1s}
 
 /* RULE */
 .rule{height:1px;background:rgba(252,251,244,.08)}
@@ -106,8 +105,8 @@ canvas#rc{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;o
 .btn-sm{padding:11px 28px}
 
 /* FOOTER */
-footer{padding:36px 48px;border-top:1px solid rgba(252,251,244,.08);display:flex;flex-direction:column;gap:28px}
-.footer-top{text-align:center;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--off)}
+footer{padding:36px 48px 28px;border-top:1px solid rgba(252,251,244,.08);display:flex;flex-direction:column;gap:20px}
+.footer-top{text-align:center;padding:16px 0}
 .footer-bot{display:flex;align-items:flex-start;justify-content:space-between;gap:24px}
 .footer-contact{display:flex;flex-direction:column;gap:8px}
 .footer-contact-lbl{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--off)}
@@ -132,7 +131,7 @@ footer{padding:36px 48px;border-top:1px solid rgba(252,251,244,.08);display:flex
 
 /* RACK SECTION */
 .rack-section {
-  padding: 100px 48px;
+  padding: 80px 48px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -141,8 +140,8 @@ footer{padding:36px 48px;border-top:1px solid rgba(252,251,244,.08);display:flex
 .rack-frame {
   position: relative;
   width: 100%;
-  max-width: 760px;
-  min-height: 520px;
+  max-width: 900px;
+  aspect-ratio: 1 / 1.1;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -153,29 +152,29 @@ footer{padding:36px 48px;border-top:1px solid rgba(252,251,244,.08);display:flex
   width: 100%;
   height: 100%;
   object-fit: contain;
-  filter: invert(1) opacity(0.22);
+  filter: invert(1) opacity(0.2);
   pointer-events: none;
   user-select: none;
 }
 .rack-text {
   position: relative;
   z-index: 1;
-  padding: 140px 80px 100px;
+  padding: 22% 18% 18%;
   text-align: center;
   width: 100%;
-  max-width: 540px;
 }
 .rack-copy {
-  font-size: clamp(15px, 1.8vw, 22px);
+  font-size: clamp(16px, 1.9vw, 24px);
   line-height: 1.7;
-  letter-spacing: 0;
   color: var(--off);
+  font-family: 'Noto Serif', Georgia, serif;
+  font-style: italic;
 }
 
 /* SRF — Sound Recognition Form scroll section */
 .srf-section {
   position: relative;
-  min-height: 90vh;
+  min-height: 80vh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -213,14 +212,14 @@ canvas#srf-wave {
 .srf-word {
   font-family: 'Noto Serif', Georgia, serif;
   font-style: italic;
-  font-size: clamp(42px, 8vw, 96px);
+  font-size: clamp(32px, 5vw, 64px);
   line-height: 1.05;
   letter-spacing: -0.02em;
   color: var(--off);
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 .srf-line {
-  font-size: clamp(11px, 1.4vw, 14px);
+  font-size: clamp(10px, 1.2vw, 13px);
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--off);
@@ -231,7 +230,7 @@ canvas#srf-wave {
 /* Experience it section */
 .exp-section {
   text-align: center;
-  padding: 80px 48px;
+  padding: 48px 48px 80px;
   background: var(--bg);
 }
 
@@ -251,7 +250,9 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
 /* MOBILE */
 @media(max-width:720px){
   nav{padding:18px 20px}
-  .hero{padding:80px 20px 48px;min-height:100vh}
+  .hero{padding:80px 20px 48px;min-height:100vh;text-align:center;align-items:center}
+  h1{font-size:clamp(24px,7vw,36px);text-align:center}
+  .hero-content{align-items:center}
   .blk{padding:48px 20px;min-height:auto;justify-content:flex-start}
   .close-blk{padding:48px 20px;min-height:auto}
   .enter{padding:60px 20px;min-height:100vh}
@@ -261,16 +262,17 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
   .hgrid{grid-template-columns:1fr;gap:14px}
   .hc{min-height:200px}
   .section-fwd .btn{display:block;text-align:center}
-  .srf-inner{padding:48px 20px;gap:28px}
+  .srf-inner{padding:40px 20px;gap:20px}
   .srf-section{min-height:auto}
-  .srf-word{font-size:clamp(36px,10vw,56px)}
-  .exp-section{padding:32px 20px}
-  .rack-section{padding:60px 20px}
-  .rack-frame{min-height:360px}
-  .rack-text{padding:100px 40px 80px}
-  .rack-copy{font-size:clamp(14px,4vw,18px)}
-  footer{padding:28px 20px;gap:20px}
-  .footer-bot{flex-direction:column;gap:20px}
+  .srf-word{font-size:clamp(26px,8vw,42px)}
+  .exp-section{padding:28px 20px 40px}
+  .rack-section{padding:40px 20px}
+  .rack-frame{aspect-ratio:auto;min-height:300px}
+  .rack-text{padding:16% 12% 14%}
+  .rack-copy{font-size:clamp(13px,3.5vw,17px)}
+  footer{padding:20px 20px 16px;gap:14px}
+  .footer-top{padding:8px 0}
+  .footer-bot{flex-direction:column;gap:16px}
   .footer-share{align-items:flex-start}
   .share-sheet{padding:24px 20px 32px}
 }
@@ -293,7 +295,7 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
 
 <nav>
   <a href="/" style="display:flex;align-items:center;text-decoration:none;">
-    <img src="/logo.png" alt="FYND TODAY" style="height:52px;width:auto;display:block;">
+    <img src="/logo.png" alt="FYND TODAY" style="height:44px;width:auto;display:block;">
   </a>
   <span class="nav-tag">Early Access</span>
 </nav>
