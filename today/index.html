@@ -1873,76 +1873,77 @@ document.getElementById('email-sub').addEventListener('click', function() {
     return;
   }
   if (consentError) consentError.style.display = 'none';
-  LS.set('email', email);
-  LS.set('firstName', firstName);
-  LS.set('onEmailScreen', false);
-  // Link this sessionId to the email immediately — enables cross-browser restore
-  saveSessionState();
-  document.getElementById('name-in').style.display = 'none';
-  document.getElementById('email-in').style.display = 'none';
-  document.getElementById('email-sub').style.display = 'none';
-  var consentLabel = document.getElementById('consent-label');
-  if (consentLabel) consentLabel.style.display = 'none';
-  if (document.getElementById('consent-error')) document.getElementById('consent-error').style.display = 'none';
-  var rnSub = document.getElementById('return-note'); if (rnSub) rnSub.style.display = 'none';
-  var h = document.getElementById('email-head');
-  if (h) { h.textContent = "Recognize every time you press play."; h.style.fontSize = "18px"; h.style.opacity = "1"; }
-  // Show listen again button immediately with confirmation
-  var again = document.getElementById('listen-again');
-  if (again) {
-    again.style.display = 'block';
-    updateSetButtons();
-  }
-  // Email submitted — update records for this session
-  // Send email update — patches all records for this session with email
-  fetch('/.netlify/functions/log-session', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      sessionId: sess.id,
-      email: email,
-      firstName: firstName,
-      entryState: sess.entryState,
-      hp: hp,
-      consent: consentChecked,
-      emailUpdate: true,
-    }),
-  }).then(function(r) { return r.json(); })
-  .then(function(result) { })
-  .catch(function(err) { console.error('Email log error:', err); });
 
-  // Send welcome email — check for duplicate first
+  // Disable button while checking — prevents double submit
+  var subBtn = document.getElementById('email-sub');
+  if (subBtn) { subBtn.disabled = true; subBtn.style.opacity = '0.5'; }
+
+  // Check for duplicate FIRST — nothing proceeds until server confirms email is new
   fetch('/.netlify/functions/send-welcome', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email: email, firstName: firstName }),
   }).then(function(r) { return r.json(); }).then(function(result) {
     if (result.duplicate) {
-      // Email already exists — undo submission, show error
-      LS.set('email', null);
-      LS.set('firstName', null);
-      var emailSub = document.getElementById('email-sub');
-      if (emailSub) emailSub.style.display = '';
+      // Duplicate — stay on email page, show error, re-enable button
+      if (subBtn) { subBtn.disabled = false; subBtn.style.opacity = ''; }
       var emailError = document.getElementById('email-error');
       if (emailError) {
         emailError.textContent = 'An account with that email already exists.';
         emailError.style.display = 'block';
       }
-      var emailIn = document.getElementById('email-in');
-      if (emailIn) emailIn.value = '';
+      document.getElementById('email-in').value = '';
+      document.getElementById('email-in').focus();
+      return;
     }
-  }).catch(function(err) { console.error('Welcome email error:', err); });
 
-  // Send recap email for Set 1 (email just collected) — read from localStorage, sess may have reset on mobile
-  (function() {
-    var recapData = null;
-    try { recapData = JSON.parse(localStorage.getItem('fynd_set1recap')); } catch(e) {}
-    if (recapData && recapData.log && recapData.log.length > 0) {
-      var _e = email, _fn = firstName, _rp = recapData.playlist, _rl = recapData.log, _rs = recapData.entryState || '';
-      setTimeout(function() { sendRecapEmail(_e, _fn, _rp, _rl, _rs); }, 1000);
-      try { localStorage.removeItem('fynd_set1recap'); } catch(e) {}
-    }
-  })();
+    // Not a duplicate — proceed with full submission
+    LS.set('email', email);
+    LS.set('firstName', firstName);
+    LS.set('onEmailScreen', false);
+    saveSessionState();
+    document.getElementById('name-in').style.display = 'none';
+    document.getElementById('email-in').style.display = 'none';
+    if (subBtn) subBtn.style.display = 'none';
+    var consentLabel = document.getElementById('consent-label');
+    if (consentLabel) consentLabel.style.display = 'none';
+    if (document.getElementById('consent-error')) document.getElementById('consent-error').style.display = 'none';
+    var rnSub = document.getElementById('return-note'); if (rnSub) rnSub.style.display = 'none';
+    var h = document.getElementById('email-head');
+    if (h) { h.textContent = "Recognize every time you press play."; h.style.fontSize = "18px"; h.style.opacity = "1"; }
+    var again = document.getElementById('listen-again');
+    if (again) { again.style.display = 'block'; updateSetButtons(); }
+
+    // Log session with email
+    fetch('/.netlify/functions/log-session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        sessionId: sess.id,
+        email: email,
+        firstName: firstName,
+        entryState: sess.entryState,
+        hp: hp,
+        consent: consentChecked,
+        emailUpdate: true,
+      }),
+    }).catch(function(err) { console.error('Email log error:', err); });
+
+    // Send recap email for Set 1
+    (function() {
+      var recapData = null;
+      try { recapData = JSON.parse(localStorage.getItem('fynd_set1recap')); } catch(e) {}
+      if (recapData && recapData.log && recapData.log.length > 0) {
+        var _e = email, _fn = firstName, _rp = recapData.playlist, _rl = recapData.log, _rs = recapData.entryState || '';
+        setTimeout(function() { sendRecapEmail(_e, _fn, _rp, _rl, _rs); }, 1000);
+        try { localStorage.removeItem('fynd_set1recap'); } catch(e) {}
+      }
+    })();
+
+  }).catch(function(err) {
+    console.error('Welcome email error:', err);
+    if (subBtn) { subBtn.disabled = false; subBtn.style.opacity = ''; }
+  });
 });
 
 document.getElementById('email-in').addEventListener('keydown', function(e) {
