@@ -937,6 +937,9 @@ function initSC() {
   widget = SC.Widget(document.getElementById('sc'));
   widget.bind(SC.Widget.Events.READY, function() { widgetReady = true; });
   widget.bind(SC.Widget.Events.FINISH, function() {
+    // Don't process if we've navigated away from listen screen
+    var _active = document.querySelector('.screen.active');
+    if (!_active || _active.id !== 's3') return;
     if (widget) widget.pause();
     stopDot();
     clearTimeout(readyTimer);
@@ -1530,7 +1533,7 @@ document.getElementById('s1').addEventListener('click', function(e) {
         silentAudioR.volume = 0;
         silentAudioR.play().catch(function(){});
       } catch(e) {}
-      if (widgetReady) { widget.skip(sess.tOrder[sess.cur]); sess._primedIdx = sess.tOrder[sess.cur]; }
+      if (widgetReady) { sess._primedIdx = sess.tOrder[sess.cur]; }
       // Clear any leftover song reveal UI before showing listen screen
       var _srClr = document.getElementById('song-reveal');
       if (_srClr) { _srClr.classList.remove('show'); _srClr.style.opacity = ''; }
@@ -1817,6 +1820,55 @@ document.getElementById('btn-stop-listen').addEventListener('click', function() 
   if (widget) widget.pause();
   stopDot();
   saveAbandoned();
+
+  // Write Abandoned to Airtable immediately (don't rely on beacon/pagehide)
+  if (sess.listenStart && !sess._abandonSent) {
+    var _now = Date.now();
+    var _dur = Math.round((_now - sess.listenStart) / 1000);
+    var _ti = sess.tOrder ? sess.tOrder[sess.cur] : undefined;
+    if (_ti !== undefined) {
+      var _tr = getTrack(sess.playlist, _ti);
+      var _sid = 'T00' + (sess.cur + 1);
+      var _tt = _tr ? (_tr.title + ' \u2014 ' + _tr.artist) : '';
+      var _date = new Date().toISOString().slice(0,10);
+      sess._abandonSent = true;
+      var _stopBody = sess._activeRecordId ? JSON.stringify({
+        trackPatch: true,
+        recordId: sess._activeRecordId,
+        duration: _dur,
+        postState: 'Abandoned',
+        reaction: sess.reaction || '',
+        replay: sess.replay ? 'Yes' : '',
+        triggered: sess.triggered || '',
+        email: LS.get('email') || '',
+        firstName: LS.get('firstName') || '',
+      }) : JSON.stringify({
+        heartbeatUpdate: true,
+        sessionId: sess.id,
+        email: LS.get('email') || '',
+        firstName: LS.get('firstName') || '',
+        entryState: sess.entryState || '',
+        trackId: _sid,
+        trackTitle: _tt,
+        playlist: sess.playlist,
+        duration: _dur,
+        postState: 'Abandoned',
+        date: _date,
+        reaction: sess.reaction || '',
+        replay: sess.replay ? 'Yes' : '',
+        triggered: sess.triggered || '',
+        visitNumber: window._visitNumber || 1,
+        daysSinceLastVisit: window._daysSinceLastVisit,
+      });
+      fetch('/.netlify/functions/log-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: _stopBody,
+      }).catch(function() {});
+      sess.listenStart = null;
+    }
+  }
+
   var savedEmail = LS.get('email');
   if (savedEmail) {
     var h = document.getElementById('email-head');
@@ -2346,7 +2398,8 @@ history.pushState({ screen: 's1' }, '', window.location.href);
 window.addEventListener('popstate', function(e) {
   if (_navLock) return;
   _navLock = true;
-  setTimeout(function() { _navLock = false; }, 100);
+  var _isMobileSafari = /iP(hone|ad|od)/.test(navigator.userAgent);
+  setTimeout(function() { _navLock = false; }, _isMobileSafari ? 300 : 100);
 
   // If currently on listen screen — stop music, record abandoned, go to sets page
   // Must check BEFORE boundary so back from listen doesn't exit the app
