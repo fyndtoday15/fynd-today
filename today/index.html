@@ -1500,14 +1500,9 @@ function doReveal(ps) {
   }, 700); // wait for answers to fade out
 } // end doReveal
 
-// S1 tap
-document.getElementById('s1').addEventListener('click', function(e) {
-  // Only fire from the Press Play button or programmatic clicks — not anywhere on the screen
-  var hint = document.querySelector('.s1-hint');
-  var clickedHint = hint && (e.target === hint || hint.contains(e.target) || (e.target.closest && e.target.closest('.s1-hint')));
-  if (!clickedHint && !window._signinBypass) {
-    return;
-  }
+// S1 tap — listener on button directly, screen click does nothing
+document.querySelector('.s1-hint').addEventListener('click', function(e) {
+  var hint = this;
   // If sign-in panel is open, eat the click — do nothing
   var _panel = document.getElementById('signin-panel');
   if (_panel.classList.contains('open') || _panel.style.display === 'flex') {
