@@ -57,24 +57,7 @@ html.assign-top, body.assign-top { background: var(--black); }
 #s1.set-reload { background: var(--black); }
 #s1.set-reload .s1-word,
 #s1.set-reload .s1-intro { display: none; }
-#s1.set-reload .s1-hint {
-  position: absolute;
-  top: 50%; left: 50%; transform: translateX(-50%) translateY(-50%);
-  color: var(--bg);
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.2);
-  border-radius: 2px;
-  font-size: 10px;
-  letter-spacing: 0.12em;
-  padding: 10px 20px;
-  white-space: nowrap;
-  opacity: 0.65;
-  animation: none;
-  transition: background 0.2s ease;
-  z-index: 10;
-  display: block;
-}
-#s1.set-reload .s1-hint:active { background: rgba(255,255,255,0.12); }
+#s1.set-reload .s1-hint { color: var(--bg); }
 #s1.set-reload .signin-trigger,
 #s1.set-reload .signin-panel { display: none !important; }
 @keyframes ph { 0%,100%{opacity:.4} 50%{opacity:.8} }
@@ -1517,10 +1500,14 @@ function doReveal(ps) {
 
 // S1 tap
 document.getElementById('s1').addEventListener('click', function(e) {
-  // Only fire from the Press Play button or programmatic clicks — not anywhere on the screen
   var hint = document.querySelector('.s1-hint');
-  if (hint && e.target !== hint && !hint.contains(e.target) && !window._signinBypass) {
-    return;
+  // In set-reload mode (black listen screen) — whole screen is clickable
+  var isSetReload = document.getElementById('s1').classList.contains('set-reload');
+  if (!isSetReload) {
+    // On the Today screen — only the hint span or programmatic trigger
+    if (hint && e.target !== hint && !hint.contains(e.target) && !window._signinBypass) {
+      return;
+    }
   }
   // If sign-in panel is open, eat the click — do nothing
   var _panel = document.getElementById('signin-panel');
@@ -1726,7 +1713,7 @@ document.getElementById('s1').addEventListener('click', function(e) {
     window._restoreSetScreen = false;
     function goToSetsPage() {
       var h = document.getElementById('email-head');
-      if (h) { h.textContent = "Recognize every time you press play."; h.style.fontSize = "18px"; h.style.opacity = "1"; h.style.display = ""; }
+      if (h) { h.textContent = "Recognize every time you press play."; h.style.fontSize = "18px"; h.style.opacity = "1"; }
       document.getElementById('email-in').style.display = 'none';
       document.getElementById('name-in').style.display = 'none';
       document.getElementById('email-sub').style.display = 'none';
@@ -1795,7 +1782,7 @@ document.getElementById('s1').addEventListener('click', function(e) {
     window._resumeMode = false;
     function goToResumeSetPage() {
       var h = document.getElementById('email-head');
-      if (h) { h.textContent = "Recognize every time you press play."; h.style.fontSize = "18px"; h.style.opacity = "1"; h.style.display = ""; }
+      if (h) { h.textContent = "Recognize every time you press play."; h.style.fontSize = "18px"; h.style.opacity = "1"; }
       document.getElementById('email-in').style.display = 'none';
       document.getElementById('name-in').style.display = 'none';
       document.getElementById('email-sub').style.display = 'none';
@@ -1863,7 +1850,7 @@ document.getElementById('btn-stop-listen').addEventListener('click', function() 
   var savedEmail = LS.get('email');
   if (savedEmail) {
     var h = document.getElementById('email-head');
-      if (h) { h.textContent = "Recognize every time you press play."; h.style.fontSize = "18px"; h.style.opacity = "1"; h.style.display = ""; }
+    if (h) { h.textContent = "Recognize every time you press play."; h.style.fontSize = "18px"; h.style.opacity = "1"; }
     document.getElementById('email-in').style.display = 'none';
     document.getElementById('name-in').style.display = 'none';
     document.getElementById('email-sub').style.display = 'none';
@@ -1886,7 +1873,7 @@ document.getElementById('recap-continue').addEventListener('click', function() {
   if (savedEmail) {
     // Show brief confirmation then listen again
     var h = document.getElementById('email-head');
-      if (h) { h.textContent = "Recognize every time you press play."; h.style.fontSize = "18px"; h.style.opacity = "1"; h.style.display = ""; }
+    if (h) { h.textContent = "Recognize every time you press play."; h.style.fontSize = "18px"; h.style.opacity = "1"; }
     document.getElementById('email-in').style.display = 'none';
     document.getElementById('name-in').style.display = 'none';
     document.getElementById('email-sub').style.display = 'none';
@@ -1936,9 +1923,7 @@ document.getElementById('email-sub').addEventListener('click', function() {
   if (document.getElementById('consent-error')) document.getElementById('consent-error').style.display = 'none';
   var rnSub = document.getElementById('return-note'); if (rnSub) rnSub.style.display = 'none';
   var h = document.getElementById('email-head');
-  if (h) { h.textContent = "Recognize every time you press play."; h.style.fontSize = "18px"; h.style.opacity = "1"; h.style.display = ""; }
-
-
+  if (h) { h.textContent = "Recognize every time you press play."; h.style.fontSize = "18px"; h.style.opacity = "1"; }
   // Show listen again button immediately with confirmation
   var again = document.getElementById('listen-again');
   if (again) {
@@ -2002,7 +1987,7 @@ function showSetsScreen() {
   var _sp = document.getElementById('signin-panel');
   if (_sp) { _sp.classList.remove('open'); _sp.style.display = 'none'; }
   var h = document.getElementById('email-head');
-      if (h) { h.textContent = "Recognize every time you press play."; h.style.fontSize = "18px"; h.style.opacity = "1"; h.style.display = ""; }
+  if (h) { h.textContent = "Recognize every time you press play."; h.style.fontSize = "18px"; h.style.opacity = "1"; }
   var emailIn = document.getElementById('email-in'); if (emailIn) emailIn.style.display = 'none';
   var nameIn = document.getElementById('name-in'); if (nameIn) nameIn.style.display = 'none';
   var emailSub = document.getElementById('email-sub'); if (emailSub) emailSub.style.display = 'none';
