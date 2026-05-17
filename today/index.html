@@ -808,35 +808,22 @@ function flipLabel(newText) {
   var next = document.getElementById('listen-label-next');
   if (!inner || !next) return;
   if (inner.textContent === newText) return;
-  // Phase 1 — current word exits downward
-  inner.style.transition = 'transform 0.25s ease-in, opacity 0.25s ease-in';
-  inner.style.transform = 'translateY(100%)';
+  // Fade out current word
+  inner.style.transition = 'opacity 0.2s ease-out';
   inner.style.opacity = '0';
-  // Phase 2 — after exit, snap next word in from above and animate down
+  // After fade out, swap text and fade in
   setTimeout(function() {
     inner.style.transition = 'none';
-    inner.style.transform = 'translateY(0)';
-    inner.style.opacity = '1';
     inner.textContent = newText;
-    // Position new word above and animate in
-    next.textContent = newText;
-    next.style.transition = 'none';
-    next.style.transform = 'translateY(-100%)';
+    requestAnimationFrame(function() {
+      requestAnimationFrame(function() {
+        inner.style.transition = 'opacity 0.2s ease-in';
+        inner.style.opacity = '1';
+      });
+    });
+    next.textContent = '';
     next.style.opacity = '0';
-    void next.offsetWidth;
-    next.style.transition = 'transform 0.3s ease-out, opacity 0.3s ease-out';
-    next.style.transform = 'translateY(0)';
-    next.style.opacity = '1';
-    // Phase 3 — after entrance, swap to inner and hide next
-    setTimeout(function() {
-      inner.style.transition = 'none';
-      inner.style.opacity = '1';
-      next.style.transition = 'none';
-      next.style.transform = 'translateY(-100%)';
-      next.style.opacity = '0';
-      next.textContent = '';
-    }, 320);
-  }, 270);
+  }, 220);
 }
 
 function openPanel(cb) {
@@ -1539,6 +1526,8 @@ document.getElementById('s1').addEventListener('click', function(e) {
       if (_srClr) { _srClr.classList.remove('show'); _srClr.style.opacity = ''; }
       var _awClr = document.getElementById('answer-wrap');
       if (_awClr) _awClr.classList.remove('show');
+      var _ucClr = document.getElementById('utility-corner');
+      if (_ucClr) _ucClr.classList.remove('show');
       show('s3');
       var _resumeDelay = /iP(hone|ad|od)/.test(navigator.userAgent) ? 600 : 300;
       setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, _resumeDelay);
@@ -3010,6 +2999,21 @@ window.addEventListener('pagehide', function() {
     visitNumber: window._visitNumber || 1,
     daysSinceLastVisit: window._daysSinceLastVisit,
   });
+  // Brave mobile silently drops sendBeacon — always use keepalive fetch for Brave
+  var _isBrave = !!(navigator.brave && navigator.brave.isBrave);
+  if (_isBrave) {
+    try {
+      fetch('/.netlify/functions/log-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: payload,
+        keepalive: true,
+      });
+      sess._abandonSent = true;
+      try { localStorage.removeItem('fynd_pendingAbandoned'); } catch(e) {}
+    } catch(e) {}
+    return;
+  }
   if (navigator.sendBeacon) {
     try {
       var sent = navigator.sendBeacon('/.netlify/functions/log-session', new Blob([payload], { type: 'application/json' }));
