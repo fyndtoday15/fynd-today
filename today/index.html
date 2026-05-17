@@ -50,21 +50,14 @@ html.assign-top, body.assign-top { background: var(--black); }
   font-size: 13px; color: var(--black); letter-spacing: 0.14em; text-transform: uppercase;
   border: 1px solid rgba(0,0,0,0.25); border-radius: 2px;
   padding: 14px 40px; cursor: pointer;
+  animation: ph 3s ease-in-out infinite;
   background: none; font-family: var(--f);
-  white-space: nowrap;
-  display: block;
-  transition: opacity 0.2s ease, transform 0.1s ease, box-shadow 0.1s ease;
+  display: inline-block;
 }
-.s1-hint:active { transform: scale(0.96); box-shadow: inset 0 2px 4px rgba(0,0,0,0.12); }
 #s1.set-reload { background: var(--black); }
 #s1.set-reload .s1-word,
 #s1.set-reload .s1-intro { display: none; }
-#s1.set-reload .s1-hint {
-  color: var(--bg); border-color: rgba(255,255,255,0.25);
-  position: absolute;
-  top: 50%; left: 50%; transform: translate(-50%, -50%);
-}
-#s1.set-reload .s1-hint:active { transform: translate(-50%, -50%) scale(0.96); }
+#s1.set-reload .s1-hint { color: var(--bg); }
 #s1.set-reload .signin-trigger,
 #s1.set-reload .signin-panel { display: none !important; }
 @keyframes ph { 0%,100%{opacity:.4} 50%{opacity:.8} }
@@ -399,8 +392,8 @@ html.assign-top, body.assign-top { background: var(--black); }
 </head>
 <body>
 
-<div id="safe-top" style="position:fixed;top:0;left:0;right:0;height:max(env(safe-area-inset-top),50px);background:#FCFBF4;z-index:9999;pointer-events:none;"></div>
-<div id="safe-bot" style="position:fixed;bottom:0;left:0;right:0;height:max(env(safe-area-inset-bottom),34px);background:#FCFBF4;z-index:9999;pointer-events:none;"></div>
+<div id="safe-top" style="position:fixed;top:0;left:0;right:0;height:max(env(safe-area-inset-top),50px);background:#FCFBF4;z-index:9999;"></div>
+<div id="safe-bot" style="position:fixed;bottom:0;left:0;right:0;height:max(env(safe-area-inset-bottom),34px);background:#FCFBF4;z-index:9999;"></div>
 <div id="dots">
   <div class="dot" id="d1"></div>
   <div class="dot" id="d2"></div>
@@ -413,7 +406,7 @@ html.assign-top, body.assign-top { background: var(--black); }
 <div class="screen active" id="s1">
   <span class="s1-word">Today.</span>
   <p class="s1-intro">Find out what the sound reveals.</p>
-  <button class="s1-hint" id="press-play-btn" onclick="handlePressPlay(event)">Press Play</button>
+  <span class="s1-hint">Press Play</span>
 </div>
 
   <button class="signin-trigger" id="signin-trigger">returning? sign in</button>
@@ -505,7 +498,7 @@ html.assign-top, body.assign-top { background: var(--black); }
         var s1el = document.getElementById('s1');
         if (s1el) {
           s1el.classList.add('set-reload');
-          var hint = document.getElementById('press-play-btn');
+          var hint = s1el.querySelector('.s1-hint');
           if (hint) hint.textContent = 'Press Play';
         }
         var tc = document.getElementById('theme-color');
@@ -1505,10 +1498,14 @@ function doReveal(ps) {
   }, 700); // wait for answers to fade out
 } // end doReveal
 
-// S1 tap handler — called directly from button onclick
-function handlePressPlay(e) {
-  alert('fired');
-  var hint = document.getElementById('press-play-btn');
+// S1 tap
+document.getElementById('s1').addEventListener('click', function(e) {
+  // Only fire from the Press Play button or programmatic clicks — not anywhere on the screen
+  var hint = document.querySelector('.s1-hint');
+  if (hint && e.target !== hint && !hint.contains(e.target) && !window._signinBypass) {
+    return;
+  }
+  // If sign-in panel is open, eat the click — do nothing
   var _panel = document.getElementById('signin-panel');
   if (_panel.classList.contains('open') || _panel.style.display === 'flex') {
     return;
@@ -1712,7 +1709,7 @@ function handlePressPlay(e) {
     window._restoreSetScreen = false;
     function goToSetsPage() {
       var h = document.getElementById('email-head');
-      if (h) { h.textContent = 'Recognize every time you press play.'; h.style.fontSize = '18px'; h.style.opacity = '1'; h.style.display = ''; }
+      if (h) { h.textContent = "Recognize every time you press play."; h.style.fontSize = "18px"; h.style.opacity = "1"; h.style.display = ""; }
       document.getElementById('email-in').style.display = 'none';
       document.getElementById('name-in').style.display = 'none';
       document.getElementById('email-sub').style.display = 'none';
@@ -1744,7 +1741,7 @@ function handlePressPlay(e) {
   if (window._allSetsComplete) {
     function goToAllComplete() {
       var h = document.getElementById('email-head');
-      if (h) { h.style.display = 'none'; }
+      if (h) { h.style.display = "none"; }
       document.getElementById('email-in').style.display = 'none';
       document.getElementById('name-in').style.display = 'none';
       document.getElementById('email-sub').style.display = 'none';
@@ -1781,7 +1778,7 @@ function handlePressPlay(e) {
     window._resumeMode = false;
     function goToResumeSetPage() {
       var h = document.getElementById('email-head');
-      if (h) { h.textContent = 'Recognize every time you press play.'; h.style.fontSize = '18px'; h.style.opacity = '1'; h.style.display = ''; }
+      if (h) { h.textContent = "Recognize every time you press play."; h.style.fontSize = "18px"; h.style.opacity = "1"; h.style.display = ""; }
       document.getElementById('email-in').style.display = 'none';
       document.getElementById('name-in').style.display = 'none';
       document.getElementById('email-sub').style.display = 'none';
@@ -1822,7 +1819,7 @@ function handlePressPlay(e) {
     setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 100);
   });
   show('s2');
-}
+});
 
 // Continue button
 // Stop for now — save state and go to sets/email
@@ -1849,7 +1846,7 @@ document.getElementById('btn-stop-listen').addEventListener('click', function() 
   var savedEmail = LS.get('email');
   if (savedEmail) {
     var h = document.getElementById('email-head');
-    if (h) { h.textContent = 'Recognize every time you press play.'; h.style.fontSize = '18px'; h.style.opacity = '1'; h.style.display = ''; }
+      if (h) { h.textContent = "Recognize every time you press play."; h.style.fontSize = "18px"; h.style.opacity = "1"; h.style.display = ""; }
     document.getElementById('email-in').style.display = 'none';
     document.getElementById('name-in').style.display = 'none';
     document.getElementById('email-sub').style.display = 'none';
@@ -1872,7 +1869,7 @@ document.getElementById('recap-continue').addEventListener('click', function() {
   if (savedEmail) {
     // Show brief confirmation then listen again
     var h = document.getElementById('email-head');
-    if (h) { h.textContent = 'Recognize every time you press play.'; h.style.fontSize = '18px'; h.style.opacity = '1'; h.style.display = ''; }
+      if (h) { h.textContent = "Recognize every time you press play."; h.style.fontSize = "18px"; h.style.opacity = "1"; h.style.display = ""; }
     document.getElementById('email-in').style.display = 'none';
     document.getElementById('name-in').style.display = 'none';
     document.getElementById('email-sub').style.display = 'none';
@@ -1922,7 +1919,9 @@ document.getElementById('email-sub').addEventListener('click', function() {
   if (document.getElementById('consent-error')) document.getElementById('consent-error').style.display = 'none';
   var rnSub = document.getElementById('return-note'); if (rnSub) rnSub.style.display = 'none';
   var h = document.getElementById('email-head');
-  if (h) { h.textContent = 'Recognize every time you press play.'; h.style.fontSize = '18px'; h.style.opacity = '1'; h.style.display = ''; }
+  if (h) { h.textContent = "Recognize every time you press play."; h.style.fontSize = "18px"; h.style.opacity = "1"; h.style.display = ""; }
+
+
   // Show listen again button immediately with confirmation
   var again = document.getElementById('listen-again');
   if (again) {
@@ -1986,7 +1985,7 @@ function showSetsScreen() {
   var _sp = document.getElementById('signin-panel');
   if (_sp) { _sp.classList.remove('open'); _sp.style.display = 'none'; }
   var h = document.getElementById('email-head');
-  if (h) { h.textContent = 'Recognize every time you press play.'; h.style.fontSize = '18px'; h.style.opacity = '1'; h.style.display = ''; }
+      if (h) { h.textContent = "Recognize every time you press play."; h.style.fontSize = "18px"; h.style.opacity = "1"; h.style.display = ""; }
   var emailIn = document.getElementById('email-in'); if (emailIn) emailIn.style.display = 'none';
   var nameIn = document.getElementById('name-in'); if (nameIn) nameIn.style.display = 'none';
   var emailSub = document.getElementById('email-sub'); if (emailSub) emailSub.style.display = 'none';
@@ -2462,7 +2461,7 @@ window.addEventListener('popstate', function(e) {
     var s1el = document.getElementById('s1');
     if (s1el) {
       s1el.classList.remove('set-reload');
-      var hint = document.getElementById('press-play-btn');
+      var hint = s1el.querySelector('.s1-hint');
       if (hint) hint.textContent = 'Press Play';
     }
     document.body.style.background = '';
@@ -2555,7 +2554,7 @@ function saveSessionState() {
 function restoreS1() {
   var word = document.querySelector('.s1-word');
   var intro = document.querySelector('.s1-intro');
-  var hint = document.getElementById('press-play-btn');
+  var hint = document.querySelector('.s1-hint');
   if (word) word.style.display = '';
   if (intro) intro.style.display = '';
   if (hint) hint.style.display = '';
@@ -2578,7 +2577,7 @@ function restoreS1() {
 function hideS1() {
   var word = document.querySelector('.s1-word');
   var intro = document.querySelector('.s1-intro');
-  var hint = document.getElementById('press-play-btn');
+  var hint = document.querySelector('.s1-hint');
   if (word) word.style.display = 'none';
   if (intro) intro.style.display = 'none';
   if (hint) hint.style.display = 'none';
