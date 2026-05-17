@@ -1555,13 +1555,17 @@ document.getElementById('s1').addEventListener('click', function(e) {
     // Check if signed in within last 24h on this browser — skip panel if so
     var _lastSignin = LS.get('lastSigninTime');
     var _24h = 24 * 60 * 60 * 1000;
-    var _withinDay = _lastSignin && (Date.now() - _lastSignin) < _24h;
+    // Also treat a fresh entryStateTime within 24h as "within day" — covers press play without sign-in panel
+    var _esTimeCheck = parseInt(localStorage.getItem('fynd_entryStateTime') || '0', 10);
+    var _withinDay = (_lastSignin && (Date.now() - _lastSignin) < _24h) || (_esTimeCheck && (Date.now() - _esTimeCheck) < _24h);
     if (_withinDay) {
       // Still within 24h — restore state silently, no sign-in required
-      // Check entry state expiry first — if expired, show entry screen before sets
+      // Check entry state expiry — match universal check logic exactly
       var _esTime = parseInt(localStorage.getItem('fynd_entryStateTime') || '0', 10);
       var _esVal = localStorage.getItem('fynd_entryState');
       var _entryExpired = !_esVal || (_esTime && (Date.now() - _esTime) > _24h);
+      // If has state but no timestamp — not expired
+      if (_esVal && !_esTime) { _entryExpired = false; }
       if (_entryExpired) {
         try { localStorage.removeItem('fynd_entryState'); localStorage.removeItem('fynd_entryStateTime'); } catch(e) {}
         markReturning();
@@ -1844,9 +1848,7 @@ document.getElementById('btn-stop-listen').addEventListener('click', function() 
   clearInterval(heartbeatTimer);
   if (widget) widget.pause();
   stopDot();
-  sess.cur++;
   saveAbandoned();
-  sess.cur--;
   var savedEmail = LS.get('email');
   if (savedEmail) {
     var h = document.getElementById('email-head');
