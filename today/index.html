@@ -409,7 +409,7 @@ html.assign-top, body.assign-top { background: var(--black); }
 <div class="screen active" id="s1">
   <span class="s1-word">Today.</span>
   <p class="s1-intro">Find out what the sound reveals.</p>
-  <button class="s1-hint">Press Play</button>
+  <button class="s1-hint" id="press-play-btn">Press Play</button>
 </div>
 
   <button class="signin-trigger" id="signin-trigger">returning? sign in</button>
@@ -501,7 +501,7 @@ html.assign-top, body.assign-top { background: var(--black); }
         var s1el = document.getElementById('s1');
         if (s1el) {
           s1el.classList.add('set-reload');
-          var hint = s1el.querySelector('.s1-hint');
+          var hint = document.getElementById('press-play-btn');
           if (hint) hint.textContent = 'Press Play';
         }
         var tc = document.getElementById('theme-color');
@@ -1502,7 +1502,7 @@ function doReveal(ps) {
 } // end doReveal
 
 // S1 tap — listener on button directly, screen click does nothing
-document.querySelector('.s1-hint').addEventListener('click', function(e) {
+document.getElementById('press-play-btn').addEventListener('click', function(e) {
   var hint = this;
   // If sign-in panel is open, eat the click — do nothing
   var _panel = document.getElementById('signin-panel');
@@ -2458,7 +2458,7 @@ window.addEventListener('popstate', function(e) {
     var s1el = document.getElementById('s1');
     if (s1el) {
       s1el.classList.remove('set-reload');
-      var hint = s1el.querySelector('.s1-hint');
+      var hint = document.getElementById('press-play-btn');
       if (hint) hint.textContent = 'Press Play';
     }
     document.body.style.background = '';
@@ -2551,7 +2551,7 @@ function saveSessionState() {
 function restoreS1() {
   var word = document.querySelector('.s1-word');
   var intro = document.querySelector('.s1-intro');
-  var hint = document.querySelector('.s1-hint');
+  var hint = document.getElementById('press-play-btn');
   if (word) word.style.display = '';
   if (intro) intro.style.display = '';
   if (hint) hint.style.display = '';
@@ -2574,7 +2574,7 @@ function restoreS1() {
 function hideS1() {
   var word = document.querySelector('.s1-word');
   var intro = document.querySelector('.s1-intro');
-  var hint = document.querySelector('.s1-hint');
+  var hint = document.getElementById('press-play-btn');
   if (word) word.style.display = 'none';
   if (intro) intro.style.display = 'none';
   if (hint) hint.style.display = 'none';
