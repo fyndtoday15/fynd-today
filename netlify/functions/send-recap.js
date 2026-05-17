@@ -15,10 +15,10 @@ const ENTRY_STATES = {
 };
 
 const DIRECTION = {
-  'Stay': 'When you want to stay with the moment.',
-  'Move': "When you're ready to shift from the moment.",
-  'Open': 'When the moment reveals something new.',
-  'Something Else': 'When none of these landed — keep listening.',
+  'Stay': 'This sound showed you where you are.',
+  'Move': 'This sound showed you a way forward.',
+  'Open': 'This sound showed you something new.',
+  'Something Else': 'Nothing landed. Keep listening.',
 };
 
 const SET_NAMES = {
