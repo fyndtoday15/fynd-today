@@ -1561,23 +1561,7 @@ document.getElementById('s1').addEventListener('click', function(e) {
     if (_withinDay) {
       // Still within 24h — restore state silently, no sign-in required
       // Check entry state expiry — match universal check logic exactly
-      var _esTime = parseInt(localStorage.getItem('fynd_entryStateTime') || '0', 10);
-      var _esVal = localStorage.getItem('fynd_entryState');
-      var _entryExpired = !_esVal || (_esTime && (Date.now() - _esTime) > _24h);
-      // If has state but no timestamp — not expired
-      if (_esVal && !_esTime) { _entryExpired = false; }
-      if (_entryExpired) {
-        try { localStorage.removeItem('fynd_entryState'); localStorage.removeItem('fynd_entryStateTime'); } catch(e) {}
-        markReturning();
-        buildList('entry-list', 'stmt', true, function(state) {
-          sess.entryState = state;
-          try { localStorage.setItem('fynd_entryState', state); } catch(e) {}
-          try { localStorage.setItem('fynd_entryStateTime', Date.now().toString()); } catch(e) {}
-          showSetsScreen();
-        });
-        show('s2');
-        return;
-      }
+
       // Entry fresh and within 24h — sync latest state from Airtable silently then go to sets
       markReturning();
       var _syncEmail = LS.get('email') || '';
@@ -1675,22 +1659,7 @@ document.getElementById('s1').addEventListener('click', function(e) {
     show('s2');
   }
 
-  var entryExpired = false;
-  if (isReturning()) {
-    try {
-      var _esTime = parseInt(localStorage.getItem('fynd_entryStateTime') || '0', 10);
-      var _esVal = localStorage.getItem('fynd_entryState');
-      if (_esVal && !_esTime) {
-        // Has state but no timestamp — write now, not expired
-        localStorage.setItem('fynd_entryStateTime', Date.now().toString());
-      } else if (!_esVal || (_esTime && (Date.now() - _esTime) > 24 * 60 * 60 * 1000)) {
-        // No state or timestamp expired — needs fresh entry selection
-        entryExpired = true;
-        localStorage.removeItem('fynd_entryState');
-        localStorage.removeItem('fynd_entryStateTime');
-      }
-    } catch(e) {}
-  }
+  var entryExpired = false; // entry never expires once set
 
   // If recap screen should be restored after refresh — rebuild and show s7
   if (window._restoreRecapScreen) {
@@ -1703,10 +1672,6 @@ document.getElementById('s1').addEventListener('click', function(e) {
         sess.entryState = completedLog.entryState || sess.entryState;
       }
     } catch(e) {}
-    if (entryExpired) {
-      showEntryThenRoute(function() { buildRecap(); show('s7'); });
-      return;
-    }
     buildRecap();
     show('s7');
     return;
@@ -1727,7 +1692,6 @@ document.getElementById('s1').addEventListener('click', function(e) {
       if (again) { again.style.display = 'block'; updateSetButtons(); }
       show('s6');
     }
-    if (entryExpired) { showEntryThenRoute(goToSetsPage); return; }
     goToSetsPage();
     return;
   }
@@ -1740,7 +1704,6 @@ document.getElementById('s1').addEventListener('click', function(e) {
       if (rn2) rn2.style.display = 'block';
       show('s6');
     }
-    if (entryExpired) { showEntryThenRoute(goToEmailPage); return; }
     goToEmailPage();
     return;
   }
@@ -1759,7 +1722,6 @@ document.getElementById('s1').addEventListener('click', function(e) {
       if (again) again.style.display = 'none';
       show('s6');
     }
-    if (entryExpired) { showEntryThenRoute(goToAllComplete); return; }
     goToAllComplete();
     return;
   }
@@ -1796,7 +1758,6 @@ document.getElementById('s1').addEventListener('click', function(e) {
       if (again) { again.style.display = 'block'; updateSetButtons(); }
       show('s6');
     }
-    if (entryExpired) { showEntryThenRoute(goToResumeSetPage); return; }
     goToResumeSetPage();
     return;
   }
@@ -2426,6 +2387,8 @@ window.addEventListener('popstate', function(e) {
     // No email = first set, back goes to Today. not sets
     if (!LS.get('email')) {
       saveAbandoned();
+      window._resumeCur = sess.cur;
+      window._resumeMode = true;
       history.pushState({ screen: 's1' }, '', window.location.href);
       _screenHistory.push('s1');
       window._skipEntry = true;
@@ -2473,6 +2436,7 @@ window.addEventListener('popstate', function(e) {
     document.body.style.background = '';
     var tc = document.getElementById('theme-color');
     if (tc) tc.content = '#FCFBF4';
+    window._skipEntry = true;
     _origShow('s1');
   } else {
     _origShow(prev);
