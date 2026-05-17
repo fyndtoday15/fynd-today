@@ -1757,40 +1757,20 @@ document.getElementById('s1').addEventListener('click', function(e) {
     return;
   }
 
-  // Returning user with abandoned session — route to sets page
-  // Resume Set X button handles navigating back into listen
+  // Returning user with abandoned session — skip entry statement, go straight to music
   if (window._resumeMode) {
-    // MVP 1 with no email yet — skip sets page, go straight back to listening
-    if (sess.playlist === 'MVP 1' && !LS.get('email')) {
-      window._resumeMode = false;
-      sess.cur = window._resumeCur || 0;
-      window._resumeCur = undefined;
-      try {
-        var silentAudioM = new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAA' +
-          'EAAQARAAAAAgABAAIAZGF0YQAAAAA=');
-        silentAudioM.volume = 0;
-        silentAudioM.play().catch(function(){});
-      } catch(e) {}
-      if (widgetReady) { widget.skip(sess.tOrder[sess.cur]); sess._primedIdx = sess.tOrder[sess.cur]; }
-      show('s3');
-      setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 300);
-      return;
-    }
     window._resumeMode = false;
-    function goToResumeSetPage() {
-      var h = document.getElementById('email-head');
-      if (h) { h.textContent = "You'll hear when something new arrives."; h.style.fontSize = '18px'; h.style.opacity = '0.6'; }
-      document.getElementById('email-in').style.display = 'none';
-      document.getElementById('name-in').style.display = 'none';
-      document.getElementById('email-sub').style.display = 'none';
-      var cl3 = document.getElementById('consent-label'); if (cl3) cl3.style.display = 'none';
-      var rn3 = document.getElementById('return-note'); if (rn3) rn3.style.display = 'none';
-      var again = document.getElementById('listen-again');
-      if (again) { again.style.display = 'block'; updateSetButtons(); }
-      show('s6');
-    }
-    if (entryExpired) { showEntryThenRoute(goToResumeSetPage); return; }
-    goToResumeSetPage();
+    sess.cur = window._resumeCur || 0;
+    window._resumeCur = undefined;
+    try {
+      var silentAudioM = new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAA' +
+        'EAAQARAAAAAgABAAIAZGF0YQAAAAA=');
+      silentAudioM.volume = 0;
+      silentAudioM.play().catch(function(){});
+    } catch(e) {}
+    if (widgetReady) { widget.skip(sess.tOrder[sess.cur]); sess._primedIdx = sess.tOrder[sess.cur]; }
+    show('s3');
+    setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 300);
     return;
   }
 
@@ -1847,6 +1827,10 @@ document.getElementById('btn-stop-listen').addEventListener('click', function() 
   saveSessionState();
   // Reset screen history so back from s6 goes to Today. not entry statement
   _screenHistory = ['s1'];
+  // Set resume flags so pressing Play goes straight back to this song
+  window._skipEntry = true;
+  window._resumeMode = true;
+  window._resumeCur = sess.cur;
   var savedEmail = LS.get('email');
   if (savedEmail) {
     var h = document.getElementById('email-head');
