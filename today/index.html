@@ -1911,11 +1911,26 @@ document.getElementById('email-sub').addEventListener('click', function() {
   .then(function(result) { })
   .catch(function(err) { console.error('Email log error:', err); });
 
-  // Send welcome email
+  // Send welcome email — check for duplicate first
   fetch('/.netlify/functions/send-welcome', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email: email, firstName: firstName }),
+  }).then(function(r) { return r.json(); }).then(function(result) {
+    if (result.duplicate) {
+      // Email already exists — undo submission, show error
+      LS.set('email', null);
+      LS.set('firstName', null);
+      var emailSub = document.getElementById('email-sub');
+      if (emailSub) emailSub.style.display = '';
+      var emailError = document.getElementById('email-error');
+      if (emailError) {
+        emailError.textContent = 'An account with that email already exists.';
+        emailError.style.display = 'block';
+      }
+      var emailIn = document.getElementById('email-in');
+      if (emailIn) emailIn.value = '';
+    }
   }).catch(function(err) { console.error('Welcome email error:', err); });
 
   // Send recap email for Set 1 (email just collected) — read from localStorage, sess may have reset on mobile
