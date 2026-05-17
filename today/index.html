@@ -1504,7 +1504,8 @@ function doReveal(ps) {
 document.getElementById('s1').addEventListener('click', function(e) {
   // Only fire from the Press Play button or programmatic clicks — not anywhere on the screen
   var hint = document.querySelector('.s1-hint');
-  if (hint && e.target !== hint && !hint.contains(e.target) && !window._signinBypass) {
+  var clickedHint = hint && (e.target === hint || hint.contains(e.target) || (e.target.closest && e.target.closest('.s1-hint')));
+  if (!clickedHint && !window._signinBypass) {
     return;
   }
   // If sign-in panel is open, eat the click — do nothing
@@ -1711,7 +1712,7 @@ document.getElementById('s1').addEventListener('click', function(e) {
     window._restoreSetScreen = false;
     function goToSetsPage() {
       var h = document.getElementById('email-head');
-      if (h) { h.textContent = "Recognize every time you press play."; h.style.fontSize = '18px'; h.style.opacity = '0.6'; }
+      if (h) { h.style.display = 'none'; }
       document.getElementById('email-in').style.display = 'none';
       document.getElementById('name-in').style.display = 'none';
       document.getElementById('email-sub').style.display = 'none';
@@ -1743,7 +1744,7 @@ document.getElementById('s1').addEventListener('click', function(e) {
   if (window._allSetsComplete) {
     function goToAllComplete() {
       var h = document.getElementById('email-head');
-      if (h) { h.textContent = "Recognize every time you press play."; h.style.fontSize = '18px'; h.style.opacity = '0.6'; }
+      if (h) { h.style.display = 'none'; }
       document.getElementById('email-in').style.display = 'none';
       document.getElementById('name-in').style.display = 'none';
       document.getElementById('email-sub').style.display = 'none';
@@ -1780,7 +1781,7 @@ document.getElementById('s1').addEventListener('click', function(e) {
     window._resumeMode = false;
     function goToResumeSetPage() {
       var h = document.getElementById('email-head');
-      if (h) { h.textContent = "Recognize every time you press play."; h.style.fontSize = '18px'; h.style.opacity = '0.6'; }
+      if (h) { h.style.display = 'none'; }
       document.getElementById('email-in').style.display = 'none';
       document.getElementById('name-in').style.display = 'none';
       document.getElementById('email-sub').style.display = 'none';
@@ -1848,7 +1849,7 @@ document.getElementById('btn-stop-listen').addEventListener('click', function() 
   var savedEmail = LS.get('email');
   if (savedEmail) {
     var h = document.getElementById('email-head');
-    if (h) { h.textContent = "Recognize every time you press play."; h.style.fontSize = '18px'; h.style.opacity = '0.6'; }
+    if (h) { h.style.display = 'none'; }
     document.getElementById('email-in').style.display = 'none';
     document.getElementById('name-in').style.display = 'none';
     document.getElementById('email-sub').style.display = 'none';
@@ -1871,7 +1872,7 @@ document.getElementById('recap-continue').addEventListener('click', function() {
   if (savedEmail) {
     // Show brief confirmation then listen again
     var h = document.getElementById('email-head');
-    if (h) { h.textContent = "Recognize every time you press play."; h.style.fontSize = '18px'; h.style.opacity = '0.6'; }
+    if (h) { h.style.display = 'none'; }
     document.getElementById('email-in').style.display = 'none';
     document.getElementById('name-in').style.display = 'none';
     document.getElementById('email-sub').style.display = 'none';
@@ -1921,9 +1922,7 @@ document.getElementById('email-sub').addEventListener('click', function() {
   if (document.getElementById('consent-error')) document.getElementById('consent-error').style.display = 'none';
   var rnSub = document.getElementById('return-note'); if (rnSub) rnSub.style.display = 'none';
   var h = document.getElementById('email-head');
-  h.textContent = "Recognize every time you press play.";
-  h.style.fontSize = '18px';
-  h.style.opacity = '0.6';
+  if (h) { h.style.display = 'none'; }
   // Show listen again button immediately with confirmation
   var again = document.getElementById('listen-again');
   if (again) {
@@ -1987,7 +1986,7 @@ function showSetsScreen() {
   var _sp = document.getElementById('signin-panel');
   if (_sp) { _sp.classList.remove('open'); _sp.style.display = 'none'; }
   var h = document.getElementById('email-head');
-  if (h) { h.textContent = "Recognize every time you press play."; h.style.fontSize = '18px'; h.style.opacity = '0.6'; }
+  if (h) { h.style.display = 'none'; }
   var emailIn = document.getElementById('email-in'); if (emailIn) emailIn.style.display = 'none';
   var nameIn = document.getElementById('name-in'); if (nameIn) nameIn.style.display = 'none';
   var emailSub = document.getElementById('email-sub'); if (emailSub) emailSub.style.display = 'none';
