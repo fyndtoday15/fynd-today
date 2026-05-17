@@ -2323,7 +2323,7 @@ history.pushState({ screen: 's1' }, '', window.location.href);
 window.addEventListener('popstate', function(e) {
   if (_navLock) return;
   _navLock = true;
-  setTimeout(function() { _navLock = false; }, 500);
+  setTimeout(function() { _navLock = false; }, 100);
 
   // If currently on listen screen — stop music, record abandoned, go to sets page
   // Must check BEFORE boundary so back from listen doesn't exit the app
@@ -2409,6 +2409,15 @@ window.addEventListener('popstate', function(e) {
   if (_screenHistory.length > 1) _screenHistory.pop();
   var prev = _screenHistory[_screenHistory.length - 1] || 's1';
 
+  // If we've backed all the way to s1 with nothing before it, exit to landing
+  if (prev === 's1' && _screenHistory.length === 1 && (!e.state || e.state.screen === 's1')) {
+    var currentActive2 = document.querySelector('.screen.active');
+    if (currentActive2 && currentActive2.id === 's1') {
+      window.location.href = 'https://fyndtoday.com';
+      return;
+    }
+  }
+
   var _panel = document.getElementById('signin-panel');
   if (_panel && _panel.classList.contains('open')) {
     _panel.classList.remove('open');
@@ -2453,7 +2462,34 @@ window.addEventListener('popstate', function(e) {
   }
 });
 
-// ── HEARTBEAT — patch active record every 10s ────────────────────────────────
+// Safari BFCache + forward button — if page is restored from cache while listen screen is active,
+// route to sets page instead (listen screen with no music is a broken state)
+window.addEventListener('pageshow', function(e) {
+  if (e.persisted) {
+    // Page restored from BFCache (Safari back/forward)
+    var currentActive = document.querySelector('.screen.active');
+    if (currentActive && currentActive.id === 's3') {
+      // Listen screen restored from cache — stop any audio, go to sets
+      if (widget) { try { widget.pause(); } catch(ex) {} }
+      stopDot();
+      if (LS.get('email')) {
+        showSetsScreen();
+      } else {
+        window._skipEntry = true;
+        var _ab = getAbandoned(sess.playlist);
+        if (_ab) {
+          sess.tOrder = _ab.tOrder;
+          sess.log = _ab.log || [];
+          window._resumeCur = _ab.cur;
+          window._resumeMode = true;
+        }
+        _origShow('s1');
+      }
+    }
+  }
+});
+
+
 function sendHeartbeat() {
   if (!sess.listenStart) return;
   var dur = Math.round((Date.now() - sess.listenStart) / 1000);
