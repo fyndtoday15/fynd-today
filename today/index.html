@@ -59,7 +59,7 @@ html.assign-top, body.assign-top { background: var(--black); }
 #s1.set-reload { background: var(--black); }
 #s1.set-reload .s1-word,
 #s1.set-reload .s1-intro { display: none; }
-#s1.set-reload .s1-hint { color: var(--bg); }
+#s1.set-reload .s1-hint { color: var(--bg); border-color: rgba(255,255,255,0.25); }
 #s1.set-reload .signin-trigger,
 #s1.set-reload .signin-panel { display: none !important; }
 @keyframes ph { 0%,100%{opacity:.4} 50%{opacity:.8} }
@@ -563,7 +563,7 @@ html.assign-top, body.assign-top { background: var(--black); }
   <div id="consent-error" style="display:none;font-size:11px;color:rgba(0,0,0,0.6);margin-top:6px;letter-spacing:0.04em;">Please check the box to continue.</div>
   <button class="email-sub" id="email-sub">I'm in.</button>
   <div id="listen-again" style="display:none; margin-top: 48px; text-align: center; width: 100%;">
-    <div style="font-size: 13px; color: var(--black); opacity: 0.6; letter-spacing: 0.01em; margin-bottom: 28px;">Recognize every time you press play.</div>
+    <div style="font-size: 13px; color: var(--black); opacity: 0.55; letter-spacing: 0.01em; margin-bottom: 24px;">Recognize every time you press play.</div>
     <div style="font-size: 11px; color: var(--black); opacity: 1; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 20px;">Play another set</div>
     <button class="set-btn" id="set-btn-1" onclick="loadSet('MVP 1')">Set 1</button>
     <button class="set-btn" onclick="loadSet('MVP 1.2')">Set 2</button>
