@@ -2425,8 +2425,10 @@ window.addEventListener('popstate', function(e) {
     resetPanel();
     // No email = first set, back goes to Today. not sets
     if (!LS.get('email')) {
+      saveAbandoned();
       history.pushState({ screen: 's1' }, '', window.location.href);
       _screenHistory.push('s1');
+      window._skipEntry = true;
       _origShow('s1');
     } else {
       history.pushState({ screen: 's6' }, '', window.location.href);
