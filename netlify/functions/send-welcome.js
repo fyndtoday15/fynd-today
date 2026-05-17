@@ -52,9 +52,16 @@ exports.handler = async function(event, context) {
       headers: { 'api-key': BREVO_API_KEY },
     });
 
-    const contactExists = checkResponse.ok; // 200 = exists, 404 = new
+    if (checkResponse.ok) {
+      // Contact already exists — block entirely, do not overwrite, do not send welcome email
+      return {
+        statusCode: 200,
+        headers: corsHeader,
+        body: JSON.stringify({ success: false, duplicate: true }),
+      };
+    }
 
-    // Always upsert the contact (update name if exists, create if not)
+    // New contact — create in Brevo
     await fetch('https://api.brevo.com/v3/contacts', {
       method: 'POST',
       headers: {
@@ -64,41 +71,39 @@ exports.handler = async function(event, context) {
       body: JSON.stringify({
         email: email,
         attributes: { FIRSTNAME: firstName },
-        updateEnabled: true,
+        updateEnabled: false,
       }),
     });
 
-    // Only send welcome email if this is a new contact
-    if (!contactExists) {
-      const emailResponse = await fetch('https://api.brevo.com/v3/smtp/email', {
-        method: 'POST',
-        headers: {
-          'api-key': BREVO_API_KEY,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          templateId: 1,
-          to: [{ email: email, name: firstName }],
-          params: { firstName: firstName },
-        }),
-      });
+    // Send welcome email
+    const emailResponse = await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: {
+        'api-key': BREVO_API_KEY,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        templateId: 1,
+        to: [{ email: email, name: firstName }],
+        params: { firstName: firstName },
+      }),
+    });
 
-      const result = await emailResponse.json();
+    const result = await emailResponse.json();
 
-      if (!emailResponse.ok) {
-        console.error('Brevo welcome error:', result);
-        return {
-          statusCode: 500,
-          headers: corsHeader,
-          body: JSON.stringify(result),
-        };
-      }
+    if (!emailResponse.ok) {
+      console.error('Brevo welcome error:', result);
+      return {
+        statusCode: 500,
+        headers: corsHeader,
+        body: JSON.stringify(result),
+      };
     }
 
     return {
       statusCode: 200,
       headers: corsHeader,
-      body: JSON.stringify({ success: true, existing: contactExists }),
+      body: JSON.stringify({ success: true, duplicate: false }),
     };
 
   } catch(err) {
