@@ -2436,6 +2436,16 @@ window.addEventListener('popstate', function(e) {
     document.body.style.background = '';
     var tc = document.getElementById('theme-color');
     if (tc) tc.content = '#FCFBF4';
+    // Restore abandoned position so same song plays on press play
+    var _ab = getAbandoned(sess.playlist);
+    if (_ab) {
+      sess.id = _ab.sessionId;
+      sess.tOrder = _ab.tOrder;
+      sess.log = _ab.log || [];
+      sess.entryState = _ab.entryState || sess.entryState;
+      window._resumeCur = _ab.cur;
+      window._resumeMode = true;
+    }
     window._skipEntry = true;
     _origShow('s1');
   } else {
