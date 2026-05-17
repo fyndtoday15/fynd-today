@@ -1845,23 +1845,20 @@ document.getElementById('btn-stop-listen').addEventListener('click', function() 
   // Save at current position — do NOT increment, they should resume this song
   saveAbandoned();
   saveSessionState();
-  // Reset screen history so back always goes to Today. not entry statement
+  // Reset screen history so back from s6 goes to Today. not entry statement
   _screenHistory = ['s1'];
   var savedEmail = LS.get('email');
-  if (!savedEmail) {
-    // No email — go back to Today. not sets
-    show('s1');
-    return;
+  if (savedEmail) {
+    var h = document.getElementById('email-head');
+    if (h) { h.textContent = "You'll hear when something new arrives."; h.style.fontSize = '18px'; h.style.opacity = '0.6'; }
+    document.getElementById('email-in').style.display = 'none';
+    document.getElementById('name-in').style.display = 'none';
+    document.getElementById('email-sub').style.display = 'none';
+    var clS = document.getElementById('consent-label'); if (clS) clS.style.display = 'none';
+    var rnS = document.getElementById('return-note'); if (rnS) rnS.style.display = 'none';
+    var again = document.getElementById('listen-again');
+    if (again) { again.style.display = 'block'; updateSetButtons(); }
   }
-  var h = document.getElementById('email-head');
-  if (h) { h.textContent = "You'll hear when something new arrives."; h.style.fontSize = '18px'; h.style.opacity = '0.6'; }
-  document.getElementById('email-in').style.display = 'none';
-  document.getElementById('name-in').style.display = 'none';
-  document.getElementById('email-sub').style.display = 'none';
-  var clS = document.getElementById('consent-label'); if (clS) clS.style.display = 'none';
-  var rnS = document.getElementById('return-note'); if (rnS) rnS.style.display = 'none';
-  var again = document.getElementById('listen-again');
-  if (again) { again.style.display = 'block'; updateSetButtons(); }
   show('s6');
 });
 
