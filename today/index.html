@@ -57,7 +57,24 @@ html.assign-top, body.assign-top { background: var(--black); }
 #s1.set-reload { background: var(--black); }
 #s1.set-reload .s1-word,
 #s1.set-reload .s1-intro { display: none; }
-#s1.set-reload .s1-hint { color: var(--bg); }
+#s1.set-reload .s1-hint {
+  position: absolute;
+  top: 50%; left: 50%; transform: translateX(-50%) translateY(-50%);
+  color: var(--bg);
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 2px;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  padding: 10px 20px;
+  white-space: nowrap;
+  opacity: 0.65;
+  animation: none;
+  transition: background 0.2s ease;
+  z-index: 10;
+  display: block;
+}
+#s1.set-reload .s1-hint:active { background: rgba(255,255,255,0.12); }
 #s1.set-reload .signin-trigger,
 #s1.set-reload .signin-panel { display: none !important; }
 @keyframes ph { 0%,100%{opacity:.4} 50%{opacity:.8} }
