@@ -1017,7 +1017,6 @@ function playTrack(idx) {
     startDot();
     // Always skip to correct track, seek to start, then play
     widget.skip(idx);
-    widget.seekTo(0);
     if (sess._gestureUnlocked) {
       widget.play();
     }
@@ -2493,7 +2492,7 @@ window.addEventListener('pageshow', function(e) {
     // Page restored from BFCache (Safari back/forward)
     var currentActive = document.querySelector('.screen.active');
     if (currentActive && currentActive.id === 's3') {
-      // Listen screen restored from cache — stop any audio, go to sets
+      // Listen screen restored from cache — stop any audio, go to sets or today
       if (widget) { try { widget.pause(); } catch(ex) {} }
       stopDot();
       if (LS.get('email')) {
@@ -2508,6 +2507,18 @@ window.addEventListener('pageshow', function(e) {
           window._resumeMode = true;
         }
         _origShow('s1');
+      }
+    } else if (currentActive && currentActive.id === 's1') {
+      // Today screen restored from BFCache — set skipEntry so press play skips entry
+      window._skipEntry = true;
+      var _ab2 = getAbandoned(sess.playlist);
+      if (_ab2) {
+        sess.id = _ab2.sessionId;
+        sess.tOrder = _ab2.tOrder;
+        sess.log = _ab2.log || [];
+        sess.entryState = _ab2.entryState || sess.entryState;
+        window._resumeCur = _ab2.cur;
+        window._resumeMode = true;
       }
     }
   }
@@ -2807,129 +2818,98 @@ initSC();
 
 // ── VISIBILITY CHANGE — fire beacon + write endTime on hide ─────────────────
 document.addEventListener('visibilitychange', function() {
-  var isMobile = /iP(hone|ad|od)/.test(navigator.userAgent);
-
-  if (document.hidden) {
-    // Tab going to background
-    if (!sess.listenStart) return;
-    var now = Date.now();
-    var dur = Math.round((now - sess.listenStart) / 1000);
-
-    // Mobile only — pause the timer to prevent duration drift on restore
-    if (isMobile) {
-      sess._elapsedBeforePause = (sess._elapsedBeforePause || 0) + (now - sess.listenStart);
-      sess._listenStartSnapshot = sess.listenStart;
-      sess.listenStart = null;
-      clearInterval(heartbeatTimer);
+  if (!document.hidden) return;
+  if (!sess.listenStart) return;
+  var now = Date.now();
+  var dur = Math.round((now - sess.listenStart) / 1000);
+  var ti = sess.tOrder ? sess.tOrder[sess.cur] : undefined;
+  if (ti === undefined) return;
+  var tr = getTrack(sess.playlist, ti);
+  if (!tr) return;
+  var sessionTrackId = 'T00' + (sess.cur + 1);
+  var trackTitle = tr.title + ' \u2014 ' + tr.artist;
+  var date = new Date().toISOString().slice(0,10);
+  // Write endTime snapshot to localStorage — recovery fallback for all browsers
+  try {
+    var _pa = JSON.parse(localStorage.getItem('fynd_pendingAbandoned'));
+    if (_pa) {
+      _pa.endTime = now;
+      localStorage.setItem('fynd_pendingAbandoned', JSON.stringify(_pa));
+    } else {
+      localStorage.setItem('fynd_pendingAbandoned', JSON.stringify({
+        sessionId: sess.id,
+        email: LS.get('email') || '',
+        firstName: LS.get('firstName') || '',
+        entryState: sess.entryState || '',
+        trackId: sessionTrackId,
+        trackTitle: trackTitle,
+        startTime: sess.listenStart,
+        endTime: now,
+        date: date,
+        playlist: sess.playlist,
+        reaction: sess.reaction || '',
+        replay: sess.replay ? 'Yes' : '',
+        triggered: sess.triggered || '',
+        visitNumber: window._visitNumber || 1,
+        daysSinceLastVisit: window._daysSinceLastVisit,
+      }));
     }
-
-    var ti = sess.tOrder ? sess.tOrder[sess.cur] : undefined;
-    if (ti === undefined) return;
-    var tr = getTrack(sess.playlist, ti);
-    if (!tr) return;
-    var sessionTrackId = 'T00' + (sess.cur + 1);
-    var trackTitle = tr.title + ' — ' + tr.artist;
-    var date = new Date().toISOString().slice(0,10);
-
-    // Write endTime snapshot to localStorage — recovery fallback for all browsers
+  } catch(e) {}
+  // Fire beacon on mobile only — desktop pagehide is reliable so beacon not needed there
+  // On desktop, visibilitychange fires on window/tab switching which would write Abandoned incorrectly
+  var isMobile = /iP(hone|ad|od)/.test(navigator.userAgent);
+  if (!isMobile) return;
+  if (sess._abandonSent) return;
+  var vcPayload = sess._activeRecordId ? JSON.stringify({
+    trackPatch: true,
+    recordId: sess._activeRecordId,
+    duration: dur,
+    postState: 'Abandoned',
+    reaction: sess.reaction || '',
+    replay: sess.replay ? 'Yes' : '',
+    triggered: sess.triggered || '',
+    email: LS.get('email') || '',
+    firstName: LS.get('firstName') || '',
+  }) : JSON.stringify({
+    heartbeatUpdate: true,
+    sessionId: sess.id,
+    email: LS.get('email') || '',
+    firstName: LS.get('firstName') || '',
+    entryState: sess.entryState || '',
+    trackId: sessionTrackId,
+    trackTitle: trackTitle,
+    playlist: sess.playlist,
+    duration: dur,
+    postState: 'Abandoned',
+    date: date,
+    reaction: sess.reaction || '',
+    replay: sess.replay ? 'Yes' : '',
+    triggered: sess.triggered || '',
+    visitNumber: window._visitNumber || 1,
+    daysSinceLastVisit: window._daysSinceLastVisit,
+  });
+  var beaconSent = false;
+  if (navigator.sendBeacon) {
     try {
-      var _pa = JSON.parse(localStorage.getItem('fynd_pendingAbandoned'));
-      if (_pa) {
-        _pa.endTime = now;
-        localStorage.setItem('fynd_pendingAbandoned', JSON.stringify(_pa));
-      } else {
-        localStorage.setItem('fynd_pendingAbandoned', JSON.stringify({
-          sessionId: sess.id,
-          email: LS.get('email') || '',
-          firstName: LS.get('firstName') || '',
-          entryState: sess.entryState || '',
-          trackId: sessionTrackId,
-          trackTitle: trackTitle,
-          startTime: sess._listenStartSnapshot || now,
-          endTime: now,
-          date: date,
-          playlist: sess.playlist,
-          reaction: sess.reaction || '',
-          replay: sess.replay ? 'Yes' : '',
-          triggered: sess.triggered || '',
-          visitNumber: window._visitNumber || 1,
-          daysSinceLastVisit: window._daysSinceLastVisit,
-        }));
+      beaconSent = navigator.sendBeacon('/.netlify/functions/log-session', new Blob([vcPayload], { type: 'application/json' }));
+      if (beaconSent) {
+        sess._abandonSent = true;
+        try { localStorage.removeItem('fynd_pendingAbandoned'); } catch(e) {}
       }
     } catch(e) {}
-
-    // Fire beacon on mobile only — desktop pagehide handles this correctly
-    if (!isMobile) return;
-    if (sess._abandonSent) return;
-    var vcPayload = sess._activeRecordId ? JSON.stringify({
-      trackPatch: true,
-      recordId: sess._activeRecordId,
-      duration: dur,
-      postState: 'Abandoned',
-      reaction: sess.reaction || '',
-      replay: sess.replay ? 'Yes' : '',
-      triggered: sess.triggered || '',
-      email: LS.get('email') || '',
-      firstName: LS.get('firstName') || '',
-    }) : JSON.stringify({
-      heartbeatUpdate: true,
-      sessionId: sess.id,
-      email: LS.get('email') || '',
-      firstName: LS.get('firstName') || '',
-      entryState: sess.entryState || '',
-      trackId: sessionTrackId,
-      trackTitle: trackTitle,
-      playlist: sess.playlist,
-      duration: dur,
-      postState: 'Abandoned',
-      date: date,
-      reaction: sess.reaction || '',
-      replay: sess.replay ? 'Yes' : '',
-      triggered: sess.triggered || '',
-      visitNumber: window._visitNumber || 1,
-      daysSinceLastVisit: window._daysSinceLastVisit,
-    });
-    // Try sendBeacon first
-    var beaconSent = false;
-    if (navigator.sendBeacon) {
-      try {
-        beaconSent = navigator.sendBeacon('/.netlify/functions/log-session', new Blob([vcPayload], { type: 'application/json' }));
-        if (beaconSent) {
-          sess._abandonSent = true;
-          try { localStorage.removeItem('fynd_pendingAbandoned'); } catch(e) {}
-        }
-      } catch(e) {}
-    }
-    // Safari iOS fallback — synchronous XHR fires even when tab is being killed
-    if (!beaconSent) {
-      try {
-        var xhr = new XMLHttpRequest();
-        xhr.open('POST', '/.netlify/functions/log-session', false);
-        xhr.setRequestHeader('Content-Type', 'application/json');
-        xhr.send(vcPayload);
-        if (xhr.status === 200) {
-          sess._abandonSent = true;
-          try { localStorage.removeItem('fynd_pendingAbandoned'); } catch(e) {}
-        }
-      } catch(e) {}
-    }
-
-  } else {
-    // Tab coming back to foreground — mobile only: resume timer
-    if (!isMobile) return;
-    if (!sess._listenStartSnapshot) return;
-    // Reset abandonSent so if they leave again it fires correctly
-    sess._abandonSent = false;
-    // Resume listen timer from where it paused
-    sess.listenStart = Date.now() - (sess._elapsedBeforePause || 0);
-    sess._elapsedBeforePause = 0;
-    sess._listenStartSnapshot = null;
-    // Restart heartbeat
-    clearInterval(heartbeatTimer);
-    heartbeatTimer = setInterval(function() {
-      if (!sess.listenStart) { clearInterval(heartbeatTimer); return; }
-      sendHeartbeat();
-    }, 5000);
+  }
+  // Safari iOS fallback — synchronous XHR fires even when tab is being killed
+  if (!beaconSent) {
+    try {
+      var xhr = new XMLHttpRequest();
+      xhr.open('POST', '/.netlify/functions/log-session', false);
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.send(vcPayload);
+      if (xhr.status === 200) {
+        sess._abandonSent = true;
+        try { localStorage.removeItem('fynd_pendingAbandoned'); } catch(e) {}
+      }
+    } catch(e) {}
   }
 });
 
