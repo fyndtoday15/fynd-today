@@ -409,7 +409,7 @@ html.assign-top, body.assign-top { background: var(--black); }
 <div class="screen active" id="s1">
   <span class="s1-word">Today.</span>
   <p class="s1-intro">Find out what the sound reveals.</p>
-  <button class="s1-hint" id="press-play-btn">Press Play</button>
+  <button class="s1-hint" id="press-play-btn" onclick="handlePressPlay(event)">Press Play</button>
 </div>
 
   <button class="signin-trigger" id="signin-trigger">returning? sign in</button>
@@ -1501,15 +1501,9 @@ function doReveal(ps) {
   }, 700); // wait for answers to fade out
 } // end doReveal
 
-// S1 tap — listener on screen, fires only when click lands inside button bounds
-document.getElementById('s1').addEventListener('click', function(e) {
+// S1 tap handler — called directly from button onclick
+function handlePressPlay(e) {
   var hint = document.getElementById('press-play-btn');
-  if (!hint) return;
-  // Use bounding rect — works regardless of opacity or animation state
-  var r = hint.getBoundingClientRect();
-  var inside = e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
-  if (!inside && !window._signinBypass) return;
-  // If sign-in panel is open, eat the click — do nothing
   var _panel = document.getElementById('signin-panel');
   if (_panel.classList.contains('open') || _panel.style.display === 'flex') {
     return;
@@ -1823,7 +1817,7 @@ document.getElementById('s1').addEventListener('click', function(e) {
     setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 100);
   });
   show('s2');
-});
+}
 
 // Continue button
 // Stop for now — save state and go to sets/email
