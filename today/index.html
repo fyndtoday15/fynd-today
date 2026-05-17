@@ -1501,9 +1501,14 @@ function doReveal(ps) {
   }, 700); // wait for answers to fade out
 } // end doReveal
 
-// S1 tap — listener on button directly, screen click does nothing
-document.getElementById('press-play-btn').addEventListener('click', function(e) {
-  var hint = this;
+// S1 tap — listener on screen, fires only when click lands inside button bounds
+document.getElementById('s1').addEventListener('click', function(e) {
+  var hint = document.getElementById('press-play-btn');
+  if (!hint) return;
+  // Use bounding rect — works regardless of opacity or animation state
+  var r = hint.getBoundingClientRect();
+  var inside = e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
+  if (!inside && !window._signinBypass) return;
   // If sign-in panel is open, eat the click — do nothing
   var _panel = document.getElementById('signin-panel');
   if (_panel.classList.contains('open') || _panel.style.display === 'flex') {
