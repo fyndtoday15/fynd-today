@@ -408,7 +408,7 @@ html.assign-top, body.assign-top { background: var(--black); }
 <div class="screen active" id="s1">
   <span class="s1-word">Today.</span>
   <p class="s1-intro">Find out what the sound reveals.</p>
-  <span class="s1-hint">Press Play</span>
+  <button class="s1-hint">Press Play</button>
 </div>
 
   <button class="signin-trigger" id="signin-trigger">returning? sign in</button>
@@ -1711,7 +1711,7 @@ document.getElementById('s1').addEventListener('click', function(e) {
     window._restoreSetScreen = false;
     function goToSetsPage() {
       var h = document.getElementById('email-head');
-      if (h) { h.textContent = "You'll hear when something new arrives."; h.style.fontSize = '18px'; h.style.opacity = '0.6'; }
+      if (h) { h.textContent = "Recognize every time you press play."; h.style.fontSize = '18px'; h.style.opacity = '0.6'; }
       document.getElementById('email-in').style.display = 'none';
       document.getElementById('name-in').style.display = 'none';
       document.getElementById('email-sub').style.display = 'none';
@@ -1743,7 +1743,7 @@ document.getElementById('s1').addEventListener('click', function(e) {
   if (window._allSetsComplete) {
     function goToAllComplete() {
       var h = document.getElementById('email-head');
-      if (h) { h.textContent = "You'll hear when something new arrives."; h.style.fontSize = '18px'; h.style.opacity = '0.6'; }
+      if (h) { h.textContent = "Recognize every time you press play."; h.style.fontSize = '18px'; h.style.opacity = '0.6'; }
       document.getElementById('email-in').style.display = 'none';
       document.getElementById('name-in').style.display = 'none';
       document.getElementById('email-sub').style.display = 'none';
@@ -1780,7 +1780,7 @@ document.getElementById('s1').addEventListener('click', function(e) {
     window._resumeMode = false;
     function goToResumeSetPage() {
       var h = document.getElementById('email-head');
-      if (h) { h.textContent = "You'll hear when something new arrives."; h.style.fontSize = '18px'; h.style.opacity = '0.6'; }
+      if (h) { h.textContent = "Recognize every time you press play."; h.style.fontSize = '18px'; h.style.opacity = '0.6'; }
       document.getElementById('email-in').style.display = 'none';
       document.getElementById('name-in').style.display = 'none';
       document.getElementById('email-sub').style.display = 'none';
@@ -1848,7 +1848,7 @@ document.getElementById('btn-stop-listen').addEventListener('click', function() 
   var savedEmail = LS.get('email');
   if (savedEmail) {
     var h = document.getElementById('email-head');
-    if (h) { h.textContent = "You'll hear when something new arrives."; h.style.fontSize = '18px'; h.style.opacity = '0.6'; }
+    if (h) { h.textContent = "Recognize every time you press play."; h.style.fontSize = '18px'; h.style.opacity = '0.6'; }
     document.getElementById('email-in').style.display = 'none';
     document.getElementById('name-in').style.display = 'none';
     document.getElementById('email-sub').style.display = 'none';
@@ -1871,7 +1871,7 @@ document.getElementById('recap-continue').addEventListener('click', function() {
   if (savedEmail) {
     // Show brief confirmation then listen again
     var h = document.getElementById('email-head');
-    if (h) { h.textContent = "You'll hear when something new arrives."; h.style.fontSize = '18px'; h.style.opacity = '0.6'; }
+    if (h) { h.textContent = "Recognize every time you press play."; h.style.fontSize = '18px'; h.style.opacity = '0.6'; }
     document.getElementById('email-in').style.display = 'none';
     document.getElementById('name-in').style.display = 'none';
     document.getElementById('email-sub').style.display = 'none';
@@ -1921,7 +1921,7 @@ document.getElementById('email-sub').addEventListener('click', function() {
   if (document.getElementById('consent-error')) document.getElementById('consent-error').style.display = 'none';
   var rnSub = document.getElementById('return-note'); if (rnSub) rnSub.style.display = 'none';
   var h = document.getElementById('email-head');
-  h.textContent = "You'll hear when something new arrives.";
+  h.textContent = "Recognize every time you press play.";
   h.style.fontSize = '18px';
   h.style.opacity = '0.6';
   // Show listen again button immediately with confirmation
@@ -1987,7 +1987,7 @@ function showSetsScreen() {
   var _sp = document.getElementById('signin-panel');
   if (_sp) { _sp.classList.remove('open'); _sp.style.display = 'none'; }
   var h = document.getElementById('email-head');
-  if (h) { h.textContent = "You'll hear when something new arrives."; h.style.fontSize = '18px'; h.style.opacity = '0.6'; }
+  if (h) { h.textContent = "Recognize every time you press play."; h.style.fontSize = '18px'; h.style.opacity = '0.6'; }
   var emailIn = document.getElementById('email-in'); if (emailIn) emailIn.style.display = 'none';
   var nameIn = document.getElementById('name-in'); if (nameIn) nameIn.style.display = 'none';
   var emailSub = document.getElementById('email-sub'); if (emailSub) emailSub.style.display = 'none';
