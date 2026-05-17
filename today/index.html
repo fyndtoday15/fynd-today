@@ -53,7 +53,9 @@ html.assign-top, body.assign-top { background: var(--black); }
   animation: ph 3s ease-in-out infinite;
   background: none; font-family: var(--f);
   display: inline-block;
+  transition: opacity 0.2s ease, transform 0.1s ease, box-shadow 0.1s ease;
 }
+.s1-hint:active { transform: scale(0.96); box-shadow: inset 0 2px 4px rgba(0,0,0,0.12); }
 #s1.set-reload { background: var(--black); }
 #s1.set-reload .s1-word,
 #s1.set-reload .s1-intro { display: none; }
@@ -322,8 +324,8 @@ html.assign-top, body.assign-top { background: var(--black); }
 .legal-corner.active .legal-tooltip { display: block; }
 .legal-corner a { color: inherit; text-decoration: none; }
 
-.set-btn { font-family: var(--f); font-size: 13px; color: var(--black); background: none; border: 1px solid rgba(0,0,0,0.35); border-radius: 2px; padding: 10px 20px; margin: 4px; cursor: pointer; letter-spacing: 0.1em; text-transform: uppercase; opacity: 1; transition: opacity 0.2s ease; }
-.set-btn:active { opacity: 0.6; }
+.set-btn { font-family: var(--f); font-size: 13px; color: var(--black); background: none; border: 1px solid rgba(0,0,0,0.35); border-radius: 2px; padding: 10px 20px; margin: 4px; cursor: pointer; letter-spacing: 0.1em; text-transform: uppercase; opacity: 1; transition: opacity 0.2s ease, transform 0.1s ease, box-shadow 0.1s ease; }
+.set-btn:active { opacity: 0.6; transform: scale(0.96); box-shadow: inset 0 2px 4px rgba(0,0,0,0.12); }
 .set-btn.used { opacity: 0.25; pointer-events: none; border-color: rgba(0,0,0,0.25); cursor: default; }
 .email-head { font-size: clamp(30px,7vw,46px); font-weight: 400; color: var(--black); letter-spacing: -0.02em; margin-bottom: 44px; text-align: center; }
 .email-input { width: 100%; max-width: 300px; font-family: var(--f); font-size: 16px; color: var(--black); background: transparent; border: none; border-bottom: 1px solid rgba(0,0,0,0.45); padding: 10px 0; outline: none; text-align: center; border-radius: 0; -webkit-appearance: none; }
@@ -561,7 +563,8 @@ html.assign-top, body.assign-top { background: var(--black); }
   <div id="consent-error" style="display:none;font-size:11px;color:rgba(0,0,0,0.6);margin-top:6px;letter-spacing:0.04em;">Please check the box to continue.</div>
   <button class="email-sub" id="email-sub">I'm in.</button>
   <div id="listen-again" style="display:none; margin-top: 48px; text-align: center; width: 100%;">
-    <div style="font-size: 11px; color: var(--black); opacity: 0.35; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 20px;">Play another set</div>
+    <div style="font-size: 13px; color: var(--black); opacity: 0.6; letter-spacing: 0.01em; margin-bottom: 28px;">Recognize every time you press play.</div>
+    <div style="font-size: 11px; color: var(--black); opacity: 1; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 20px;">Play another set</div>
     <button class="set-btn" id="set-btn-1" onclick="loadSet('MVP 1')">Set 1</button>
     <button class="set-btn" onclick="loadSet('MVP 1.2')">Set 2</button>
     <button class="set-btn" onclick="loadSet('MVP 1.3')">Set 3</button>
@@ -807,37 +810,35 @@ function flipLabel(newText) {
   var inner = document.getElementById('listen-label-inner');
   var next = document.getElementById('listen-label-next');
   if (!inner || !next) return;
-  // Phase 1 — inner exits downward (220ms)
-  inner.style.transition = 'transform 0.22s ease-in, opacity 0.22s ease-in';
+  // Phase 1 — current word exits downward
+  inner.style.transition = 'transform 0.25s ease-in, opacity 0.25s ease-in';
   inner.style.transform = 'translateY(100%)';
   inner.style.opacity = '0';
-  // Phase 2 — inner stays hidden, next animates in from above
+  // Phase 2 — after exit, snap next word in from above and animate down
   setTimeout(function() {
-    // Keep inner hidden and reset position silently
     inner.style.transition = 'none';
     inner.style.transform = 'translateY(0)';
-    inner.style.opacity = '0';
+    inner.style.opacity = '1';
     inner.textContent = newText;
-    // Snap next above, animate down
+    // Position new word above and animate in
     next.textContent = newText;
     next.style.transition = 'none';
     next.style.transform = 'translateY(-100%)';
     next.style.opacity = '0';
     void next.offsetWidth;
-    next.style.transition = 'transform 0.28s ease-out, opacity 0.28s ease-out';
+    next.style.transition = 'transform 0.3s ease-out, opacity 0.3s ease-out';
     next.style.transform = 'translateY(0)';
     next.style.opacity = '1';
-    // Phase 3 — next done, swap to inner invisibly, hide next
+    // Phase 3 — after entrance, swap to inner and hide next
     setTimeout(function() {
-      // Snap inner visible (it's behind next so no flash)
+      inner.style.transition = 'none';
       inner.style.opacity = '1';
-      // Hide next without transition
       next.style.transition = 'none';
-      next.style.opacity = '0';
       next.style.transform = 'translateY(-100%)';
+      next.style.opacity = '0';
       next.textContent = '';
-    }, 300);
-  }, 230);
+    }, 320);
+  }, 270);
 }
 
 function openPanel(cb) {
@@ -1757,20 +1758,40 @@ document.getElementById('s1').addEventListener('click', function(e) {
     return;
   }
 
-  // Returning user with abandoned session — skip entry statement, go straight to music
+  // Returning user with abandoned session — route to sets page
+  // Resume Set X button handles navigating back into listen
   if (window._resumeMode) {
+    // MVP 1 with no email yet — skip sets page, go straight back to listening
+    if (sess.playlist === 'MVP 1' && !LS.get('email')) {
+      window._resumeMode = false;
+      sess.cur = window._resumeCur || 0;
+      window._resumeCur = undefined;
+      try {
+        var silentAudioM = new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAA' +
+          'EAAQARAAAAAgABAAIAZGF0YQAAAAA=');
+        silentAudioM.volume = 0;
+        silentAudioM.play().catch(function(){});
+      } catch(e) {}
+      if (widgetReady) { widget.skip(sess.tOrder[sess.cur]); sess._primedIdx = sess.tOrder[sess.cur]; }
+      show('s3');
+      setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 300);
+      return;
+    }
     window._resumeMode = false;
-    sess.cur = window._resumeCur || 0;
-    window._resumeCur = undefined;
-    try {
-      var silentAudioM = new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAA' +
-        'EAAQARAAAAAgABAAIAZGF0YQAAAAA=');
-      silentAudioM.volume = 0;
-      silentAudioM.play().catch(function(){});
-    } catch(e) {}
-    if (widgetReady) { widget.skip(sess.tOrder[sess.cur]); sess._primedIdx = sess.tOrder[sess.cur]; }
-    show('s3');
-    setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 300);
+    function goToResumeSetPage() {
+      var h = document.getElementById('email-head');
+      if (h) { h.textContent = "You'll hear when something new arrives."; h.style.fontSize = '18px'; h.style.opacity = '0.6'; }
+      document.getElementById('email-in').style.display = 'none';
+      document.getElementById('name-in').style.display = 'none';
+      document.getElementById('email-sub').style.display = 'none';
+      var cl3 = document.getElementById('consent-label'); if (cl3) cl3.style.display = 'none';
+      var rn3 = document.getElementById('return-note'); if (rn3) rn3.style.display = 'none';
+      var again = document.getElementById('listen-again');
+      if (again) { again.style.display = 'block'; updateSetButtons(); }
+      show('s6');
+    }
+    if (entryExpired) { showEntryThenRoute(goToResumeSetPage); return; }
+    goToResumeSetPage();
     return;
   }
 
@@ -1821,16 +1842,9 @@ document.getElementById('btn-stop-listen').addEventListener('click', function() 
   clearInterval(heartbeatTimer);
   if (widget) widget.pause();
   stopDot();
-  resetPanel();
-  // Save at current position — do NOT increment, they should resume this song
+  sess.cur++;
   saveAbandoned();
-  saveSessionState();
-  // Reset screen history so back from s6 goes to Today. not entry statement
-  _screenHistory = ['s1'];
-  // Set resume flags so pressing Play goes straight back to this song
-  window._skipEntry = true;
-  window._resumeMode = true;
-  window._resumeCur = sess.cur;
+  sess.cur--;
   var savedEmail = LS.get('email');
   if (savedEmail) {
     var h = document.getElementById('email-head');
