@@ -1507,6 +1507,7 @@ function doReveal(ps) {
 
 // S1 tap handler — called directly from button onclick
 function handlePressPlay(e) {
+  alert('fired');
   var hint = document.getElementById('press-play-btn');
   var _panel = document.getElementById('signin-panel');
   if (_panel.classList.contains('open') || _panel.style.display === 'flex') {
