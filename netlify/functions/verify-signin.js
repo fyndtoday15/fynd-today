@@ -107,8 +107,9 @@ exports.handler = async function(event, context) {
     }).catch(function(e) { console.error('OTP delete error:', e); });
   } catch(e) {}
 
-  // Step 3: Get ALL session state records for this email, pick the best one
-  // "Best" = most completed sets, then highest cur, then most recent
+  // Step 3: Get ALL session state records for this email
+  // Merge abandonedSets across ALL records — each session saves its own state
+  // completedSets is also merged so no set completion is lost
   console.log('Looking up all session states for:', email);
   try {
     const filterFormula2 = encodeURIComponent(`AND({Email}="${email}",{Track ID}="SESSION_STATE")`);
@@ -121,6 +122,12 @@ exports.handler = async function(event, context) {
 
     let bestState = null;
     let bestScore = -1;
+    // Merged across all records
+    let mergedCompletedSets = [];
+    let mergedAbandonedSets = {};
+    let bestEntryState = null;
+    let bestEntryStateTime = null;
+    let bestVisitNumber = 0;
 
     if (sessData.records && sessData.records.length > 0) {
       for (var j = 0; j < sessData.records.length; j++) {
@@ -130,11 +137,43 @@ exports.handler = async function(event, context) {
         try { parsed = JSON.parse(rawState); } catch(e) { continue; }
         if (!parsed) continue;
 
-        // Score: completed sets count * 100 + cur position
+        // Merge completedSets — union across all records
+        if (parsed.completedSets && Array.isArray(parsed.completedSets)) {
+          parsed.completedSets.forEach(function(s) {
+            if (mergedCompletedSets.indexOf(s) === -1) mergedCompletedSets.push(s);
+          });
+        }
+
+        // Merge abandonedSets — keep most recent entry per playlist
+        if (parsed.abandonedSets && typeof parsed.abandonedSets === 'object') {
+          Object.keys(parsed.abandonedSets).forEach(function(playlist) {
+            var incoming = parsed.abandonedSets[playlist];
+            var existing = mergedAbandonedSets[playlist];
+            // Keep if: no existing entry, or incoming is more recent
+            if (!existing || (incoming.timestamp && (!existing.timestamp || incoming.timestamp > existing.timestamp))) {
+              mergedAbandonedSets[playlist] = incoming;
+            }
+          });
+        }
+
+        // Best entry state — most recent
+        if (parsed.entryState) {
+          var esTime = parsed.entryStateTime || 0;
+          if (!bestEntryState || esTime > (bestEntryStateTime || 0)) {
+            bestEntryState = parsed.entryState;
+            bestEntryStateTime = esTime;
+          }
+        }
+
+        // Best visit number — highest
+        if (parsed.visitNumber && parsed.visitNumber > bestVisitNumber) {
+          bestVisitNumber = parsed.visitNumber;
+        }
+
+        // Pick best single record for top-level fields (sessionId, cur, tOrder, playlist)
         var completedCount = (parsed.completedSets || []).length;
         var curPos = parsed.cur || 0;
         var updatedAt = parsed.updatedAt || 0;
-        // Primary: most completed sets. Secondary: highest cur. Tertiary: most recent
         var score = completedCount * 10000 + curPos * 100 + (updatedAt > 0 ? 1 : 0);
 
         console.log('Record score:', score, 'completed:', completedCount, 'cur:', curPos, 'sessionId:', parsed.sessionId);
@@ -146,11 +185,30 @@ exports.handler = async function(event, context) {
       }
     }
 
-    console.log('Best state sessionId:', bestState ? bestState.sessionId : 'none');
+    // Build merged state — best single record for top-level, merged for sets data
+    var finalState = bestState ? Object.assign({}, bestState) : null;
+    if (finalState) {
+      finalState.completedSets = mergedCompletedSets;
+      finalState.abandonedSets = mergedAbandonedSets;
+      if (bestEntryState) finalState.entryState = bestEntryState;
+      if (bestEntryStateTime) finalState.entryStateTime = bestEntryStateTime;
+      if (bestVisitNumber > 0) finalState.visitNumber = bestVisitNumber;
+    }
+
+    // Remove completed sets from abandonedSets — no point resuming a finished set
+    if (finalState && finalState.abandonedSets && finalState.completedSets) {
+      finalState.completedSets.forEach(function(playlist) {
+        delete finalState.abandonedSets[playlist];
+      });
+    }
+
+    console.log('Final merged completedSets:', finalState ? finalState.completedSets : []);
+    console.log('Final merged abandonedSets keys:', finalState ? Object.keys(finalState.abandonedSets || {}) : []);
+
     return {
       statusCode: 200,
       headers: { 'Access-Control-Allow-Origin': allowedOrigin },
-      body: JSON.stringify({ success: true, state: bestState }),
+      body: JSON.stringify({ success: true, state: finalState }),
     };
 
   } catch(err) {
