@@ -57,7 +57,8 @@ html.assign-top, body.assign-top { background: var(--black); }
 #s1.set-reload { background: var(--black); }
 #s1.set-reload .s1-word,
 #s1.set-reload .s1-intro { display: none; }
-#s1.set-reload .s1-hint { color: var(--bg); }
+#s1.set-reload .s1-hint { display: none; }
+#s1.set-reload #btn-tap-play { display: block !important; }
 #s1.set-reload .signin-trigger,
 #s1.set-reload .signin-panel { display: none !important; }
 @keyframes ph { 0%,100%{opacity:.4} 50%{opacity:.8} }
@@ -406,7 +407,8 @@ html.assign-top, body.assign-top { background: var(--black); }
 <div class="screen active" id="s1">
   <span class="s1-word">Today.</span>
   <p class="s1-intro">Find out what the sound reveals.</p>
-  <button class="s1-hint" id="s1-hint-btn">Press Play</button>
+  <span class="s1-hint">Press Play</span>
+  <button id="btn-tap-play" style="display:none; position:absolute; bottom:clamp(100px,16vh,140px); left:50%; transform:translateX(-50%); font-family:var(--f); font-size:10px; color:var(--bg); background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.2); border-radius:2px; cursor:pointer; letter-spacing:0.12em; text-transform:uppercase; padding:10px 28px; white-space:nowrap; z-index:100; -webkit-tap-highlight-color:transparent;">Tap to play</button>
 </div>
 
   <button class="signin-trigger" id="signin-trigger">returning? sign in</button>
@@ -498,7 +500,7 @@ html.assign-top, body.assign-top { background: var(--black); }
         var s1el = document.getElementById('s1');
         if (s1el) {
           s1el.classList.add('set-reload');
-          var hint = document.getElementById('s1-hint-btn');
+          var hint = s1el.querySelector('.s1-hint');
           if (hint) hint.textContent = 'Press Play';
         }
         var tc = document.getElementById('theme-color');
@@ -1145,15 +1147,14 @@ function playTrack(idx) {
         var poll2 = setInterval(function() {
           if (widgetReady) { clearInterval(poll2); go(); }
         }, 200);
-        // Brave mobile forces widget ready faster — 1.5s instead of 4s
-        var _forcedReadyDelay = (navigator.brave && navigator.brave.isBrave) ? 1500 : 4000;
+        // Final forced fallback for Safari fresh tab — widget is ready but READY event never fired
         setTimeout(function() {
           if (!widgetReady) {
             clearInterval(poll2);
             widgetReady = true;
             go();
           }
-        }, _forcedReadyDelay);
+        }, 4000);
       }
     }, 2000);
   }
@@ -1497,7 +1498,7 @@ function doReveal(ps) {
 
 // S1 tap
 document.getElementById('s1').addEventListener('click', function(e) {
-  var hint = document.getElementById('s1-hint-btn');
+  var hint = document.querySelector('.s1-hint');
   // In set-reload mode (black listen screen) — whole screen is clickable
   var isSetReload = document.getElementById('s1').classList.contains('set-reload');
   if (!isSetReload) {
@@ -1795,6 +1796,17 @@ document.getElementById('s1').addEventListener('click', function(e) {
   show('s2');
 });
 
+// Tap to play button — fires same as clicking the set-reload screen
+document.getElementById('btn-tap-play').addEventListener('click', function(e) {
+  e.stopPropagation();
+  document.getElementById('s1').click();
+});
+
+// Set buttons — add touchstart so :active CSS fires reliably on all mobile browsers
+document.querySelectorAll('.set-btn').forEach(function(btn) {
+  btn.addEventListener('touchstart', function() {}, { passive: true });
+});
+
 // Continue button
 // Stop for now — save state and go to sets/email
 document.getElementById('legal-icon').addEventListener('click', function(e) {
@@ -2071,9 +2083,7 @@ function loadSet(playlistName) {
   LS.set('onEmailScreen', false);
 
   LS.set('pendingSet', playlistName);
-  // Cache-bust reload — prevents Brave mobile from using stale cached SC widget
-  var _loc = window.location.href.split('?')[0];
-  window.location.href = _loc + '?t=' + Date.now();
+  window.location.reload();
 }
 
 // ── RETURNING USER SYSTEM ───────────────────────────────
@@ -2512,7 +2522,7 @@ window.addEventListener('popstate', function(e) {
     var s1el = document.getElementById('s1');
     if (s1el) {
       s1el.classList.remove('set-reload');
-      var hint = document.getElementById('s1-hint-btn');
+      var hint = s1el.querySelector('.s1-hint');
       if (hint) hint.textContent = 'Press Play';
     }
     document.body.style.background = '';
@@ -2655,7 +2665,7 @@ function saveSessionState() {
 function restoreS1() {
   var word = document.querySelector('.s1-word');
   var intro = document.querySelector('.s1-intro');
-  var hint = document.getElementById('s1-hint-btn');
+  var hint = document.querySelector('.s1-hint');
   if (word) word.style.display = '';
   if (intro) intro.style.display = '';
   if (hint) hint.style.display = '';
@@ -2678,7 +2688,7 @@ function restoreS1() {
 function hideS1() {
   var word = document.querySelector('.s1-word');
   var intro = document.querySelector('.s1-intro');
-  var hint = document.getElementById('s1-hint-btn');
+  var hint = document.querySelector('.s1-hint');
   if (word) word.style.display = 'none';
   if (intro) intro.style.display = 'none';
   if (hint) hint.style.display = 'none';
