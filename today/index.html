@@ -1182,8 +1182,13 @@ function doReplay() {
       }),
     }).catch(function() {});
   }
-  widget.seekTo(0);
-  setTimeout(function() { widget.play(); }, 200);
+  // Explicitly skip to current track index to prevent SC widget advancing to next track
+  var _replayIdx = sess.tOrder[sess.cur];
+  widget.skip(_replayIdx);
+  setTimeout(function() {
+    widget.seekTo(0);
+    widget.play();
+  }, 300);
 }
 
 // Thumb up — hide thumbs, store reaction, music keeps playing
