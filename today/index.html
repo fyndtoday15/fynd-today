@@ -1546,6 +1546,18 @@ document.getElementById('s1').addEventListener('click', function(e) {
       silentAudioP.volume = 0;
       silentAudioP.play().catch(function(){});
     } catch(e) {}
+    // On Brave mobile — force widget reinit if not ready to break the cycle
+    if (!widgetReady && navigator.brave && navigator.brave.isBrave) {
+      var _braveIframe = document.getElementById('sc');
+      if (_braveIframe && _braveIframe.src) {
+        var _braveSrc = _braveIframe.src;
+        _braveIframe.src = '';
+        setTimeout(function() {
+          _braveIframe.src = _braveSrc;
+          initSC();
+        }, 100);
+      }
+    }
     if (widgetReady) { widget.skip(sess.tOrder[0]); sess._primedIdx = sess.tOrder[0]; }
     show('s3');
     setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 300);
@@ -1799,9 +1811,16 @@ document.getElementById('s1').addEventListener('click', function(e) {
 document.getElementById('s1').addEventListener('touchend', function(e) {
   var isSetReload = document.getElementById('s1').classList.contains('set-reload');
   if (!isSetReload) return;
-  // Prevent ghost click from also firing
   e.preventDefault();
-  document.getElementById('s1').click();
+  e.stopPropagation();
+  // Dispatch a real click event at center of screen so the s1 click handler fires
+  var evt = new MouseEvent('click', {
+    bubbles: true,
+    cancelable: true,
+    clientX: window.innerWidth / 2,
+    clientY: window.innerHeight / 2,
+  });
+  document.getElementById('s1').dispatchEvent(evt);
 }, { passive: false });
 
 // Continue button
