@@ -406,7 +406,7 @@ html.assign-top, body.assign-top { background: var(--black); }
 <div class="screen active" id="s1">
   <span class="s1-word">Today.</span>
   <p class="s1-intro">Find out what the sound reveals.</p>
-  <span class="s1-hint">Press Play</span>
+  <button class="s1-hint" id="s1-hint-btn">Press Play</button>
 </div>
 
   <button class="signin-trigger" id="signin-trigger">returning? sign in</button>
@@ -498,7 +498,7 @@ html.assign-top, body.assign-top { background: var(--black); }
         var s1el = document.getElementById('s1');
         if (s1el) {
           s1el.classList.add('set-reload');
-          var hint = s1el.querySelector('.s1-hint');
+          var hint = document.getElementById('s1-hint-btn');
           if (hint) hint.textContent = 'Press Play';
         }
         var tc = document.getElementById('theme-color');
@@ -1497,7 +1497,7 @@ function doReveal(ps) {
 
 // S1 tap
 document.getElementById('s1').addEventListener('click', function(e) {
-  var hint = document.querySelector('.s1-hint');
+  var hint = document.getElementById('s1-hint-btn');
   // In set-reload mode (black listen screen) — whole screen is clickable
   var isSetReload = document.getElementById('s1').classList.contains('set-reload');
   if (!isSetReload) {
@@ -1546,18 +1546,6 @@ document.getElementById('s1').addEventListener('click', function(e) {
       silentAudioP.volume = 0;
       silentAudioP.play().catch(function(){});
     } catch(e) {}
-    // On Brave mobile — force widget reinit if not ready to break the cycle
-    if (!widgetReady && navigator.brave && navigator.brave.isBrave) {
-      var _braveIframe = document.getElementById('sc');
-      if (_braveIframe && _braveIframe.src) {
-        var _braveSrc = _braveIframe.src;
-        _braveIframe.src = '';
-        setTimeout(function() {
-          _braveIframe.src = _braveSrc;
-          initSC();
-        }, 100);
-      }
-    }
     if (widgetReady) { widget.skip(sess.tOrder[0]); sess._primedIdx = sess.tOrder[0]; }
     show('s3');
     setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 300);
@@ -1806,22 +1794,6 @@ document.getElementById('s1').addEventListener('click', function(e) {
   });
   show('s2');
 });
-
-// Brave mobile — touchend on set-reload black screen as fallback for click not firing on text
-document.getElementById('s1').addEventListener('touchend', function(e) {
-  var isSetReload = document.getElementById('s1').classList.contains('set-reload');
-  if (!isSetReload) return;
-  e.preventDefault();
-  e.stopPropagation();
-  // Dispatch a real click event at center of screen so the s1 click handler fires
-  var evt = new MouseEvent('click', {
-    bubbles: true,
-    cancelable: true,
-    clientX: window.innerWidth / 2,
-    clientY: window.innerHeight / 2,
-  });
-  document.getElementById('s1').dispatchEvent(evt);
-}, { passive: false });
 
 // Continue button
 // Stop for now — save state and go to sets/email
@@ -2099,7 +2071,9 @@ function loadSet(playlistName) {
   LS.set('onEmailScreen', false);
 
   LS.set('pendingSet', playlistName);
-  window.location.reload();
+  // Cache-bust reload — prevents Brave mobile from using stale cached SC widget
+  var _loc = window.location.href.split('?')[0];
+  window.location.href = _loc + '?t=' + Date.now();
 }
 
 // ── RETURNING USER SYSTEM ───────────────────────────────
@@ -2538,7 +2512,7 @@ window.addEventListener('popstate', function(e) {
     var s1el = document.getElementById('s1');
     if (s1el) {
       s1el.classList.remove('set-reload');
-      var hint = s1el.querySelector('.s1-hint');
+      var hint = document.getElementById('s1-hint-btn');
       if (hint) hint.textContent = 'Press Play';
     }
     document.body.style.background = '';
@@ -2681,7 +2655,7 @@ function saveSessionState() {
 function restoreS1() {
   var word = document.querySelector('.s1-word');
   var intro = document.querySelector('.s1-intro');
-  var hint = document.querySelector('.s1-hint');
+  var hint = document.getElementById('s1-hint-btn');
   if (word) word.style.display = '';
   if (intro) intro.style.display = '';
   if (hint) hint.style.display = '';
@@ -2704,7 +2678,7 @@ function restoreS1() {
 function hideS1() {
   var word = document.querySelector('.s1-word');
   var intro = document.querySelector('.s1-intro');
-  var hint = document.querySelector('.s1-hint');
+  var hint = document.getElementById('s1-hint-btn');
   if (word) word.style.display = 'none';
   if (intro) intro.style.display = 'none';
   if (hint) hint.style.display = 'none';
