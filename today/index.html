@@ -1145,14 +1145,15 @@ function playTrack(idx) {
         var poll2 = setInterval(function() {
           if (widgetReady) { clearInterval(poll2); go(); }
         }, 200);
-        // Final forced fallback for Safari fresh tab — widget is ready but READY event never fired
+        // Brave mobile forces widget ready faster — 1.5s instead of 4s
+        var _forcedReadyDelay = (navigator.brave && navigator.brave.isBrave) ? 1500 : 4000;
         setTimeout(function() {
           if (!widgetReady) {
             clearInterval(poll2);
             widgetReady = true;
             go();
           }
-        }, 4000);
+        }, _forcedReadyDelay);
       }
     }, 2000);
   }
@@ -1793,6 +1794,15 @@ document.getElementById('s1').addEventListener('click', function(e) {
   });
   show('s2');
 });
+
+// Brave mobile — touchend on set-reload black screen as fallback for click not firing on text
+document.getElementById('s1').addEventListener('touchend', function(e) {
+  var isSetReload = document.getElementById('s1').classList.contains('set-reload');
+  if (!isSetReload) return;
+  // Prevent ghost click from also firing
+  e.preventDefault();
+  document.getElementById('s1').click();
+}, { passive: false });
 
 // Continue button
 // Stop for now — save state and go to sets/email
