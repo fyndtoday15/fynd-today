@@ -53,12 +53,16 @@ html.assign-top, body.assign-top { background: var(--black); }
   animation: ph 3s ease-in-out infinite;
   background: none; font-family: var(--f);
   display: inline-block;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
 }
+.s1-hint:active { transform: scale(0.96); box-shadow: inset 0 2px 4px rgba(0,0,0,0.15); }
 #s1.set-reload { background: var(--black); }
 #s1.set-reload .s1-word,
 #s1.set-reload .s1-intro { display: none; }
 #s1.set-reload .s1-hint { display: none; }
 #s1.set-reload #btn-tap-play { display: block !important; }
+#btn-tap-play { transition: transform 0.1s ease, box-shadow 0.1s ease; }
+#btn-tap-play:active { transform: translate(-50%, 0) scale(0.96); box-shadow: inset 0 2px 4px rgba(0,0,0,0.3); }
 #s1.set-reload .signin-trigger,
 #s1.set-reload .signin-panel { display: none !important; }
 @keyframes ph { 0%,100%{opacity:.4} 50%{opacity:.8} }
@@ -67,7 +71,8 @@ html.assign-top, body.assign-top { background: var(--black); }
 #s2 { background: var(--bg); justify-content: flex-start; padding-top: clamp(56px,11vh,88px); overflow-y: auto; -webkit-overflow-scrolling: touch; position: relative; }
 #s2::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 80px; background: linear-gradient(to bottom, transparent, var(--bg)); pointer-events: none; z-index: 2; }
 .screen-label { font-size: 15px; color: var(--black); opacity: 0.75; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 40px; align-self: flex-start; }
-.stmt { width: 100%; padding: 16px 0; font-size: clamp(15px,3.8vw,18px); font-weight: 400; color: var(--black); line-height: 1.55; border-bottom: 1px solid rgba(0,0,0,0.08); cursor: pointer; user-select: none; transition: opacity 0.15s ease; }
+.stmt { width: 100%; padding: 16px 0; font-size: clamp(15px,3.8vw,18px); font-weight: 400; color: var(--black); line-height: 1.55; border-bottom: 1px solid rgba(0,0,0,0.08); cursor: pointer; user-select: none; transition: opacity 0.15s ease, transform 0.1s ease; }
+.stmt:active:not(.tapped) { transform: scale(0.98); }
 .stmt:first-of-type { border-top: 1px solid rgba(0,0,0,0.08); }
 .stmt.tapped { opacity: 0.3; pointer-events: none; }
 
@@ -171,7 +176,8 @@ html.assign-top, body.assign-top { background: var(--black); }
   min-height: 44px;
 }
 .utility-corner-btn:last-child { border-bottom: none; }
-.utility-corner-btn:active { background: rgba(255,255,255,0.18); }
+.utility-corner-btn { transition: background 0.1s ease, transform 0.1s ease; }
+.utility-corner-btn:active { background: rgba(255,255,255,0.25); transform: scale(0.94); }
 
 /* Answer statements — staggered fade in, pulse with music, tap to confirm */
 .answer-wrap {
@@ -205,7 +211,9 @@ html.assign-top, body.assign-top { background: var(--black); }
   transition: opacity 0.2s ease, transform 0.2s ease;
   padding: 12px 0;
   letter-spacing: 0.01em;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
 }
+.answer-stmt.arrived:active { transform: scale(0.97); box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); }
 .answer-stmt.arrived {
   transform: translateY(0);
   opacity: 0.28;
@@ -258,7 +266,8 @@ html.assign-top, body.assign-top { background: var(--black); }
   transition: background 0.2s ease;
   z-index: 10;
 }
-.btn-stop-listen:active { background: rgba(255,255,255,0.12); }
+.btn-stop-listen { transition: background 0.1s ease, transform 0.1s ease, box-shadow 0.1s ease; }
+.btn-stop-listen:active { background: rgba(255,255,255,0.18); transform: scale(0.96); box-shadow: inset 0 2px 4px rgba(0,0,0,0.3); }
 
 /* S5 — kept in DOM for history/routing but hidden, no visible content needed */
 #s5 { background: var(--black); }
@@ -274,7 +283,8 @@ html.assign-top, body.assign-top { background: var(--black); }
 .recap-track:first-of-type { border-top: 1px solid rgba(0,0,0,0.08); }
 .recap-song { font-size: clamp(15px,3.8vw,17px); font-weight: 400; color: var(--black); line-height: 1.4; }
 .recap-direction { font-size: clamp(12px,3vw,14px); color: var(--black); opacity: 0.4; margin-top: 4px; line-height: 1.4; }
-.recap-continue { display: block; margin: 36px auto 48px; font-family: var(--f); font-size: 14px; color: var(--black); background: none; border: 1px solid rgba(0,0,0,0.25); border-radius: 2px; padding: 14px 40px; cursor: pointer; letter-spacing: 0.1em; text-transform: uppercase; width: 100%; max-width: 280px; animation: ph 3s ease-in-out infinite; }
+.recap-continue { display: block; margin: 36px auto 48px; font-family: var(--f); font-size: 14px; color: var(--black); background: none; border: 1px solid rgba(0,0,0,0.25); border-radius: 2px; padding: 14px 40px; cursor: pointer; letter-spacing: 0.1em; text-transform: uppercase; width: 100%; max-width: 280px; animation: ph 3s ease-in-out infinite; transition: transform 0.1s ease, box-shadow 0.1s ease; }
+.recap-continue:active { transform: scale(0.96); box-shadow: inset 0 2px 4px rgba(0,0,0,0.12); }
 
 /* S6 — EMAIL */
 #s6 { background: var(--bg); justify-content: center; }
@@ -329,7 +339,8 @@ html.assign-top, body.assign-top { background: var(--black); }
 .email-head { font-size: clamp(30px,7vw,46px); font-weight: 400; color: var(--black); letter-spacing: -0.02em; margin-bottom: 44px; text-align: center; }
 .email-input { width: 100%; max-width: 300px; font-family: var(--f); font-size: 16px; color: var(--black); background: transparent; border: none; border-bottom: 1px solid rgba(0,0,0,0.45); padding: 10px 0; outline: none; text-align: center; border-radius: 0; -webkit-appearance: none; }
 .email-input::placeholder { color: var(--black); opacity: 0.22; }
-.email-sub { display: block; margin: 28px auto 0; font-family: var(--f); font-size: 14px; color: var(--black); background: none; border: 1px solid rgba(0,0,0,0.25); border-radius: 2px; padding: 14px 40px; cursor: pointer; letter-spacing: 0.1em; text-transform: uppercase; width: 100%; max-width: 280px; animation: ph 3s ease-in-out infinite; }
+.email-sub { display: block; margin: 28px auto 0; font-family: var(--f); font-size: 14px; color: var(--black); background: none; border: 1px solid rgba(0,0,0,0.25); border-radius: 2px; padding: 14px 40px; cursor: pointer; letter-spacing: 0.1em; text-transform: uppercase; width: 100%; max-width: 280px; animation: ph 3s ease-in-out infinite; transition: transform 0.1s ease, box-shadow 0.1s ease; }
+.email-sub:active { transform: scale(0.96); box-shadow: inset 0 2px 4px rgba(0,0,0,0.12); }
 
 /* DOTS */
 .thumbs-wrap {
@@ -383,8 +394,9 @@ html.assign-top, body.assign-top { background: var(--black); }
 .signin-otp-row { display: none; flex-direction: column; align-items: center; width: 100%; }
 .signin-otp-row.show { display: flex; }
 .signin-msg { font-size: 11px; color: var(--black); opacity: 0.45; letter-spacing: 0.08em; margin-bottom: 16px; text-align: center; line-height: 1.7; }
-.signin-btn { font-family: var(--f); font-size: 11px; color: var(--black); background: none; border: 1px solid rgba(0,0,0,0.25); border-radius: 1px; padding: 10px 28px; cursor: pointer; letter-spacing: 0.12em; text-transform: uppercase; width: auto; margin-top: 0; }
+.signin-btn { font-family: var(--f); font-size: 11px; color: var(--black); background: none; border: 1px solid rgba(0,0,0,0.25); border-radius: 1px; padding: 10px 28px; cursor: pointer; letter-spacing: 0.12em; text-transform: uppercase; width: auto; margin-top: 0; transition: transform 0.1s ease, box-shadow 0.1s ease; }
 .signin-btn:hover { border-color: rgba(0,0,0,0.5); }
+.signin-btn:active { transform: scale(0.96); box-shadow: inset 0 2px 4px rgba(0,0,0,0.12); }
 .signin-err { font-size: 11px; color: rgba(0,0,0,0.5); letter-spacing: 0.04em; margin-top: 10px; display: none; text-align: center; line-height: 1.6; }
 .signin-back { display: block; font-size: 11px; color: var(--black); opacity: 0.35; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; background: none; border: none; font-family: var(--f); padding: 12px 0 0; }
 .signin-back.show { display: block; }
@@ -1552,7 +1564,13 @@ document.getElementById('s1').addEventListener('click', function(e) {
         silentAudioR.volume = 0;
         silentAudioR.play().catch(function(){});
       } catch(e) {}
-      if (widgetReady) { sess._primedIdx = sess.tOrder[sess.cur]; }
+      if (widgetReady) {
+        widget.skip(sess.tOrder[sess.cur]);
+        sess._primedIdx = sess.tOrder[sess.cur];
+        // Play immediately within gesture — mobile requires this to unlock audio
+        sess._gestureUnlocked = true;
+        widget.play();
+      }
       // Clear any leftover song reveal UI before showing listen screen
       var _srClr = document.getElementById('song-reveal');
       if (_srClr) { _srClr.classList.remove('show'); _srClr.style.opacity = ''; }
@@ -1572,7 +1590,13 @@ document.getElementById('s1').addEventListener('click', function(e) {
       silentAudioP.volume = 0;
       silentAudioP.play().catch(function(){});
     } catch(e) {}
-    if (widgetReady) { widget.skip(sess.tOrder[0]); sess._primedIdx = sess.tOrder[0]; }
+    if (widgetReady) {
+      widget.skip(sess.tOrder[0]);
+      sess._primedIdx = sess.tOrder[0];
+      // Play immediately within gesture — mobile requires this to unlock audio
+      sess._gestureUnlocked = true;
+      widget.play();
+    }
     show('s3');
     setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 300);
     return;
@@ -1827,9 +1851,10 @@ document.getElementById('btn-tap-play').addEventListener('click', function(e) {
   document.getElementById('s1').click();
 });
 
-// Set buttons — add touchstart so :active CSS fires reliably on all mobile browsers
-document.querySelectorAll('.set-btn').forEach(function(btn) {
-  btn.addEventListener('touchstart', function() {}, { passive: true });
+// All interactive elements — touchstart so :active CSS fires on all mobile browsers
+var _touchTargets = document.querySelectorAll('.set-btn, .s1-hint, #btn-tap-play, .btn-stop-listen, .utility-corner-btn, .email-sub, .recap-continue, .signin-btn, .stmt, .answer-stmt, #thumb-up-corner, #replay-corner, #skip-corner');
+_touchTargets.forEach(function(el) {
+  el.addEventListener('touchstart', function() {}, { passive: true });
 });
 
 // Continue button
