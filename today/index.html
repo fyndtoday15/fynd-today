@@ -408,7 +408,7 @@ html.assign-top, body.assign-top { background: var(--black); }
   <span class="s1-word">Today.</span>
   <p class="s1-intro">Find out what the sound reveals.</p>
   <span class="s1-hint">Press Play</span>
-  <button id="btn-tap-play" style="display:none; position:absolute; bottom:clamp(100px,16vh,140px); left:50%; transform:translateX(-50%); font-family:var(--f); font-size:10px; color:var(--bg); background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.2); border-radius:2px; cursor:pointer; letter-spacing:0.12em; text-transform:uppercase; padding:10px 28px; white-space:nowrap; z-index:100; -webkit-tap-highlight-color:transparent;">Tap to play</button>
+  <button id="btn-tap-play" style="display:none; position:absolute; bottom:clamp(140px,22vh,180px); left:50%; transform:translateX(-50%); font-family:var(--f); font-size:13px; color:var(--bg); background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.25); border-radius:2px; cursor:pointer; letter-spacing:0.14em; text-transform:uppercase; padding:14px 40px; white-space:nowrap; z-index:100; -webkit-tap-highlight-color:transparent;">Press Play</button>
 </div>
 
   <button class="signin-trigger" id="signin-trigger">returning? sign in</button>
@@ -1017,6 +1017,31 @@ function playTrack(idx) {
       widget.seekTo(0);
       widget.play();
     }, 300);
+    // Mobile silent play failure guard — if PLAY event doesn't fire within 1.5s, retry
+    // On mobile browsers widget.play() can silently fail even when widget is "ready"
+    var _playConfirmed = false;
+    var _playRetryTimer = null;
+    function _onPlayConfirm() {
+      _playConfirmed = true;
+      clearTimeout(_playRetryTimer);
+      try { widget.unbind(SC.Widget.Events.PLAY, _onPlayConfirm); } catch(e) {}
+    }
+    try { widget.bind(SC.Widget.Events.PLAY, _onPlayConfirm); } catch(e) {}
+    _playRetryTimer = setTimeout(function() {
+      if (!_playConfirmed) {
+        try { widget.unbind(SC.Widget.Events.PLAY, _onPlayConfirm); } catch(e) {}
+        // Silent failure detected — retry play sequence
+        widget.skip(idx);
+        setTimeout(function() {
+          widget.seekTo(0);
+          widget.play();
+          // One more retry at 1s if still not playing
+          setTimeout(function() {
+            if (!_playConfirmed) { widget.play(); }
+          }, 1000);
+        }, 300);
+      }
+    }, 1500);
     sess.listenStart = Date.now();
     clearTimeout(readyTimer);
     clearTimeout(autoTimer);
