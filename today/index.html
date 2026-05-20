@@ -61,8 +61,8 @@ html.assign-top, body.assign-top { background: var(--black); }
 #s1.set-reload .s1-intro { display: none; }
 #s1.set-reload .s1-hint { display: none; }
 #s1.set-reload #btn-tap-play { display: block !important; }
-#btn-tap-play { transition: transform 0.1s ease, box-shadow 0.1s ease; }
-#btn-tap-play:active { transform: translate(-50%, 0) scale(0.96); box-shadow: inset 0 2px 4px rgba(0,0,0,0.3); }
+#btn-tap-play { transition: background 0.1s ease; }
+#btn-tap-play:active { background: rgba(255,255,255,0.15); }
 #s1.set-reload .signin-trigger,
 #s1.set-reload .signin-panel { display: none !important; }
 @keyframes ph { 0%,100%{opacity:.4} 50%{opacity:.8} }
@@ -266,8 +266,8 @@ html.assign-top, body.assign-top { background: var(--black); }
   transition: background 0.2s ease;
   z-index: 10;
 }
-.btn-stop-listen { transition: background 0.1s ease, transform 0.1s ease, box-shadow 0.1s ease; }
-.btn-stop-listen:active { background: rgba(255,255,255,0.18); transform: scale(0.96); box-shadow: inset 0 2px 4px rgba(0,0,0,0.3); }
+.btn-stop-listen { transition: background 0.1s ease; }
+.btn-stop-listen:active { background: rgba(255,255,255,0.15); }
 
 /* S5 — kept in DOM for history/routing but hidden, no visible content needed */
 #s5 { background: var(--black); }
