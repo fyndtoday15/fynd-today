@@ -61,7 +61,7 @@ html.assign-top, body.assign-top { background: var(--black); }
 #s1.set-reload .s1-intro { display: none; }
 #s1.set-reload .s1-hint { display: none; }
 #s1.set-reload #btn-tap-play { display: block !important; }
-#btn-tap-play { transition: background 0.1s ease, transform 0.1s ease; }
+#btn-tap-play { transform: translateX(-50%); transition: background 0.1s ease, transform 0.1s ease; }
 #btn-tap-play:active { background: rgba(255,255,255,0.15); transform: translateX(-50%) scale(0.96); }
 #s1.set-reload .signin-trigger,
 #s1.set-reload .signin-panel { display: none !important; }
@@ -420,7 +420,7 @@ html.assign-top, body.assign-top { background: var(--black); }
   <span class="s1-word">Today.</span>
   <p class="s1-intro">Find out what the sound reveals.</p>
   <span class="s1-hint">Press Play</span>
-  <button id="btn-tap-play" style="display:none; position:absolute; bottom:clamp(140px,22vh,180px); left:50%; transform:translateX(-50%); font-family:var(--f); font-size:13px; color:var(--bg); background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.25); border-radius:2px; cursor:pointer; letter-spacing:0.14em; text-transform:uppercase; padding:14px 40px; white-space:nowrap; z-index:100; -webkit-tap-highlight-color:transparent;">Press Play</button>
+  <button id="btn-tap-play" style="display:none; position:absolute; bottom:clamp(140px,22vh,180px); left:50%; font-family:var(--f); font-size:13px; color:var(--bg); background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.25); border-radius:2px; cursor:pointer; letter-spacing:0.14em; text-transform:uppercase; padding:14px 40px; white-space:nowrap; z-index:100; -webkit-tap-highlight-color:transparent;">Press Play</button>
 </div>
 
   <button class="signin-trigger" id="signin-trigger">returning? sign in</button>
