@@ -2527,8 +2527,6 @@ window.addEventListener('popstate', function(e) {
       window._skipEntry = true;
       _origShow('s1');
     } else {
-      history.pushState({ screen: 's6' }, '', window.location.href);
-      _screenHistory.push('s6');
       showSetsScreen();
     }
     return;
@@ -2578,17 +2576,20 @@ window.addEventListener('popstate', function(e) {
     document.body.style.background = '';
     var tc = document.getElementById('theme-color');
     if (tc) tc.content = '#FCFBF4';
-    // Restore abandoned position so same song plays on press play
-    var _ab = getAbandoned(sess.playlist);
-    if (_ab) {
-      sess.id = _ab.sessionId;
-      sess.tOrder = _ab.tOrder;
-      sess.log = _ab.log || [];
-      sess.entryState = _ab.entryState || sess.entryState;
-      window._resumeCur = _ab.cur;
-      window._resumeMode = true;
+    if (!LS.get('email')) {
+      // No email — restore abandoned so press play resumes listen
+      var _ab = getAbandoned(sess.playlist);
+      if (_ab) {
+        sess.id = _ab.sessionId;
+        sess.tOrder = _ab.tOrder;
+        sess.log = _ab.log || [];
+        sess.entryState = _ab.entryState || sess.entryState;
+        window._resumeCur = _ab.cur;
+        window._resumeMode = true;
+      }
+      window._skipEntry = true;
     }
-    window._skipEntry = true;
+    // Has email — don't set _skipEntry, press play will route to sets page normally
     _origShow('s1');
   } else {
     _origShow(prev);
