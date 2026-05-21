@@ -1020,7 +1020,6 @@ function playTrack(idx) {
     resetPanel();
     startDot();
     // Always skip to correct track, seek to start, then play
-    if (widget) { try { widget.pause(); } catch(e) {} }
     widget.skip(idx);
     if (sess._gestureUnlocked) {
       widget.play();
@@ -2536,9 +2535,6 @@ window.addEventListener('popstate', function(e) {
       }
     }
     resetPanel();
-    // Compensate for browser's natural history pop — push current URL back
-    // so the back chain from sets→today→landing remains correct
-    history.pushState({ screen: 's3_exit' }, '', window.location.href);
     // No email = first set, back goes to Today
     if (!LS.get('email')) {
       saveAbandoned();
@@ -2547,6 +2543,8 @@ window.addEventListener('popstate', function(e) {
       window._skipEntry = true;
       _origShow('s1');
     } else {
+      history.pushState({ screen: 's6' }, '', window.location.href);
+      _screenHistory.push('s6');
       showSetsScreen();
     }
     return;
