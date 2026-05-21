@@ -2545,7 +2545,19 @@ window.addEventListener('popstate', function(e) {
     } else {
       history.pushState({ screen: 's6' }, '', window.location.href);
       _screenHistory.push('s6');
-      showSetsScreen();
+      // Use _origShow (not showSetsScreen) to avoid double-pushing s6 to history
+      var _sp2 = document.getElementById('signin-panel');
+      if (_sp2) { _sp2.classList.remove('open'); _sp2.style.display = 'none'; }
+      var _h2 = document.getElementById('email-head');
+      if (_h2) { _h2.textContent = 'Recognize every time you press play.'; _h2.style.fontSize = '18px'; _h2.style.opacity = '1'; }
+      var _ei = document.getElementById('email-in'); if (_ei) _ei.style.display = 'none';
+      var _ni = document.getElementById('name-in'); if (_ni) _ni.style.display = 'none';
+      var _es = document.getElementById('email-sub'); if (_es) _es.style.display = 'none';
+      var _cl = document.getElementById('consent-label'); if (_cl) _cl.style.display = 'none';
+      var _rn = document.getElementById('return-note'); if (_rn) _rn.style.display = 'none';
+      var _ag = document.getElementById('listen-again');
+      if (_ag) { _ag.style.display = 'block'; updateSetButtons(); }
+      _origShow('s6');
     }
     return;
   }
