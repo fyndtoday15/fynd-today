@@ -8,7 +8,7 @@ const ALLOWED_ORIGINS = [
 // In-memory rate limit — per function instance
 const rateLimitMap = {};
 const RATE_LIMIT = 60;
-const RATE_WINDOW = 60000; 
+const RATE_WINDOW = 60000;
 
 function isRateLimited(ip) {
   const now = Date.now();
@@ -24,7 +24,20 @@ function sanitizeString(val, maxLen) {
   return val.slice(0, maxLen).replace(/[<>]/g, '');
 }
 
+// Fetch with timeout — prevents hanging on slow Airtable responses
+function fetchWithTimeout(url, options, ms) {
+  ms = ms || 8000;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), ms);
+  return fetch(url, Object.assign({}, options, { signal: controller.signal }))
+    .finally(() => clearTimeout(timer));
+}
+
 exports.handler = async function(event, context) {
+  // Critical: allows Netlify to return response immediately without waiting
+  // for event loop to drain — essential for sendBeacon requests on tab close
+  context.callbackWaitsForEmptyEventLoop = false;
+
   const origin = event.headers.origin || event.headers.Origin || '';
   const allowedOrigin = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
 
@@ -88,7 +101,7 @@ exports.handler = async function(event, context) {
       return { statusCode: 400, body: 'Consent required' };
     }
     try {
-      const response = await fetch(BASE_URL, {
+      const response = await fetchWithTimeout(BASE_URL, {
         method: 'POST',
         headers: HEADERS,
         body: JSON.stringify({
@@ -135,7 +148,7 @@ exports.handler = async function(event, context) {
   // ENTRY STATE — write a dedicated record on every entry state selection
   if (data.entryUpdate) {
     try {
-      const response = await fetch(BASE_URL, {
+      const response = await fetchWithTimeout(BASE_URL, {
         method: 'POST',
         headers: HEADERS,
         body: JSON.stringify({
@@ -200,7 +213,7 @@ exports.handler = async function(event, context) {
       'Replay': '',
     };
     try {
-      const response = await fetch(BASE_URL, {
+      const response = await fetchWithTimeout(BASE_URL, {
         method: 'POST',
         headers: HEADERS,
         body: JSON.stringify({ records: [{ fields }] }),
@@ -219,6 +232,7 @@ exports.handler = async function(event, context) {
   }
 
   // TRACK PATCH — update specific record by Airtable record ID
+  // Used for tab-close beacon and stop-for-now — fastest path, single request
   if (data.trackPatch) {
     const pFields = {
       'Duration': Math.max(Number(data.duration) || 0, 0),
@@ -230,11 +244,11 @@ exports.handler = async function(event, context) {
     if (data.email) pFields['Email'] = sanitizeString(data.email, 200);
     if (data.firstName) pFields['First Name'] = sanitizeString(data.firstName, 100);
     try {
-      const response = await fetch(BASE_URL + '/' + sanitizeString(data.recordId, 30), {
+      const response = await fetchWithTimeout(BASE_URL + '/' + sanitizeString(data.recordId, 30), {
         method: 'PATCH',
         headers: HEADERS,
         body: JSON.stringify({ fields: pFields }),
-      });
+      }, 6000); // 6s timeout — single request, must complete before function recycles
       const result = await response.json();
       if (!response.ok) {
         console.error('Track patch error:', result);
@@ -272,21 +286,21 @@ exports.handler = async function(event, context) {
     try {
       // Only match In Progress records — never patch completed ones
       const filterFormula = encodeURIComponent(`AND({Session ID}="${hSessionId}",{Track ID}="${hTrackId}",{Position}="In Progress")`);
-      const findRes = await fetch(BASE_URL + '?filterByFormula=' + filterFormula + '&maxRecords=1', { headers: HEADERS });
+      const findRes = await fetchWithTimeout(BASE_URL + '?filterByFormula=' + filterFormula + '&maxRecords=1', { headers: HEADERS }, 6000);
       const findData = await findRes.json();
       let response;
       if (findData.records && findData.records.length > 0) {
-        response = await fetch(BASE_URL + '/' + findData.records[0].id, {
+        response = await fetchWithTimeout(BASE_URL + '/' + findData.records[0].id, {
           method: 'PATCH',
           headers: HEADERS,
           body: JSON.stringify({ fields: hFields }),
-        });
+        }, 6000);
       } else {
-        response = await fetch(BASE_URL, {
+        response = await fetchWithTimeout(BASE_URL, {
           method: 'POST',
           headers: HEADERS,
           body: JSON.stringify({ records: [{ fields: hFields }] }),
-        });
+        }, 6000);
       }
       const result = await response.json();
       if (!response.ok) {
@@ -334,7 +348,7 @@ exports.handler = async function(event, context) {
   });
 
   try {
-    const response = await fetch(BASE_URL, {
+    const response = await fetchWithTimeout(BASE_URL, {
       method: 'POST',
       headers: HEADERS,
       body: JSON.stringify({ records: records }),
