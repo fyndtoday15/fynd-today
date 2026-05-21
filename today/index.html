@@ -1020,6 +1020,7 @@ function playTrack(idx) {
     resetPanel();
     startDot();
     // Always skip to correct track, seek to start, then play
+    if (widget) { try { widget.pause(); } catch(e) {} }
     widget.skip(idx);
     if (sess._gestureUnlocked) {
       widget.play();
@@ -2367,6 +2368,11 @@ var PLAYLIST_VERSION = '2';
   try {
     var pending = JSON.parse(localStorage.getItem('fynd_pendingAbandoned'));
     if (pending) {
+      // Skip if already sent via beacon on tab close
+      if (pending.sent) {
+        localStorage.removeItem('fynd_pendingAbandoned');
+        return;
+      }
       // If sessionStorage still has fynd_sessionActive this is a refresh not a new visit
       // In that case don't send abandoned — the record is still In Progress and heartbeat will patch it
       var isSameSession = !!sessionStorage.getItem('fynd_sessionActive');
@@ -2530,13 +2536,14 @@ window.addEventListener('popstate', function(e) {
       }
     }
     resetPanel();
-    // No email = first set, back goes to Today. not sets
+    // Compensate for browser's natural history pop — push current URL back
+    // so the back chain from sets→today→landing remains correct
+    history.pushState({ screen: 's3_exit' }, '', window.location.href);
+    // No email = first set, back goes to Today
     if (!LS.get('email')) {
       saveAbandoned();
       window._resumeCur = sess.cur;
       window._resumeMode = true;
-      history.pushState({ screen: 's1' }, '', window.location.href);
-      _screenHistory.push('s1');
       window._skipEntry = true;
       _origShow('s1');
     } else {
@@ -3018,7 +3025,11 @@ document.addEventListener('visibilitychange', function() {
       beaconSent = navigator.sendBeacon('/.netlify/functions/log-session', new Blob([vcPayload], { type: 'application/json' }));
       if (beaconSent) {
         sess._abandonSent = true;
-        try { localStorage.removeItem('fynd_pendingAbandoned'); } catch(e) {}
+        try {
+          var _paV = JSON.parse(localStorage.getItem('fynd_pendingAbandoned'));
+          if (_paV) { _paV.sent = true; localStorage.setItem('fynd_pendingAbandoned', JSON.stringify(_paV)); }
+          else { localStorage.removeItem('fynd_pendingAbandoned'); }
+        } catch(e) {}
       }
     } catch(e) {}
   }
@@ -3092,7 +3103,11 @@ window.addEventListener('pagehide', function() {
         keepalive: true,
       });
       sess._abandonSent = true;
-      try { localStorage.removeItem('fynd_pendingAbandoned'); } catch(e) {}
+      try {
+        var _paSent = JSON.parse(localStorage.getItem('fynd_pendingAbandoned'));
+        if (_paSent) { _paSent.sent = true; localStorage.setItem('fynd_pendingAbandoned', JSON.stringify(_paSent)); }
+        else { localStorage.removeItem('fynd_pendingAbandoned'); }
+      } catch(e) {}
     } catch(e) {}
     return;
   }
@@ -3101,7 +3116,11 @@ window.addEventListener('pagehide', function() {
       var sent = navigator.sendBeacon('/.netlify/functions/log-session', new Blob([payload], { type: 'application/json' }));
       if (!sent) throw new Error('sendBeacon returned false');
       sess._abandonSent = true;
-      try { localStorage.removeItem('fynd_pendingAbandoned'); } catch(e) {}
+      try {
+        var _paSent2 = JSON.parse(localStorage.getItem('fynd_pendingAbandoned'));
+        if (_paSent2) { _paSent2.sent = true; localStorage.setItem('fynd_pendingAbandoned', JSON.stringify(_paSent2)); }
+        else { localStorage.removeItem('fynd_pendingAbandoned'); }
+      } catch(e) {}
     } catch(e) {
       try {
         fetch('/.netlify/functions/log-session', {
