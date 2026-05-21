@@ -1566,8 +1566,11 @@ document.getElementById('s1').addEventListener('click', function(e) {
         silentAudioR.play().catch(function(){});
       } catch(e) {}
       if (widgetReady) {
-        // Signal gesture unlocked so go() calls play() synchronously within gesture
+        widget.skip(sess.tOrder[sess.cur]);
+        sess._primedIdx = sess.tOrder[sess.cur];
+        // Play immediately within gesture — mobile requires this to unlock audio
         sess._gestureUnlocked = true;
+        widget.play();
       }
       // Clear any leftover song reveal UI before showing listen screen
       var _srClr = document.getElementById('song-reveal');
@@ -1589,8 +1592,11 @@ document.getElementById('s1').addEventListener('click', function(e) {
       silentAudioP.play().catch(function(){});
     } catch(e) {}
     if (widgetReady) {
-      // Signal gesture unlocked so go() calls play() synchronously within gesture
+      widget.skip(sess.tOrder[0]);
+      sess._primedIdx = sess.tOrder[0];
+      // Play immediately within gesture — mobile requires this to unlock audio
       sess._gestureUnlocked = true;
+      widget.play();
     }
     show('s3');
     setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 300);
@@ -2378,9 +2384,9 @@ var PLAYLIST_VERSION = '2';
         dur = Math.round((Date.now() - pending.startTime) / 1000);
       }
       localStorage.removeItem('fynd_pendingAbandoned');
-      // Use trackPatch with recordId if available — prevents duplicate rows
-      // Fall back to heartbeatUpdate by sessionId
-      var recoveryBody = pending.recordId ? JSON.stringify({
+      // Use trackPatch with recordId if available — patches existing row directly, no duplicates
+      // Fall back to heartbeatUpdate by sessionId if no recordId
+      var _recoveryBody = (pending.recordId) ? JSON.stringify({
         trackPatch: true,
         recordId: pending.recordId,
         duration: dur,
@@ -2411,7 +2417,7 @@ var PLAYLIST_VERSION = '2';
       fetch('/.netlify/functions/log-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: recoveryBody,
+        body: _recoveryBody,
       }).catch(function(){});
     }
   } catch(e) {}
@@ -2524,11 +2530,13 @@ window.addEventListener('popstate', function(e) {
       }
     }
     resetPanel();
-    // No email = first set, back goes to Today
+    // No email = first set, back goes to Today. not sets
     if (!LS.get('email')) {
       saveAbandoned();
       window._resumeCur = sess.cur;
       window._resumeMode = true;
+      history.pushState({ screen: 's1' }, '', window.location.href);
+      _screenHistory.push('s1');
       window._skipEntry = true;
       _origShow('s1');
     } else {
