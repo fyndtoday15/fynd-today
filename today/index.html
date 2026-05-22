@@ -2460,7 +2460,12 @@ var _navLock = false;
 
 var _origShow = show;
 show = function(id) {
-  if (id !== 's3') {
+  if (id === 's3') {
+    // Push a fresh s1 before entering listen
+    // This replenishes the s1 consumed by the previous back-from-listen
+    // so every back from listen always has today to land on
+    history.pushState({ screen: 's1' }, '', window.location.href);
+  } else {
     if (_screenHistory[_screenHistory.length - 1] !== id) {
       _screenHistory.push(id);
       history.pushState({ screen: id }, '', window.location.href);
@@ -2479,7 +2484,7 @@ history.pushState({ screen: 's1' }, '', window.location.href);
 window.addEventListener('popstate', function(e) {
   if (_navLock) return;
   _navLock = true;
-  setTimeout(function() { _navLock = false; }, 300);
+  setTimeout(function() { _navLock = false; }, 500);
 
   var current = document.querySelector('.screen.active');
   var currentId = current ? current.id : 's1';
