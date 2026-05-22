@@ -2555,7 +2555,21 @@ window.addEventListener('popstate', function(e) {
 
   // ── FROM SETS/EMAIL SCREEN ───────────────────────────
   if (currentId === 's6') {
-    if (LS.get('email')) { LS.set('lastSigninTime', Date.now()); }
+    if (LS.get('email')) {
+      LS.set('lastSigninTime', Date.now());
+    } else {
+      // No email — restore abandoned so press play resumes listen, not entry
+      var _ab6 = getAbandoned(sess.playlist);
+      if (_ab6) {
+        sess.id = _ab6.sessionId;
+        sess.tOrder = _ab6.tOrder;
+        sess.log = _ab6.log || [];
+        sess.entryState = _ab6.entryState || sess.entryState;
+        window._resumeCur = _ab6.cur;
+        window._resumeMode = true;
+      }
+      window._skipEntry = true;
+    }
     _origShow('s1');
     return;
   }
