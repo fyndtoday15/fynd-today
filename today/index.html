@@ -2540,7 +2540,6 @@ window.addEventListener('popstate', function(e) {
       }
     }
     resetPanel();
-    history.pushState({ screen: 's1' }, '', window.location.href);
     if (!LS.get('email')) {
       saveAbandoned();
       window._resumeCur = sess.cur;
