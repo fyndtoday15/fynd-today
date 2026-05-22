@@ -1,3 +1,4 @@
+<!-- FYND-BUILD-v177 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1019,14 +1020,10 @@ function playTrack(idx) {
   function go() {
     resetPanel();
     startDot();
-    // Only skip if not already on correct track — avoids audio artifact from double-skip
-    if (sess._primedIdx !== idx) {
-      widget.skip(idx);
-    }
+    // Only skip if not already on correct track — avoids double-skip artifact
+    if (sess._primedIdx !== idx) { widget.skip(idx); }
     sess._primedIdx = undefined;
-    if (sess._gestureUnlocked) {
-      widget.play();
-    }
+    if (sess._gestureUnlocked) { widget.play(); }
     sess._gestureUnlocked = false;
     setTimeout(function() {
       widget.seekTo(0);
@@ -1614,10 +1611,9 @@ document.getElementById('s1').addEventListener('click', function(e) {
     // Check if signed in within last 24h on this browser — skip panel if so
     var _lastSignin = LS.get('lastSigninTime');
     var _24h = 24 * 60 * 60 * 1000;
+    // Also treat a fresh entryStateTime within 24h as "within day" — covers press play without sign-in panel
     var _esTimeCheck = parseInt(localStorage.getItem('fynd_entryStateTime') || '0', 10);
-    var _esExists = !!(localStorage.getItem('fynd_entryState'));
-    // Within day if signed in recently, or entryState exists (never expires once set)
-    var _withinDay = (_lastSignin && (Date.now() - _lastSignin) < _24h) || (_esTimeCheck && (Date.now() - _esTimeCheck) < _24h) || _esExists;
+    var _withinDay = (_lastSignin && (Date.now() - _lastSignin) < _24h) || (_esTimeCheck && (Date.now() - _esTimeCheck) < _24h) || !!(localStorage.getItem('fynd_entryState'));
     if (_withinDay) {
       // Still within 24h — restore state silently, no sign-in required
       // Check entry state expiry — match universal check logic exactly
@@ -2544,7 +2540,6 @@ window.addEventListener('popstate', function(e) {
       }
     }
     resetPanel();
-    // Push s1 so user gets today first, then one more back goes to landing
     history.pushState({ screen: 's1' }, '', window.location.href);
     if (!LS.get('email')) {
       saveAbandoned();
@@ -2552,7 +2547,6 @@ window.addEventListener('popstate', function(e) {
       window._resumeMode = true;
       window._skipEntry = true;
     } else {
-      // Refresh lastSigninTime so press play goes straight to sets
       LS.set('lastSigninTime', Date.now());
     }
     _origShow('s1');
@@ -2561,7 +2555,6 @@ window.addEventListener('popstate', function(e) {
 
   // ── FROM SETS/EMAIL SCREEN ───────────────────────────
   if (currentId === 's6') {
-    // Refresh lastSigninTime so press play goes straight to sets (no sign-in gate)
     if (LS.get('email')) { LS.set('lastSigninTime', Date.now()); }
     _origShow('s1');
     return;
