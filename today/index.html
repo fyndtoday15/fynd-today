@@ -1568,7 +1568,7 @@ document.getElementById('s1').addEventListener('click', function(e) {
       if (widgetReady) {
         widget.skip(sess.tOrder[sess.cur]);
         sess._primedIdx = sess.tOrder[sess.cur];
-        // Play immediately within gesture — mobile requires this to unlock audio
+        widget.seekTo(0);
         sess._gestureUnlocked = true;
         widget.play();
       }
@@ -1594,7 +1594,7 @@ document.getElementById('s1').addEventListener('click', function(e) {
     if (widgetReady) {
       widget.skip(sess.tOrder[0]);
       sess._primedIdx = sess.tOrder[0];
-      // Play immediately within gesture — mobile requires this to unlock audio
+      widget.seekTo(0);
       sess._gestureUnlocked = true;
       widget.play();
     }
@@ -2536,19 +2536,17 @@ window.addEventListener('popstate', function(e) {
       }
     }
     resetPanel();
+    // Restore the s1 entry that the browser popped to fire this popstate
+    // Without this, back from sets/today hits boundary and goes to landing
+    history.pushState({ screen: 's1' }, '', window.location.href);
     // No email = first set, back goes to Today
     if (!LS.get('email')) {
       saveAbandoned();
       window._resumeCur = sess.cur;
       window._resumeMode = true;
       window._skipEntry = true;
-      // Push s1 twice: one for today display, one buffer so back-from-today → boundary → landing
-      history.pushState({ screen: 's1' }, '', window.location.href);
-      history.pushState({ screen: 's1' }, '', window.location.href);
       _origShow('s1');
     } else {
-      // Push s1 buffer so back-from-sets → today, then back-from-today → boundary → landing
-      history.pushState({ screen: 's1' }, '', window.location.href);
       history.pushState({ screen: 's6' }, '', window.location.href);
       _screenHistory.push('s6');
       // Use _origShow (not showSetsScreen) to avoid double-pushing s6 to history
@@ -2576,8 +2574,8 @@ window.addEventListener('popstate', function(e) {
   if (_screenHistory.length > 1) _screenHistory.pop();
   var prev = _screenHistory[_screenHistory.length - 1] || 's1';
 
-  // Exit to landing when already on today page and history exhausted
-  if (prev === 's1') {
+  // If we've backed all the way to s1 with nothing before it, exit to landing
+  if (prev === 's1' && _screenHistory.length === 1 && (!e.state || e.state.screen === 's1')) {
     var currentActive2 = document.querySelector('.screen.active');
     if (currentActive2 && currentActive2.id === 's1') {
       window.location.href = 'https://fyndtoday.com';
