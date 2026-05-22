@@ -1019,8 +1019,11 @@ function playTrack(idx) {
   function go() {
     resetPanel();
     startDot();
-    // Always skip to correct track, seek to start, then play
-    widget.skip(idx);
+    // Only skip if not already on correct track — re-skipping causes audio blip
+    if (sess._primedIdx !== idx) {
+      widget.skip(idx);
+    }
+    sess._primedIdx = undefined;
     if (sess._gestureUnlocked) {
       widget.play();
     }
@@ -1566,11 +1569,11 @@ document.getElementById('s1').addEventListener('click', function(e) {
         silentAudioR.play().catch(function(){});
       } catch(e) {}
       if (widgetReady) {
-        // Unlock SC widget audio within gesture, then immediately pause
-        // This avoids the abrupt sound from playing mid-track before seekTo(0)
-        widget.play();
-        widget.pause();
+        widget.skip(sess.tOrder[sess.cur]);
+        sess._primedIdx = sess.tOrder[sess.cur];
+        // Play immediately within gesture — mobile requires this to unlock audio
         sess._gestureUnlocked = true;
+        widget.play();
       }
       // Clear any leftover song reveal UI before showing listen screen
       var _srClr = document.getElementById('song-reveal');
@@ -1592,11 +1595,11 @@ document.getElementById('s1').addEventListener('click', function(e) {
       silentAudioP.play().catch(function(){});
     } catch(e) {}
     if (widgetReady) {
-      // Unlock SC widget audio within gesture, then immediately pause
-      // This avoids the abrupt sound from playing mid-track before seekTo(0)
-      widget.play();
-      widget.pause();
+      widget.skip(sess.tOrder[0]);
+      sess._primedIdx = sess.tOrder[0];
+      // Play immediately within gesture — mobile requires this to unlock audio
       sess._gestureUnlocked = true;
+      widget.play();
     }
     show('s3');
     setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 300);
