@@ -1019,11 +1019,8 @@ function playTrack(idx) {
   function go() {
     resetPanel();
     startDot();
-    // Only skip if not already on correct track — re-skipping causes audio blip
-    if (sess._primedIdx !== idx) {
-      widget.skip(idx);
-    }
-    sess._primedIdx = undefined;
+    // Always skip to correct track, seek to start, then play
+    widget.skip(idx);
     if (sess._gestureUnlocked) {
       widget.play();
     }
@@ -1881,7 +1878,6 @@ document.getElementById('btn-stop-listen').addEventListener('click', function() 
   if (widget) widget.pause();
   stopDot();
   saveAbandoned();
-  // Clear entry statement screen from history so back goes to today not entry
   _screenHistory = _screenHistory.filter(function(s) { return s !== 's2'; });
 
   // Write Abandoned to Airtable immediately (don't rely on beacon/pagehide)
@@ -2576,7 +2572,7 @@ window.addEventListener('popstate', function(e) {
   if (_screenHistory.length > 1) _screenHistory.pop();
   var prev = _screenHistory[_screenHistory.length - 1] || 's1';
 
-  // If screenHistory is exhausted and we're on today page — exit to landing
+  // Exit to landing when on today page and history exhausted
   if (_screenHistory.length <= 1 && prev === 's1') {
     var currentActive2 = document.querySelector('.screen.active');
     if (currentActive2 && currentActive2.id === 's1') {
