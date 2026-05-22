@@ -1878,6 +1878,8 @@ document.getElementById('btn-stop-listen').addEventListener('click', function() 
   if (widget) widget.pause();
   stopDot();
   saveAbandoned();
+  // Clear any entry statement screen from history so back goes to today not entry
+  _screenHistory = _screenHistory.filter(function(s) { return s !== 's2'; });
 
   // Write Abandoned to Airtable immediately (don't rely on beacon/pagehide)
   if (sess.listenStart && !sess._abandonSent) {
