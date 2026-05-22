@@ -2542,10 +2542,13 @@ window.addEventListener('popstate', function(e) {
       window._resumeCur = sess.cur;
       window._resumeMode = true;
       window._skipEntry = true;
-      // Push s1 so back from today goes to landing not boundary immediately
+      // Push s1 twice: one for today display, one buffer so back-from-today → boundary → landing
+      history.pushState({ screen: 's1' }, '', window.location.href);
       history.pushState({ screen: 's1' }, '', window.location.href);
       _origShow('s1');
     } else {
+      // Push s1 buffer so back-from-sets → today, then back-from-today → boundary → landing
+      history.pushState({ screen: 's1' }, '', window.location.href);
       history.pushState({ screen: 's6' }, '', window.location.href);
       _screenHistory.push('s6');
       // Use _origShow (not showSetsScreen) to avoid double-pushing s6 to history
@@ -2573,8 +2576,8 @@ window.addEventListener('popstate', function(e) {
   if (_screenHistory.length > 1) _screenHistory.pop();
   var prev = _screenHistory[_screenHistory.length - 1] || 's1';
 
-  // Exit to landing when on today page and history exhausted
-  if (_screenHistory.length <= 1 && prev === 's1') {
+  // Exit to landing when already on today page and history exhausted
+  if (prev === 's1') {
     var currentActive2 = document.querySelector('.screen.active');
     if (currentActive2 && currentActive2.id === 's1') {
       window.location.href = 'https://fyndtoday.com';
