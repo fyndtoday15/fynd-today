@@ -1566,11 +1566,7 @@ document.getElementById('s1').addEventListener('click', function(e) {
         silentAudioR.play().catch(function(){});
       } catch(e) {}
       if (widgetReady) {
-        widget.skip(sess.tOrder[sess.cur]);
-        sess._primedIdx = sess.tOrder[sess.cur];
-        widget.seekTo(0);
         sess._gestureUnlocked = true;
-        widget.play();
       }
       // Clear any leftover song reveal UI before showing listen screen
       var _srClr = document.getElementById('song-reveal');
@@ -1592,11 +1588,7 @@ document.getElementById('s1').addEventListener('click', function(e) {
       silentAudioP.play().catch(function(){});
     } catch(e) {}
     if (widgetReady) {
-      widget.skip(sess.tOrder[0]);
-      sess._primedIdx = sess.tOrder[0];
-      widget.seekTo(0);
       sess._gestureUnlocked = true;
-      widget.play();
     }
     show('s3');
     setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 300);
@@ -1611,9 +1603,10 @@ document.getElementById('s1').addEventListener('click', function(e) {
     // Check if signed in within last 24h on this browser — skip panel if so
     var _lastSignin = LS.get('lastSigninTime');
     var _24h = 24 * 60 * 60 * 1000;
-    // Also treat a fresh entryStateTime within 24h as "within day" — covers press play without sign-in panel
     var _esTimeCheck = parseInt(localStorage.getItem('fynd_entryStateTime') || '0', 10);
-    var _withinDay = (_lastSignin && (Date.now() - _lastSignin) < _24h) || (_esTimeCheck && (Date.now() - _esTimeCheck) < _24h);
+    var _esExists = !!(localStorage.getItem('fynd_entryState'));
+    // Within day if: signed in recently, OR entry state exists (never expires once set)
+    var _withinDay = (_lastSignin && (Date.now() - _lastSignin) < _24h) || (_esTimeCheck && (Date.now() - _esTimeCheck) < _24h) || _esExists;
     if (_withinDay) {
       // Still within 24h — restore state silently, no sign-in required
       // Check entry state expiry — match universal check logic exactly
@@ -2540,7 +2533,11 @@ window.addEventListener('popstate', function(e) {
       }
     }
     resetPanel();
-    // Always go to today page — never to landing, never to sets
+    // Always push s1 into browser history so:
+    // - back from today always goes to landing (hits boundary)
+    // - back from sets goes to today (hits this s1)
+    history.pushState({ screen: 's1' }, '', window.location.href);
+    // Always go to today page
     if (!LS.get('email')) {
       saveAbandoned();
       window._resumeCur = sess.cur;
@@ -2962,7 +2959,7 @@ document.addEventListener('visibilitychange', function() {
   } catch(e) {}
   // Fire beacon on mobile only — desktop pagehide is reliable so beacon not needed there
   // On desktop, visibilitychange fires on window/tab switching which would write Abandoned incorrectly
-  var isMobile = /iP(hone|ad|od)/.test(navigator.userAgent);
+  var isMobile = /iP(hone|ad|od)|Android/i.test(navigator.userAgent);
   if (!isMobile) return;
   if (sess._abandonSent) return;
   var vcPayload = sess._activeRecordId ? JSON.stringify({
