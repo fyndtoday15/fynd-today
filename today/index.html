@@ -1566,7 +1566,11 @@ document.getElementById('s1').addEventListener('click', function(e) {
         silentAudioR.play().catch(function(){});
       } catch(e) {}
       if (widgetReady) {
+        widget.skip(sess.tOrder[sess.cur]);
+        sess._primedIdx = sess.tOrder[sess.cur];
+        widget.seekTo(0);
         sess._gestureUnlocked = true;
+        widget.play();
       }
       // Clear any leftover song reveal UI before showing listen screen
       var _srClr = document.getElementById('song-reveal');
@@ -1588,7 +1592,11 @@ document.getElementById('s1').addEventListener('click', function(e) {
       silentAudioP.play().catch(function(){});
     } catch(e) {}
     if (widgetReady) {
+      widget.skip(sess.tOrder[0]);
+      sess._primedIdx = sess.tOrder[0];
+      widget.seekTo(0);
       sess._gestureUnlocked = true;
+      widget.play();
     }
     show('s3');
     setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 300);
@@ -1605,7 +1613,7 @@ document.getElementById('s1').addEventListener('click', function(e) {
     var _24h = 24 * 60 * 60 * 1000;
     var _esTimeCheck = parseInt(localStorage.getItem('fynd_entryStateTime') || '0', 10);
     var _esExists = !!(localStorage.getItem('fynd_entryState'));
-    // Within day if: signed in recently, OR entry state exists (never expires once set)
+    // Within day if signed in recently, or entryState exists (never expires once set)
     var _withinDay = (_lastSignin && (Date.now() - _lastSignin) < _24h) || (_esTimeCheck && (Date.now() - _esTimeCheck) < _24h) || _esExists;
     if (_withinDay) {
       // Still within 24h — restore state silently, no sign-in required
@@ -2533,11 +2541,8 @@ window.addEventListener('popstate', function(e) {
       }
     }
     resetPanel();
-    // Always push s1 into browser history so:
-    // - back from today always goes to landing (hits boundary)
-    // - back from sets goes to today (hits this s1)
+    // Push s1 so user gets today first, then one more back goes to landing
     history.pushState({ screen: 's1' }, '', window.location.href);
-    // Always go to today page
     if (!LS.get('email')) {
       saveAbandoned();
       window._resumeCur = sess.cur;
