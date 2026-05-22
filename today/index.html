@@ -1568,7 +1568,7 @@ document.getElementById('s1').addEventListener('click', function(e) {
       if (widgetReady) {
         widget.skip(sess.tOrder[sess.cur]);
         sess._primedIdx = sess.tOrder[sess.cur];
-        widget.seekTo(0);
+        // Play immediately within gesture — mobile requires this to unlock audio
         sess._gestureUnlocked = true;
         widget.play();
       }
@@ -1594,7 +1594,7 @@ document.getElementById('s1').addEventListener('click', function(e) {
     if (widgetReady) {
       widget.skip(sess.tOrder[0]);
       sess._primedIdx = sess.tOrder[0];
-      widget.seekTo(0);
+      // Play immediately within gesture — mobile requires this to unlock audio
       sess._gestureUnlocked = true;
       widget.play();
     }
@@ -1878,7 +1878,6 @@ document.getElementById('btn-stop-listen').addEventListener('click', function() 
   if (widget) widget.pause();
   stopDot();
   saveAbandoned();
-  _screenHistory = _screenHistory.filter(function(s) { return s !== 's2'; });
 
   // Write Abandoned to Airtable immediately (don't rely on beacon/pagehide)
   if (sess.listenStart && !sess._abandonSent) {
@@ -2458,11 +2457,13 @@ var _navLock = false;
 
 var _origShow = show;
 show = function(id) {
+  console.log('show() called:', id, '| _screenHistory before:', JSON.stringify(_screenHistory));
   // Never push s3 (listen) to history — no one should back into listen
   if (id !== 's3') {
     if (_screenHistory[_screenHistory.length - 1] !== id) {
       _screenHistory.push(id);
       history.pushState({ screen: id }, '', window.location.href);
+      console.log('pushState:', id, '| _screenHistory after:', JSON.stringify(_screenHistory));
     }
   }
   _origShow(id);
@@ -2472,6 +2473,7 @@ history.pushState({ screen: 'boundary' }, '', window.location.href);
 history.pushState({ screen: 's1' }, '', window.location.href);
 
 window.addEventListener('popstate', function(e) {
+  console.log('POPSTATE fired. e.state:', JSON.stringify(e.state), '_screenHistory:', JSON.stringify(_screenHistory), 'currentActive:', document.querySelector('.screen.active') ? document.querySelector('.screen.active').id : 'none');
   if (_navLock) return;
   _navLock = true;
   var _isMobileSafari = /iP(hone|ad|od)/.test(navigator.userAgent);
@@ -2481,6 +2483,7 @@ window.addEventListener('popstate', function(e) {
   // Must check BEFORE boundary so back from listen doesn't exit the app
   var currentActive = document.querySelector('.screen.active');
   if (currentActive && currentActive.id === 's3') {
+    console.log('S3 ACTIVE - handling back from listen');
     clearTimeout(readyTimer);
     clearTimeout(autoTimer);
     clearTimeout(thumbsTimer);
@@ -2536,9 +2539,6 @@ window.addEventListener('popstate', function(e) {
       }
     }
     resetPanel();
-    // Restore the s1 entry that the browser popped to fire this popstate
-    // Without this, back from sets/today hits boundary and goes to landing
-    history.pushState({ screen: 's1' }, '', window.location.href);
     // No email = first set, back goes to Today
     if (!LS.get('email')) {
       saveAbandoned();
@@ -2567,6 +2567,7 @@ window.addEventListener('popstate', function(e) {
   }
 
   if (!e.state || e.state.screen === 'boundary') {
+    console.log('BOUNDARY HIT - going to fyndtoday.com');
     window.location.href = 'https://fyndtoday.com';
     return;
   }
