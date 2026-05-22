@@ -1566,9 +1566,10 @@ document.getElementById('s1').addEventListener('click', function(e) {
         silentAudioR.play().catch(function(){});
       } catch(e) {}
       if (widgetReady) {
-        widget.skip(sess.tOrder[sess.cur]);
-        sess._primedIdx = sess.tOrder[sess.cur];
-        // Signal gesture unlocked so go() plays synchronously within gesture
+        // Unlock SC widget audio within gesture, then immediately pause
+        // This avoids the abrupt sound from playing mid-track before seekTo(0)
+        widget.play();
+        widget.pause();
         sess._gestureUnlocked = true;
       }
       // Clear any leftover song reveal UI before showing listen screen
@@ -1591,9 +1592,10 @@ document.getElementById('s1').addEventListener('click', function(e) {
       silentAudioP.play().catch(function(){});
     } catch(e) {}
     if (widgetReady) {
-      widget.skip(sess.tOrder[0]);
-      sess._primedIdx = sess.tOrder[0];
-      // Signal gesture unlocked so go() plays synchronously within gesture
+      // Unlock SC widget audio within gesture, then immediately pause
+      // This avoids the abrupt sound from playing mid-track before seekTo(0)
+      widget.play();
+      widget.pause();
       sess._gestureUnlocked = true;
     }
     show('s3');
@@ -1876,7 +1878,7 @@ document.getElementById('btn-stop-listen').addEventListener('click', function() 
   if (widget) widget.pause();
   stopDot();
   saveAbandoned();
-  // Clear any entry statement screen from history so back goes to today not entry
+  // Clear entry statement screen from history so back goes to today not entry
   _screenHistory = _screenHistory.filter(function(s) { return s !== 's2'; });
 
   // Write Abandoned to Airtable immediately (don't rely on beacon/pagehide)
@@ -2571,7 +2573,7 @@ window.addEventListener('popstate', function(e) {
   if (_screenHistory.length > 1) _screenHistory.pop();
   var prev = _screenHistory[_screenHistory.length - 1] || 's1';
 
-  // If _screenHistory is exhausted or only has s1 and we're on today page — exit to landing
+  // If screenHistory is exhausted and we're on today page — exit to landing
   if (_screenHistory.length <= 1 && prev === 's1') {
     var currentActive2 = document.querySelector('.screen.active');
     if (currentActive2 && currentActive2.id === 's1') {
