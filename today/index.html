@@ -1355,7 +1355,7 @@ document.getElementById('thumb-down-corner').addEventListener('click', function(
     if (stD) { stD.style.transition = 'none'; stD.style.background = '#000000'; }
     if (sbD) { sbD.style.transition = 'none'; sbD.style.background = '#000000'; }
     show('s3');
-    if (widgetReady) { sess._gestureUnlocked = true; }
+    sess._gestureUnlocked = true;
   setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 100);
   } else {
     markSetComplete(sess.playlist);
@@ -1565,11 +1565,12 @@ document.getElementById('s1').addEventListener('click', function(e) {
         silentAudioR.volume = 0;
         silentAudioR.play().catch(function(){});
       } catch(e) {}
+      // Always set gestureUnlocked — go() will use it whenever widgetReady fires
+      sess._gestureUnlocked = true;
       if (widgetReady) {
         widget.skip(sess.tOrder[sess.cur]);
         sess._primedIdx = sess.tOrder[sess.cur];
         widget.seekTo(0);
-        sess._gestureUnlocked = true;
         widget.play();
       }
       // Clear any leftover song reveal UI before showing listen screen
@@ -1591,11 +1592,12 @@ document.getElementById('s1').addEventListener('click', function(e) {
       silentAudioP.volume = 0;
       silentAudioP.play().catch(function(){});
     } catch(e) {}
+    // Always set gestureUnlocked — go() will use it whenever widgetReady fires
+    sess._gestureUnlocked = true;
     if (widgetReady) {
       widget.skip(sess.tOrder[0]);
       sess._primedIdx = sess.tOrder[0];
       widget.seekTo(0);
-      sess._gestureUnlocked = true;
       widget.play();
     }
     show('s3');
@@ -1796,6 +1798,7 @@ document.getElementById('s1').addEventListener('click', function(e) {
         silentAudioM.volume = 0;
         silentAudioM.play().catch(function(){});
       } catch(e) {}
+      sess._gestureUnlocked = true;
       if (widgetReady) { widget.skip(sess.tOrder[sess.cur]); sess._primedIdx = sess.tOrder[sess.cur]; }
       show('s3');
       setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 300);
