@@ -1878,7 +1878,6 @@ document.getElementById('btn-stop-listen').addEventListener('click', function() 
   if (widget) widget.pause();
   stopDot();
   saveAbandoned();
-  _screenHistory = _screenHistory.filter(function(s) { return s !== 's2'; });
 
   // Write Abandoned to Airtable immediately (don't rely on beacon/pagehide)
   if (sess.listenStart && !sess._abandonSent) {
@@ -2450,15 +2449,14 @@ function sendRecapEmail(email, firstName, playlist, log, entryState) {
 }
 
 // ── BACK BUTTON ─────────────────────────────────────────
-// Two history states: s1 (inner) and fyndtoday.com (outer)
-// Listen screen → s1 → fyndtoday.com
-// ── BACK BUTTON — real navigation history ───────────────
+// ── BACK BUTTON ─────────────────────────────────────────
+// Strategy: keep a deep history stack so back always has room.
+// Never rely on e.state for routing — always route from currentActive screen.
 var _screenHistory = ['s1'];
 var _navLock = false;
 
 var _origShow = show;
 show = function(id) {
-  // Never push s3 (listen) to history — no one should back into listen
   if (id !== 's3') {
     if (_screenHistory[_screenHistory.length - 1] !== id) {
       _screenHistory.push(id);
@@ -2468,25 +2466,31 @@ show = function(id) {
   _origShow(id);
 };
 
+// Push enough history entries so back button always has room to route correctly
+// boundary = exit to landing, then two s1 entries as buffer
 history.pushState({ screen: 'boundary' }, '', window.location.href);
+history.pushState({ screen: 's1' }, '', window.location.href);
+history.pushState({ screen: 's1' }, '', window.location.href);
 history.pushState({ screen: 's1' }, '', window.location.href);
 
 window.addEventListener('popstate', function(e) {
   if (_navLock) return;
   _navLock = true;
-  var _isMobile = /iP(hone|ad|od)|Android/i.test(navigator.userAgent) || !!(navigator.brave && navigator.brave.isBrave && 'ontouchstart' in window);
-  setTimeout(function() { _navLock = false; }, _isMobile ? 300 : 100);
+  setTimeout(function() { _navLock = false; }, 300);
 
-  // If currently on listen screen — stop music, record abandoned, go to sets page
-  // Must check BEFORE boundary so back from listen doesn't exit the app
-  var currentActive = document.querySelector('.screen.active');
-  if (currentActive && currentActive.id === 's3') {
+  var current = document.querySelector('.screen.active');
+  var currentId = current ? current.id : 's1';
+
+  // ── FROM LISTEN SCREEN ───────────────────────────────
+  if (currentId === 's3') {
+    // Stop everything
     clearTimeout(readyTimer);
     clearTimeout(autoTimer);
     clearTimeout(thumbsTimer);
     clearInterval(heartbeatTimer);
     if (widget) widget.pause();
     stopDot();
+    // Write abandoned to Airtable
     if (sess.listenStart && !sess._abandonSent) {
       var _now = Date.now();
       var _dur = Math.round((_now - sess.listenStart) / 1000);
@@ -2494,7 +2498,7 @@ window.addEventListener('popstate', function(e) {
       if (_ti !== undefined) {
         var _tr = getTrack(sess.playlist, _ti);
         var _sid = 'T00' + (sess.cur + 1);
-        var _tt = _tr.title + ' \u2014 ' + _tr.artist;
+        var _tt = _tr.title + '\u2014' + _tr.artist;
         var _date = new Date().toISOString().slice(0,10);
         sess._abandonSent = true;
         var _bBody = sess._activeRecordId ? JSON.stringify({
@@ -2536,101 +2540,54 @@ window.addEventListener('popstate', function(e) {
       }
     }
     resetPanel();
-    // On mobile, the browser pops the s1 history entry to fire popstate.
-    // We must push s1 back so back-from-sets/today doesn't immediately hit boundary.
-    // On desktop this isn't needed because desktop has more history depth.
-    if (_isMobile) {
-      history.pushState({ screen: 's1' }, '', window.location.href);
-    }
-    // No email = first set, back goes to Today
+    // Always go to today page — never to landing, never to sets
     if (!LS.get('email')) {
       saveAbandoned();
       window._resumeCur = sess.cur;
       window._resumeMode = true;
       window._skipEntry = true;
-      _origShow('s1');
-    } else {
-      history.pushState({ screen: 's6' }, '', window.location.href);
-      _screenHistory.push('s6');
-      // Use _origShow (not showSetsScreen) to avoid double-pushing s6 to history
-      var _sp2 = document.getElementById('signin-panel');
-      if (_sp2) { _sp2.classList.remove('open'); _sp2.style.display = 'none'; }
-      var _h2 = document.getElementById('email-head');
-      if (_h2) { _h2.textContent = 'Recognize every time you press play.'; _h2.style.fontSize = '18px'; _h2.style.opacity = '1'; }
-      var _ei = document.getElementById('email-in'); if (_ei) _ei.style.display = 'none';
-      var _ni = document.getElementById('name-in'); if (_ni) _ni.style.display = 'none';
-      var _es = document.getElementById('email-sub'); if (_es) _es.style.display = 'none';
-      var _cl = document.getElementById('consent-label'); if (_cl) _cl.style.display = 'none';
-      var _rn = document.getElementById('return-note'); if (_rn) _rn.style.display = 'none';
-      var _ag = document.getElementById('listen-again');
-      if (_ag) { _ag.style.display = 'block'; updateSetButtons(); }
-      _origShow('s6');
     }
+    _origShow('s1');
     return;
   }
 
-  if (!e.state || e.state.screen === 'boundary') {
+  // ── FROM SETS/EMAIL SCREEN ───────────────────────────
+  if (currentId === 's6') {
+    _origShow('s1');
+    return;
+  }
+
+  // ── FROM RECAP SCREEN ────────────────────────────────
+  if (currentId === 's7') {
+    showSetsScreen();
+    return;
+  }
+
+  // ── FROM ENTRY SCREEN ────────────────────────────────
+  if (currentId === 's2') {
+    _origShow('s1');
+    return;
+  }
+
+  // ── FROM TODAY SCREEN ────────────────────────────────
+  if (currentId === 's1') {
+    // Sign-in panel open — close it
+    var _panel = document.getElementById('signin-panel');
+    if (_panel && _panel.classList.contains('open')) {
+      _panel.classList.remove('open');
+      _panel.style.display = 'none';
+      document.getElementById('signin-trigger').style.display = 'block';
+      restoreS1();
+      _navLock = false;
+      return;
+    }
+    // Exit to landing
     window.location.href = 'https://fyndtoday.com';
     return;
   }
 
-  if (_screenHistory.length > 1) _screenHistory.pop();
-  var prev = _screenHistory[_screenHistory.length - 1] || 's1';
-
-  // If we've backed all the way to s1 with nothing before it, exit to landing
-  if (prev === 's1' && _screenHistory.length === 1 && (!e.state || e.state.screen === 's1')) {
-    var currentActive2 = document.querySelector('.screen.active');
-    if (currentActive2 && currentActive2.id === 's1') {
-      window.location.href = 'https://fyndtoday.com';
-      return;
-    }
-  }
-
-  var _panel = document.getElementById('signin-panel');
-  if (_panel && _panel.classList.contains('open')) {
-    _panel.classList.remove('open');
-    _panel.style.display = 'none';
-    document.getElementById('signin-trigger').style.display = 'block';
-    restoreS1();
-    _screenHistory = ['s1'];
-    _navLock = false;
-    return;
-  }
-
-  if (prev === 'signin') {
-    var _sp = document.getElementById('signin-panel');
-    if (_sp) { _sp.classList.remove('open'); _sp.style.display = 'none'; }
-    document.getElementById('signin-trigger').style.display = 'block';
-    restoreS1();
-    _origShow('s1');
-  } else if (prev === 's1') {
-    var s1el = document.getElementById('s1');
-    if (s1el) {
-      s1el.classList.remove('set-reload');
-      var hint = s1el.querySelector('.s1-hint');
-      if (hint) hint.textContent = 'Press Play';
-    }
-    document.body.style.background = '';
-    var tc = document.getElementById('theme-color');
-    if (tc) tc.content = '#FCFBF4';
-    if (!LS.get('email')) {
-      // No email — restore abandoned so press play resumes listen
-      var _ab = getAbandoned(sess.playlist);
-      if (_ab) {
-        sess.id = _ab.sessionId;
-        sess.tOrder = _ab.tOrder;
-        sess.log = _ab.log || [];
-        sess.entryState = _ab.entryState || sess.entryState;
-        window._resumeCur = _ab.cur;
-        window._resumeMode = true;
-      }
-      window._skipEntry = true;
-    }
-    // Has email — don't set _skipEntry, press play will route to sets page normally
-    _origShow('s1');
-  } else {
-    _origShow(prev);
-  }
+  // ── FALLBACK ─────────────────────────────────────────
+  _origShow('s1');
 });
 
 // Safari BFCache + forward button — if page is restored from cache while listen screen is active,
