@@ -1568,9 +1568,8 @@ document.getElementById('s1').addEventListener('click', function(e) {
       if (widgetReady) {
         widget.skip(sess.tOrder[sess.cur]);
         sess._primedIdx = sess.tOrder[sess.cur];
-        // Play immediately within gesture — mobile requires this to unlock audio
+        // Signal gesture unlocked so go() plays synchronously within gesture
         sess._gestureUnlocked = true;
-        widget.play();
       }
       // Clear any leftover song reveal UI before showing listen screen
       var _srClr = document.getElementById('song-reveal');
@@ -1594,9 +1593,8 @@ document.getElementById('s1').addEventListener('click', function(e) {
     if (widgetReady) {
       widget.skip(sess.tOrder[0]);
       sess._primedIdx = sess.tOrder[0];
-      // Play immediately within gesture — mobile requires this to unlock audio
+      // Signal gesture unlocked so go() plays synchronously within gesture
       sess._gestureUnlocked = true;
-      widget.play();
     }
     show('s3');
     setTimeout(function() { playTrack(sess.tOrder[sess.cur]); }, 300);
@@ -2573,8 +2571,8 @@ window.addEventListener('popstate', function(e) {
   if (_screenHistory.length > 1) _screenHistory.pop();
   var prev = _screenHistory[_screenHistory.length - 1] || 's1';
 
-  // If we've backed all the way to s1 with nothing before it, exit to landing
-  if (prev === 's1' && _screenHistory.length === 1 && (!e.state || e.state.screen === 's1')) {
+  // If _screenHistory is exhausted or only has s1 and we're on today page — exit to landing
+  if (_screenHistory.length <= 1 && prev === 's1') {
     var currentActive2 = document.querySelector('.screen.active');
     if (currentActive2 && currentActive2.id === 's1') {
       window.location.href = 'https://fyndtoday.com';
