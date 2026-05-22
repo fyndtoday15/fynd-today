@@ -2470,7 +2470,6 @@ show = function(id) {
 
 history.pushState({ screen: 'boundary' }, '', window.location.href);
 history.pushState({ screen: 's1' }, '', window.location.href);
-history.pushState({ screen: 's1' }, '', window.location.href);
 
 window.addEventListener('popstate', function(e) {
   if (_navLock) return;
@@ -2543,6 +2542,8 @@ window.addEventListener('popstate', function(e) {
       window._resumeCur = sess.cur;
       window._resumeMode = true;
       window._skipEntry = true;
+      // Push s1 so back from today goes to landing not boundary immediately
+      history.pushState({ screen: 's1' }, '', window.location.href);
       _origShow('s1');
     } else {
       history.pushState({ screen: 's6' }, '', window.location.href);
