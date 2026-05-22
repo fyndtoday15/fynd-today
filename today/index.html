@@ -1019,8 +1019,11 @@ function playTrack(idx) {
   function go() {
     resetPanel();
     startDot();
-    // Always skip to correct track, seek to start, then play
-    widget.skip(idx);
+    // Only skip if not already on correct track — avoids audio artifact from double-skip
+    if (sess._primedIdx !== idx) {
+      widget.skip(idx);
+    }
+    sess._primedIdx = undefined;
     if (sess._gestureUnlocked) {
       widget.play();
     }
@@ -2548,6 +2551,9 @@ window.addEventListener('popstate', function(e) {
       window._resumeCur = sess.cur;
       window._resumeMode = true;
       window._skipEntry = true;
+    } else {
+      // Refresh lastSigninTime so press play goes straight to sets
+      LS.set('lastSigninTime', Date.now());
     }
     _origShow('s1');
     return;
@@ -2555,6 +2561,8 @@ window.addEventListener('popstate', function(e) {
 
   // ── FROM SETS/EMAIL SCREEN ───────────────────────────
   if (currentId === 's6') {
+    // Refresh lastSigninTime so press play goes straight to sets (no sign-in gate)
+    if (LS.get('email')) { LS.set('lastSigninTime', Date.now()); }
     _origShow('s1');
     return;
   }
