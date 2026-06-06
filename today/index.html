@@ -2,803 +2,782 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#0a0a0a">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" id="theme-color" content="#0a0a0a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>FYND TODAY</title>
 <style>
-  /* ── RESET ── */
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  
-  /* ── TOKENS ── */
-  :root {
-    --black: #0a0a0a;
-    --off-white: #f5f3ee;
-    --dim: rgba(245,243,238,0.35);
-    --dimmer: rgba(245,243,238,0.15);
-    --f: 'EB Garamond', Georgia, serif;
-    --f-mono: 'DM Mono', 'Courier New', monospace;
-    --transition: 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-  }
+@font-face {
+  font-family: 'DejaVu Sans';
+  src: url('/ttf/DejaVuSans.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'DejaVu Sans';
+  src: url('/ttf/DejaVuSans-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
 
-  /* ── BASE ── */
-  html, body {
-    height: 100%;
-    background: var(--black);
-    color: var(--off-white);
-    font-family: var(--f);
-    -webkit-font-smoothing: antialiased;
-    overflow: hidden;
-    user-select: none;
-    -webkit-user-select: none;
-  }
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
 
-  /* ── SCREENS ── */
-  .screen {
-    position: fixed;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity var(--transition);
-    padding: env(safe-area-inset-top, 20px) env(safe-area-inset-right, 20px) env(safe-area-inset-bottom, 20px) env(safe-area-inset-left, 20px);
-  }
-  .screen.active {
-    opacity: 1;
-    pointer-events: all;
-  }
+:root {
+  --bg: #0a0a0a;
+  --fg: #f0ede6;
+  --dim: rgba(240,237,230,0.4);
+  --dimmer: rgba(240,237,230,0.18);
+  --f: 'DejaVu Sans', Arial, sans-serif;
+}
 
-  /* ── WORDMARK ── */
-  .wordmark {
-    position: fixed;
-    bottom: max(28px, env(safe-area-inset-bottom, 28px));
-    left: 50%;
-    transform: translateX(-50%);
-    font-family: var(--f-mono);
-    font-size: 9px;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-    color: var(--dimmer);
-    z-index: 100;
-    text-align: center;
-    line-height: 1.4;
-    pointer-events: none;
-  }
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--f);
+  -webkit-font-smoothing: antialiased;
+}
 
-  /* ── SCREEN: ENTRY ── */
-  #s-entry {
-    gap: 0;
-  }
-  .entry-line {
-    font-size: clamp(18px, 4.5vw, 28px);
-    font-weight: 400;
-    line-height: 1.5;
-    text-align: center;
-    color: var(--off-white);
-    opacity: 0;
-    transform: translateY(8px);
-    transition: opacity 0.9s ease, transform 0.9s ease;
-    max-width: 480px;
-    padding: 0 32px;
-  }
-  .entry-line.visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  .entry-line.dim {
-    color: var(--dim);
-    font-size: clamp(14px, 3.5vw, 18px);
-  }
+/* ── SCREENS ── */
+.screen {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.7s ease;
+  padding:
+    calc(env(safe-area-inset-top, 20px) + 20px)
+    32px
+    calc(env(safe-area-inset-bottom, 20px) + 20px);
+}
+.screen.active {
+  opacity: 1;
+  pointer-events: all;
+}
 
-  .entry-paths {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 16px;
-    margin-top: 52px;
-    opacity: 0;
-    transition: opacity 1s ease;
-  }
-  .entry-paths.visible { opacity: 1; }
+/* ── WORDMARK ── */
+#wordmark {
+  position: fixed;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 24px);
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 9px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--dimmer);
+  text-align: center;
+  line-height: 1.5;
+  z-index: 10;
+  pointer-events: none;
+}
 
-  .path-btn {
-    background: none;
-    border: none;
-    font-family: var(--f);
-    font-size: clamp(13px, 3vw, 16px);
-    color: var(--off-white);
-    cursor: pointer;
-    letter-spacing: 0.06em;
-    padding: 10px 0;
-    border-bottom: 1px solid rgba(245,243,238,0.2);
-    width: 200px;
-    text-align: center;
-    transition: border-color 0.3s ease, color 0.3s ease;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .path-btn:active { color: var(--dim); }
-  .path-sep {
-    font-family: var(--f-mono);
-    font-size: 9px;
-    letter-spacing: 0.18em;
-    color: var(--dimmer);
-    text-transform: uppercase;
-  }
+/* ── LOADER ── */
+#loader {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  transition: opacity 0.6s ease;
+}
+#loader.out {
+  opacity: 0;
+  pointer-events: none;
+}
+.loader-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--dimmer);
+  animation: breathe 1.8s ease-in-out infinite;
+}
+@keyframes breathe {
+  0%, 100% { opacity: 0.2; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.4); }
+}
 
-  /* ── SCREEN: BEFORE (RETURN) ── */
-  #s-before {
-    gap: 0;
-  }
-  .before-line {
-    font-size: clamp(16px, 4vw, 24px);
-    font-weight: 400;
-    font-style: italic;
-    color: var(--dim);
-    text-align: center;
-    max-width: 400px;
-    padding: 0 32px;
-    line-height: 1.6;
-    opacity: 0;
-    transition: opacity 1.2s ease;
-  }
-  .before-line.visible { opacity: 1; }
-  .before-continue {
-    margin-top: 48px;
-    background: none;
-    border: none;
-    font-family: var(--f-mono);
-    font-size: 10px;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--dimmer);
-    cursor: pointer;
-    padding: 12px 0;
-    opacity: 0;
-    transition: opacity 0.8s ease, color 0.2s ease;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .before-continue.visible { opacity: 1; }
-  .before-continue:active { color: var(--off-white); }
+/* ── S-ENTRY ── */
+#s-entry { gap: 0; }
 
-  /* ── SCREEN: SEARCH ── */
-  #s-search {
-    gap: 0;
-    padding: 0 32px;
-  }
-  .search-prompt {
-    font-size: clamp(14px, 3.5vw, 18px);
-    color: var(--dim);
-    text-align: center;
-    margin-bottom: 40px;
-    letter-spacing: 0.02em;
-    line-height: 1.6;
-  }
-  .search-wrap {
-    width: 100%;
-    max-width: 360px;
-    position: relative;
-  }
-  .search-input {
-    width: 100%;
-    background: none;
-    border: none;
-    border-bottom: 1px solid rgba(245,243,238,0.25);
-    padding: 14px 0;
-    font-family: var(--f);
-    font-size: clamp(16px, 4vw, 20px);
-    color: var(--off-white);
-    outline: none;
-    caret-color: var(--off-white);
-    letter-spacing: 0.02em;
-    transition: border-color 0.3s ease;
-  }
-  .search-input::placeholder { color: var(--dimmer); }
-  .search-input:focus { border-color: rgba(245,243,238,0.5); }
+.entry-line {
+  font-size: clamp(17px, 4.2vw, 26px);
+  font-weight: 400;
+  line-height: 1.6;
+  text-align: center;
+  color: var(--fg);
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 1s ease, transform 1s ease;
+  max-width: 440px;
+  padding: 0 8px;
+}
+.entry-line.show {
+  opacity: 1;
+  transform: translateY(0);
+}
 
-  .search-results {
-    width: 100%;
-    max-width: 360px;
-    margin-top: 24px;
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-    max-height: 280px;
-    overflow-y: auto;
-  }
-  .search-result {
-    padding: 14px 0;
-    border-bottom: 1px solid rgba(245,243,238,0.08);
-    cursor: pointer;
-    transition: opacity 0.2s ease;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .search-result:active { opacity: 0.5; }
-  .result-title {
-    font-size: clamp(14px, 3.5vw, 16px);
-    color: var(--off-white);
-    letter-spacing: 0.02em;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .result-artist {
-    font-size: 12px;
-    color: var(--dim);
-    margin-top: 3px;
-    font-family: var(--f-mono);
-    letter-spacing: 0.08em;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .search-not-found {
-    font-size: clamp(14px, 3.5vw, 16px);
-    color: var(--dim);
-    font-style: italic;
-    text-align: center;
-    padding: 24px 0;
-    line-height: 1.6;
-  }
+.entry-paths {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-top: 56px;
+  opacity: 0;
+  transition: opacity 1s ease;
+}
+.entry-paths.show { opacity: 1; }
 
-  /* ── SCREEN: LISTEN ── */
-  #s-listen {
-    justify-content: center;
-    gap: 0;
-  }
+.path-btn {
+  background: none;
+  border: none;
+  border-bottom: 1px solid rgba(240,237,230,0.22);
+  font-family: var(--f);
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--fg);
+  cursor: pointer;
+  padding: 12px 0;
+  width: 200px;
+  text-align: center;
+  transition: opacity 0.15s ease, transform 0.1s ease;
+}
+.path-btn:active {
+  opacity: 0.5;
+  transform: scale(0.97);
+}
 
-  /* SC iframe — hidden but functional */
-  #sc-iframe {
-    position: fixed;
-    width: 1px;
-    height: 1px;
-    opacity: 0;
-    pointer-events: none;
-    top: -9999px;
-  }
+.path-sep {
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--dimmer);
+}
 
-  .listen-meta {
-    text-align: center;
-    opacity: 0;
-    transition: opacity 0.8s ease;
-    padding: 0 40px;
-  }
-  .listen-meta.visible { opacity: 1; }
-  .listen-track-label {
-    font-family: var(--f-mono);
-    font-size: 10px;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--dimmer);
-    margin-bottom: 12px;
-  }
-  .listen-track-name {
-    font-size: clamp(18px, 4.5vw, 26px);
-    color: var(--off-white);
-    line-height: 1.4;
-    letter-spacing: 0.01em;
-  }
-  .listen-track-artist {
-    font-size: clamp(12px, 3vw, 14px);
-    color: var(--dim);
-    margin-top: 6px;
-    font-family: var(--f-mono);
-    letter-spacing: 0.1em;
-  }
+/* ── S-BEFORE (return visit) ── */
+#s-before { gap: 0; }
 
-  /* pulse dot */
-  .pulse-wrap {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 48px;
-    height: 40px;
-  }
-  .pulse-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--off-white);
-    opacity: 0;
-    transition: opacity 0.4s ease;
-  }
-  .pulse-dot.active {
-    opacity: 0.7;
-    animation: pulse 2.4s ease-in-out infinite;
-  }
-  @keyframes pulse {
-    0%, 100% { transform: scale(1); opacity: 0.5; }
-    50% { transform: scale(1.6); opacity: 0.9; }
-  }
+.before-observation {
+  font-size: clamp(16px, 4vw, 22px);
+  font-weight: 400;
+  color: var(--dim);
+  text-align: center;
+  max-width: 380px;
+  line-height: 1.65;
+  opacity: 0;
+  transition: opacity 1.2s ease;
+  padding: 0 8px;
+}
+.before-observation.show { opacity: 1; }
 
-  /* curated tag */
-  .curated-tag {
-    font-family: var(--f-mono);
-    font-size: 9px;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-    color: var(--dimmer);
-    text-align: center;
-    margin-bottom: 40px;
-    opacity: 0;
-    transition: opacity 0.6s ease;
-  }
-  .curated-tag.visible { opacity: 1; }
+.before-cta {
+  margin-top: 52px;
+  background: none;
+  border: none;
+  font-family: var(--f);
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--dimmer);
+  cursor: pointer;
+  padding: 12px 0;
+  opacity: 0;
+  transition: opacity 0.8s ease, color 0.2s ease;
+}
+.before-cta.show { opacity: 1; }
+.before-cta:active { color: var(--fg); }
 
-  /* stop button */
-  .listen-stop {
-    position: fixed;
-    bottom: max(64px, calc(env(safe-area-inset-bottom, 20px) + 44px));
-    left: 50%;
-    transform: translateX(-50%);
-    background: none;
-    border: none;
-    font-family: var(--f-mono);
-    font-size: 10px;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--dimmer);
-    cursor: pointer;
-    padding: 12px 0;
-    opacity: 0;
-    transition: opacity 0.6s ease, color 0.2s ease;
-    -webkit-tap-highlight-color: transparent;
-    white-space: nowrap;
-  }
-  .listen-stop.visible { opacity: 1; }
-  .listen-stop:active { color: var(--off-white); }
+/* ── S-SEARCH ── */
+#s-search { justify-content: flex-start; padding-top: clamp(80px, 15vh, 120px); gap: 0; }
 
-  /* ── SCREEN: RECOGNITION ── */
-  #s-recognition {
-    gap: 0;
-    padding: 0 40px;
-  }
+.search-label {
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--dimmer);
+  margin-bottom: 32px;
+  text-align: center;
+}
 
-  .recog-track-reveal {
-    text-align: center;
-    margin-bottom: 48px;
-    opacity: 0;
-    transition: opacity 0.8s ease;
-  }
-  .recog-track-reveal.visible { opacity: 1; }
-  .recog-reveal-label {
-    font-family: var(--f-mono);
-    font-size: 9px;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--dimmer);
-    margin-bottom: 10px;
-  }
-  .recog-reveal-name {
-    font-size: clamp(14px, 3.5vw, 18px);
-    color: var(--dim);
-    letter-spacing: 0.02em;
-  }
+.search-field-wrap {
+  width: 100%;
+  max-width: 340px;
+}
 
-  .recog-question {
-    font-size: clamp(13px, 3.2vw, 16px);
-    color: var(--dim);
-    text-align: center;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    font-family: var(--f-mono);
-    margin-bottom: 40px;
-    opacity: 0;
-    transition: opacity 0.8s ease 0.2s;
-  }
-  .recog-question.visible { opacity: 1; }
+.search-field {
+  width: 100%;
+  background: none;
+  border: none;
+  border-bottom: 1px solid rgba(240,237,230,0.2);
+  padding: 14px 0;
+  font-family: var(--f);
+  font-size: clamp(16px, 4.2vw, 20px);
+  color: var(--fg);
+  outline: none;
+  caret-color: var(--fg);
+  letter-spacing: 0.01em;
+  transition: border-color 0.3s ease;
+}
+.search-field::placeholder { color: var(--dimmer); }
+.search-field:focus { border-color: rgba(240,237,230,0.45); }
 
-  .recog-statements {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    width: 100%;
-    max-width: 360px;
-  }
+.search-results {
+  width: 100%;
+  max-width: 340px;
+  margin-top: 28px;
+  display: flex;
+  flex-direction: column;
+}
 
-  .stmt-btn {
-    background: none;
-    border: 1px solid rgba(245,243,238,0.12);
-    border-radius: 1px;
-    padding: 20px 24px;
-    font-family: var(--f);
-    font-size: clamp(16px, 4vw, 20px);
-    color: var(--off-white);
-    cursor: pointer;
-    text-align: left;
-    line-height: 1.5;
-    letter-spacing: 0.01em;
-    opacity: 0;
-    transform: translateY(10px);
-    transition: opacity 0.7s ease, transform 0.7s ease, border-color 0.2s ease, background 0.2s ease;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .stmt-btn.visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  .stmt-btn:active {
-    background: rgba(245,243,238,0.06);
-    border-color: rgba(245,243,238,0.3);
-  }
-  .stmt-btn.selected {
-    border-color: rgba(245,243,238,0.4);
-    background: rgba(245,243,238,0.05);
-  }
+.search-result {
+  padding: 15px 0;
+  border-bottom: 1px solid rgba(240,237,230,0.07);
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+.search-result:active { opacity: 0.45; }
 
-  .neither-btn {
-    background: none;
-    border: none;
-    font-family: var(--f-mono);
-    font-size: 10px;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--dimmer);
-    cursor: pointer;
-    padding: 16px 0;
-    text-align: center;
-    opacity: 0;
-    transition: opacity 0.7s ease 0.6s, color 0.2s ease;
-    -webkit-tap-highlight-color: transparent;
-    width: 100%;
-    max-width: 360px;
-  }
-  .neither-btn.visible { opacity: 1; }
-  .neither-btn:active { color: var(--off-white); }
+.result-title {
+  font-size: clamp(14px, 3.5vw, 16px);
+  color: var(--fg);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.result-sub {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--dimmer);
+  margin-top: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
-  /* Are you sure */
-  .sure-wrap {
-    position: fixed;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--black);
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.4s ease;
-    z-index: 50;
-    flex-direction: column;
-    gap: 32px;
-  }
-  .sure-wrap.visible {
-    opacity: 1;
-    pointer-events: all;
-  }
-  .sure-text {
-    font-size: clamp(18px, 4.5vw, 26px);
-    color: var(--dim);
-    font-style: italic;
-    text-align: center;
-  }
-  .sure-btns {
-    display: flex;
-    gap: 32px;
-  }
-  .sure-btn {
-    background: none;
-    border: none;
-    font-family: var(--f-mono);
-    font-size: 10px;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--off-white);
-    cursor: pointer;
-    padding: 10px 0;
-    -webkit-tap-highlight-color: transparent;
-    transition: color 0.2s ease;
-  }
-  .sure-btn:active { color: var(--dim); }
+.search-empty {
+  font-size: 15px;
+  color: var(--dim);
+  text-align: center;
+  padding: 28px 0;
+  line-height: 1.7;
+}
 
-  /* ── SCREEN: REFLECTION ── */
-  #s-reflection {
-    gap: 0;
-    padding: 0 40px;
-  }
-  .reflection-line {
-    font-size: clamp(20px, 5vw, 32px);
-    font-weight: 400;
-    font-style: italic;
-    color: var(--off-white);
-    text-align: center;
-    max-width: 440px;
-    line-height: 1.5;
-    opacity: 0;
-    transition: opacity 1.4s ease;
-  }
-  .reflection-line.visible { opacity: 1; }
+/* ── S-LISTEN ── */
+#s-listen { gap: 0; }
 
-  .reflection-actions {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
-    margin-top: 56px;
-    opacity: 0;
-    transition: opacity 0.8s ease 0.8s;
-  }
-  .reflection-actions.visible { opacity: 1; }
+.listen-curated-tag {
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--dimmer);
+  text-align: center;
+  margin-bottom: 52px;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+.listen-curated-tag.show { opacity: 1; }
 
-  .keep-going-btn {
-    background: none;
-    border: none;
-    font-family: var(--f);
-    font-size: clamp(15px, 3.8vw, 18px);
-    color: var(--off-white);
-    cursor: pointer;
-    letter-spacing: 0.04em;
-    padding: 10px 0;
-    border-bottom: 1px solid rgba(245,243,238,0.2);
-    width: 160px;
-    text-align: center;
-    transition: border-color 0.3s ease;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .keep-going-btn:active { border-color: rgba(245,243,238,0.5); }
+.listen-pulse-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 52px;
+}
+.pulse-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--fg);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+.pulse-dot.active {
+  opacity: 0.65;
+  animation: pulse 2.6s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 0.45; }
+  50% { transform: scale(1.7); opacity: 0.85; }
+}
 
-  .share-btn {
-    background: none;
-    border: none;
-    font-family: var(--f-mono);
-    font-size: 10px;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--dimmer);
-    cursor: pointer;
-    padding: 8px 0;
-    transition: color 0.2s ease;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .share-btn:active { color: var(--off-white); }
+.listen-track-info {
+  text-align: center;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+  padding: 0 32px;
+  max-width: 380px;
+}
+.listen-track-info.show { opacity: 1; }
 
-  /* ── SHARE CARD ── */
-  .share-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(10,10,10,0.95);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.4s ease;
-    z-index: 200;
-    padding: 32px;
-  }
-  .share-overlay.visible {
-    opacity: 1;
-    pointer-events: all;
-  }
-  .share-card {
-    background: var(--black);
-    border: 1px solid rgba(245,243,238,0.12);
-    width: 100%;
-    max-width: 320px;
-    padding: 40px 32px;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 32px;
-  }
-  .share-card-line {
-    font-size: clamp(16px, 4vw, 22px);
-    font-style: italic;
-    color: var(--off-white);
-    line-height: 1.5;
-    letter-spacing: 0.01em;
-  }
-  .share-card-mark {
-    font-family: var(--f-mono);
-    font-size: 9px;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-    color: var(--dimmer);
-  }
-  .share-close {
-    position: absolute;
-    top: 24px;
-    right: 24px;
-    background: none;
-    border: none;
-    color: var(--dimmer);
-    font-size: 20px;
-    cursor: pointer;
-    padding: 8px;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .share-close:active { color: var(--off-white); }
-  .share-copy-btn {
-    background: none;
-    border: 1px solid rgba(245,243,238,0.2);
-    font-family: var(--f-mono);
-    font-size: 10px;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--off-white);
-    cursor: pointer;
-    padding: 12px 24px;
-    transition: border-color 0.2s ease;
-    -webkit-tap-highlight-color: transparent;
-    width: 100%;
-  }
-  .share-copy-btn:active { border-color: rgba(245,243,238,0.5); }
+.listen-framing {
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--dimmer);
+  margin-bottom: 14px;
+  line-height: 1.5;
+}
+.listen-title {
+  font-size: clamp(17px, 4.2vw, 22px);
+  color: var(--fg);
+  line-height: 1.4;
+}
+.listen-artist {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-top: 7px;
+}
 
-  /* ── SCREEN: STOPPED ── */
-  #s-stopped {
-    gap: 0;
-    padding: 0 40px;
-  }
-  .stopped-line {
-    font-size: clamp(14px, 3.5vw, 18px);
-    color: var(--dim);
-    text-align: center;
-    line-height: 1.7;
-    max-width: 360px;
-    opacity: 0;
-    transition: opacity 1s ease;
-  }
-  .stopped-line.visible { opacity: 1; }
-  .stopped-actions {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
-    margin-top: 48px;
-    opacity: 0;
-    transition: opacity 0.8s ease 0.6s;
-  }
-  .stopped-actions.visible { opacity: 1; }
-  .stopped-btn {
-    background: none;
-    border: none;
-    font-family: var(--f);
-    font-size: clamp(14px, 3.5vw, 17px);
-    color: var(--off-white);
-    cursor: pointer;
-    letter-spacing: 0.04em;
-    padding: 10px 0;
-    border-bottom: 1px solid rgba(245,243,238,0.2);
-    width: 200px;
-    text-align: center;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .stopped-btn:active { border-color: rgba(245,243,238,0.5); }
+.listen-stop {
+  position: fixed;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 56px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: none;
+  border: none;
+  font-family: var(--f);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--dimmer);
+  cursor: pointer;
+  padding: 12px 0;
+  opacity: 0;
+  transition: opacity 0.5s ease, color 0.2s ease, transform 0.1s ease;
+  white-space: nowrap;
+}
+.listen-stop.show { opacity: 1; }
+.listen-stop:active { color: var(--fg); transform: translateX(-50%) scale(0.97); }
 
-  /* ── EMAIL GATE ── */
-  #s-email {
-    gap: 0;
-    padding: 0 40px;
-  }
-  .email-head {
-    font-size: clamp(16px, 4vw, 22px);
-    color: var(--off-white);
-    text-align: center;
-    max-width: 360px;
-    line-height: 1.6;
-    margin-bottom: 40px;
-    opacity: 0;
-    transition: opacity 0.8s ease;
-  }
-  .email-head.visible { opacity: 1; }
-  .email-form {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    width: 100%;
-    max-width: 320px;
-    opacity: 0;
-    transition: opacity 0.8s ease 0.3s;
-  }
-  .email-form.visible { opacity: 1; }
-  .email-input {
-    background: none;
-    border: none;
-    border-bottom: 1px solid rgba(245,243,238,0.25);
-    padding: 12px 0;
-    font-family: var(--f);
-    font-size: clamp(15px, 3.8vw, 18px);
-    color: var(--off-white);
-    outline: none;
-    caret-color: var(--off-white);
-    letter-spacing: 0.02em;
-    transition: border-color 0.3s ease;
-  }
-  .email-input::placeholder { color: var(--dimmer); }
-  .email-input:focus { border-color: rgba(245,243,238,0.5); }
-  .email-submit {
-    background: none;
-    border: 1px solid rgba(245,243,238,0.2);
-    font-family: var(--f);
-    font-size: clamp(14px, 3.5vw, 16px);
-    color: var(--off-white);
-    cursor: pointer;
-    padding: 14px 0;
-    letter-spacing: 0.06em;
-    margin-top: 8px;
-    transition: border-color 0.2s ease;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .email-submit:active { border-color: rgba(245,243,238,0.5); }
-  .email-error {
-    font-family: var(--f-mono);
-    font-size: 11px;
-    letter-spacing: 0.1em;
-    color: var(--dim);
-    text-align: center;
-    display: none;
-    margin-top: -8px;
-  }
-  .email-skip {
-    background: none;
-    border: none;
-    font-family: var(--f-mono);
-    font-size: 10px;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--dimmer);
-    cursor: pointer;
-    padding: 10px 0;
-    margin-top: 8px;
-    transition: color 0.2s ease;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .email-skip:active { color: var(--off-white); }
+/* ── S-RECOGNITION ── */
+#s-recognition { gap: 0; padding: 0 36px; }
 
-  /* ── LOADING ── */
-  .loader {
-    position: fixed;
-    inset: 0;
-    background: var(--black);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 300;
-    opacity: 1;
-    transition: opacity 0.8s ease;
-  }
-  .loader.hidden { opacity: 0; pointer-events: none; }
-  .loader-dot {
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    background: var(--dimmer);
-    animation: pulse 1.6s ease-in-out infinite;
-  }
+.recog-reveal {
+  text-align: center;
+  margin-bottom: 44px;
+  opacity: 0;
+  transition: opacity 0.9s ease;
+}
+.recog-reveal.show { opacity: 1; }
+.recog-reveal-label {
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--dimmer);
+  margin-bottom: 10px;
+}
+.recog-reveal-name {
+  font-size: clamp(14px, 3.5vw, 17px);
+  color: var(--dim);
+}
 
-  /* ── UTILS ── */
-  @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=DM+Mono:wght@300;400&display=swap');
+.recog-prompt {
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--dimmer);
+  text-align: center;
+  margin-bottom: 36px;
+  opacity: 0;
+  transition: opacity 0.7s ease;
+}
+.recog-prompt.show { opacity: 1; }
+
+.recog-stmts {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  max-width: 340px;
+}
+
+.stmt-btn {
+  background: none;
+  border: 1px solid rgba(240,237,230,0.1);
+  border-radius: 1px;
+  padding: 20px 22px;
+  font-family: var(--f);
+  font-size: clamp(15px, 3.8vw, 18px);
+  color: var(--fg);
+  cursor: pointer;
+  text-align: left;
+  line-height: 1.55;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.65s ease, transform 0.65s ease, border-color 0.2s ease, background 0.15s ease;
+}
+.stmt-btn.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+.stmt-btn:active {
+  background: rgba(240,237,230,0.05);
+  border-color: rgba(240,237,230,0.28);
+}
+.stmt-btn.chosen {
+  border-color: rgba(240,237,230,0.35);
+  background: rgba(240,237,230,0.04);
+}
+
+.neither-btn {
+  background: none;
+  border: none;
+  font-family: var(--f);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--dimmer);
+  cursor: pointer;
+  padding: 18px 0;
+  text-align: center;
+  width: 100%;
+  max-width: 340px;
+  opacity: 0;
+  transition: opacity 0.65s ease 0.5s, color 0.2s ease;
+}
+.neither-btn.show { opacity: 1; }
+.neither-btn:active { color: var(--fg); }
+
+/* ── ARE YOU SURE ── */
+#sure-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 36px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+  z-index: 50;
+  padding: 0 40px;
+}
+#sure-overlay.show {
+  opacity: 1;
+  pointer-events: all;
+}
+.sure-text {
+  font-size: clamp(18px, 4.5vw, 26px);
+  color: var(--dim);
+  text-align: center;
+  line-height: 1.5;
+}
+.sure-actions {
+  display: flex;
+  gap: 40px;
+}
+.sure-btn {
+  background: none;
+  border: none;
+  font-family: var(--f);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--fg);
+  cursor: pointer;
+  padding: 10px 0;
+  transition: opacity 0.2s ease;
+}
+.sure-btn:active { opacity: 0.5; }
+
+/* ── S-REFLECTION ── */
+#s-reflection { gap: 0; padding: 0 40px; }
+
+.reflection-text {
+  font-size: clamp(20px, 5vw, 30px);
+  font-weight: 400;
+  color: var(--fg);
+  text-align: center;
+  max-width: 420px;
+  line-height: 1.55;
+  opacity: 0;
+  transition: opacity 1.4s ease;
+}
+.reflection-text.show { opacity: 1; }
+
+.reflection-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  margin-top: 56px;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+.reflection-actions.show { opacity: 1; }
+
+.keep-going-btn {
+  background: none;
+  border: none;
+  border-bottom: 1px solid rgba(240,237,230,0.2);
+  font-family: var(--f);
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--fg);
+  cursor: pointer;
+  padding: 12px 0;
+  width: 180px;
+  text-align: center;
+  transition: opacity 0.15s ease, transform 0.1s ease;
+}
+.keep-going-btn:active { opacity: 0.5; transform: scale(0.97); }
+
+.share-btn {
+  background: none;
+  border: none;
+  font-family: var(--f);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--dimmer);
+  cursor: pointer;
+  padding: 8px 0;
+  transition: color 0.2s ease;
+}
+.share-btn:active { color: var(--fg); }
+
+/* ── S-STOPPED ── */
+#s-stopped { gap: 0; padding: 0 40px; }
+
+.stopped-text {
+  font-size: clamp(15px, 3.8vw, 19px);
+  color: var(--dim);
+  text-align: center;
+  line-height: 1.7;
+  max-width: 340px;
+  opacity: 0;
+  transition: opacity 1s ease;
+}
+.stopped-text.show { opacity: 1; }
+
+.stopped-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  margin-top: 48px;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+.stopped-actions.show { opacity: 1; }
+
+.stopped-btn {
+  background: none;
+  border: none;
+  border-bottom: 1px solid rgba(240,237,230,0.15);
+  font-family: var(--f);
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--fg);
+  cursor: pointer;
+  padding: 12px 0;
+  width: 200px;
+  text-align: center;
+  transition: opacity 0.15s ease, transform 0.1s ease;
+}
+.stopped-btn:active { opacity: 0.5; transform: scale(0.97); }
+
+/* ── S-EMAIL ── */
+#s-email { gap: 0; padding: 0 40px; }
+
+.email-heading {
+  font-size: clamp(16px, 4vw, 20px);
+  color: var(--fg);
+  text-align: center;
+  max-width: 340px;
+  line-height: 1.65;
+  margin-bottom: 44px;
+  opacity: 0;
+  transition: opacity 0.9s ease;
+}
+.email-heading.show { opacity: 1; }
+
+.email-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  max-width: 300px;
+  opacity: 0;
+  transition: opacity 0.9s ease 0.3s;
+}
+.email-fields.show { opacity: 1; }
+
+.email-input {
+  background: none;
+  border: none;
+  border-bottom: 1px solid rgba(240,237,230,0.2);
+  padding: 12px 0;
+  font-family: var(--f);
+  font-size: clamp(15px, 3.8vw, 17px);
+  color: var(--fg);
+  outline: none;
+  caret-color: var(--fg);
+  letter-spacing: 0.01em;
+  transition: border-color 0.3s ease;
+}
+.email-input::placeholder { color: var(--dimmer); }
+.email-input:focus { border-color: rgba(240,237,230,0.45); }
+
+.email-error {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--dim);
+  display: none;
+  text-align: center;
+}
+
+.email-submit-btn {
+  background: none;
+  border: 1px solid rgba(240,237,230,0.18);
+  border-radius: 1px;
+  font-family: var(--f);
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--fg);
+  cursor: pointer;
+  padding: 14px 0;
+  margin-top: 8px;
+  transition: border-color 0.2s ease, opacity 0.15s ease, transform 0.1s ease;
+}
+.email-submit-btn:active { border-color: rgba(240,237,230,0.45); transform: scale(0.98); }
+
+.email-skip-btn {
+  background: none;
+  border: none;
+  font-family: var(--f);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--dimmer);
+  cursor: pointer;
+  padding: 10px 0;
+  transition: color 0.2s ease;
+}
+.email-skip-btn:active { color: var(--fg); }
+
+/* ── SHARE OVERLAY ── */
+#share-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10,10,10,0.96);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+  z-index: 200;
+}
+#share-overlay.show {
+  opacity: 1;
+  pointer-events: all;
+}
+.share-card {
+  width: 100%;
+  max-width: 300px;
+  border: 1px solid rgba(240,237,230,0.1);
+  padding: 44px 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 36px;
+  text-align: center;
+}
+.share-card-line {
+  font-size: clamp(16px, 4vw, 21px);
+  color: var(--fg);
+  line-height: 1.55;
+}
+.share-card-mark {
+  font-size: 9px;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--dimmer);
+}
+.share-close {
+  position: absolute;
+  top: 20px;
+  right: 24px;
+  background: none;
+  border: none;
+  color: var(--dimmer);
+  font-size: 22px;
+  cursor: pointer;
+  padding: 8px;
+  line-height: 1;
+  transition: color 0.2s ease;
+}
+.share-close:active { color: var(--fg); }
+.share-copy {
+  background: none;
+  border: 1px solid rgba(240,237,230,0.18);
+  font-family: var(--f);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--fg);
+  cursor: pointer;
+  padding: 13px 0;
+  width: 100%;
+  transition: border-color 0.2s ease;
+}
+.share-copy:active { border-color: rgba(240,237,230,0.45); }
 </style>
 </head>
 <body>
 
 <!-- LOADER -->
-<div class="loader" id="loader"><div class="loader-dot"></div></div>
+<div id="loader"><div class="loader-dot"></div></div>
 
 <!-- WORDMARK -->
-<div class="wordmark">FYND<br>TODAY</div>
+<div id="wordmark">FYND<br>TODAY</div>
 
 <!-- SHARE OVERLAY -->
-<div class="share-overlay" id="share-overlay">
+<div id="share-overlay">
   <button class="share-close" id="share-close">×</button>
   <div class="share-card">
     <div class="share-card-line" id="share-card-line"></div>
     <div class="share-card-mark">FYND TODAY</div>
-    <button class="share-copy-btn" id="share-copy-btn">Copy to share</button>
+    <button class="share-copy" id="share-copy">copy to share</button>
   </div>
 </div>
 
 <!-- ARE YOU SURE -->
-<div class="sure-wrap" id="sure-wrap">
+<div id="sure-overlay">
   <div class="sure-text">are you sure?</div>
-  <div class="sure-btns">
+  <div class="sure-actions">
     <button class="sure-btn" id="sure-yes">yes</button>
     <button class="sure-btn" id="sure-no">actually, no</button>
   </div>
 </div>
 
-<!-- S-ENTRY: First visit -->
+<!-- S-ENTRY -->
 <div class="screen" id="s-entry">
   <div class="entry-line" id="el-1">You've heard a song that changed the room.</div>
   <div class="entry-line" id="el-2">You've felt music move you before you understood why.</div>
@@ -810,43 +789,45 @@
   </div>
 </div>
 
-<!-- S-BEFORE: Return visit -->
+<!-- S-BEFORE -->
 <div class="screen" id="s-before">
-  <div class="before-line" id="before-line"></div>
-  <button class="before-continue" id="before-continue">continue</button>
+  <div class="before-observation" id="before-obs"></div>
+  <button class="before-cta" id="before-cta">continue</button>
 </div>
 
 <!-- S-SEARCH -->
 <div class="screen" id="s-search">
-  <div class="search-prompt">Bring a track you've been drawn to.</div>
-  <div class="search-wrap">
-    <input class="search-input" id="search-input" type="text" placeholder="title or artist" autocomplete="off" autocorrect="off" spellcheck="false">
+  <div class="search-label">bring a track you've been drawn to</div>
+  <div class="search-field-wrap">
+    <input class="search-field" id="search-field" type="text"
+      placeholder="title or artist"
+      autocomplete="off" autocorrect="off" spellcheck="false">
   </div>
   <div class="search-results" id="search-results"></div>
 </div>
 
 <!-- S-LISTEN -->
 <div class="screen" id="s-listen">
-  <div class="curated-tag" id="curated-tag">we wanted you to hear this</div>
-  <div class="pulse-wrap"><div class="pulse-dot" id="pulse-dot"></div></div>
-  <div class="listen-meta" id="listen-meta">
-    <div class="listen-track-label" id="listen-mode-label">now playing</div>
-    <div class="listen-track-name" id="listen-track-name"></div>
-    <div class="listen-track-artist" id="listen-track-artist"></div>
+  <div class="listen-curated-tag" id="curated-tag">we wanted you to hear this</div>
+  <div class="listen-pulse-wrap">
+    <div class="pulse-dot" id="pulse-dot"></div>
+  </div>
+  <div class="listen-track-info" id="track-info">
+    <div class="listen-framing" id="listen-framing"></div>
+    <div class="listen-title" id="listen-title"></div>
+    <div class="listen-artist" id="listen-artist"></div>
   </div>
   <button class="listen-stop" id="listen-stop">stop for now</button>
-  <iframe id="yt-player" src="" allow="autoplay; encrypted-media" allowfullscreen
-    style="position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;top:-9999px;"></iframe>
 </div>
 
 <!-- S-RECOGNITION -->
 <div class="screen" id="s-recognition">
-  <div class="recog-track-reveal" id="recog-track-reveal">
+  <div class="recog-reveal" id="recog-reveal">
     <div class="recog-reveal-label">that was</div>
     <div class="recog-reveal-name" id="recog-reveal-name"></div>
   </div>
-  <div class="recog-question visible" id="recog-question">what just happened?</div>
-  <div class="recog-statements">
+  <div class="recog-prompt" id="recog-prompt">what just happened?</div>
+  <div class="recog-stmts">
     <button class="stmt-btn" id="stmt-a"></button>
     <button class="stmt-btn" id="stmt-b"></button>
   </div>
@@ -855,7 +836,7 @@
 
 <!-- S-REFLECTION -->
 <div class="screen" id="s-reflection">
-  <div class="reflection-line" id="reflection-line"></div>
+  <div class="reflection-text" id="reflection-text"></div>
   <div class="reflection-actions" id="reflection-actions">
     <button class="keep-going-btn" id="keep-going-btn">keep going</button>
     <button class="share-btn" id="share-btn">share this</button>
@@ -864,71 +845,52 @@
 
 <!-- S-STOPPED -->
 <div class="screen" id="s-stopped">
-  <div class="stopped-line" id="stopped-line">you can always come back.<br>the sound will be here.</div>
+  <div class="stopped-text" id="stopped-text">
+    you can always come back.<br>the sound will be here.
+  </div>
   <div class="stopped-actions" id="stopped-actions">
-    <button class="stopped-btn" id="stopped-continue">keep going</button>
-    <button class="stopped-btn" id="stopped-done">done for now</button>
+    <button class="stopped-btn" id="btn-keep-going-2">keep going</button>
+    <button class="stopped-btn" id="btn-done">done for now</button>
   </div>
 </div>
 
 <!-- S-EMAIL -->
 <div class="screen" id="s-email">
-  <div class="email-head visible" id="email-head">
-    leave your email to keep what sound shows you.
+  <div class="email-heading" id="email-heading">
+    leave your email.<br>we'll keep what sound shows you.
   </div>
-  <div class="email-form visible" id="email-form">
-    <input class="email-input" id="name-input" type="text" placeholder="first name" autocomplete="given-name">
-    <input class="email-input" id="email-input" type="email" placeholder="email" autocomplete="email">
+  <div class="email-fields" id="email-fields">
+    <input class="email-input" id="name-input" type="text"
+      placeholder="first name" autocomplete="given-name">
+    <input class="email-input" id="email-input" type="email"
+      placeholder="email" autocomplete="email">
     <div class="email-error" id="email-error"></div>
-    <button class="email-submit" id="email-submit">I'm in</button>
-    <button class="email-skip" id="email-skip">not yet</button>
+    <button class="email-submit-btn" id="email-submit">i'm in</button>
+    <button class="email-skip-btn" id="email-skip">not yet</button>
   </div>
 </div>
 
 <script>
-// ── FYND TODAY — Sound Portal v2 ─────────────────────────────────────────────
-
-// ── STATE ────────────────────────────────────────────────────────────────────
-const STATE = {
-  sessionId: null,
-  email: null,
-  firstName: null,
-  sessionCount: 0,
-  beforeLine: null,
-  trackId: null,
-  trackTitle: null,
-  trackArtist: null,
-  isCurated: false,
-  isSearched: false,
-  isInterrupted: false,
-  trackStartTime: null,
-  chosenPosition: null,
-  responseSpeed: 'normal',
-  positions: [],
-  trackCount: 0,
-  reflectionLine: null,
-  curatedIndex: 0,
-  ytPlayer: null,
-  ytReady: false,
-  recognitionTimer: null,
-};
+// ── FYND TODAY SOUND PORTAL v2 ────────────────────────────────────────────────
 
 // ── STORAGE ──────────────────────────────────────────────────────────────────
-const LS = {
-  get: (k) => { try { const v = localStorage.getItem('fynd_'+k); return v ? JSON.parse(v) : null; } catch(e) { return null; } },
-  set: (k, v) => { try { localStorage.setItem('fynd_'+k, JSON.stringify(v)); } catch(e) {} },
+var LS = {
+  get: function(k) {
+    try { var v = localStorage.getItem('fynd2_'+k); return v ? JSON.parse(v) : null; } catch(e) { return null; }
+  },
+  set: function(k, v) {
+    try { localStorage.setItem('fynd2_'+k, JSON.stringify(v)); } catch(e) {}
+  },
 };
 
-// ── CURATED TRACKS ───────────────────────────────────────────────────────────
-// YouTube video IDs for approved FYND TODAY tracks
-// Format: { title, artist, ytId }
-const CURATED_TRACKS = [
-  // TODO: add approved artist tracks with YouTube video IDs
-  // { title: 'Track Name', artist: 'Artist Name', ytId: 'dQw4w9WgXcQ' },
+// ── CURATED TRACKS ────────────────────────────────────────────────────────────
+// Add approved tracks here: { title, artist, ytId }
+var CURATED = [
+  // { title: 'Track Name', artist: 'Artist', ytId: 'youtubeVideoId' },
 ];
 
 // ── STATEMENT PAIRS ───────────────────────────────────────────────────────────
-const STATEMENT_PAIRS = [
+var PAIRS = [
   ['something got quieter.', 'something started moving.'],
   ['i felt held where i was.', 'i felt pulled somewhere.'],
   ['it settled something.', 'it shifted something.'],
@@ -937,140 +899,153 @@ const STATEMENT_PAIRS = [
   ['something in me slowed.', 'something in me opened.'],
 ];
 
-// ── FALLBACK REFLECTIONS ─────────────────────────────────────────────────────
-const FALLBACKS = {
+// ── FALLBACKS ─────────────────────────────────────────────────────────────────
+var FALLBACKS = {
   stay: [
     'you know exactly where you are right now.',
     "you've been sitting with something.",
     'some things are worth staying inside.',
-    'you found the quiet inside the sound.',
   ],
   move: [
     'something moved through you that needed to.',
-    "you're further along than you were.",
     "you went somewhere you didn't plan to go.",
-    'the sound found you mid-motion.',
+    "you're further along than you were.",
   ],
   open: [
     "something shifted that wasn't there before.",
     "a door opened that you didn't know was there.",
     'you didn\'t expect that.',
-    'sound showed you something new.',
   ],
 };
 
-// ── YOUTUBE PLAYER ────────────────────────────────────────────────────────────
-function loadYouTubeAPI() {
-  const tag = document.createElement('script');
-  tag.src = 'https://www.youtube.com/iframe_api';
-  document.head.appendChild(tag);
-}
-
-// Called by YouTube API when ready
-window.onYouTubeIframeAPIReady = function() {
-  STATE.ytReady = true;
+// ── SESSION STATE ─────────────────────────────────────────────────────────────
+var sess = {
+  id: null,
+  email: null,
+  firstName: null,
+  sessionCount: 0,
+  beforeLine: null,
+  trackTitle: null,
+  trackArtist: null,
+  trackId: null,
+  isCurated: false,
+  isSearched: false,
+  isInterrupted: false,
+  trackCount: 0,
+  positions: [],
+  chosenPosition: null,
+  responseSpeed: 'normal',
+  reflectionLine: null,
+  curatedIdx: 0,
+  choiceTime: null,
+  pendingChoice: null,
+  recognitionTimer: null,
+  stopTimer: null,
+  ytPlayer: null,
+  ytReady: false,
 };
 
-function playYouTubeTrack(ytId) {
-  const iframe = document.getElementById('yt-player');
-
-  if (STATE.ytPlayer) {
-    try { STATE.ytPlayer.destroy(); } catch(e) {}
-    STATE.ytPlayer = null;
-  }
-
-  iframe.src = '';
-
-  STATE.ytPlayer = new YT.Player('yt-player', {
-    videoId: ytId,
-    playerVars: {
-      autoplay: 1,
-      controls: 0,
-      disablekb: 1,
-      fs: 0,
-      modestbranding: 1,
-      rel: 0,
-      playsinline: 1,
-    },
-    events: {
-      onReady: function(e) {
-        e.target.playVideo();
-        startListenTimer();
-      },
-      onStateChange: function(e) {
-        // YT.PlayerState.ENDED = 0
-        if (e.data === 0) {
-          clearTimeout(STATE.recognitionTimer);
-          goToRecognition();
-        }
-      },
-      onError: function(e) {
-        console.error('YT player error:', e.data);
-        // Track unavailable — go to recognition anyway
-        clearTimeout(STATE.recognitionTimer);
-        goToRecognition();
-      },
-    },
+// ── SCREENS ───────────────────────────────────────────────────────────────────
+function show(id) {
+  document.querySelectorAll('.screen').forEach(function(s) {
+    s.classList.remove('active');
   });
+  var t = document.getElementById(id);
+  if (t) t.classList.add('active');
 }
 
-function stopPlayer() {
-  if (STATE.ytPlayer) {
-    try { STATE.ytPlayer.stopVideo(); } catch(e) {}
+// ── INIT ──────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+  setTimeout(function() {
+    var loader = document.getElementById('loader');
+    loader.classList.add('out');
+    setTimeout(function() {
+      loader.style.display = 'none';
+      init();
+    }, 650);
+  }, 500);
+});
+
+function init() {
+  sess.email = LS.get('email');
+  sess.firstName = LS.get('firstName');
+  sess.sessionCount = LS.get('sessionCount') || 0;
+  sess.beforeLine = LS.get('beforeLine');
+  sess.id = 'f2_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+
+  if (sess.sessionCount > 0 && sess.beforeLine) {
+    showBefore();
+  } else {
+    showEntry();
   }
-  clearTimeout(STATE.recognitionTimer);
-  document.getElementById('pulse-dot').classList.remove('active');
+
+  bindEvents();
 }
 
-// ── SEARCH ───────────────────────────────────────────────────────────────────
-let searchDebounce = null;
+// ── ENTRY ─────────────────────────────────────────────────────────────────────
+function showEntry() {
+  show('s-entry');
+  var ids = ['el-1', 'el-2', 'el-3'];
+  ids.forEach(function(id, i) {
+    setTimeout(function() {
+      var el = document.getElementById(id);
+      if (el) el.classList.add('show');
+    }, 700 + i * 950);
+  });
+  setTimeout(function() {
+    var ep = document.getElementById('entry-paths');
+    if (ep) ep.classList.add('show');
+  }, 700 + 3 * 950);
+}
+
+function showBefore() {
+  show('s-before');
+  var obs = document.getElementById('before-obs');
+  var cta = document.getElementById('before-cta');
+  obs.textContent = sess.beforeLine;
+  setTimeout(function() {
+    obs.classList.add('show');
+    setTimeout(function() { cta.classList.add('show'); }, 900);
+  }, 400);
+}
+
+// ── SEARCH ────────────────────────────────────────────────────────────────────
+var searchTimer = null;
 
 function showSearch() {
-  showScreen('s-search');
-  setTimeout(() => document.getElementById('search-input').focus(), 300);
+  show('s-search');
+  document.getElementById('search-results').innerHTML = '';
+  document.getElementById('search-field').value = '';
+  setTimeout(function() {
+    document.getElementById('search-field').focus();
+  }, 350);
 }
 
-function doSearch(query) {
-  if (!query || query.length < 2) {
+function doSearch(q) {
+  if (!q || q.length < 2) {
     document.getElementById('search-results').innerHTML = '';
     return;
   }
-  fetch('/.netlify/functions/search-tracks', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ query }),
-  })
-    .then(r => r.json())
-    .then(data => {
-      if (data.results && data.results.length > 0) {
-        renderSearchResults(data.results);
-      } else {
-        document.getElementById('search-results').innerHTML =
-          '<div class="search-not-found">that track isn\'t here yet.<br>bring another.</div>';
-      }
-    })
-    .catch(() => {
-      document.getElementById('search-results').innerHTML =
-        '<div class="search-not-found">something went wrong.<br>try again.</div>';
-    });
+  // Placeholder — YouTube search will wire in here
+  document.getElementById('search-results').innerHTML =
+    '<div class="search-empty">search coming soon.<br>discovery mode is ready below.</div>';
 }
 
-function renderSearchResults(tracks) {
-  const container = document.getElementById('search-results');
+function renderResults(tracks) {
+  var container = document.getElementById('search-results');
   container.innerHTML = '';
-  tracks.forEach(track => {
-    const el = document.createElement('div');
+  if (!tracks || tracks.length === 0) {
+    container.innerHTML = '<div class="search-empty">that track isn\'t here yet.<br>bring another.</div>';
+    return;
+  }
+  tracks.forEach(function(t) {
+    var el = document.createElement('div');
     el.className = 'search-result';
-    el.innerHTML = `
-      <div class="result-title">${escHtml(track.title)}</div>
-      <div class="result-artist">${escHtml(track.artist)}</div>
-    `;
-    el.addEventListener('click', () => {
-      selectTrack({
-        title: track.title,
-        artist: track.artist,
-        ytId: track.id,
-      }, false);
+    el.innerHTML =
+      '<div class="result-title">' + esc(t.title) + '</div>' +
+      '<div class="result-sub">' + esc(t.artist) + '</div>';
+    el.addEventListener('click', function() {
+      selectTrack(t, false);
     });
     container.appendChild(el);
   });
@@ -1078,205 +1053,219 @@ function renderSearchResults(tracks) {
 
 // ── TRACK SELECTION ───────────────────────────────────────────────────────────
 function selectTrack(track, isCurated) {
-  STATE.trackTitle = track.title;
-  STATE.trackArtist = track.artist;
-  STATE.trackId = track.ytId;
-  STATE.isCurated = isCurated;
-  STATE.isSearched = !isCurated;
-  STATE.isInterrupted = track.isInterrupted || false;
-  STATE.chosenPosition = null;
-  STATE.trackCount++;
-  goToListen();
+  sess.trackTitle = track.title;
+  sess.trackArtist = track.artist;
+  sess.trackId = track.ytId || track.id || null;
+  sess.isCurated = isCurated;
+  sess.isSearched = !isCurated;
+  sess.isInterrupted = track.isInterrupted || false;
+  sess.chosenPosition = null;
+  sess.trackCount++;
+  goListen();
 }
 
 function selectCurated(interrupt) {
-  if (CURATED_TRACKS.length === 0) { showSearch(); return; }
-  const track = CURATED_TRACKS[STATE.curatedIndex % CURATED_TRACKS.length];
-  STATE.curatedIndex++;
-  selectTrack({ ...track, isInterrupted: interrupt || false }, true);
+  if (CURATED.length === 0) { showSearch(); return; }
+  var t = CURATED[sess.curatedIdx % CURATED.length];
+  sess.curatedIdx++;
+  selectTrack({ title: t.title, artist: t.artist, ytId: t.ytId, isInterrupted: !!interrupt }, true);
 }
 
-// ── LISTEN ───────────────────────────────────────────────────────────────────
-function goToListen() {
-  showScreen('s-listen');
+// ── LISTEN ────────────────────────────────────────────────────────────────────
+function goListen() {
+  show('s-listen');
 
-  const curTag = document.getElementById('curated-tag');
-  const meta = document.getElementById('listen-meta');
-  const dot = document.getElementById('pulse-dot');
-  const stop = document.getElementById('listen-stop');
-  const label = document.getElementById('listen-mode-label');
+  // Reset elements
+  var dot = document.getElementById('pulse-dot');
+  var stop = document.getElementById('listen-stop');
+  var info = document.getElementById('track-info');
+  var tag = document.getElementById('curated-tag');
 
   dot.classList.remove('active');
-  stop.classList.remove('visible');
-  meta.classList.remove('visible');
-  curTag.classList.remove('visible');
+  stop.classList.remove('show');
+  info.classList.remove('show');
+  tag.classList.remove('show');
 
-  if (STATE.isCurated) {
-    if (STATE.isInterrupted) curTag.classList.add('visible');
-    label.textContent = 'now playing';
-    // Track name hidden until after recognition (point 4)
-    document.getElementById('listen-track-name').textContent = '';
-    document.getElementById('listen-track-artist').textContent = '';
+  clearTimeout(sess.recognitionTimer);
+  clearTimeout(sess.stopTimer);
+
+  if (sess.isCurated) {
+    if (sess.isInterrupted) tag.classList.add('show');
+    document.getElementById('listen-framing').textContent = '';
+    document.getElementById('listen-title').textContent = '';
+    document.getElementById('listen-artist').textContent = '';
   } else {
-    // Searched track — show framing line and track info
-    label.textContent = "let's find out what it's doing to you today.";
-    document.getElementById('listen-track-name').textContent = STATE.trackTitle;
-    document.getElementById('listen-track-artist').textContent = STATE.trackArtist;
-    setTimeout(() => meta.classList.add('visible'), 800);
+    document.getElementById('listen-framing').textContent =
+      "let's find out what it's doing to you today.";
+    document.getElementById('listen-title').textContent = sess.trackTitle;
+    document.getElementById('listen-artist').textContent = sess.trackArtist;
+    setTimeout(function() { info.classList.add('show'); }, 700);
   }
 
-  // Play
-  playYouTubeTrack(STATE.trackId);
+  // Start dot and timers (YouTube player starts separately)
+  startListenTimers();
 }
 
-function startListenTimer() {
-  STATE.trackStartTime = Date.now();
-  document.getElementById('pulse-dot').classList.add('active');
+function startListenTimers() {
+  // Dot
+  setTimeout(function() {
+    document.getElementById('pulse-dot').classList.add('active');
+  }, 300);
 
-  // Show stop button after 10s
-  setTimeout(() => {
-    document.getElementById('listen-stop').classList.add('visible');
+  // Show stop after 10s
+  sess.stopTimer = setTimeout(function() {
+    document.getElementById('listen-stop').classList.add('show');
   }, 10000);
 
-  // For searched tracks: go to recognition at 60s mark
-  // Curated tracks: wait for ENDED event (full track)
-  if (STATE.isSearched) {
-    STATE.recognitionTimer = setTimeout(() => {
-      goToRecognition();
+  // For searched tracks, recognition at 60s
+  // Curated tracks: recognition triggered by player end event
+  if (sess.isSearched) {
+    sess.recognitionTimer = setTimeout(function() {
+      goRecognition();
     }, 60000);
   }
 }
 
+function stopAudio() {
+  document.getElementById('pulse-dot').classList.remove('active');
+  clearTimeout(sess.recognitionTimer);
+  clearTimeout(sess.stopTimer);
+  // YouTube player stop will go here
+}
+
 // ── RECOGNITION ───────────────────────────────────────────────────────────────
-let pendingChoice = null;
-let choiceTime = null;
+function goRecognition() {
+  stopAudio();
+  show('s-recognition');
 
-function goToRecognition() {
-  stopPlayer();
-  showScreen('s-recognition');
+  var reveal = document.getElementById('recog-reveal');
+  var prompt = document.getElementById('recog-prompt');
+  var btnA = document.getElementById('stmt-a');
+  var btnB = document.getElementById('stmt-b');
+  var neither = document.getElementById('stmt-neither');
 
-  // Curated track reveal (point 4) — show after recognition screen appears
-  const reveal = document.getElementById('recog-track-reveal');
-  if (STATE.isCurated) {
+  reveal.classList.remove('show');
+  prompt.classList.remove('show');
+  btnA.classList.remove('show', 'chosen');
+  btnB.classList.remove('show', 'chosen');
+  neither.classList.remove('show');
+
+  sess.pendingChoice = null;
+  sess.choiceTime = Date.now();
+
+  // Curated track reveal (point 4)
+  if (sess.isCurated) {
     document.getElementById('recog-reveal-name').textContent =
-      STATE.trackTitle + ' — ' + STATE.trackArtist;
-    setTimeout(() => reveal.classList.add('visible'), 300);
-  } else {
-    reveal.classList.remove('visible');
+      sess.trackTitle + ' — ' + sess.trackArtist;
+    setTimeout(function() { reveal.classList.add('show'); }, 300);
   }
 
-  // Pick random statement pair
-  const pair = STATEMENT_PAIRS[Math.floor(Math.random() * STATEMENT_PAIRS.length)];
-  const btnA = document.getElementById('stmt-a');
-  const btnB = document.getElementById('stmt-b');
-  const neither = document.getElementById('stmt-neither');
-
+  // Pick pair
+  var pair = PAIRS[Math.floor(Math.random() * PAIRS.length)];
   btnA.textContent = pair[0];
   btnB.textContent = pair[1];
-  btnA.classList.remove('visible', 'selected');
-  btnB.classList.remove('visible', 'selected');
-  neither.classList.remove('visible');
-  pendingChoice = null;
-  choiceTime = Date.now();
 
-  document.getElementById('recog-question').classList.add('visible');
-  setTimeout(() => btnA.classList.add('visible'), 400);
-  setTimeout(() => btnB.classList.add('visible'), 700);
-  setTimeout(() => neither.classList.add('visible'), 1100);
+  setTimeout(function() { prompt.classList.add('show'); }, 200);
+  setTimeout(function() { btnA.classList.add('show'); }, 500);
+  setTimeout(function() { btnB.classList.add('show'); }, 800);
+  setTimeout(function() { neither.classList.add('show'); }, 1200);
 }
 
 function handleChoice(position, btnEl) {
-  const elapsed = Date.now() - choiceTime;
-  STATE.responseSpeed = elapsed < 3000 ? 'fast' : elapsed > 12000 ? 'slow' : 'normal';
+  var elapsed = Date.now() - sess.choiceTime;
+  sess.responseSpeed = elapsed < 3000 ? 'fast' : elapsed > 12000 ? 'slow' : 'normal';
 
-  document.querySelectorAll('.stmt-btn').forEach(b => b.classList.remove('selected'));
-  if (btnEl) btnEl.classList.add('selected');
-  pendingChoice = position;
+  document.querySelectorAll('.stmt-btn').forEach(function(b) {
+    b.classList.remove('chosen');
+  });
+  if (btnEl) btnEl.classList.add('chosen');
+
+  sess.pendingChoice = position;
 
   // Push back 30% of time after first track (point 5)
-  if (STATE.trackCount > 1 && Math.random() < 0.3) {
-    document.getElementById('sure-wrap').classList.add('visible');
+  if (sess.trackCount > 1 && Math.random() < 0.3) {
+    document.getElementById('sure-overlay').classList.add('show');
   } else {
     confirmChoice(position);
   }
 }
 
 function confirmChoice(position) {
-  document.getElementById('sure-wrap').classList.remove('visible');
-  STATE.chosenPosition = position;
-  STATE.positions.push(position);
-  goToReflection();
+  document.getElementById('sure-overlay').classList.remove('show');
+  sess.chosenPosition = position;
+  sess.positions.push(position);
+  goReflection();
 }
 
 // ── REFLECTION ────────────────────────────────────────────────────────────────
-function goToReflection() {
-  showScreen('s-reflection');
-  const line = document.getElementById('reflection-line');
-  const actions = document.getElementById('reflection-actions');
-  line.classList.remove('visible');
-  actions.classList.remove('visible');
+function goReflection() {
+  show('s-reflection');
 
-  // Silence sometimes (point 3) — 20% of time after first track
-  const doSilence = STATE.trackCount > 1 && Math.random() < 0.2;
+  var txt = document.getElementById('reflection-text');
+  var acts = document.getElementById('reflection-actions');
+  txt.classList.remove('show');
+  acts.classList.remove('show');
+
+  // Silence 20% of time after first track (point 3)
+  var doSilence = sess.trackCount > 1 && Math.random() < 0.2;
 
   if (doSilence) {
-    setTimeout(() => actions.classList.add('visible'), 3000);
+    setTimeout(function() { acts.classList.add('show'); }, 3200);
     return;
   }
 
-  getReflection().then(text => {
-    STATE.reflectionLine = text;
-    line.textContent = text;
-    setTimeout(() => line.classList.add('visible'), 500);
-    setTimeout(() => actions.classList.add('visible'), 1400);
+  getReflection(function(line) {
+    sess.reflectionLine = line;
+    txt.textContent = line;
+    setTimeout(function() { txt.classList.add('show'); }, 400);
+    setTimeout(function() { acts.classList.add('show'); }, 1500);
   });
 }
 
-async function getReflection() {
-  try {
-    const res = await fetch('/.netlify/functions/generate-reflection', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        sessionNumber: STATE.sessionCount + 1,
-        positions: STATE.positions,
-        searchedTrack: STATE.isSearched,
-        previousPosition: LS.get('lastPosition'),
-        responseSpeed: STATE.responseSpeed,
-        firstName: STATE.firstName,
-      }),
-    });
-    if (!res.ok) throw new Error('API fail');
-    const data = await res.json();
+function getReflection(cb) {
+  var dominant = getDominant();
+  fetch('/.netlify/functions/generate-reflection', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      sessionNumber: sess.sessionCount + 1,
+      positions: sess.positions,
+      searchedTrack: sess.isSearched,
+      previousPosition: LS.get('lastPosition'),
+      responseSpeed: sess.responseSpeed,
+      firstName: sess.firstName,
+    }),
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
     if (data.beforeLine) LS.set('beforeLine', data.beforeLine);
-    return data.reflectionLine || getFallback(getDominantPosition());
-  } catch(e) {
-    return getFallback(getDominantPosition());
-  }
+    cb(data.reflectionLine || fallback(dominant));
+  })
+  .catch(function() { cb(fallback(dominant)); });
 }
 
-function getDominantPosition() {
-  const counts = { stay: 0, move: 0, open: 0 };
-  STATE.positions.forEach(p => { if (counts[p] !== undefined) counts[p]++; });
-  return Object.keys(counts).reduce((a, b) => counts[a] >= counts[b] ? a : b);
+function getDominant() {
+  var c = { stay: 0, move: 0, open: 0 };
+  sess.positions.forEach(function(p) { if (c[p] !== undefined) c[p]++; });
+  return Object.keys(c).reduce(function(a, b) { return c[a] >= c[b] ? a : b; });
 }
 
-function getFallback(pos) {
-  const opts = FALLBACKS[pos] || FALLBACKS.open;
+function fallback(pos) {
+  var opts = FALLBACKS[pos] || FALLBACKS.open;
   return opts[Math.floor(Math.random() * opts.length)];
 }
 
 // ── KEEP GOING ────────────────────────────────────────────────────────────────
 function keepGoing() {
-  // Occasionally interrupt with curated track (point 8)
-  const shouldInterrupt = STATE.isSearched
-    && STATE.trackCount > 1
-    && CURATED_TRACKS.length > 0
+  // Occasionally introduce curated track mid-session (point 8)
+  var interrupt = sess.isSearched
+    && sess.trackCount > 1
+    && CURATED.length > 0
     && Math.random() < 0.25;
 
-  if (shouldInterrupt) {
+  if (interrupt) {
     selectCurated(true);
-  } else if (STATE.isCurated && CURATED_TRACKS.length > 0) {
+  } else if (sess.isCurated && CURATED.length > 0) {
     selectCurated(false);
   } else {
     showSearch();
@@ -1285,724 +1274,106 @@ function keepGoing() {
 
 // ── SESSION END ───────────────────────────────────────────────────────────────
 function endSession() {
-  STATE.sessionCount++;
-  LS.set('sessionCount', STATE.sessionCount);
-  LS.set('lastPosition', getDominantPosition());
-  if (!STATE.email) {
-    showScreen('s-email');
-    setTimeout(() => {
-      document.getElementById('email-head').classList.add('visible');
-      document.getElementById('email-form').classList.add('visible');
-    }, 400);
+  sess.sessionCount++;
+  LS.set('sessionCount', sess.sessionCount);
+  LS.set('lastPosition', getDominant());
+
+  if (!sess.email) {
+    showEmail();
   } else {
     showStopped();
   }
 }
 
 function showStopped() {
-  showScreen('s-stopped');
-  setTimeout(() => document.getElementById('stopped-line').classList.add('visible'), 400);
-  setTimeout(() => document.getElementById('stopped-actions').classList.add('visible'), 900);
+  show('s-stopped');
+  setTimeout(function() {
+    document.getElementById('stopped-text').classList.add('show');
+    setTimeout(function() {
+      document.getElementById('stopped-actions').classList.add('show');
+    }, 600);
+  }, 300);
+}
+
+function showEmail() {
+  show('s-email');
+  setTimeout(function() {
+    document.getElementById('email-heading').classList.add('show');
+    document.getElementById('email-fields').classList.add('show');
+  }, 400);
 }
 
 // ── SHARE ─────────────────────────────────────────────────────────────────────
 function showShare() {
-  if (!STATE.reflectionLine) return;
-  document.getElementById('share-card-line').textContent = STATE.reflectionLine;
-  document.getElementById('share-overlay').classList.add('visible');
+  if (!sess.reflectionLine) return;
+  document.getElementById('share-card-line').textContent = sess.reflectionLine;
+  document.getElementById('share-overlay').classList.add('show');
 }
 
-// ── SCREENS ──────────────────────────────────────────────────────────────────
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  const t = document.getElementById(id);
-  if (t) t.classList.add('active');
-}
+// ── EMAIL SUBMIT ──────────────────────────────────────────────────────────────
+function submitEmail() {
+  var name = document.getElementById('name-input').value.trim();
+  var email = document.getElementById('email-input').value.trim();
+  var errEl = document.getElementById('email-error');
+  var btn = document.getElementById('email-submit');
 
-// ── ENTRY ─────────────────────────────────────────────────────────────────────
-function showFirstEntry() {
-  showScreen('s-entry');
-  ['el-1','el-2','el-3'].forEach((id, i) => {
-    setTimeout(() => document.getElementById(id).classList.add('visible'), 600 + i * 900);
-  });
-  setTimeout(() => document.getElementById('entry-paths').classList.add('visible'), 600 + 3 * 900);
-}
-
-function showReturnEntry() {
-  showScreen('s-before');
-  const bl = document.getElementById('before-line');
-  bl.textContent = STATE.beforeLine;
-  setTimeout(() => {
-    bl.classList.add('visible');
-    setTimeout(() => document.getElementById('before-continue').classList.add('visible'), 800);
-  }, 400);
-}
-
-// ── INIT ─────────────────────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
-  loadYouTubeAPI();
-  setTimeout(init, 400);
-});
-
-function init() {
-  document.getElementById('loader').classList.add('hidden');
-  STATE.email = LS.get('email');
-  STATE.firstName = LS.get('firstName');
-  STATE.sessionCount = LS.get('sessionCount') || 0;
-  STATE.beforeLine = LS.get('beforeLine');
-  STATE.sessionId = 'fynd_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
-
-  if (STATE.sessionCount > 0 && STATE.beforeLine) {
-    showReturnEntry();
-  } else {
-    showFirstEntry();
-  }
-  bindEvents();
-}
-
-// ── EVENTS ───────────────────────────────────────────────────────────────────
-function bindEvents() {
-  document.getElementById('btn-search').addEventListener('click', showSearch);
-  document.getElementById('btn-discover').addEventListener('click', () => {
-    CURATED_TRACKS.length > 0 ? selectCurated(false) : showSearch();
-  });
-  document.getElementById('before-continue').addEventListener('click', showFirstEntry);
-
-  // Search
-  document.getElementById('search-input').addEventListener('input', e => {
-    clearTimeout(searchDebounce);
-    searchDebounce = setTimeout(() => doSearch(e.target.value.trim()), 400);
-  });
-
-  // Listen
-  document.getElementById('listen-stop').addEventListener('click', () => {
-    stopPlayer();
-    showStopped();
-  });
-
-  // Recognition
-  document.getElementById('stmt-a').addEventListener('click', function() { handleChoice('stay', this); });
-  document.getElementById('stmt-b').addEventListener('click', function() { handleChoice('move', this); });
-  document.getElementById('stmt-neither').addEventListener('click', function() { handleChoice('open', null); });
-
-  // Are you sure
-  document.getElementById('sure-yes').addEventListener('click', () => {
-    STATE.responseSpeed = 'changed';
-    confirmChoice(pendingChoice);
-  });
-  document.getElementById('sure-no').addEventListener('click', () => {
-    STATE.responseSpeed = 'changed';
-    document.getElementById('sure-wrap').classList.remove('visible');
-    const flipped = pendingChoice === 'stay' ? 'move' : pendingChoice === 'move' ? 'stay' : 'open';
-    confirmChoice(flipped);
-  });
-
-  // Reflection
-  document.getElementById('keep-going-btn').addEventListener('click', keepGoing);
-  document.getElementById('share-btn').addEventListener('click', showShare);
-
-  // Share
-  document.getElementById('share-close').addEventListener('click', () => {
-    document.getElementById('share-overlay').classList.remove('visible');
-  });
-  document.getElementById('share-copy-btn').addEventListener('click', () => {
-    const text = STATE.reflectionLine + '\n\nfyndtoday.com';
-    if (navigator.share) {
-      navigator.share({ text }).catch(() => {});
-    } else {
-      navigator.clipboard.writeText(text).then(() => {
-        document.getElementById('share-copy-btn').textContent = 'copied';
-        setTimeout(() => { document.getElementById('share-copy-btn').textContent = 'copy to share'; }, 2000);
-      }).catch(() => {});
-    }
-  });
-
-  // Stopped
-  document.getElementById('stopped-continue').addEventListener('click', keepGoing);
-  document.getElementById('stopped-done').addEventListener('click', endSession);
-
-  // Email
-  document.getElementById('email-submit').addEventListener('click', submitEmail);
-  document.getElementById('email-skip').addEventListener('click', showStopped);
-  document.getElementById('email-input').addEventListener('keydown', e => {
-    if (e.key === 'Enter') submitEmail();
-  });
-}
-
-// ── EMAIL ─────────────────────────────────────────────────────────────────────
-async function submitEmail() {
-  const name = document.getElementById('name-input').value.trim();
-  const email = document.getElementById('email-input').value.trim();
-  const errEl = document.getElementById('email-error');
-  const submitBtn = document.getElementById('email-submit');
-
-  if (!name || !email || !email.includes('@')) {
+  if (!name || !email || email.indexOf('@') < 0) {
     errEl.textContent = 'both fields required.';
     errEl.style.display = 'block';
     return;
   }
 
-  submitBtn.disabled = true;
-  submitBtn.style.opacity = '0.5';
+  btn.disabled = true;
+  btn.style.opacity = '0.5';
   errEl.style.display = 'none';
 
-  try {
-    const res = await fetch('/.netlify/functions/send-welcome', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, firstName: name }),
-    });
-    const data = await res.json();
+  fetch('/.netlify/functions/send-welcome', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: email, firstName: name }),
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
     if (data.duplicate) {
       errEl.textContent = 'an account with that email already exists.';
       errEl.style.display = 'block';
-      submitBtn.disabled = false;
-      submitBtn.style.opacity = '';
+      btn.disabled = false;
+      btn.style.opacity = '';
       document.getElementById('email-input').value = '';
       return;
     }
-    STATE.email = email;
-    STATE.firstName = name;
+    sess.email = email;
+    sess.firstName = name;
     LS.set('email', email);
     LS.set('firstName', name);
     showStopped();
-  } catch(e) {
-    submitBtn.disabled = false;
-    submitBtn.style.opacity = '';
-  }
-}
-
-// ── UTILS ─────────────────────────────────────────────────────────────────────
-function shuffle(arr) {
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-  return arr;
-}
-
-function escHtml(str) {
-  return String(str)
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-// ── STATE ────────────────────────────────────────────────────────────────────
-const STATE = {
-  // Session
-  sessionId: null,
-  email: null,
-  firstName: null,
-  sessionCount: 0,
-  beforeLine: null,
-
-  // Current track
-  trackId: null,
-  trackTitle: null,
-  trackArtist: null,
-  trackUrl: null,
-  isCurated: false,
-  isSearched: false,
-  isInterrupted: false, // "we wanted you to hear this"
-  trackStartTime: null,
-
-  // Recognition
-  chosenPosition: null,   // 'stay' | 'move' | 'open'
-  responseSpeed: 'normal', // 'fast' | 'slow' | 'changed'
-  positions: [],           // accumulated this session
-  trackCount: 0,           // tracks played this session
-  reflectionLine: null,
-
-  // Curated pool (populated from FYND TODAY approved tracks)
-  curatedPool: [],
-  curatedIndex: 0,
-};
-
-// ── STORAGE ──────────────────────────────────────────────────────────────────
-const LS = {
-  get: (k) => { try { const v = localStorage.getItem('fynd_'+k); return v ? JSON.parse(v) : null; } catch(e) { return null; } },
-  set: (k, v) => { try { localStorage.setItem('fynd_'+k, JSON.stringify(v)); } catch(e) {} },
-  remove: (k) => { try { localStorage.removeItem('fynd_'+k); } catch(e) {} },
-};
-
-// ── CURATED TRACKS ───────────────────────────────────────────────────────────
-// Populated with approved FYND TODAY tracks
-// Format: { title, artist, url } where url is SoundCloud track URL
-const CURATED_TRACKS = [
-  // TODO: populate with approved artist tracks
-  // { title: 'Track Name', artist: 'Artist', url: 'https://soundcloud.com/artist/track' },
-];
-
-// ── STATEMENT PAIRS ───────────────────────────────────────────────────────────
-// Each pair: [stay-leaning, move-leaning]
-// Neither = open
-const STATEMENT_PAIRS = [
-  ['something got quieter.', 'something started moving.'],
-  ['i felt held where i was.', 'i felt pulled somewhere.'],
-  ['it settled something.', 'it shifted something.'],
-  ['i stayed inside it.', 'it took me somewhere.'],
-  ['it got heavier.', 'it got lighter.'],
-  ['something in me slowed.', 'something in me opened.'],
-];
-
-// ── FALLBACK REFLECTIONS ─────────────────────────────────────────────────────
-const FALLBACKS = {
-  stay: [
-    'you know exactly where you are right now.',
-    "you've been sitting with something.",
-    'some things are worth staying inside.',
-    'you found the quiet inside the sound.',
-  ],
-  move: [
-    'something moved through you that needed to.',
-    "you're further along than you were.",
-    'you went somewhere you didn\'t plan to go.',
-    'the sound found you mid-motion.',
-  ],
-  open: [
-    'something shifted that wasn\'t there before.',
-    'a door opened that you didn\'t know was there.',
-    'you didn\'t expect that.',
-    'sound showed you something new.',
-  ],
-};
-
-// ── SC WIDGET ────────────────────────────────────────────────────────────────
-let widget = null;
-let widgetReady = false;
-let recognitionTimer = null;
-
-function initWidget(url) {
-  const iframe = document.getElementById('sc-iframe');
-  iframe.src = 'https://w.soundcloud.com/player/?url=' + encodeURIComponent(url)
-    + '&auto_play=true&hide_related=true&show_comments=false&show_user=false'
-    + '&show_reposts=false&show_teaser=false&visual=false';
-  widget = SC.Widget(iframe);
-  widgetReady = false;
-  widget.bind(SC.Widget.Events.READY, () => {
-    widgetReady = true;
-    widget.play();
-    startListenTimer();
-  });
-  widget.bind(SC.Widget.Events.FINISH, () => {
-    clearTimeout(recognitionTimer);
-    goToRecognition();
+  })
+  .catch(function() {
+    btn.disabled = false;
+    btn.style.opacity = '';
   });
 }
 
-function startListenTimer() {
-  STATE.trackStartTime = Date.now();
-  const dot = document.getElementById('pulse-dot');
-  dot.classList.add('active');
-
-  // Show stop button after 8s
-  setTimeout(() => {
-    document.getElementById('listen-stop').classList.add('visible');
-  }, 8000);
-
-  // Show recognition after 45-90s OR full track (handled by FINISH event)
-  // For searched tracks: recognition at 60s mark
-  // For curated tracks: at natural end (FINISH handles it)
-  if (STATE.isSearched) {
-    recognitionTimer = setTimeout(() => {
-      goToRecognition();
-    }, 60000); // 60 seconds
-  }
-}
-
-// ── SCREENS ──────────────────────────────────────────────────────────────────
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  const target = document.getElementById(id);
-  if (target) target.classList.add('active');
-}
-
-// ── INIT ─────────────────────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
-  // Load fonts first, then init
-  setTimeout(init, 400);
-});
-
-function init() {
-  // Hide loader
-  const loader = document.getElementById('loader');
-  loader.classList.add('hidden');
-
-  // Restore state
-  STATE.email = LS.get('email');
-  STATE.firstName = LS.get('firstName');
-  STATE.sessionCount = LS.get('sessionCount') || 0;
-  STATE.beforeLine = LS.get('beforeLine');
-  STATE.curatedPool = shuffle([...CURATED_TRACKS]);
-
-  // Generate session ID
-  STATE.sessionId = 'fynd_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
-
-  if (STATE.sessionCount > 0 && STATE.beforeLine) {
-    showReturnEntry();
-  } else {
-    showFirstEntry();
-  }
-
-  bindEvents();
-}
-
-// ── ENTRY ─────────────────────────────────────────────────────────────────────
-function showFirstEntry() {
-  showScreen('s-entry');
-  // Stagger lines
-  const lines = ['el-1', 'el-2', 'el-3'];
-  lines.forEach((id, i) => {
-    setTimeout(() => {
-      document.getElementById(id).classList.add('visible');
-    }, 600 + (i * 900));
-  });
-  setTimeout(() => {
-    document.getElementById('entry-paths').classList.add('visible');
-  }, 600 + (3 * 900));
-}
-
-function showReturnEntry() {
-  showScreen('s-before');
-  const bl = document.getElementById('before-line');
-  bl.textContent = STATE.beforeLine;
-  setTimeout(() => {
-    bl.classList.add('visible');
-    setTimeout(() => {
-      document.getElementById('before-continue').classList.add('visible');
-    }, 800);
-  }, 400);
-}
-
-// ── SEARCH ───────────────────────────────────────────────────────────────────
-let searchDebounce = null;
-
-function showSearch() {
-  showScreen('s-search');
-  setTimeout(() => {
-    document.getElementById('search-input').focus();
-  }, 300);
-}
-
-function doSearch(query) {
-  if (!query || query.length < 2) {
-    document.getElementById('search-results').innerHTML = '';
-    return;
-  }
-  // SoundCloud search via oEmbed/widget search
-  // Using SC API search
-  const clientId = 'your_soundcloud_client_id'; // TODO: add SC client ID
-  fetch(`https://api.soundcloud.com/tracks?q=${encodeURIComponent(query)}&limit=6&client_id=${clientId}`)
-    .then(r => r.json())
-    .then(tracks => {
-      renderSearchResults(tracks);
-    })
-    .catch(() => {
-      // If API fails, show not found
-      document.getElementById('search-results').innerHTML =
-        '<div class="search-not-found">that track isn\'t here yet.<br>bring another.</div>';
-    });
-}
-
-function renderSearchResults(tracks) {
-  const container = document.getElementById('search-results');
-  if (!tracks || tracks.length === 0) {
-    container.innerHTML = '<div class="search-not-found">that track isn\'t here yet.<br>bring another.</div>';
-    return;
-  }
-  container.innerHTML = '';
-  tracks.forEach(track => {
-    const el = document.createElement('div');
-    el.className = 'search-result';
-    el.innerHTML = `
-      <div class="result-title">${escHtml(track.title)}</div>
-      <div class="result-artist">${escHtml(track.user?.username || '')}</div>
-    `;
-    el.addEventListener('click', () => {
-      selectTrack({
-        title: track.title,
-        artist: track.user?.username || '',
-        url: track.permalink_url,
-        id: String(track.id),
-      }, false);
-    });
-    container.appendChild(el);
-  });
-}
-
-// ── TRACK SELECTION ───────────────────────────────────────────────────────────
-function selectTrack(track, isCurated) {
-  STATE.trackTitle = track.title;
-  STATE.trackArtist = track.artist;
-  STATE.trackUrl = track.url;
-  STATE.trackId = track.id || track.url;
-  STATE.isCurated = isCurated;
-  STATE.isSearched = !isCurated;
-  STATE.isInterrupted = false;
-  STATE.chosenPosition = null;
-  STATE.trackCount++;
-
-  goToListen();
-}
-
-function selectCurated(interrupt) {
-  if (STATE.curatedPool.length === 0) return;
-  const track = STATE.curatedPool[STATE.curatedIndex % STATE.curatedPool.length];
-  STATE.curatedIndex++;
-  STATE.isInterrupted = interrupt || false;
-  selectTrack({ ...track, id: track.url }, true);
-}
-
-// ── LISTEN ───────────────────────────────────────────────────────────────────
-function goToListen() {
-  showScreen('s-listen');
-
-  const curTag = document.getElementById('curated-tag');
-  const meta = document.getElementById('listen-meta');
-  const dot = document.getElementById('pulse-dot');
-  const stop = document.getElementById('listen-stop');
-  const label = document.getElementById('listen-mode-label');
-
-  // Reset
-  dot.classList.remove('active');
-  stop.classList.remove('visible');
-  meta.classList.remove('visible');
-  curTag.classList.remove('visible');
-  clearTimeout(recognitionTimer);
-
-  if (STATE.isCurated) {
-    // Curated: hide meta until after recognition
-    if (STATE.isInterrupted) {
-      curTag.classList.add('visible');
-    }
-    label.textContent = 'now playing';
-    // Meta hidden — reveals after recognition
-  } else {
-    // Searched: show track info with framing line
-    label.textContent = "let's find out what it's doing to you today.";
-    document.getElementById('listen-track-name').textContent = STATE.trackTitle;
-    document.getElementById('listen-track-artist').textContent = STATE.trackArtist;
-    setTimeout(() => meta.classList.add('visible'), 600);
-  }
-
-  // Init SC widget
-  initWidget(STATE.trackUrl);
-}
-
-// ── RECOGNITION ───────────────────────────────────────────────────────────────
-let pendingChoice = null;
-let choiceTime = null;
-
-function goToRecognition() {
-  if (widget) { try { widget.pause(); } catch(e) {} }
-  document.getElementById('pulse-dot').classList.remove('active');
-
-  showScreen('s-recognition');
-
-  // For curated tracks — reveal after recognition (shown above statements)
-  const reveal = document.getElementById('recog-track-reveal');
-  if (STATE.isCurated) {
-    document.getElementById('recog-reveal-name').textContent =
-      STATE.trackTitle + ' — ' + STATE.trackArtist;
-    setTimeout(() => reveal.classList.add('visible'), 200);
-  } else {
-    reveal.classList.remove('visible');
-  }
-
-  // Pick statement pair
-  const pair = STATEMENT_PAIRS[Math.floor(Math.random() * STATEMENT_PAIRS.length)];
-  const btnA = document.getElementById('stmt-a');
-  const btnB = document.getElementById('stmt-b');
-  const neither = document.getElementById('stmt-neither');
-
-  btnA.textContent = pair[0];
-  btnB.textContent = pair[1];
-  btnA.classList.remove('visible', 'selected');
-  btnB.classList.remove('visible', 'selected');
-  neither.classList.remove('visible');
-  pendingChoice = null;
-  choiceTime = Date.now();
-
-  document.getElementById('recog-question').classList.add('visible');
-
-  setTimeout(() => btnA.classList.add('visible'), 400);
-  setTimeout(() => btnB.classList.add('visible'), 700);
-  setTimeout(() => neither.classList.add('visible'), 1000);
-}
-
-function handleChoice(position, btnEl) {
-  // Speed signal
-  const elapsed = Date.now() - choiceTime;
-  STATE.responseSpeed = elapsed < 3000 ? 'fast' : elapsed > 12000 ? 'slow' : 'normal';
-
-  // Mark selected
-  document.querySelectorAll('.stmt-btn').forEach(b => b.classList.remove('selected'));
-  if (btnEl) btnEl.classList.add('selected');
-
-  pendingChoice = position;
-
-  // Sometimes push back (30% of the time, not on first track)
-  if (STATE.trackCount > 1 && Math.random() < 0.3) {
-    showSure(position);
-  } else {
-    confirmChoice(position);
-  }
-}
-
-function showSure(position) {
-  document.getElementById('sure-wrap').classList.add('visible');
-}
-
-function confirmChoice(position) {
-  document.getElementById('sure-wrap').classList.remove('visible');
-  STATE.chosenPosition = position;
-  STATE.positions.push(position);
-  goToReflection();
-}
-
-// ── REFLECTION ────────────────────────────────────────────────────────────────
-function goToReflection() {
-  showScreen('s-reflection');
-  const line = document.getElementById('reflection-line');
-  const actions = document.getElementById('reflection-actions');
-  line.classList.remove('visible');
-  actions.classList.remove('visible');
-
-  // Occasionally: no reflection (20% of time, after first track)
-  const doSilence = STATE.trackCount > 1 && Math.random() < 0.2;
-
-  if (doSilence) {
-    // Just silence then keep going
-    setTimeout(() => {
-      actions.classList.add('visible');
-    }, 3000);
-    return;
-  }
-
-  // Get reflection — try AI, fall back to local
-  getReflection().then(text => {
-    STATE.reflectionLine = text;
-    line.textContent = text;
-    setTimeout(() => line.classList.add('visible'), 400);
-    setTimeout(() => actions.classList.add('visible'), 1200);
-  });
-}
-
-async function getReflection() {
-  try {
-    const dominant = getDominantPosition();
-    const res = await fetch('/.netlify/functions/generate-reflection', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        sessionNumber: STATE.sessionCount + 1,
-        positions: STATE.positions,
-        searchedTrack: STATE.isSearched,
-        sameSongReturned: false, // TODO: check track history
-        previousPosition: LS.get('lastPosition'),
-        responseSpeed: STATE.responseSpeed,
-        firstName: STATE.firstName,
-      }),
-    });
-    if (!res.ok) throw new Error('API error');
-    const data = await res.json();
-    // Save before-line for next visit
-    if (data.beforeLine) LS.set('beforeLine', data.beforeLine);
-    return data.reflectionLine || getFallback(dominant);
-  } catch(e) {
-    return getFallback(getDominantPosition());
-  }
-}
-
-function getDominantPosition() {
-  const counts = { stay: 0, move: 0, open: 0 };
-  STATE.positions.forEach(p => { if (counts[p] !== undefined) counts[p]++; });
-  return Object.keys(counts).reduce((a, b) => counts[a] >= counts[b] ? a : b);
-}
-
-function getFallback(pos) {
-  const options = FALLBACKS[pos] || FALLBACKS.open;
-  return options[Math.floor(Math.random() * options.length)];
-}
-
-// ── KEEP GOING ────────────────────────────────────────────────────────────────
-function keepGoing() {
-  // Sometimes introduce a curated track mid-session (point 8)
-  const shouldInterrupt = STATE.isSearched && STATE.trackCount > 1
-    && CURATED_TRACKS.length > 0 && Math.random() < 0.25;
-
-  if (shouldInterrupt) {
-    selectCurated(true);
-  } else if (STATE.isCurated) {
-    // Continue with next curated
-    selectCurated(false);
-  } else {
-    // Back to search
-    showSearch();
-  }
-}
-
-// ── SESSION END ───────────────────────────────────────────────────────────────
-function endSession() {
-  STATE.sessionCount++;
-  LS.set('sessionCount', STATE.sessionCount);
-  LS.set('lastPosition', getDominantPosition());
-
-  if (!STATE.email) {
-    showEmailGate();
-  } else {
-    showStopped();
-  }
-}
-
-function showStopped() {
-  showScreen('s-stopped');
-  const line = document.getElementById('stopped-line');
-  const actions = document.getElementById('stopped-actions');
-  setTimeout(() => line.classList.add('visible'), 400);
-  setTimeout(() => actions.classList.add('visible'), 800);
-}
-
-function showEmailGate() {
-  showScreen('s-email');
-}
-
-// ── SHARE ─────────────────────────────────────────────────────────────────────
-function showShare() {
-  if (!STATE.reflectionLine) return;
-  document.getElementById('share-card-line').textContent = STATE.reflectionLine;
-  document.getElementById('share-overlay').classList.add('visible');
-}
-
-// ── BIND EVENTS ───────────────────────────────────────────────────────────────
+// ── EVENTS ────────────────────────────────────────────────────────────────────
 function bindEvents() {
   // Entry
   document.getElementById('btn-search').addEventListener('click', showSearch);
-  document.getElementById('btn-discover').addEventListener('click', () => {
-    if (CURATED_TRACKS.length > 0) {
-      selectCurated(false);
-    } else {
-      showSearch(); // fallback if no curated tracks yet
-    }
+  document.getElementById('btn-discover').addEventListener('click', function() {
+    if (CURATED.length > 0) { selectCurated(false); } else { showSearch(); }
   });
 
-  // Before / return
-  document.getElementById('before-continue').addEventListener('click', () => {
-    showScreen('s-entry');
-    showFirstEntry();
-  });
+  // Before
+  document.getElementById('before-cta').addEventListener('click', showEntry);
 
   // Search
-  document.getElementById('search-input').addEventListener('input', (e) => {
-    clearTimeout(searchDebounce);
-    searchDebounce = setTimeout(() => doSearch(e.target.value.trim()), 400);
+  document.getElementById('search-field').addEventListener('input', function(e) {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(function() { doSearch(e.target.value.trim()); }, 400);
   });
 
   // Listen
-  document.getElementById('listen-stop').addEventListener('click', () => {
-    if (widget) { try { widget.pause(); } catch(e) {} }
-    clearTimeout(recognitionTimer);
-    document.getElementById('pulse-dot').classList.remove('active');
+  document.getElementById('listen-stop').addEventListener('click', function() {
+    stopAudio();
     showStopped();
   });
 
@@ -2017,17 +1388,16 @@ function bindEvents() {
     handleChoice('open', null);
   });
 
-  // Are you sure
-  document.getElementById('sure-yes').addEventListener('click', () => {
-    STATE.responseSpeed = 'changed'; // changed = stayed with it
-    confirmChoice(pendingChoice);
+  // Sure
+  document.getElementById('sure-yes').addEventListener('click', function() {
+    sess.responseSpeed = 'changed';
+    confirmChoice(sess.pendingChoice);
   });
-  document.getElementById('sure-no').addEventListener('click', () => {
-    STATE.responseSpeed = 'changed';
-    // Let them re-choose — go back to recognition
-    document.getElementById('sure-wrap').classList.remove('visible');
-    // Flip the choice
-    const flipped = pendingChoice === 'stay' ? 'move' : pendingChoice === 'move' ? 'stay' : 'open';
+  document.getElementById('sure-no').addEventListener('click', function() {
+    sess.responseSpeed = 'changed';
+    document.getElementById('sure-overlay').classList.remove('show');
+    var flipped = sess.pendingChoice === 'stay' ? 'move'
+      : sess.pendingChoice === 'move' ? 'stay' : 'open';
     confirmChoice(flipped);
   });
 
@@ -2036,90 +1406,36 @@ function bindEvents() {
   document.getElementById('share-btn').addEventListener('click', showShare);
 
   // Share
-  document.getElementById('share-close').addEventListener('click', () => {
-    document.getElementById('share-overlay').classList.remove('visible');
+  document.getElementById('share-close').addEventListener('click', function() {
+    document.getElementById('share-overlay').classList.remove('show');
   });
-  document.getElementById('share-copy-btn').addEventListener('click', () => {
-    const text = STATE.reflectionLine + '\n\nfyndtoday.com';
+  document.getElementById('share-copy').addEventListener('click', function() {
+    var text = sess.reflectionLine + '\n\nfyndtoday.com';
+    var btn = document.getElementById('share-copy');
     if (navigator.share) {
-      navigator.share({ text }).catch(() => {});
+      navigator.share({ text: text }).catch(function() {});
     } else {
-      navigator.clipboard.writeText(text).then(() => {
-        document.getElementById('share-copy-btn').textContent = 'copied';
-        setTimeout(() => {
-          document.getElementById('share-copy-btn').textContent = 'copy to share';
-        }, 2000);
-      }).catch(() => {});
+      navigator.clipboard.writeText(text).then(function() {
+        btn.textContent = 'copied';
+        setTimeout(function() { btn.textContent = 'copy to share'; }, 2000);
+      }).catch(function() {});
     }
   });
 
   // Stopped
-  document.getElementById('stopped-continue').addEventListener('click', keepGoing);
-  document.getElementById('stopped-done').addEventListener('click', endSession);
+  document.getElementById('btn-keep-going-2').addEventListener('click', keepGoing);
+  document.getElementById('btn-done').addEventListener('click', endSession);
 
   // Email
   document.getElementById('email-submit').addEventListener('click', submitEmail);
   document.getElementById('email-skip').addEventListener('click', showStopped);
-  document.getElementById('email-input').addEventListener('keydown', (e) => {
+  document.getElementById('email-input').addEventListener('keydown', function(e) {
     if (e.key === 'Enter') submitEmail();
   });
 }
 
-// ── EMAIL ─────────────────────────────────────────────────────────────────────
-async function submitEmail() {
-  const name = document.getElementById('name-input').value.trim();
-  const email = document.getElementById('email-input').value.trim();
-  const errEl = document.getElementById('email-error');
-  const submitBtn = document.getElementById('email-submit');
-
-  if (!name || !email || !email.includes('@')) {
-    errEl.textContent = 'both fields required.';
-    errEl.style.display = 'block';
-    return;
-  }
-
-  submitBtn.disabled = true;
-  submitBtn.style.opacity = '0.5';
-  errEl.style.display = 'none';
-
-  try {
-    const res = await fetch('/.netlify/functions/send-welcome', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, firstName: name }),
-    });
-    const data = await res.json();
-
-    if (data.duplicate) {
-      errEl.textContent = 'an account with that email already exists.';
-      errEl.style.display = 'block';
-      submitBtn.disabled = false;
-      submitBtn.style.opacity = '';
-      document.getElementById('email-input').value = '';
-      return;
-    }
-
-    STATE.email = email;
-    STATE.firstName = name;
-    LS.set('email', email);
-    LS.set('firstName', name);
-    showStopped();
-  } catch(e) {
-    submitBtn.disabled = false;
-    submitBtn.style.opacity = '';
-  }
-}
-
 // ── UTILS ─────────────────────────────────────────────────────────────────────
-function shuffle(arr) {
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-  return arr;
-}
-
-function escHtml(str) {
+function esc(str) {
   return String(str)
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
