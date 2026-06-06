@@ -777,6 +777,11 @@ html, body {
   </div>
 </div>
 
+<!-- YOUTUBE PLAYER (hidden) -->
+<div id="yt-wrap" style="position:fixed;width:1px;height:1px;top:-9999px;left:-9999px;opacity:0;pointer-events:none;">
+  <div id="yt-player"></div>
+</div>
+
 <!-- S-ENTRY -->
 <div class="screen" id="s-entry">
   <div class="entry-line" id="el-1">You've heard a song that changed the room.</div>
@@ -1026,9 +1031,28 @@ function doSearch(q) {
     document.getElementById('search-results').innerHTML = '';
     return;
   }
-  // Placeholder — YouTube search will wire in here
+  // Show searching state
   document.getElementById('search-results').innerHTML =
-    '<div class="search-empty">search coming soon.<br>discovery mode is ready below.</div>';
+    '<div class="search-empty" id="search-status">searching...</div>';
+
+  fetch('/.netlify/functions/search-tracks', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ query: q }),
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.results && data.results.length > 0) {
+      renderResults(data.results);
+    } else {
+      document.getElementById('search-results').innerHTML =
+        '<div class="search-empty">that track isn't here yet.<br>bring another.</div>';
+    }
+  })
+  .catch(function() {
+    document.getElementById('search-results').innerHTML =
+      '<div class="search-empty">something went wrong.<br>try again.</div>';
+  });
 }
 
 function renderResults(tracks) {
@@ -1045,7 +1069,7 @@ function renderResults(tracks) {
       '<div class="result-title">' + esc(t.title) + '</div>' +
       '<div class="result-sub">' + esc(t.artist) + '</div>';
     el.addEventListener('click', function() {
-      selectTrack(t, false);
+      selectTrack({ title: t.title, artist: t.artist, ytId: t.id }, false);
     });
     container.appendChild(el);
   });
@@ -1102,8 +1126,13 @@ function goListen() {
     setTimeout(function() { info.classList.add('show'); }, 700);
   }
 
-  // Start dot and timers (YouTube player starts separately)
-  startListenTimers();
+  // Start YouTube player — timers start in player onReady callback
+  if (sess.trackId) {
+    playYouTube(sess.trackId);
+  } else {
+    // Curated track with no ytId yet — start timers directly
+    startListenTimers();
+  }
 }
 
 function startListenTimers() {
@@ -1130,7 +1159,58 @@ function stopAudio() {
   document.getElementById('pulse-dot').classList.remove('active');
   clearTimeout(sess.recognitionTimer);
   clearTimeout(sess.stopTimer);
-  // YouTube player stop will go here
+  if (sess.ytPlayer && typeof sess.ytPlayer.stopVideo === 'function') {
+    try { sess.ytPlayer.stopVideo(); } catch(e) {}
+  }
+}
+
+// ── YOUTUBE PLAYER ────────────────────────────────────────────────────────────
+function playYouTube(ytId) {
+  // Destroy previous player
+  if (sess.ytPlayer && typeof sess.ytPlayer.destroy === 'function') {
+    try { sess.ytPlayer.destroy(); } catch(e) {}
+    sess.ytPlayer = null;
+  }
+
+  if (!window.YT || !window.YT.Player) {
+    // API not ready yet — retry
+    setTimeout(function() { playYouTube(ytId); }, 300);
+    return;
+  }
+
+  sess.ytPlayer = new YT.Player('yt-player', {
+    height: '1',
+    width: '1',
+    videoId: ytId,
+    playerVars: {
+      autoplay: 1,
+      controls: 0,
+      disablekb: 1,
+      fs: 0,
+      modestbranding: 1,
+      rel: 0,
+      playsinline: 1,
+      origin: window.location.origin,
+    },
+    events: {
+      onReady: function(e) {
+        e.target.playVideo();
+        startListenTimers();
+      },
+      onStateChange: function(e) {
+        // YT.PlayerState.ENDED = 0
+        if (e.data === 0) {
+          clearTimeout(sess.recognitionTimer);
+          goRecognition();
+        }
+      },
+      onError: function() {
+        // Track unavailable — move to recognition
+        clearTimeout(sess.recognitionTimer);
+        goRecognition();
+      },
+    },
+  });
 }
 
 // ── RECOGNITION ───────────────────────────────────────────────────────────────
@@ -1442,6 +1522,20 @@ function esc(str) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
 }
+</script>
+<script>
+// Load YouTube IFrame API
+(function() {
+  var tag = document.createElement('script');
+  tag.src = 'https://www.youtube.com/iframe_api';
+  var firstScript = document.getElementsByTagName('script')[0];
+  firstScript.parentNode.insertBefore(tag, firstScript);
+})();
+
+// Called by YouTube API when ready
+window.onYouTubeIframeAPIReady = function() {
+  sess.ytReady = true;
+};
 </script>
 </body>
 </html>
