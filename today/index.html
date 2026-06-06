@@ -966,9 +966,26 @@ document.addEventListener('DOMContentLoaded', function() {
     loader.classList.add('out');
     setTimeout(function() {
       loader.style.display = 'none';
-      init();
-    }, 650);
-  }, 500);
+      try {
+        init();
+      } catch(e) {
+        console.error('Init error:', e);
+        // Fallback — just show entry screen
+        show('s-entry');
+        ['el-1','el-2','el-3'].forEach(function(id, i) {
+          setTimeout(function() {
+            var el = document.getElementById(id);
+            if (el) el.classList.add('show');
+          }, 600 + i * 900);
+        });
+        setTimeout(function() {
+          var ep = document.getElementById('entry-paths');
+          if (ep) ep.classList.add('show');
+        }, 600 + 3 * 900);
+        bindEvents();
+      }
+    }, 500);
+  }, 300);
 });
 
 function init() {
@@ -981,6 +998,7 @@ function init() {
   if (sess.sessionCount > 0 && sess.beforeLine) {
     showBefore();
   } else {
+    sess.sessionCount = 0; // reset if no beforeLine
     showEntry();
   }
 
@@ -990,17 +1008,26 @@ function init() {
 // ── ENTRY ─────────────────────────────────────────────────────────────────────
 function showEntry() {
   show('s-entry');
-  var ids = ['el-1', 'el-2', 'el-3'];
-  ids.forEach(function(id, i) {
-    setTimeout(function() {
-      var el = document.getElementById(id);
-      if (el) el.classList.add('show');
-    }, 700 + i * 950);
+  // Reset lines in case of return visit
+  ['el-1','el-2','el-3'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) { el.classList.remove('show'); el.style.opacity = '0'; }
   });
+  var ep = document.getElementById('entry-paths');
+  if (ep) { ep.classList.remove('show'); }
+
   setTimeout(function() {
-    var ep = document.getElementById('entry-paths');
-    if (ep) ep.classList.add('show');
-  }, 700 + 3 * 950);
+    ['el-1','el-2','el-3'].forEach(function(id, i) {
+      setTimeout(function() {
+        var el = document.getElementById(id);
+        if (el) el.classList.add('show');
+      }, i * 950);
+    });
+    setTimeout(function() {
+      var ep2 = document.getElementById('entry-paths');
+      if (ep2) ep2.classList.add('show');
+    }, 3 * 950);
+  }, 100);
 }
 
 function showBefore() {
@@ -1046,7 +1073,7 @@ function doSearch(q) {
       renderResults(data.results);
     } else {
       document.getElementById('search-results').innerHTML =
-        '<div class="search-empty">that track isn't here yet.<br>bring another.</div>';
+        '<div class="search-empty">that track isn\'t here yet.<br>bring another.</div>';
     }
   })
   .catch(function() {
@@ -1434,6 +1461,18 @@ function submitEmail() {
   });
 }
 
+// ── YOUTUBE LOADER ───────────────────────────────────────────────────────────
+// Load YouTube API — must be inside main script so sess is in scope
+(function() {
+  var tag = document.createElement('script');
+  tag.src = 'https://www.youtube.com/iframe_api';
+  document.head.appendChild(tag);
+})();
+
+window.onYouTubeIframeAPIReady = function() {
+  sess.ytReady = true;
+};
+
 // ── EVENTS ────────────────────────────────────────────────────────────────────
 function bindEvents() {
   // Entry
@@ -1522,20 +1561,6 @@ function esc(str) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
 }
-</script>
-<script>
-// Load YouTube IFrame API
-(function() {
-  var tag = document.createElement('script');
-  tag.src = 'https://www.youtube.com/iframe_api';
-  var firstScript = document.getElementsByTagName('script')[0];
-  firstScript.parentNode.insertBefore(tag, firstScript);
-})();
-
-// Called by YouTube API when ready
-window.onYouTubeIframeAPIReady = function() {
-  sess.ytReady = true;
-};
 </script>
 </body>
 </html>
