@@ -961,31 +961,14 @@ function show(id) {
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', function() {
+  var loader = document.getElementById('loader');
   setTimeout(function() {
-    var loader = document.getElementById('loader');
     loader.classList.add('out');
-    setTimeout(function() {
-      loader.style.display = 'none';
-      try {
-        init();
-      } catch(e) {
-        console.error('Init error:', e);
-        // Fallback — just show entry screen
-        show('s-entry');
-        ['el-1','el-2','el-3'].forEach(function(id, i) {
-          setTimeout(function() {
-            var el = document.getElementById(id);
-            if (el) el.classList.add('show');
-          }, 600 + i * 900);
-        });
-        setTimeout(function() {
-          var ep = document.getElementById('entry-paths');
-          if (ep) ep.classList.add('show');
-        }, 600 + 3 * 900);
-        bindEvents();
-      }
-    }, 500);
-  }, 300);
+  }, 200);
+  setTimeout(function() {
+    loader.style.display = 'none';
+    init();
+  }, 700);
 });
 
 function init() {
@@ -1008,26 +991,25 @@ function init() {
 // ── ENTRY ─────────────────────────────────────────────────────────────────────
 function showEntry() {
   show('s-entry');
-  // Reset lines in case of return visit
+  // Reset lines
   ['el-1','el-2','el-3'].forEach(function(id) {
     var el = document.getElementById(id);
-    if (el) { el.classList.remove('show'); el.style.opacity = '0'; }
+    if (el) el.classList.remove('show');
   });
   var ep = document.getElementById('entry-paths');
-  if (ep) { ep.classList.remove('show'); }
+  if (ep) ep.classList.remove('show');
 
-  setTimeout(function() {
-    ['el-1','el-2','el-3'].forEach(function(id, i) {
-      setTimeout(function() {
-        var el = document.getElementById(id);
-        if (el) el.classList.add('show');
-      }, i * 950);
-    });
+  // Animate in
+  ['el-1','el-2','el-3'].forEach(function(id, i) {
     setTimeout(function() {
-      var ep2 = document.getElementById('entry-paths');
-      if (ep2) ep2.classList.add('show');
-    }, 3 * 950);
-  }, 100);
+      var el = document.getElementById(id);
+      if (el) el.classList.add('show');
+    }, 300 + i * 900);
+  });
+  setTimeout(function() {
+    var ep2 = document.getElementById('entry-paths');
+    if (ep2) ep2.classList.add('show');
+  }, 300 + 3 * 900);
 }
 
 function showBefore() {
