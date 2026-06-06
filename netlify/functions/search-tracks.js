@@ -1,116 +1,1568 @@
-const ALLOWED_ORIGINS = [
-  'https://fyndtoday.netlify.app',
-  'https://fyndtoday.com',
-  'https://www.fyndtoday.com',
-];
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" id="theme-color" content="#0a0a0a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>FYND TODAY</title>
+<style>
+@font-face {
+  font-family: 'DejaVu Sans';
+  src: url('/ttf/DejaVuSans.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'DejaVu Sans';
+  src: url('/ttf/DejaVuSans-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
 
-exports.handler = async function(event, context) {
-  context.callbackWaitsForEmptyEventLoop = false;
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
 
-  const origin = event.headers.origin || event.headers.Origin || '';
-  const allowedOrigin = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+:root {
+  --bg: #0a0a0a;
+  --fg: #f0ede6;
+  --dim: rgba(240,237,230,0.4);
+  --dimmer: rgba(240,237,230,0.18);
+  --f: 'DejaVu Sans', Arial, sans-serif;
+}
 
-  if (event.httpMethod === 'OPTIONS') {
-    return {
-      statusCode: 200,
-      headers: {
-        'Access-Control-Allow-Origin': allowedOrigin,
-        'Access-Control-Allow-Headers': 'Content-Type',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      },
-      body: '',
-    };
-  }
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--f);
+  -webkit-font-smoothing: antialiased;
+}
 
-  if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: 'Method Not Allowed' };
-  }
+/* ── SCREENS ── */
+.screen {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.7s ease;
+  padding:
+    calc(env(safe-area-inset-top, 20px) + 20px)
+    32px
+    calc(env(safe-area-inset-bottom, 20px) + 20px);
+}
+.screen.active {
+  opacity: 1;
+  pointer-events: all;
+}
 
-  if (!ALLOWED_ORIGINS.includes(origin)) {
-    return { statusCode: 403, body: 'Forbidden' };
-  }
+/* ── WORDMARK ── */
+#wordmark {
+  position: fixed;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 24px);
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 9px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--dimmer);
+  text-align: center;
+  line-height: 1.5;
+  z-index: 10;
+  pointer-events: none;
+}
 
-  const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
+/* ── LOADER ── */
+#loader {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  transition: opacity 0.6s ease;
+}
+#loader.out {
+  opacity: 0;
+  pointer-events: none;
+}
+.loader-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--dimmer);
+  animation: breathe 1.8s ease-in-out infinite;
+}
+@keyframes breathe {
+  0%, 100% { opacity: 0.2; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.4); }
+}
 
-  let data;
-  try {
-    data = JSON.parse(event.body);
-  } catch(e) {
-    return { statusCode: 400, body: 'Invalid JSON' };
-  }
+/* ── S-ENTRY ── */
+#s-entry { gap: 0; }
 
-  const query = (data.query || '').trim();
-  if (!query || query.length < 2) {
-    return {
-      statusCode: 400,
-      headers: { 'Access-Control-Allow-Origin': allowedOrigin },
-      body: JSON.stringify({ error: 'Query too short' }),
-    };
-  }
+.entry-line {
+  font-size: clamp(17px, 4.2vw, 26px);
+  font-weight: 400;
+  line-height: 1.6;
+  text-align: center;
+  color: var(--fg);
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 1s ease, transform 1s ease;
+  max-width: 440px;
+  padding: 0 8px;
+}
+.entry-line.show {
+  opacity: 1;
+  transform: translateY(0);
+}
 
-  try {
-    // Search YouTube for music tracks
-    const searchUrl = 'https://www.googleapis.com/youtube/v3/search'
-      + '?part=snippet'
-      + '&q=' + encodeURIComponent(query + ' official audio')
-      + '&type=video'
-      + '&videoCategoryId=10'  // Music category
-      + '&maxResults=6'
-      + '&key=' + YOUTUBE_API_KEY;
+.entry-paths {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-top: 56px;
+  opacity: 0;
+  transition: opacity 1s ease;
+}
+.entry-paths.show { opacity: 1; }
 
-    const res = await fetch(searchUrl);
-    const ytData = await res.json();
+.path-btn {
+  background: none;
+  border: none;
+  border-bottom: 1px solid rgba(240,237,230,0.22);
+  font-family: var(--f);
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--fg);
+  cursor: pointer;
+  padding: 12px 0;
+  width: 200px;
+  text-align: center;
+  transition: opacity 0.15s ease, transform 0.1s ease;
+}
+.path-btn:active {
+  opacity: 0.5;
+  transform: scale(0.97);
+}
 
-    if (!res.ok) {
-      console.error('YouTube API error:', ytData);
-      return {
-        statusCode: 500,
-        headers: { 'Access-Control-Allow-Origin': allowedOrigin },
-        body: JSON.stringify({ error: 'YouTube API error', detail: ytData.error?.message }),
-      };
-    }
+.path-sep {
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--dimmer);
+}
 
-    if (!ytData.items || ytData.items.length === 0) {
-      return {
-        statusCode: 200,
-        headers: { 'Access-Control-Allow-Origin': allowedOrigin },
-        body: JSON.stringify({ results: [] }),
-      };
-    }
+/* ── S-BEFORE (return visit) ── */
+#s-before { gap: 0; }
 
-    // Map to clean track objects
-    const results = ytData.items.map(item => ({
-      id: item.id.videoId,
-      title: cleanTitle(item.snippet.title),
-      artist: item.snippet.channelTitle,
-      thumbnail: item.snippet.thumbnails?.default?.url || '',
-    }));
+.before-observation {
+  font-size: clamp(16px, 4vw, 22px);
+  font-weight: 400;
+  color: var(--dim);
+  text-align: center;
+  max-width: 380px;
+  line-height: 1.65;
+  opacity: 0;
+  transition: opacity 1.2s ease;
+  padding: 0 8px;
+}
+.before-observation.show { opacity: 1; }
 
-    return {
-      statusCode: 200,
-      headers: { 'Access-Control-Allow-Origin': allowedOrigin },
-      body: JSON.stringify({ results }),
-    };
+.before-cta {
+  margin-top: 52px;
+  background: none;
+  border: none;
+  font-family: var(--f);
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--dimmer);
+  cursor: pointer;
+  padding: 12px 0;
+  opacity: 0;
+  transition: opacity 0.8s ease, color 0.2s ease;
+}
+.before-cta.show { opacity: 1; }
+.before-cta:active { color: var(--fg); }
 
-  } catch(err) {
-    console.error('search-tracks error:', err);
-    return {
-      statusCode: 500,
-      headers: { 'Access-Control-Allow-Origin': allowedOrigin },
-      body: JSON.stringify({ error: err.toString() }),
-    };
-  }
+/* ── S-SEARCH ── */
+#s-search { justify-content: flex-start; padding-top: clamp(80px, 15vh, 120px); gap: 0; }
+
+.search-label {
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--dimmer);
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+.search-field-wrap {
+  width: 100%;
+  max-width: 340px;
+}
+
+.search-field {
+  width: 100%;
+  background: none;
+  border: none;
+  border-bottom: 1px solid rgba(240,237,230,0.2);
+  padding: 14px 0;
+  font-family: var(--f);
+  font-size: clamp(16px, 4.2vw, 20px);
+  color: var(--fg);
+  outline: none;
+  caret-color: var(--fg);
+  letter-spacing: 0.01em;
+  transition: border-color 0.3s ease;
+}
+.search-field::placeholder { color: var(--dimmer); }
+.search-field:focus { border-color: rgba(240,237,230,0.45); }
+
+.search-results {
+  width: 100%;
+  max-width: 340px;
+  margin-top: 28px;
+  display: flex;
+  flex-direction: column;
+}
+
+.search-result {
+  padding: 15px 0;
+  border-bottom: 1px solid rgba(240,237,230,0.07);
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+.search-result:active { opacity: 0.45; }
+
+.result-title {
+  font-size: clamp(14px, 3.5vw, 16px);
+  color: var(--fg);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.result-sub {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--dimmer);
+  margin-top: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.search-empty {
+  font-size: 15px;
+  color: var(--dim);
+  text-align: center;
+  padding: 28px 0;
+  line-height: 1.7;
+}
+
+/* ── S-LISTEN ── */
+#s-listen { gap: 0; }
+
+.listen-curated-tag {
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--dimmer);
+  text-align: center;
+  margin-bottom: 52px;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+.listen-curated-tag.show { opacity: 1; }
+
+.listen-pulse-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 52px;
+}
+.pulse-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--fg);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+.pulse-dot.active {
+  opacity: 0.65;
+  animation: pulse 2.6s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 0.45; }
+  50% { transform: scale(1.7); opacity: 0.85; }
+}
+
+.listen-track-info {
+  text-align: center;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+  padding: 0 32px;
+  max-width: 380px;
+}
+.listen-track-info.show { opacity: 1; }
+
+.listen-framing {
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--dimmer);
+  margin-bottom: 14px;
+  line-height: 1.5;
+}
+.listen-title {
+  font-size: clamp(17px, 4.2vw, 22px);
+  color: var(--fg);
+  line-height: 1.4;
+}
+.listen-artist {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-top: 7px;
+}
+
+.listen-stop {
+  position: fixed;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 56px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: none;
+  border: none;
+  font-family: var(--f);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--dimmer);
+  cursor: pointer;
+  padding: 12px 0;
+  opacity: 0;
+  transition: opacity 0.5s ease, color 0.2s ease, transform 0.1s ease;
+  white-space: nowrap;
+}
+.listen-stop.show { opacity: 1; }
+.listen-stop:active { color: var(--fg); transform: translateX(-50%) scale(0.97); }
+
+/* ── S-RECOGNITION ── */
+#s-recognition { gap: 0; padding: 0 36px; }
+
+.recog-reveal {
+  text-align: center;
+  margin-bottom: 44px;
+  opacity: 0;
+  transition: opacity 0.9s ease;
+}
+.recog-reveal.show { opacity: 1; }
+.recog-reveal-label {
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--dimmer);
+  margin-bottom: 10px;
+}
+.recog-reveal-name {
+  font-size: clamp(14px, 3.5vw, 17px);
+  color: var(--dim);
+}
+
+.recog-prompt {
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--dimmer);
+  text-align: center;
+  margin-bottom: 36px;
+  opacity: 0;
+  transition: opacity 0.7s ease;
+}
+.recog-prompt.show { opacity: 1; }
+
+.recog-stmts {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  max-width: 340px;
+}
+
+.stmt-btn {
+  background: none;
+  border: 1px solid rgba(240,237,230,0.1);
+  border-radius: 1px;
+  padding: 20px 22px;
+  font-family: var(--f);
+  font-size: clamp(15px, 3.8vw, 18px);
+  color: var(--fg);
+  cursor: pointer;
+  text-align: left;
+  line-height: 1.55;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.65s ease, transform 0.65s ease, border-color 0.2s ease, background 0.15s ease;
+}
+.stmt-btn.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+.stmt-btn:active {
+  background: rgba(240,237,230,0.05);
+  border-color: rgba(240,237,230,0.28);
+}
+.stmt-btn.chosen {
+  border-color: rgba(240,237,230,0.35);
+  background: rgba(240,237,230,0.04);
+}
+
+.neither-btn {
+  background: none;
+  border: none;
+  font-family: var(--f);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--dimmer);
+  cursor: pointer;
+  padding: 18px 0;
+  text-align: center;
+  width: 100%;
+  max-width: 340px;
+  opacity: 0;
+  transition: opacity 0.65s ease 0.5s, color 0.2s ease;
+}
+.neither-btn.show { opacity: 1; }
+.neither-btn:active { color: var(--fg); }
+
+/* ── ARE YOU SURE ── */
+#sure-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 36px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+  z-index: 50;
+  padding: 0 40px;
+}
+#sure-overlay.show {
+  opacity: 1;
+  pointer-events: all;
+}
+.sure-text {
+  font-size: clamp(18px, 4.5vw, 26px);
+  color: var(--dim);
+  text-align: center;
+  line-height: 1.5;
+}
+.sure-actions {
+  display: flex;
+  gap: 40px;
+}
+.sure-btn {
+  background: none;
+  border: none;
+  font-family: var(--f);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--fg);
+  cursor: pointer;
+  padding: 10px 0;
+  transition: opacity 0.2s ease;
+}
+.sure-btn:active { opacity: 0.5; }
+
+/* ── S-REFLECTION ── */
+#s-reflection { gap: 0; padding: 0 40px; }
+
+.reflection-text {
+  font-size: clamp(20px, 5vw, 30px);
+  font-weight: 400;
+  color: var(--fg);
+  text-align: center;
+  max-width: 420px;
+  line-height: 1.55;
+  opacity: 0;
+  transition: opacity 1.4s ease;
+}
+.reflection-text.show { opacity: 1; }
+
+.reflection-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  margin-top: 56px;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+.reflection-actions.show { opacity: 1; }
+
+.keep-going-btn {
+  background: none;
+  border: none;
+  border-bottom: 1px solid rgba(240,237,230,0.2);
+  font-family: var(--f);
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--fg);
+  cursor: pointer;
+  padding: 12px 0;
+  width: 180px;
+  text-align: center;
+  transition: opacity 0.15s ease, transform 0.1s ease;
+}
+.keep-going-btn:active { opacity: 0.5; transform: scale(0.97); }
+
+.share-btn {
+  background: none;
+  border: none;
+  font-family: var(--f);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--dimmer);
+  cursor: pointer;
+  padding: 8px 0;
+  transition: color 0.2s ease;
+}
+.share-btn:active { color: var(--fg); }
+
+/* ── S-STOPPED ── */
+#s-stopped { gap: 0; padding: 0 40px; }
+
+.stopped-text {
+  font-size: clamp(15px, 3.8vw, 19px);
+  color: var(--dim);
+  text-align: center;
+  line-height: 1.7;
+  max-width: 340px;
+  opacity: 0;
+  transition: opacity 1s ease;
+}
+.stopped-text.show { opacity: 1; }
+
+.stopped-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  margin-top: 48px;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+.stopped-actions.show { opacity: 1; }
+
+.stopped-btn {
+  background: none;
+  border: none;
+  border-bottom: 1px solid rgba(240,237,230,0.15);
+  font-family: var(--f);
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--fg);
+  cursor: pointer;
+  padding: 12px 0;
+  width: 200px;
+  text-align: center;
+  transition: opacity 0.15s ease, transform 0.1s ease;
+}
+.stopped-btn:active { opacity: 0.5; transform: scale(0.97); }
+
+/* ── S-EMAIL ── */
+#s-email { gap: 0; padding: 0 40px; }
+
+.email-heading {
+  font-size: clamp(16px, 4vw, 20px);
+  color: var(--fg);
+  text-align: center;
+  max-width: 340px;
+  line-height: 1.65;
+  margin-bottom: 44px;
+  opacity: 0;
+  transition: opacity 0.9s ease;
+}
+.email-heading.show { opacity: 1; }
+
+.email-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  max-width: 300px;
+  opacity: 0;
+  transition: opacity 0.9s ease 0.3s;
+}
+.email-fields.show { opacity: 1; }
+
+.email-input {
+  background: none;
+  border: none;
+  border-bottom: 1px solid rgba(240,237,230,0.2);
+  padding: 12px 0;
+  font-family: var(--f);
+  font-size: clamp(15px, 3.8vw, 17px);
+  color: var(--fg);
+  outline: none;
+  caret-color: var(--fg);
+  letter-spacing: 0.01em;
+  transition: border-color 0.3s ease;
+}
+.email-input::placeholder { color: var(--dimmer); }
+.email-input:focus { border-color: rgba(240,237,230,0.45); }
+
+.email-error {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--dim);
+  display: none;
+  text-align: center;
+}
+
+.email-submit-btn {
+  background: none;
+  border: 1px solid rgba(240,237,230,0.18);
+  border-radius: 1px;
+  font-family: var(--f);
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--fg);
+  cursor: pointer;
+  padding: 14px 0;
+  margin-top: 8px;
+  transition: border-color 0.2s ease, opacity 0.15s ease, transform 0.1s ease;
+}
+.email-submit-btn:active { border-color: rgba(240,237,230,0.45); transform: scale(0.98); }
+
+.email-skip-btn {
+  background: none;
+  border: none;
+  font-family: var(--f);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--dimmer);
+  cursor: pointer;
+  padding: 10px 0;
+  transition: color 0.2s ease;
+}
+.email-skip-btn:active { color: var(--fg); }
+
+/* ── SHARE OVERLAY ── */
+#share-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10,10,10,0.96);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+  z-index: 200;
+}
+#share-overlay.show {
+  opacity: 1;
+  pointer-events: all;
+}
+.share-card {
+  width: 100%;
+  max-width: 300px;
+  border: 1px solid rgba(240,237,230,0.1);
+  padding: 44px 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 36px;
+  text-align: center;
+}
+.share-card-line {
+  font-size: clamp(16px, 4vw, 21px);
+  color: var(--fg);
+  line-height: 1.55;
+}
+.share-card-mark {
+  font-size: 9px;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--dimmer);
+}
+.share-close {
+  position: absolute;
+  top: 20px;
+  right: 24px;
+  background: none;
+  border: none;
+  color: var(--dimmer);
+  font-size: 22px;
+  cursor: pointer;
+  padding: 8px;
+  line-height: 1;
+  transition: color 0.2s ease;
+}
+.share-close:active { color: var(--fg); }
+.share-copy {
+  background: none;
+  border: 1px solid rgba(240,237,230,0.18);
+  font-family: var(--f);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--fg);
+  cursor: pointer;
+  padding: 13px 0;
+  width: 100%;
+  transition: border-color 0.2s ease;
+}
+.share-copy:active { border-color: rgba(240,237,230,0.45); }
+</style>
+</head>
+<body>
+
+<!-- LOADER -->
+<div id="loader"><div class="loader-dot"></div></div>
+
+<!-- WORDMARK -->
+<div id="wordmark">FYND<br>TODAY</div>
+
+<!-- SHARE OVERLAY -->
+<div id="share-overlay">
+  <button class="share-close" id="share-close">×</button>
+  <div class="share-card">
+    <div class="share-card-line" id="share-card-line"></div>
+    <div class="share-card-mark">FYND TODAY</div>
+    <button class="share-copy" id="share-copy">copy to share</button>
+  </div>
+</div>
+
+<!-- ARE YOU SURE -->
+<div id="sure-overlay">
+  <div class="sure-text">are you sure?</div>
+  <div class="sure-actions">
+    <button class="sure-btn" id="sure-yes">yes</button>
+    <button class="sure-btn" id="sure-no">actually, no</button>
+  </div>
+</div>
+
+<!-- YOUTUBE PLAYER (hidden) -->
+<div id="yt-wrap" style="position:fixed;width:1px;height:1px;top:-9999px;left:-9999px;opacity:0;pointer-events:none;">
+  <div id="yt-player"></div>
+</div>
+
+<!-- S-ENTRY -->
+<div class="screen" id="s-entry">
+  <div class="entry-line" id="el-1">You've heard a song that changed the room.</div>
+  <div class="entry-line" id="el-2">You've felt music move you before you understood why.</div>
+  <div class="entry-line" id="el-3">This is built around that.</div>
+  <div class="entry-paths" id="entry-paths">
+    <button class="path-btn" id="btn-search">Find a track</button>
+    <div class="path-sep">or</div>
+    <button class="path-btn" id="btn-discover">Let sound find you</button>
+  </div>
+</div>
+
+<!-- S-BEFORE -->
+<div class="screen" id="s-before">
+  <div class="before-observation" id="before-obs"></div>
+  <button class="before-cta" id="before-cta">continue</button>
+</div>
+
+<!-- S-SEARCH -->
+<div class="screen" id="s-search">
+  <div class="search-label">bring a track you've been drawn to</div>
+  <div class="search-field-wrap">
+    <input class="search-field" id="search-field" type="text"
+      placeholder="title or artist"
+      autocomplete="off" autocorrect="off" spellcheck="false">
+  </div>
+  <div class="search-results" id="search-results"></div>
+</div>
+
+<!-- S-LISTEN -->
+<div class="screen" id="s-listen">
+  <div class="listen-curated-tag" id="curated-tag">we wanted you to hear this</div>
+  <div class="listen-pulse-wrap">
+    <div class="pulse-dot" id="pulse-dot"></div>
+  </div>
+  <div class="listen-track-info" id="track-info">
+    <div class="listen-framing" id="listen-framing"></div>
+    <div class="listen-title" id="listen-title"></div>
+    <div class="listen-artist" id="listen-artist"></div>
+  </div>
+  <button class="listen-stop" id="listen-stop">stop for now</button>
+</div>
+
+<!-- S-RECOGNITION -->
+<div class="screen" id="s-recognition">
+  <div class="recog-reveal" id="recog-reveal">
+    <div class="recog-reveal-label">that was</div>
+    <div class="recog-reveal-name" id="recog-reveal-name"></div>
+  </div>
+  <div class="recog-prompt" id="recog-prompt">what just happened?</div>
+  <div class="recog-stmts">
+    <button class="stmt-btn" id="stmt-a"></button>
+    <button class="stmt-btn" id="stmt-b"></button>
+  </div>
+  <button class="neither-btn" id="stmt-neither">neither</button>
+</div>
+
+<!-- S-REFLECTION -->
+<div class="screen" id="s-reflection">
+  <div class="reflection-text" id="reflection-text"></div>
+  <div class="reflection-actions" id="reflection-actions">
+    <button class="keep-going-btn" id="keep-going-btn">keep going</button>
+    <button class="share-btn" id="share-btn">share this</button>
+  </div>
+</div>
+
+<!-- S-STOPPED -->
+<div class="screen" id="s-stopped">
+  <div class="stopped-text" id="stopped-text">
+    you can always come back.<br>the sound will be here.
+  </div>
+  <div class="stopped-actions" id="stopped-actions">
+    <button class="stopped-btn" id="btn-keep-going-2">keep going</button>
+    <button class="stopped-btn" id="btn-done">done for now</button>
+  </div>
+</div>
+
+<!-- S-EMAIL -->
+<div class="screen" id="s-email">
+  <div class="email-heading" id="email-heading">
+    leave your email.<br>we'll keep what sound shows you.
+  </div>
+  <div class="email-fields" id="email-fields">
+    <input class="email-input" id="name-input" type="text"
+      placeholder="first name" autocomplete="given-name">
+    <input class="email-input" id="email-input" type="email"
+      placeholder="email" autocomplete="email">
+    <div class="email-error" id="email-error"></div>
+    <button class="email-submit-btn" id="email-submit">i'm in</button>
+    <button class="email-skip-btn" id="email-skip">not yet</button>
+  </div>
+</div>
+
+<script>
+// ── FYND TODAY SOUND PORTAL v2 ────────────────────────────────────────────────
+
+// ── STORAGE ──────────────────────────────────────────────────────────────────
+var LS = {
+  get: function(k) {
+    try { var v = localStorage.getItem('fynd2_'+k); return v ? JSON.parse(v) : null; } catch(e) { return null; }
+  },
+  set: function(k, v) {
+    try { localStorage.setItem('fynd2_'+k, JSON.stringify(v)); } catch(e) {}
+  },
 };
 
-// Clean common YouTube title noise
-function cleanTitle(title) {
-  return title
-    .replace(/\(Official (Audio|Video|Music Video|Lyric Video|Visualizer)\)/gi, '')
-    .replace(/\[Official (Audio|Video|Music Video|Lyric Video|Visualizer)\]/gi, '')
-    .replace(/\(Audio\)/gi, '')
-    .replace(/\[Audio\]/gi, '')
-    .replace(/\(Lyrics\)/gi, '')
-    .replace(/\[Lyrics\]/gi, '')
-    .replace(/ft\./gi, 'ft.')
-    .trim();
+// ── CURATED TRACKS ────────────────────────────────────────────────────────────
+// Add approved tracks here: { title, artist, ytId }
+var CURATED = [
+  // { title: 'Track Name', artist: 'Artist', ytId: 'youtubeVideoId' },
+];
+
+// ── STATEMENT PAIRS ───────────────────────────────────────────────────────────
+var PAIRS = [
+  ['something got quieter.', 'something started moving.'],
+  ['i felt held where i was.', 'i felt pulled somewhere.'],
+  ['it settled something.', 'it shifted something.'],
+  ['i stayed inside it.', 'it took me somewhere.'],
+  ['it got heavier.', 'it got lighter.'],
+  ['something in me slowed.', 'something in me opened.'],
+];
+
+// ── FALLBACKS ─────────────────────────────────────────────────────────────────
+var FALLBACKS = {
+  stay: [
+    'you know exactly where you are right now.',
+    "you've been sitting with something.",
+    'some things are worth staying inside.',
+  ],
+  move: [
+    'something moved through you that needed to.',
+    "you went somewhere you didn't plan to go.",
+    "you're further along than you were.",
+  ],
+  open: [
+    "something shifted that wasn't there before.",
+    "a door opened that you didn't know was there.",
+    'you didn\'t expect that.',
+  ],
+};
+
+// ── SESSION STATE ─────────────────────────────────────────────────────────────
+var sess = {
+  id: null,
+  email: null,
+  firstName: null,
+  sessionCount: 0,
+  beforeLine: null,
+  trackTitle: null,
+  trackArtist: null,
+  trackId: null,
+  isCurated: false,
+  isSearched: false,
+  isInterrupted: false,
+  trackCount: 0,
+  positions: [],
+  chosenPosition: null,
+  responseSpeed: 'normal',
+  reflectionLine: null,
+  curatedIdx: 0,
+  choiceTime: null,
+  pendingChoice: null,
+  recognitionTimer: null,
+  stopTimer: null,
+  ytPlayer: null,
+  ytReady: false,
+};
+
+// ── SCREENS ───────────────────────────────────────────────────────────────────
+function show(id) {
+  document.querySelectorAll('.screen').forEach(function(s) {
+    s.classList.remove('active');
+  });
+  var t = document.getElementById(id);
+  if (t) t.classList.add('active');
 }
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+  setTimeout(function() {
+    var loader = document.getElementById('loader');
+    loader.classList.add('out');
+    setTimeout(function() {
+      loader.style.display = 'none';
+      try {
+        init();
+      } catch(e) {
+        console.error('Init error:', e);
+        // Fallback — just show entry screen
+        show('s-entry');
+        ['el-1','el-2','el-3'].forEach(function(id, i) {
+          setTimeout(function() {
+            var el = document.getElementById(id);
+            if (el) el.classList.add('show');
+          }, 600 + i * 900);
+        });
+        setTimeout(function() {
+          var ep = document.getElementById('entry-paths');
+          if (ep) ep.classList.add('show');
+        }, 600 + 3 * 900);
+        bindEvents();
+      }
+    }, 500);
+  }, 300);
+});
+
+function init() {
+  sess.email = LS.get('email');
+  sess.firstName = LS.get('firstName');
+  sess.sessionCount = LS.get('sessionCount') || 0;
+  sess.beforeLine = LS.get('beforeLine');
+  sess.id = 'f2_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+
+  if (sess.sessionCount > 0 && sess.beforeLine) {
+    showBefore();
+  } else {
+    sess.sessionCount = 0; // reset if no beforeLine
+    showEntry();
+  }
+
+  bindEvents();
+}
+
+// ── ENTRY ─────────────────────────────────────────────────────────────────────
+function showEntry() {
+  show('s-entry');
+  // Reset lines in case of return visit
+  ['el-1','el-2','el-3'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) { el.classList.remove('show'); el.style.opacity = '0'; }
+  });
+  var ep = document.getElementById('entry-paths');
+  if (ep) { ep.classList.remove('show'); }
+
+  setTimeout(function() {
+    ['el-1','el-2','el-3'].forEach(function(id, i) {
+      setTimeout(function() {
+        var el = document.getElementById(id);
+        if (el) el.classList.add('show');
+      }, i * 950);
+    });
+    setTimeout(function() {
+      var ep2 = document.getElementById('entry-paths');
+      if (ep2) ep2.classList.add('show');
+    }, 3 * 950);
+  }, 100);
+}
+
+function showBefore() {
+  show('s-before');
+  var obs = document.getElementById('before-obs');
+  var cta = document.getElementById('before-cta');
+  obs.textContent = sess.beforeLine;
+  setTimeout(function() {
+    obs.classList.add('show');
+    setTimeout(function() { cta.classList.add('show'); }, 900);
+  }, 400);
+}
+
+// ── SEARCH ────────────────────────────────────────────────────────────────────
+var searchTimer = null;
+
+function showSearch() {
+  show('s-search');
+  document.getElementById('search-results').innerHTML = '';
+  document.getElementById('search-field').value = '';
+  setTimeout(function() {
+    document.getElementById('search-field').focus();
+  }, 350);
+}
+
+function doSearch(q) {
+  if (!q || q.length < 2) {
+    document.getElementById('search-results').innerHTML = '';
+    return;
+  }
+  // Show searching state
+  document.getElementById('search-results').innerHTML =
+    '<div class="search-empty" id="search-status">searching...</div>';
+
+  fetch('/.netlify/functions/search-tracks', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ query: q }),
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.results && data.results.length > 0) {
+      renderResults(data.results);
+    } else {
+      document.getElementById('search-results').innerHTML =
+        '<div class="search-empty">that track isn't here yet.<br>bring another.</div>';
+    }
+  })
+  .catch(function() {
+    document.getElementById('search-results').innerHTML =
+      '<div class="search-empty">something went wrong.<br>try again.</div>';
+  });
+}
+
+function renderResults(tracks) {
+  var container = document.getElementById('search-results');
+  container.innerHTML = '';
+  if (!tracks || tracks.length === 0) {
+    container.innerHTML = '<div class="search-empty">that track isn\'t here yet.<br>bring another.</div>';
+    return;
+  }
+  tracks.forEach(function(t) {
+    var el = document.createElement('div');
+    el.className = 'search-result';
+    el.innerHTML =
+      '<div class="result-title">' + esc(t.title) + '</div>' +
+      '<div class="result-sub">' + esc(t.artist) + '</div>';
+    el.addEventListener('click', function() {
+      selectTrack({ title: t.title, artist: t.artist, ytId: t.id }, false);
+    });
+    container.appendChild(el);
+  });
+}
+
+// ── TRACK SELECTION ───────────────────────────────────────────────────────────
+function selectTrack(track, isCurated) {
+  sess.trackTitle = track.title;
+  sess.trackArtist = track.artist;
+  sess.trackId = track.ytId || track.id || null;
+  sess.isCurated = isCurated;
+  sess.isSearched = !isCurated;
+  sess.isInterrupted = track.isInterrupted || false;
+  sess.chosenPosition = null;
+  sess.trackCount++;
+  goListen();
+}
+
+function selectCurated(interrupt) {
+  if (CURATED.length === 0) { showSearch(); return; }
+  var t = CURATED[sess.curatedIdx % CURATED.length];
+  sess.curatedIdx++;
+  selectTrack({ title: t.title, artist: t.artist, ytId: t.ytId, isInterrupted: !!interrupt }, true);
+}
+
+// ── LISTEN ────────────────────────────────────────────────────────────────────
+function goListen() {
+  show('s-listen');
+
+  // Reset elements
+  var dot = document.getElementById('pulse-dot');
+  var stop = document.getElementById('listen-stop');
+  var info = document.getElementById('track-info');
+  var tag = document.getElementById('curated-tag');
+
+  dot.classList.remove('active');
+  stop.classList.remove('show');
+  info.classList.remove('show');
+  tag.classList.remove('show');
+
+  clearTimeout(sess.recognitionTimer);
+  clearTimeout(sess.stopTimer);
+
+  if (sess.isCurated) {
+    if (sess.isInterrupted) tag.classList.add('show');
+    document.getElementById('listen-framing').textContent = '';
+    document.getElementById('listen-title').textContent = '';
+    document.getElementById('listen-artist').textContent = '';
+  } else {
+    document.getElementById('listen-framing').textContent =
+      "let's find out what it's doing to you today.";
+    document.getElementById('listen-title').textContent = sess.trackTitle;
+    document.getElementById('listen-artist').textContent = sess.trackArtist;
+    setTimeout(function() { info.classList.add('show'); }, 700);
+  }
+
+  // Start YouTube player — timers start in player onReady callback
+  if (sess.trackId) {
+    playYouTube(sess.trackId);
+  } else {
+    // Curated track with no ytId yet — start timers directly
+    startListenTimers();
+  }
+}
+
+function startListenTimers() {
+  // Dot
+  setTimeout(function() {
+    document.getElementById('pulse-dot').classList.add('active');
+  }, 300);
+
+  // Show stop after 10s
+  sess.stopTimer = setTimeout(function() {
+    document.getElementById('listen-stop').classList.add('show');
+  }, 10000);
+
+  // For searched tracks, recognition at 60s
+  // Curated tracks: recognition triggered by player end event
+  if (sess.isSearched) {
+    sess.recognitionTimer = setTimeout(function() {
+      goRecognition();
+    }, 60000);
+  }
+}
+
+function stopAudio() {
+  document.getElementById('pulse-dot').classList.remove('active');
+  clearTimeout(sess.recognitionTimer);
+  clearTimeout(sess.stopTimer);
+  if (sess.ytPlayer && typeof sess.ytPlayer.stopVideo === 'function') {
+    try { sess.ytPlayer.stopVideo(); } catch(e) {}
+  }
+}
+
+// ── YOUTUBE PLAYER ────────────────────────────────────────────────────────────
+function playYouTube(ytId) {
+  // Destroy previous player
+  if (sess.ytPlayer && typeof sess.ytPlayer.destroy === 'function') {
+    try { sess.ytPlayer.destroy(); } catch(e) {}
+    sess.ytPlayer = null;
+  }
+
+  if (!window.YT || !window.YT.Player) {
+    // API not ready yet — retry
+    setTimeout(function() { playYouTube(ytId); }, 300);
+    return;
+  }
+
+  sess.ytPlayer = new YT.Player('yt-player', {
+    height: '1',
+    width: '1',
+    videoId: ytId,
+    playerVars: {
+      autoplay: 1,
+      controls: 0,
+      disablekb: 1,
+      fs: 0,
+      modestbranding: 1,
+      rel: 0,
+      playsinline: 1,
+      origin: window.location.origin,
+    },
+    events: {
+      onReady: function(e) {
+        e.target.playVideo();
+        startListenTimers();
+      },
+      onStateChange: function(e) {
+        // YT.PlayerState.ENDED = 0
+        if (e.data === 0) {
+          clearTimeout(sess.recognitionTimer);
+          goRecognition();
+        }
+      },
+      onError: function() {
+        // Track unavailable — move to recognition
+        clearTimeout(sess.recognitionTimer);
+        goRecognition();
+      },
+    },
+  });
+}
+
+// ── RECOGNITION ───────────────────────────────────────────────────────────────
+function goRecognition() {
+  stopAudio();
+  show('s-recognition');
+
+  var reveal = document.getElementById('recog-reveal');
+  var prompt = document.getElementById('recog-prompt');
+  var btnA = document.getElementById('stmt-a');
+  var btnB = document.getElementById('stmt-b');
+  var neither = document.getElementById('stmt-neither');
+
+  reveal.classList.remove('show');
+  prompt.classList.remove('show');
+  btnA.classList.remove('show', 'chosen');
+  btnB.classList.remove('show', 'chosen');
+  neither.classList.remove('show');
+
+  sess.pendingChoice = null;
+  sess.choiceTime = Date.now();
+
+  // Curated track reveal (point 4)
+  if (sess.isCurated) {
+    document.getElementById('recog-reveal-name').textContent =
+      sess.trackTitle + ' — ' + sess.trackArtist;
+    setTimeout(function() { reveal.classList.add('show'); }, 300);
+  }
+
+  // Pick pair
+  var pair = PAIRS[Math.floor(Math.random() * PAIRS.length)];
+  btnA.textContent = pair[0];
+  btnB.textContent = pair[1];
+
+  setTimeout(function() { prompt.classList.add('show'); }, 200);
+  setTimeout(function() { btnA.classList.add('show'); }, 500);
+  setTimeout(function() { btnB.classList.add('show'); }, 800);
+  setTimeout(function() { neither.classList.add('show'); }, 1200);
+}
+
+function handleChoice(position, btnEl) {
+  var elapsed = Date.now() - sess.choiceTime;
+  sess.responseSpeed = elapsed < 3000 ? 'fast' : elapsed > 12000 ? 'slow' : 'normal';
+
+  document.querySelectorAll('.stmt-btn').forEach(function(b) {
+    b.classList.remove('chosen');
+  });
+  if (btnEl) btnEl.classList.add('chosen');
+
+  sess.pendingChoice = position;
+
+  // Push back 30% of time after first track (point 5)
+  if (sess.trackCount > 1 && Math.random() < 0.3) {
+    document.getElementById('sure-overlay').classList.add('show');
+  } else {
+    confirmChoice(position);
+  }
+}
+
+function confirmChoice(position) {
+  document.getElementById('sure-overlay').classList.remove('show');
+  sess.chosenPosition = position;
+  sess.positions.push(position);
+  goReflection();
+}
+
+// ── REFLECTION ────────────────────────────────────────────────────────────────
+function goReflection() {
+  show('s-reflection');
+
+  var txt = document.getElementById('reflection-text');
+  var acts = document.getElementById('reflection-actions');
+  txt.classList.remove('show');
+  acts.classList.remove('show');
+
+  // Silence 20% of time after first track (point 3)
+  var doSilence = sess.trackCount > 1 && Math.random() < 0.2;
+
+  if (doSilence) {
+    setTimeout(function() { acts.classList.add('show'); }, 3200);
+    return;
+  }
+
+  getReflection(function(line) {
+    sess.reflectionLine = line;
+    txt.textContent = line;
+    setTimeout(function() { txt.classList.add('show'); }, 400);
+    setTimeout(function() { acts.classList.add('show'); }, 1500);
+  });
+}
+
+function getReflection(cb) {
+  var dominant = getDominant();
+  fetch('/.netlify/functions/generate-reflection', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      sessionNumber: sess.sessionCount + 1,
+      positions: sess.positions,
+      searchedTrack: sess.isSearched,
+      previousPosition: LS.get('lastPosition'),
+      responseSpeed: sess.responseSpeed,
+      firstName: sess.firstName,
+    }),
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.beforeLine) LS.set('beforeLine', data.beforeLine);
+    cb(data.reflectionLine || fallback(dominant));
+  })
+  .catch(function() { cb(fallback(dominant)); });
+}
+
+function getDominant() {
+  var c = { stay: 0, move: 0, open: 0 };
+  sess.positions.forEach(function(p) { if (c[p] !== undefined) c[p]++; });
+  return Object.keys(c).reduce(function(a, b) { return c[a] >= c[b] ? a : b; });
+}
+
+function fallback(pos) {
+  var opts = FALLBACKS[pos] || FALLBACKS.open;
+  return opts[Math.floor(Math.random() * opts.length)];
+}
+
+// ── KEEP GOING ────────────────────────────────────────────────────────────────
+function keepGoing() {
+  // Occasionally introduce curated track mid-session (point 8)
+  var interrupt = sess.isSearched
+    && sess.trackCount > 1
+    && CURATED.length > 0
+    && Math.random() < 0.25;
+
+  if (interrupt) {
+    selectCurated(true);
+  } else if (sess.isCurated && CURATED.length > 0) {
+    selectCurated(false);
+  } else {
+    showSearch();
+  }
+}
+
+// ── SESSION END ───────────────────────────────────────────────────────────────
+function endSession() {
+  sess.sessionCount++;
+  LS.set('sessionCount', sess.sessionCount);
+  LS.set('lastPosition', getDominant());
+
+  if (!sess.email) {
+    showEmail();
+  } else {
+    showStopped();
+  }
+}
+
+function showStopped() {
+  show('s-stopped');
+  setTimeout(function() {
+    document.getElementById('stopped-text').classList.add('show');
+    setTimeout(function() {
+      document.getElementById('stopped-actions').classList.add('show');
+    }, 600);
+  }, 300);
+}
+
+function showEmail() {
+  show('s-email');
+  setTimeout(function() {
+    document.getElementById('email-heading').classList.add('show');
+    document.getElementById('email-fields').classList.add('show');
+  }, 400);
+}
+
+// ── SHARE ─────────────────────────────────────────────────────────────────────
+function showShare() {
+  if (!sess.reflectionLine) return;
+  document.getElementById('share-card-line').textContent = sess.reflectionLine;
+  document.getElementById('share-overlay').classList.add('show');
+}
+
+// ── EMAIL SUBMIT ──────────────────────────────────────────────────────────────
+function submitEmail() {
+  var name = document.getElementById('name-input').value.trim();
+  var email = document.getElementById('email-input').value.trim();
+  var errEl = document.getElementById('email-error');
+  var btn = document.getElementById('email-submit');
+
+  if (!name || !email || email.indexOf('@') < 0) {
+    errEl.textContent = 'both fields required.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.style.opacity = '0.5';
+  errEl.style.display = 'none';
+
+  fetch('/.netlify/functions/send-welcome', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: email, firstName: name }),
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.duplicate) {
+      errEl.textContent = 'an account with that email already exists.';
+      errEl.style.display = 'block';
+      btn.disabled = false;
+      btn.style.opacity = '';
+      document.getElementById('email-input').value = '';
+      return;
+    }
+    sess.email = email;
+    sess.firstName = name;
+    LS.set('email', email);
+    LS.set('firstName', name);
+    showStopped();
+  })
+  .catch(function() {
+    btn.disabled = false;
+    btn.style.opacity = '';
+  });
+}
+
+// ── EVENTS ────────────────────────────────────────────────────────────────────
+function bindEvents() {
+  // Entry
+  document.getElementById('btn-search').addEventListener('click', showSearch);
+  document.getElementById('btn-discover').addEventListener('click', function() {
+    if (CURATED.length > 0) { selectCurated(false); } else { showSearch(); }
+  });
+
+  // Before
+  document.getElementById('before-cta').addEventListener('click', showEntry);
+
+  // Search
+  document.getElementById('search-field').addEventListener('input', function(e) {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(function() { doSearch(e.target.value.trim()); }, 400);
+  });
+
+  // Listen
+  document.getElementById('listen-stop').addEventListener('click', function() {
+    stopAudio();
+    showStopped();
+  });
+
+  // Recognition
+  document.getElementById('stmt-a').addEventListener('click', function() {
+    handleChoice('stay', this);
+  });
+  document.getElementById('stmt-b').addEventListener('click', function() {
+    handleChoice('move', this);
+  });
+  document.getElementById('stmt-neither').addEventListener('click', function() {
+    handleChoice('open', null);
+  });
+
+  // Sure
+  document.getElementById('sure-yes').addEventListener('click', function() {
+    sess.responseSpeed = 'changed';
+    confirmChoice(sess.pendingChoice);
+  });
+  document.getElementById('sure-no').addEventListener('click', function() {
+    sess.responseSpeed = 'changed';
+    document.getElementById('sure-overlay').classList.remove('show');
+    var flipped = sess.pendingChoice === 'stay' ? 'move'
+      : sess.pendingChoice === 'move' ? 'stay' : 'open';
+    confirmChoice(flipped);
+  });
+
+  // Reflection
+  document.getElementById('keep-going-btn').addEventListener('click', keepGoing);
+  document.getElementById('share-btn').addEventListener('click', showShare);
+
+  // Share
+  document.getElementById('share-close').addEventListener('click', function() {
+    document.getElementById('share-overlay').classList.remove('show');
+  });
+  document.getElementById('share-copy').addEventListener('click', function() {
+    var text = sess.reflectionLine + '\n\nfyndtoday.com';
+    var btn = document.getElementById('share-copy');
+    if (navigator.share) {
+      navigator.share({ text: text }).catch(function() {});
+    } else {
+      navigator.clipboard.writeText(text).then(function() {
+        btn.textContent = 'copied';
+        setTimeout(function() { btn.textContent = 'copy to share'; }, 2000);
+      }).catch(function() {});
+    }
+  });
+
+  // Stopped
+  document.getElementById('btn-keep-going-2').addEventListener('click', keepGoing);
+  document.getElementById('btn-done').addEventListener('click', endSession);
+
+  // Email
+  document.getElementById('email-submit').addEventListener('click', submitEmail);
+  document.getElementById('email-skip').addEventListener('click', showStopped);
+  document.getElementById('email-input').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') submitEmail();
+  });
+}
+
+// ── UTILS ─────────────────────────────────────────────────────────────────────
+function esc(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+</script>
+<script>
+// Load YouTube IFrame API
+(function() {
+  var tag = document.createElement('script');
+  tag.src = 'https://www.youtube.com/iframe_api';
+  var firstScript = document.getElementsByTagName('script')[0];
+  firstScript.parentNode.insertBefore(tag, firstScript);
+})();
+
+// Called by YouTube API when ready
+window.onYouTubeIframeAPIReady = function() {
+  sess.ytReady = true;
+};
+</script>
+</body>
+</html>
