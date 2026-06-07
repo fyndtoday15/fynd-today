@@ -221,7 +221,7 @@ JSON only — no markdown, no preamble:
         'anthropic-version': '2023-06-01',
       },
       {
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-5',
         max_tokens: 200,
         system: systemPrompt,
         messages: [{ role: 'user', content: userPrompt }],
