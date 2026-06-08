@@ -6,9 +6,6 @@ const ALLOWED_ORIGINS = [
   'https://www.fyndtoday.com',
 ];
 
-// ── HTTPS FETCH WRAPPER ───────────────────────────────────────────────────────
-// Native fetch may not exist in older Node.js runtimes on Netlify.
-// Uses the built-in https module instead — guaranteed to work.
 function httpsPost(url, headers, body) {
   return new Promise(function(resolve, reject) {
     const parsed = new URL(url);
@@ -36,7 +33,6 @@ function httpsPost(url, headers, body) {
   });
 }
 
-// ── MAIN HANDLER ─────────────────────────────────────────────────────────────
 exports.handler = async function(event, context) {
   context.callbackWaitsForEmptyEventLoop = false;
 
@@ -58,161 +54,139 @@ exports.handler = async function(event, context) {
   }
 
   const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
-
   if (!ANTHROPIC_API_KEY) {
     console.error('ANTHROPIC_API_KEY not set');
     return fallbackResponse(allowedOrigin, 'open', corsHeaders);
   }
 
   let data;
-  try {
-    data = JSON.parse(event.body);
-  } catch(e) {
-    return { statusCode: 400, body: 'Invalid JSON' };
-  }
+  try { data = JSON.parse(event.body); }
+  catch(e) { return { statusCode: 400, body: 'Invalid JSON' }; }
 
   const {
     sessionNumber = 1,
     positions = [],
+    trackTitle = '',
+    trackArtist = '',
+    chosenStatement = '',
+    chosenPosition = '',
     searchedTrack = false,
     sameSongReturned = false,
     previousPosition = null,
     responseSpeed = 'normal',
-    firstName = null,
   } = data;
 
-  // ── DERIVE DOMINANT POSITION ──────────────────────────────────────────────
+  // Derive dominant
   const counts = { stay: 0, move: 0, open: 0 };
   positions.forEach(function(p) {
     if (p === 'stay') counts.stay++;
     else if (p === 'move') counts.move++;
     else if (p === 'open' || p === 'neither') counts.open++;
   });
-  const dominant = Object.keys(counts).reduce(function(a, b) {
+  const dominant = chosenPosition || Object.keys(counts).reduce(function(a, b) {
     return counts[a] >= counts[b] ? a : b;
   });
   const mixed = Object.values(counts).filter(function(v) { return v > 0; }).length > 1;
-  const positionCount = positions.length;
 
-  // ── BUILD SESSION CONTEXT ─────────────────────────────────────────────────
-  // Sutherland: context is the most important variable.
-  // Specific input produces specific output.
-  // Generic input produces wallpaper.
+  // Build context — specific to this track and this choice
   const ctx = [];
 
-  if (sessionNumber === 1) {
-    ctx.push('This is their first session with the portal.');
-  } else {
-    ctx.push('Session ' + sessionNumber + ' for this person.');
+  if (trackTitle && trackArtist) {
+    ctx.push('Track: "' + trackTitle + '" by ' + trackArtist + '.');
   }
 
-  if (mixed) {
-    const parts = [];
-    if (counts.stay > 0) parts.push(counts.stay + ' stay');
-    if (counts.move > 0) parts.push(counts.move + ' move');
-    if (counts.open > 0) parts.push(counts.open + ' open');
-    ctx.push('Mixed session: ' + parts.join(', ') + '. No single clear direction. They are somewhere between.');
+  if (chosenStatement) {
+    ctx.push('What they recognized: "' + chosenStatement + '"');
   } else {
-    ctx.push('Clear ' + dominant + ' session across ' + positionCount + ' recognition moment' + (positionCount !== 1 ? 's' : '') + '.');
+    ctx.push('They chose neither statement — something opened instead.');
+  }
+
+  ctx.push('Position this produced: ' + dominant + '.');
+
+  if (sessionNumber === 1) {
+    ctx.push('First session with the portal.');
+  } else {
+    ctx.push('Session ' + sessionNumber + '.');
   }
 
   if (previousPosition && previousPosition !== dominant) {
-    ctx.push('Last session: ' + previousPosition + '. This session: ' + dominant + '. That is a real shift.');
+    ctx.push('Last session: ' + previousPosition + '. This session: ' + dominant + '. A real shift.');
   } else if (previousPosition && previousPosition === dominant) {
-    ctx.push('Same position as last session: ' + dominant + '. They keep arriving here.');
+    ctx.push('Same position as last session. They keep arriving here.');
   }
 
   if (sameSongReturned) {
-    ctx.push('They brought back a song they have searched before. It moved them differently this time.');
+    ctx.push('They brought this exact track back. It moved them differently than before.');
   } else if (searchedTrack) {
-    ctx.push('They brought their own track. They chose this song. That choice is not neutral.');
+    ctx.push('They brought their own track — chose it specifically.');
   } else {
-    ctx.push('They chose discovery mode — they let the portal introduce the track. They did not know what was coming.');
+    ctx.push('Discovery mode — they did not know what was coming.');
   }
 
   if (responseSpeed === 'fast') {
-    ctx.push('They responded immediately. Instinctive. Pre-cognitive. No deliberation.');
+    ctx.push('They responded immediately. Instinctive. Pre-cognitive.');
   } else if (responseSpeed === 'slow') {
     ctx.push('They paused before responding. Something made them sit with it.');
   } else if (responseSpeed === 'changed') {
-    ctx.push('They changed their answer after being asked if they were sure. They reconsidered and committed to something different. That reversal is real signal.');
+    ctx.push('They changed their answer after being asked if they were sure. That reversal is real signal.');
   }
 
-  // ── SYSTEM PROMPT ─────────────────────────────────────────────────────────
   const systemPrompt = `You are the voice of FYND TODAY.
 
-FYND TODAY is a music-powered recognition system. The sound portal shows people how sound moves them. After each session, one line appears on a dark screen. That line is your only output.
+FYND TODAY is a music-powered recognition system. After each session, one line appears on a dark screen. That line is your only output.
 
-THE PURPOSE OF THIS LINE:
-It is not a summary. Not a compliment. Not a diagnosis.
-It is a recognition. Like someone who was watching — not studying, just present — and noticed something true. Then said it plainly.
+You have been given specific information: the exact track that played, the exact statement the person recognized as true, and the position that produced. Use all of it. A generic line is a failure. The person must read this and feel it was written for them specifically — because it was.
 
-The Rory Sutherland principle applies: people do not know what they feel until something names it for them. The line does not explain what happened. It surfaces what was already true. The person reads it and thinks — yes, that is exactly right. They did not know until the line appeared. That is what makes it shareable. Not because it is clever. Because it is accurate.
+THE PURPOSE:
+Not a summary. Not a compliment. Not a diagnosis.
+A recognition. Like someone who noticed something true about this person in this moment and said it plainly. The person reads it and thinks: yes, that is exactly right. I did not know until this appeared.
 
-THE POSITION SYSTEM (never name these — use only to inform tone):
-— Stay: holding still inside a moment. Not avoiding, not rushing. Present with what is. The sound confirmed the stillness.
-— Move: something is in motion. Not forced — pulled. The next thing is already forming. The sound confirmed the momentum.
-— Open: something shifted that was not there before. Recognition just occurred. Still inside the moment of noticing.
-Mixed positions: somewhere between. Do not resolve it. Name the in-between.
+That is what makes it shareable. Not because it is clever. Because it is accurate.
+
+THE POSITIONS (never name these in output):
+— Stay: holding still. Present with what is. The sound confirmed the stillness.
+— Move: something in motion. The next thing forming. The sound confirmed the momentum.
+— Open: something shifted. Still inside the moment of noticing.
+— Mixed: somewhere between. Hold the tension, do not resolve it.
 
 THE VOICE:
 Direct. Quiet. Specific. Lowercase. No punctuation at the end.
-Confident without being loud. Under 12 words. Every word accountable. Nothing decorative.
+Confident without being loud. Under 12 words. Every word accountable.
 
-HARD RULES — every one applies:
-— Never mention music, sound, listening, tracks, songs
-— Never use: feel, feeling, feelings, emotion, emotional, mood, vibe, energy, journey, experience, healing, growth
-— Never be motivational. Not "keep going" or "you're doing great" or "you're ready"
-— Never be therapeutic. Not presumptuous observations about what they are carrying
+HARD RULES:
+— Never mention the track title, artist, or any lyrics
+— Never mention music, sound, listening, songs, tracks
+— Never use: feel, feeling, emotion, emotional, mood, vibe, energy, journey, experience, healing, growth, space
+— Never motivational. Never therapeutic.
 — Never name the position as a label
-— Never be vague enough to apply to anyone. If it could appear in a horoscope — discard it
-— Never start with "you've been" — overused, wallpaper now
-— Never explain what the session meant
+— If it could appear in a horoscope — discard it and try again
+— Never start with "you've been"
 — Never write a question
 
-WHAT THE LINE MUST DO:
-— Feel written for this specific session — not recycled
-— Name something precise. A specific thing that happened, not a general condition
-— Land slightly ahead of where the person thought they were — not so far it loses them
-— Be the kind of line someone screenshots — not because it is pretty, because it is true
+THE LINE MUST:
+— Be traceable to this specific track and this specific chosen statement
+— Name something precise — not a general condition
+— Land slightly ahead of where the person thought they were
+— Be the kind of line someone screenshots because it is true, not because it is pretty
 
 POSITION TONE:
-
-Stay: Grounded. Still. Not trying to move them. Confirms the value of remaining. Not prescriptive — precise.
-
-Move: Confirmation of something already in motion. Not motivation — recognition. The person is already moving. Name it.
-
+Stay: Grounded. Still. Confirms the value of remaining. Not prescriptive.
+Move: Confirmation of something already happening. Not motivation — recognition.
 Open: First breath after something lands. Quiet surprise. Names the shift without explaining it.
+Mixed: Holds the tension. Names being in-between as a real condition, not a problem.
 
-Mixed: Holds the tension. Does not resolve it. Names being in-between as a real condition, not a problem.
-
-REFERENCE LINES — study the precision:
-Good: "you know exactly where you are right now"
-Good: "something moved through you that was not ready to wait"
-Good: "you kept choosing the thing that asked more of you"
-Good: "you came back to the same place and it met you differently"
-Good: "the answer was faster than the question"
-Good: "staying is not the same as waiting"
-Good: "you were not looking for that and you found it anyway"
-
-Bad: "you've been sitting with something for a while" — vague, therapeutic wallpaper
-Bad: "something shifted that wasn't there before" — too broad, works for any session
-Bad: "you're further along than you think" — motivational framing, not recognition
-Bad: "a door opened that you didn't know was there" — metaphor over specificity
-Bad: "you held space for something important" — uses forbidden language, meaningless
-
-THE BEFORE LINE:
-Also return a "before line" — one sentence that appears at the START of the person's NEXT session, before any sound plays. The portal remembering. References what this session revealed — not what the person said, but what their behavior showed. Same voice. Same precision. Same rules. Makes the person feel seen before a single note plays.`;
+ALSO WRITE A BEFORE LINE:
+One sentence that appears at the START of their next session, before any sound plays. References what this session revealed — the track, the recognition, the position — without explaining it. Makes them feel remembered. Same rules apply.`;
 
   const userPrompt = `Session context:
 ${ctx.join('\n')}
 
-Write the reflection line and the before line for this person right now.
+Write one reflection line for this specific person after this specific session.
+Write one before line for the start of their next session.
 
-JSON only — no markdown, no preamble:
+JSON only:
 {"reflectionLine": "...", "beforeLine": "..."}`;
 
-  // ── API CALL ──────────────────────────────────────────────────────────────
   try {
     const result = await httpsPost(
       'https://api.anthropic.com/v1/messages',
@@ -233,10 +207,8 @@ JSON only — no markdown, no preamble:
       return fallbackResponse(allowedOrigin, dominant, corsHeaders);
     }
 
-    const raw = result.body;
-    const text = (raw.content && raw.content[0] && raw.content[0].text)
-      ? raw.content[0].text.trim()
-      : '';
+    const text = (result.body.content && result.body.content[0] && result.body.content[0].text)
+      ? result.body.content[0].text.trim() : '';
 
     if (!text) {
       console.error('Empty response from Claude');
@@ -249,14 +221,7 @@ JSON only — no markdown, no preamble:
       parsed = JSON.parse(clean);
     } catch(e) {
       console.error('JSON parse failed:', text);
-      return {
-        statusCode: 200,
-        headers: corsHeaders,
-        body: JSON.stringify({
-          reflectionLine: text.slice(0, 120),
-          beforeLine: getFallbackBeforeLine(dominant),
-        }),
-      };
+      return fallbackResponse(allowedOrigin, dominant, corsHeaders);
     }
 
     return {
@@ -274,27 +239,19 @@ JSON only — no markdown, no preamble:
   }
 };
 
-// ── FALLBACKS ─────────────────────────────────────────────────────────────────
-// Run only when the API is genuinely unavailable.
-// Held to the same standard as generated lines.
-// No generics. No therapy. No motivation.
-
 function getFallbackReflection(dominant) {
   const lines = {
     stay: [
       'you know exactly where you are right now',
       'staying is not the same as waiting',
       'you held the moment without trying to name it',
-      'you kept choosing to remain and that is not the same as not moving',
     ],
     move: [
       'something moved through you that was not ready to wait',
       'you did not plan to go there but you went',
       'the answer came faster than the question',
-      'you kept choosing the thing that asked more of you',
     ],
     open: [
-      'you came back to the same place and it met you differently',
       'you were not looking for that and you found it anyway',
       'the recognition happened before the explanation',
       'something got in that you did not open the door for',
@@ -302,7 +259,6 @@ function getFallbackReflection(dominant) {
     mixed: [
       'you were somewhere between and you held it honestly',
       'not every session resolves and this one did not need to',
-      'you held more than one direction at once',
     ],
   };
   const options = lines[dominant] || lines.open;
@@ -311,22 +267,10 @@ function getFallbackReflection(dominant) {
 
 function getFallbackBeforeLine(dominant) {
   const lines = {
-    stay: [
-      'last time you stayed and it was the right call',
-      'last time the stillness was the whole thing',
-    ],
-    move: [
-      'last time something was already in motion before you arrived',
-      'last time you chose forward without knowing where it went',
-    ],
-    open: [
-      'last time something got in that you did not plan for',
-      'last time the recognition happened before the explanation',
-    ],
-    mixed: [
-      'last time you were somewhere between and you held it honestly',
-      'last time nothing fully resolved and that was enough',
-    ],
+    stay: ['last time you stayed and it was the right call', 'last time the stillness was the whole thing'],
+    move: ['last time something was already in motion before you arrived', 'last time you chose forward without knowing where it went'],
+    open: ['last time something got in that you did not plan for', 'last time the recognition happened before the explanation'],
+    mixed: ['last time you were somewhere between and you held it honestly'],
   };
   const options = lines[dominant] || lines.open;
   return options[Math.floor(Math.random() * options.length)];
