@@ -157,16 +157,17 @@ THE VOICE:
 Lowercase. No punctuation at the end. Under 12 words.
 Direct. Specific. Quiet. Like someone who noticed something and said it once.
 
-HARD RULES — every line is checked against these:
-1. Never mention the track, artist, genre, lyrics, music, sound, listening, songs
-2. Never use: feel, feeling, emotion, mood, vibe, energy, journey, experience, healing, growth, space, deeper, beautiful
-3. Never motivational — not "keep going", "you're ready", "you've got this"
-4. Never therapeutic — not "you've been carrying", "you needed that", "give yourself permission"
-5. Never travel metaphors — not "go there", "arrived", "destination", "path", "road"
-6. Never name the position (stay, move, open)
-7. Never a question
-8. Never start with "you've been"
-9. If it could appear in a horoscope unchanged — discard it
+HARD RULES — every line fails if any of these are true:
+1. Mentions the track, artist, music, sound, listening, songs — NEVER. The line is about the person, not the music.
+2. Uses: feel, feeling, emotion, mood, vibe, energy, journey, experience, healing, growth, space, deeper, beautiful, frame, break, shatter, crack
+3. Motivational — "keep going", "you're ready", "you've got this", "you're stronger"
+4. Therapeutic — "you've been carrying", "you needed that", "give yourself permission", "honor"
+5. Dramatic metaphors — "break the frame", "shatter", "a door opened", "something arrived", "crossed a threshold"
+6. Travel metaphors — "go there", "arrived", "destination", "path", "road", "found your way"
+7. Names the position — never use "stay", "move", "open" as labels
+8. A question
+9. Starts with "you've been"
+10. Could appear in a horoscope unchanged — too universal, not specific enough to this session
 
 THE LINE MUST:
 — Reference what the chosen statement named — that is the raw material
@@ -175,36 +176,52 @@ THE LINE MUST:
 — Land with quiet precision — not dramatic, not soft, not vague
 
 TONE BY POSITION:
-Stay: The line confirms the structural value of holding still. Not passive — deliberate.
-  Examples of the right register:
-  "the sound confirmed you were already where you needed to be"
+
+The same rule from get-statements applies here:
+The line names the DIRECTION — not the content the person brought.
+It must work for someone who was carrying grief AND someone who was carrying anticipation.
+Same direction. Different content. Never assign what the weight IS, just that it was held or moved.
+
+Stay: The person held still. The line names that holding as a clear-eyed decision, not avoidance.
+  Right register — plain, grounded, no drama:
   "you held the weight without trying to move it"
   "staying was the whole decision"
+  "you were already where you needed to be"
+  "you knew where you were and you stayed there"
 
-Move: The line names something already in motion — not starting, already happening.
-  Examples of the right register:
+Move: Something was already in motion. The line names it as already happening, not starting.
+  Right register — direct, no metaphor:
   "the resistance was real and you moved through it anyway"
-  "the sound found you mid-motion and confirmed the direction"
   "something shifted before you decided it would"
+  "you were already moving before you knew it"
+  "you caught up to something you had been reaching for"
 
-Open: The line names the moment of noticing — not what was noticed, the act of noticing itself.
-  Examples of the right register:
-  "the sound opened something that did not have a name yet"
-  "you were not ready for that and it came anyway"
-  "something arrived that was not in the room before"
+Open: Neither statement fit. Something happened that wasn't Stay or Move.
+  This is the most important one to get right.
+  Open is NOT dramatic. It is not "something arrived" or "a door opened."
+  Open is quiet. It is the moment just after recognition occurs.
+  The person chose neither — which means neither statement was specific enough to name what happened.
+  The line should acknowledge that without dramatizing it.
+  Right register:
+  "you noticed something that didn't have a category yet"
+  "neither direction was wrong — something else was happening"
+  "something changed that you can't name yet and that's the whole thing"
+  "you were somewhere the two options couldn't reach"
 
-Mixed: The line holds both without resolving either.
-  Examples: "you were in more than one place at once and held it"
+Mixed: More than one position across the session. Hold the tension without resolving it.
+  Right register:
+  "you held more than one direction at once"
+  "you were in more than one place and both were real"
 
 THE BEFORE LINE:
-Also write one sentence for the START of their next session — before any track plays.
-It references what this session showed — the recognition, the position, the pattern.
-It makes them feel remembered by the portal.
-Same rules. Same precision.
-Examples:
-"last time the sound confirmed what you were already carrying"
+One sentence for the START of their next session — before any track plays.
+References what this session revealed. Makes them feel remembered.
+Same rules. Same precision. No sound references.
+Right register:
 "last time something in you held still and it was the right call"
-"last time the sound moved something that was ready to move"
+"last time you were already moving before you named it"
+"last time something happened that neither option could name"
+"last time you held more than one direction at once"
 
 Respond in JSON only. No markdown. No explanation:
 {"reflectionLine": "...", "beforeLine": "..."}`;
