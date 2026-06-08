@@ -368,7 +368,70 @@ html, body {
 .listen-stop.show { opacity: 1; }
 .listen-stop:active { color: var(--fg); transform: translateX(-50%) scale(0.97); }
 
-/* ── S-RECOGNITION ── */
+/* ── LISTEN STATEMENTS OVERLAY ── */
+.listen-stmts {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 36px;
+  gap: 16px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 1.2s ease;
+  background: rgba(10,10,10,0.85);
+  z-index: 20;
+}
+.listen-stmts.show {
+  opacity: 1;
+  pointer-events: all;
+}
+.listen-stmts-prompt {
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--dimmer);
+  text-align: center;
+  margin-bottom: 20px;
+}
+.listen-stmt-btn {
+  background: none;
+  border: 1px solid rgba(240,237,230,0.1);
+  border-radius: 1px;
+  padding: 20px 22px;
+  font-family: var(--f);
+  font-size: clamp(15px, 3.8vw, 18px);
+  color: var(--fg);
+  cursor: pointer;
+  text-align: left;
+  line-height: 1.55;
+  width: 100%;
+  max-width: 340px;
+  transition: border-color 0.2s ease, background 0.15s ease;
+}
+.listen-stmt-btn:active {
+  background: rgba(240,237,230,0.05);
+  border-color: rgba(240,237,230,0.3);
+}
+.listen-stmt-btn.chosen {
+  border-color: rgba(240,237,230,0.35);
+  background: rgba(240,237,230,0.04);
+}
+.listen-stmt-neither {
+  background: none;
+  border: none;
+  font-family: var(--f);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--dimmer);
+  cursor: pointer;
+  padding: 14px 0;
+  transition: color 0.2s ease;
+}
+.listen-stmt-neither:active { color: var(--fg); }
 #s-recognition { gap: 0; padding: 0 36px; }
 
 .recog-reveal {
@@ -823,6 +886,14 @@ html, body {
     <div class="listen-artist" id="listen-artist"></div>
   </div>
   <button class="listen-stop" id="listen-stop">stop for now</button>
+
+  <!-- Statements overlay — appears at 30s while track still plays -->
+  <div class="listen-stmts" id="listen-stmts">
+    <div class="listen-stmts-prompt">what did the sound do?</div>
+    <button class="listen-stmt-btn" id="listen-stmt-a"></button>
+    <button class="listen-stmt-btn" id="listen-stmt-b"></button>
+    <button class="listen-stmt-neither" id="listen-stmt-neither">neither</button>
+  </div>
 </div>
 
 <!-- S-RECOGNITION -->
@@ -894,15 +965,7 @@ var CURATED = [
   // { title: 'Track Name', artist: 'Artist', ytId: 'youtubeVideoId' },
 ];
 
-// ── STATEMENT PAIRS ───────────────────────────────────────────────────────────
-var PAIRS = [
-  ['something got quieter.', 'something started moving.'],
-  ['i felt held where i was.', 'i felt pulled somewhere.'],
-  ['it settled something.', 'it shifted something.'],
-  ['i stayed inside it.', 'it took me somewhere.'],
-  ['it got heavier.', 'it got lighter.'],
-  ['something in me slowed.', 'something in me opened.'],
-];
+// Statement pairs now generated per-track by get-statements.js
 
 // ── FALLBACKS ─────────────────────────────────────────────────────────────────
 var FALLBACKS = {
@@ -919,7 +982,10 @@ var FALLBACKS = {
   open: [
     "something shifted that wasn't there before.",
     "a door opened that you didn't know was there.",
-    'you didn\'t expect that.',
+    "you didn't expect that.",
+    "something new just arrived.",
+    "you went somewhere you didn't plan to go.",
+    "that landed differently than you expected.",
   ],
 };
 
@@ -939,9 +1005,13 @@ var sess = {
   trackCount: 0,
   positions: [],
   chosenPosition: null,
+  chosenStatement: '',
   responseSpeed: 'normal',
   reflectionLine: null,
   curatedIdx: 0,
+  pendingStatements: null,
+  chosenStatement: '',
+  currentStatements: { a: '', b: '' },
   choiceTime: null,
   pendingChoice: null,
   recognitionTimer: null,
@@ -1094,6 +1164,14 @@ function selectTrack(track, isCurated) {
   sess.isInterrupted = track.isInterrupted || false;
   sess.chosenPosition = null;
   sess.trackCount++;
+
+  // Reset statements to null — will be fetched from Claude
+  sess.pendingStatements = null;
+
+  // Fetch Claude-researched statements for this specific track in background
+  // By the time 60s of listening is done, statements will be ready
+  fetchStatements(track.title, track.artist);
+
   goListen();
 }
 
@@ -1155,13 +1233,11 @@ function startListenTimers() {
     document.getElementById('listen-stop').classList.add('show');
   }, 10000);
 
-  // For searched tracks, recognition at 60s
-  // Curated tracks: recognition triggered by player end event
-  if (sess.isSearched) {
-    sess.recognitionTimer = setTimeout(function() {
-      goRecognition();
-    }, 60000);
-  }
+  // Show statements at 30s — track keeps playing underneath
+  // Recognition (stopping track) only happens when user picks a statement
+  sess.recognitionTimer = setTimeout(function() {
+    showStatementsOverlay();
+  }, 30000);
 }
 
 function stopAudio() {
@@ -1210,7 +1286,19 @@ function playYouTube(ytId) {
         // YT.PlayerState.ENDED = 0
         if (e.data === 0) {
           clearTimeout(sess.recognitionTimer);
-          goRecognition();
+          // If statements already showing, do nothing — user will pick
+          // If not yet showing, show them now (short track)
+          var stmtWrap = document.getElementById('listen-stmts');
+          if (stmtWrap && !stmtWrap.classList.contains('show')) {
+            showStatementsOverlay();
+          }
+          // If track ended without user picking, go to recognition after 8s
+          setTimeout(function() {
+            var stmtWrapCheck = document.getElementById('listen-stmts');
+            if (stmtWrapCheck && stmtWrapCheck.classList.contains('show')) {
+              goRecognition();
+            }
+          }, 8000);
         }
       },
       onError: function() {
@@ -1222,10 +1310,143 @@ function playYouTube(ytId) {
   });
 }
 
+// ── STATEMENTS OVERLAY ────────────────────────────────────────────────────────
+// Shows statements ON the listen screen while track keeps playing.
+// User picks — THEN track fades and recognition screen appears.
+function showStatementsOverlay() {
+  var stmtWrap = document.getElementById('listen-stmts');
+  if (!stmtWrap) return;
+
+  // Populate with Claude-researched or fallback pair
+  var pair;
+  if (sess.pendingStatements && sess.pendingStatements.a && sess.pendingStatements.b) {
+    pair = [sess.pendingStatements.a, sess.pendingStatements.b];
+  } else {
+    var PAIRS_LOCAL = [
+      ['something in me got quieter', 'something started moving'],
+      ['i felt held where i was', 'i felt pulled somewhere'],
+      ['it settled something', 'it shifted something'],
+      ['i stayed inside it', 'it took me somewhere'],
+    ];
+    pair = PAIRS_LOCAL[Math.floor(Math.random() * PAIRS_LOCAL.length)];
+  }
+
+  document.getElementById('listen-stmt-a').textContent = pair[0];
+  document.getElementById('listen-stmt-b').textContent = pair[1];
+
+  sess.choiceTime = Date.now();
+
+  // Fade in the overlay
+  stmtWrap.classList.add('show');
+}
+
+// ── FETCH STATEMENTS FROM CLAUDE ─────────────────────────────────────────────
+// Fires when track is selected — runs in background during listening.
+// By the time recognition screen appears, statements are ready.
+function fetchStatements(title, artist) {
+  fetch('/.netlify/functions/get-statements', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ title: title, artist: artist }),
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    // Store on sess — goRecognition reads this
+    sess.pendingStatements = {
+      a: data.statementA || null,
+      b: data.statementB || null,
+    };
+  })
+  .catch(function() {
+    sess.pendingStatements = null; // will use fallback pairs
+  });
+}
+
+// ── HANDLE CHOICE FROM LISTEN OVERLAY ────────────────────────────────────────
+// Track fades out, then recognition screen appears
+function handleListenChoice(position, btnEl) {
+  var elapsed = Date.now() - sess.choiceTime;
+  sess.responseSpeed = elapsed < 3000 ? 'fast' : elapsed > 12000 ? 'slow' : 'normal';
+
+  // Store the actual statement text chosen for Claude's reflection context
+  if (btnEl) {
+    document.querySelectorAll('.listen-stmt-btn').forEach(function(b) {
+      b.classList.remove('chosen');
+    });
+    btnEl.classList.add('chosen');
+    sess.chosenStatement = btnEl.textContent || '';
+  } else {
+    sess.chosenStatement = 'neither'; // open position
+  }
+
+  // Fade audio out gracefully over 1.5s while screen transitions
+  clearTimeout(sess.recognitionTimer);
+  clearTimeout(sess.stopTimer);
+  sess.pendingChoice = position;
+
+  if (sess.ytPlayer && typeof sess.ytPlayer.setVolume === 'function') {
+    var vol = 100;
+    var fadeInterval = setInterval(function() {
+      vol -= 5;
+      if (vol <= 0) {
+        clearInterval(fadeInterval);
+        try { sess.ytPlayer.stopVideo(); } catch(e) {}
+        try { sess.ytPlayer.setVolume(100); } catch(e) {} // reset for next track
+      } else {
+        try { sess.ytPlayer.setVolume(vol); } catch(e) {}
+      }
+    }, 75); // 100/5 steps * 75ms = 1500ms fade
+  }
+
+  // Go to recognition after fade starts (not waits for full fade)
+  setTimeout(function() {
+    goRecognitionWithChoice(position);
+  }, 600);
+}
+
 // ── RECOGNITION ───────────────────────────────────────────────────────────────
+function goRecognitionWithChoice(position) {
+  stopAudio();
+
+  // For curated tracks — reveal title/artist
+  show('s-recognition');
+  var reveal = document.getElementById('recog-reveal');
+  var prompt = document.getElementById('recog-prompt');
+  reveal.classList.remove('show');
+  prompt.classList.remove('show');
+
+  if (sess.isCurated) {
+    document.getElementById('recog-reveal-name').textContent =
+      sess.trackTitle + ' — ' + sess.trackArtist;
+    setTimeout(function() { reveal.classList.add('show'); }, 300);
+  }
+
+  // Hide the statement buttons on recognition screen (already chose on listen screen)
+  document.getElementById('stmt-a').style.display = 'none';
+  document.getElementById('stmt-b').style.display = 'none';
+  document.getElementById('stmt-neither').style.display = 'none';
+
+  // Push back 30% of time after first track
+  if (sess.trackCount > 1 && Math.random() < 0.3) {
+    sess.pendingChoice = position;
+    document.getElementById('sure-overlay').classList.add('show');
+  } else {
+    confirmChoice(position);
+  }
+}
+
 function goRecognition() {
   stopAudio();
   show('s-recognition');
+
+  // Reset display in case previous round hid them
+  document.getElementById('stmt-a').style.display = '';
+  document.getElementById('stmt-b').style.display = '';
+  document.getElementById('stmt-neither').style.display = '';
+
+  // Also reset listen overlay
+  var stmtWrap = document.getElementById('listen-stmts');
+  if (stmtWrap) stmtWrap.classList.remove('show');
 
   var reveal = document.getElementById('recog-reveal');
   var prompt = document.getElementById('recog-prompt');
@@ -1249,8 +1470,13 @@ function goRecognition() {
     setTimeout(function() { reveal.classList.add('show'); }, 300);
   }
 
-  // Pick pair
-  var pair = PAIRS[Math.floor(Math.random() * PAIRS.length)];
+  // Use Claude-researched statements if ready, otherwise fallback to generic pairs
+  var pair;
+  if (sess.pendingStatements && sess.pendingStatements.a && sess.pendingStatements.b) {
+    pair = [sess.pendingStatements.a, sess.pendingStatements.b];
+  } else {
+    pair = PAIRS[Math.floor(Math.random() * PAIRS.length)];
+  }
   btnA.textContent = pair[0];
   btnB.textContent = pair[1];
 
@@ -1319,7 +1545,12 @@ function getReflection(cb) {
     body: JSON.stringify({
       sessionNumber: sess.sessionCount + 1,
       positions: sess.positions,
+      trackTitle: sess.trackTitle || '',
+      trackArtist: sess.trackArtist || '',
+      chosenStatement: sess.chosenStatement || '',
+      chosenPosition: sess.chosenPosition || dominant,
       searchedTrack: sess.isSearched,
+      sameSongReturned: false,
       previousPosition: LS.get('lastPosition'),
       responseSpeed: sess.responseSpeed,
       firstName: sess.firstName,
@@ -1341,7 +1572,13 @@ function getDominant() {
 
 function fallback(pos) {
   var opts = FALLBACKS[pos] || FALLBACKS.open;
-  return opts[Math.floor(Math.random() * opts.length)];
+  // Avoid repeating last reflection
+  var last = LS.get('lastFallback');
+  var filtered = opts.filter(function(o) { return o !== last; });
+  var pool = filtered.length > 0 ? filtered : opts;
+  var chosen = pool[Math.floor(Math.random() * pool.length)];
+  LS.set('lastFallback', chosen);
+  return chosen;
 }
 
 // ── KEEP GOING ────────────────────────────────────────────────────────────────
@@ -1472,6 +1709,17 @@ function bindEvents() {
     searchTimer = setTimeout(function() { doSearch(e.target.value.trim()); }, 400);
   });
 
+  // Listen screen statement buttons (appear at 30s, track still playing)
+  document.getElementById('listen-stmt-a').addEventListener('click', function() {
+    handleListenChoice('stay', this);
+  });
+  document.getElementById('listen-stmt-b').addEventListener('click', function() {
+    handleListenChoice('move', this);
+  });
+  document.getElementById('listen-stmt-neither').addEventListener('click', function() {
+    handleListenChoice('open', null);
+  });
+
   // Listen
   document.getElementById('listen-stop').addEventListener('click', function() {
     stopAudio();
@@ -1495,11 +1743,19 @@ function bindEvents() {
     confirmChoice(sess.pendingChoice);
   });
   document.getElementById('sure-no').addEventListener('click', function() {
-    sess.responseSpeed = 'changed';
     document.getElementById('sure-overlay').classList.remove('show');
-    var flipped = sess.pendingChoice === 'stay' ? 'move'
-      : sess.pendingChoice === 'move' ? 'stay' : 'open';
-    confirmChoice(flipped);
+    sess.responseSpeed = 'changed';
+    sess.pendingChoice = null;
+    sess.choiceTime = Date.now();
+
+    // Always go back to listen screen with the statements overlay visible
+    // so the user can re-choose cleanly
+    show('s-listen');
+    document.querySelectorAll('.listen-stmt-btn').forEach(function(b) {
+      b.classList.remove('chosen');
+    });
+    var listenStmts = document.getElementById('listen-stmts');
+    if (listenStmts) listenStmts.classList.add('show');
   });
 
   // Reflection
