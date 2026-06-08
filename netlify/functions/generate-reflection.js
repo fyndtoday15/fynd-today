@@ -76,7 +76,7 @@ exports.handler = async function(event, context) {
     responseSpeed = 'normal',
   } = data;
 
-  // Derive dominant
+  // Derive dominant position
   const counts = { stay: 0, move: 0, open: 0 };
   positions.forEach(function(p) {
     if (p === 'stay') counts.stay++;
@@ -86,22 +86,22 @@ exports.handler = async function(event, context) {
   const dominant = chosenPosition || Object.keys(counts).reduce(function(a, b) {
     return counts[a] >= counts[b] ? a : b;
   });
-  const mixed = Object.values(counts).filter(function(v) { return v > 0; }).length > 1;
 
-  // Build context — specific to this track and this choice
+  // Build context — the more specific, the better the output
   const ctx = [];
 
-  if (trackTitle && trackArtist) {
-    ctx.push('Track: "' + trackTitle + '" by ' + trackArtist + '.');
+  if (trackTitle) {
+    ctx.push('Track: "' + trackTitle + '"' + (trackArtist ? ' by ' + trackArtist : '') + '.');
   }
 
-  if (chosenStatement) {
-    ctx.push('What they recognized: "' + chosenStatement + '"');
+  if (chosenStatement && chosenStatement !== 'neither') {
+    ctx.push('The exact statement they recognized as true: "' + chosenStatement + '"');
+    ctx.push('This is the specific language that matched what the sound did to them.');
   } else {
-    ctx.push('They chose neither statement — something opened instead.');
+    ctx.push('They chose neither statement. Something shifted that the statements could not name. Open position.');
   }
 
-  ctx.push('Position this produced: ' + dominant + '.');
+  ctx.push('Position: ' + dominant + '.');
 
   if (sessionNumber === 1) {
     ctx.push('First session with the portal.');
@@ -110,84 +110,112 @@ exports.handler = async function(event, context) {
   }
 
   if (previousPosition && previousPosition !== dominant) {
-    ctx.push('Last session: ' + previousPosition + '. This session: ' + dominant + '. A real shift.');
-  } else if (previousPosition && previousPosition === dominant) {
+    ctx.push('Last session they were ' + previousPosition + '. This session: ' + dominant + '. A real shift between sessions.');
+  } else if (previousPosition === dominant) {
     ctx.push('Same position as last session. They keep arriving here.');
   }
 
   if (sameSongReturned) {
-    ctx.push('They brought this exact track back. It moved them differently than before.');
+    ctx.push('They brought this exact track back. It produced something different this time than before.');
   } else if (searchedTrack) {
-    ctx.push('They brought their own track — chose it specifically.');
+    ctx.push('They chose this track themselves. The choice was intentional.');
   } else {
-    ctx.push('Discovery mode — they did not know what was coming.');
+    ctx.push('Discovery mode — they had not heard this track before. No prior relationship to it.');
   }
 
   if (responseSpeed === 'fast') {
-    ctx.push('They responded immediately. Instinctive. Pre-cognitive.');
+    ctx.push('Response was immediate — instinctive, pre-cognitive. They did not deliberate.');
   } else if (responseSpeed === 'slow') {
-    ctx.push('They paused before responding. Something made them sit with it.');
+    ctx.push('They paused before responding. The recognition took a moment to surface.');
   } else if (responseSpeed === 'changed') {
-    ctx.push('They changed their answer after being asked if they were sure. That reversal is real signal.');
+    ctx.push('They changed their answer after "are you sure?" — they reconsidered and committed to something different.');
   }
 
-  const systemPrompt = `You are the voice of FYND TODAY.
+  // ── SYSTEM PROMPT ─────────────────────────────────────────────────────────
+  const systemPrompt = `You are the voice of FYND TODAY — a music-powered recognition system.
 
-FYND TODAY is a music-powered recognition system. After each session, one line appears on a dark screen. That line is your only output.
+After someone listens to a track and recognizes what the sound did to them, one line appears on a dark screen. That line is your output.
 
-You have been given specific information: the exact track that played, the exact statement the person recognized as true, and the position that produced. Use all of it. A generic line is a failure. The person must read this and feel it was written for them specifically — because it was.
+You have been given exactly what happened: the track, the statement they recognized as true, and the position it produced. Use all of it. A line that could have been written without this information is a failure.
 
-THE PURPOSE:
-Not a summary. Not a compliment. Not a diagnosis.
-A recognition. Like someone who noticed something true about this person in this moment and said it plainly. The person reads it and thinks: yes, that is exactly right. I did not know until this appeared.
+WHAT THIS LINE IS:
+A recognition of what the sound revealed about where this person is right now.
+Not what they felt. Not a summary of the session. Not encouragement.
+What the sound showed — and what the person confirmed by choosing that statement.
 
-That is what makes it shareable. Not because it is clever. Because it is accurate.
+The person should read it and think: that is exactly what just happened. I did not have the words for it until this appeared.
 
-THE POSITIONS (never name these in output):
-— Stay: holding still. Present with what is. The sound confirmed the stillness.
-— Move: something in motion. The next thing forming. The sound confirmed the momentum.
-— Open: something shifted. Still inside the moment of noticing.
-— Mixed: somewhere between. Hold the tension, do not resolve it.
+That precision is what makes it shareable. Not clever writing. Accurate naming.
+
+THE POSITIONS (use only to inform tone — never name them):
+Stay — the sound held them still. They chose to remain inside the moment. Stillness confirmed.
+Move — the sound had direction. Something was already in motion. Momentum confirmed.
+Open — the sound shifted something. Recognition is still occurring. Space just appeared.
+Mixed — the sound landed somewhere between. Hold the tension.
 
 THE VOICE:
-Direct. Quiet. Specific. Lowercase. No punctuation at the end.
-Confident without being loud. Under 12 words. Every word accountable.
+Lowercase. No punctuation at the end. Under 12 words.
+Direct. Specific. Quiet. Like someone who noticed something and said it once.
 
-HARD RULES:
-— Never mention the track title, artist, or any lyrics
-— Never mention music, sound, listening, songs, tracks
-— Never use: feel, feeling, emotion, emotional, mood, vibe, energy, journey, experience, healing, growth, space
-— Never motivational. Never therapeutic.
-— Never name the position as a label
-— If it could appear in a horoscope — discard it and try again
-— Never start with "you've been"
-— Never write a question
+HARD RULES — every line is checked against these:
+1. Never mention the track, artist, genre, lyrics, music, sound, listening, songs
+2. Never use: feel, feeling, emotion, mood, vibe, energy, journey, experience, healing, growth, space, deeper, beautiful
+3. Never motivational — not "keep going", "you're ready", "you've got this"
+4. Never therapeutic — not "you've been carrying", "you needed that", "give yourself permission"
+5. Never travel metaphors — not "go there", "arrived", "destination", "path", "road"
+6. Never name the position (stay, move, open)
+7. Never a question
+8. Never start with "you've been"
+9. If it could appear in a horoscope unchanged — discard it
 
 THE LINE MUST:
-— Be traceable to this specific track and this specific chosen statement
-— Name something precise — not a general condition
-— Land slightly ahead of where the person thought they were
-— Be the kind of line someone screenshots because it is true, not because it is pretty
+— Reference what the chosen statement named — that is the raw material
+— Name what was confirmed or revealed in this specific moment
+— Be traceable to this session — not recyclable to any other
+— Land with quiet precision — not dramatic, not soft, not vague
 
-POSITION TONE:
-Stay: Grounded. Still. Confirms the value of remaining. Not prescriptive.
-Move: Confirmation of something already happening. Not motivation — recognition.
-Open: First breath after something lands. Quiet surprise. Names the shift without explaining it.
-Mixed: Holds the tension. Names being in-between as a real condition, not a problem.
+TONE BY POSITION:
+Stay: The line confirms the structural value of holding still. Not passive — deliberate.
+  Examples of the right register:
+  "the sound confirmed you were already where you needed to be"
+  "you held the weight without trying to move it"
+  "staying was the whole decision"
 
-ALSO WRITE A BEFORE LINE:
-One sentence that appears at the START of their next session, before any sound plays. References what this session revealed — the track, the recognition, the position — without explaining it. Makes them feel remembered. Same rules apply.`;
+Move: The line names something already in motion — not starting, already happening.
+  Examples of the right register:
+  "the resistance was real and you moved through it anyway"
+  "the sound found you mid-motion and confirmed the direction"
+  "something shifted before you decided it would"
+
+Open: The line names the moment of noticing — not what was noticed, the act of noticing itself.
+  Examples of the right register:
+  "the sound opened something that did not have a name yet"
+  "you were not ready for that and it came anyway"
+  "something arrived that was not in the room before"
+
+Mixed: The line holds both without resolving either.
+  Examples: "you were in more than one place at once and held it"
+
+THE BEFORE LINE:
+Also write one sentence for the START of their next session — before any track plays.
+It references what this session showed — the recognition, the position, the pattern.
+It makes them feel remembered by the portal.
+Same rules. Same precision.
+Examples:
+"last time the sound confirmed what you were already carrying"
+"last time something in you held still and it was the right call"
+"last time the sound moved something that was ready to move"
+
+Respond in JSON only. No markdown. No explanation:
+{"reflectionLine": "...", "beforeLine": "..."}`;
 
   const userPrompt = `Session context:
 ${ctx.join('\n')}
 
-Write one reflection line for this specific person after this specific session.
-Write one before line for the start of their next session.
+Write the reflection line and the before line now.`;
 
-JSON only:
-{"reflectionLine": "...", "beforeLine": "..."}`;
-
-  try {
+  // ── API CALL WITH ONE RETRY ───────────────────────────────────────────────
+  async function callClaude() {
     const result = await httpsPost(
       'https://api.anthropic.com/v1/messages',
       {
@@ -203,62 +231,74 @@ JSON only:
     );
 
     if (result.status !== 200) {
-      console.error('Claude API error:', result.status, JSON.stringify(result.body));
-      return fallbackResponse(allowedOrigin, dominant, corsHeaders);
+      throw new Error('API returned ' + result.status);
     }
 
     const text = (result.body.content && result.body.content[0] && result.body.content[0].text)
       ? result.body.content[0].text.trim() : '';
 
-    if (!text) {
-      console.error('Empty response from Claude');
-      return fallbackResponse(allowedOrigin, dominant, corsHeaders);
-    }
+    if (!text) throw new Error('Empty response');
 
+    const clean = text.replace(/```json|```/g, '').trim();
+    return JSON.parse(clean);
+  }
+
+  try {
     let parsed;
     try {
-      const clean = text.replace(/```json|```/g, '').trim();
-      parsed = JSON.parse(clean);
-    } catch(e) {
-      console.error('JSON parse failed:', text);
-      return fallbackResponse(allowedOrigin, dominant, corsHeaders);
+      parsed = await callClaude();
+    } catch(firstErr) {
+      console.log('First attempt failed:', firstErr.message, '— retrying');
+      parsed = await callClaude(); // one retry
     }
+
+    if (!parsed.reflectionLine) throw new Error('No reflectionLine in response');
 
     return {
       statusCode: 200,
       headers: corsHeaders,
       body: JSON.stringify({
-        reflectionLine: parsed.reflectionLine || getFallbackReflection(dominant),
+        reflectionLine: parsed.reflectionLine,
         beforeLine: parsed.beforeLine || getFallbackBeforeLine(dominant),
       }),
     };
 
   } catch(err) {
-    console.error('generate-reflection error:', err);
+    console.error('generate-reflection failed after retry:', err.message);
+    // Only reach fallbacks if Claude is completely unreachable
     return fallbackResponse(allowedOrigin, dominant, corsHeaders);
   }
 };
 
+// ── FALLBACKS ─────────────────────────────────────────────────────────────────
+// These only fire if the API is completely unreachable (network failure etc.)
+// They are held to the same standard as Claude-generated lines.
+// Specific. No travel. No therapy. No motivation.
+
 function getFallbackReflection(dominant) {
   const lines = {
     stay: [
+      'the sound confirmed you were already where you needed to be',
+      'you held the weight without trying to move it',
+      'staying was the whole decision',
       'you know exactly where you are right now',
-      'staying is not the same as waiting',
-      'you held the moment without trying to name it',
     ],
     move: [
-      'something moved through you that was not ready to wait',
-      'you did not plan to go there but you went',
-      'the answer came faster than the question',
+      'the resistance was real and you moved through it anyway',
+      'something shifted before you decided it would',
+      'the sound found you mid-motion and confirmed the direction',
+      'the answer came before the question finished forming',
     ],
     open: [
-      'you were not looking for that and you found it anyway',
+      'the sound opened something that did not have a name yet',
+      'you were not ready for that and it came anyway',
+      'something arrived that was not in the room before',
       'the recognition happened before the explanation',
-      'something got in that you did not open the door for',
     ],
     mixed: [
-      'you were somewhere between and you held it honestly',
-      'not every session resolves and this one did not need to',
+      'you were in more than one place at once and held it',
+      'the sound confirmed something that was not finished resolving',
+      'you held more than one direction and neither was wrong',
     ],
   };
   const options = lines[dominant] || lines.open;
@@ -267,10 +307,22 @@ function getFallbackReflection(dominant) {
 
 function getFallbackBeforeLine(dominant) {
   const lines = {
-    stay: ['last time you stayed and it was the right call', 'last time the stillness was the whole thing'],
-    move: ['last time something was already in motion before you arrived', 'last time you chose forward without knowing where it went'],
-    open: ['last time something got in that you did not plan for', 'last time the recognition happened before the explanation'],
-    mixed: ['last time you were somewhere between and you held it honestly'],
+    stay: [
+      'last time the sound confirmed what you were already holding',
+      'last time staying was the whole decision',
+    ],
+    move: [
+      'last time something in you was already in motion before you arrived',
+      'last time the sound found you mid-motion and confirmed the direction',
+    ],
+    open: [
+      'last time something arrived that was not in the room before',
+      'last time the sound opened something that did not have a name yet',
+    ],
+    mixed: [
+      'last time you held more than one direction at once',
+      'last time the sound confirmed something still resolving',
+    ],
   };
   const options = lines[dominant] || lines.open;
   return options[Math.floor(Math.random() * options.length)];
