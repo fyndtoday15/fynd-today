@@ -88,6 +88,7 @@ Not poetic. Not metaphorical. Not clinical. Just honest and specific to this tra
 
 Length: one complete thought. 6-12 words. Long enough to feel true, short enough to land immediately.
 
+Present tense only — everything happening right now, not past or future.
 Lowercase. No punctuation at the end.
 
 WHAT MAKES A GOOD STATEMENT PAIR:
@@ -197,20 +198,20 @@ Research this track carefully. Write the two recognition statements for someone 
 // Written to the same standard — natural, specific, plausible.
 const FALLBACK_PAIRS = [
   [
-    'i sat with it instead of trying to move through it',
-    'something shifted and i let it',
+    'i am sitting with it instead of trying to move through it',
+    'something is shifting and i am letting it',
   ],
   [
-    'i recognized something i had been holding without naming it',
-    'it moved something that was ready to go',
+    'i am recognizing something i have been holding without naming it',
+    'something is moving that is ready to go',
   ],
   [
-    'i stayed in the weight of it',
-    'i felt myself catch up to something i was already reaching for',
+    'i am staying in the weight of it',
+    'i am catching up to something i have been reaching for',
   ],
   [
-    'i stopped trying to figure out where i was and stayed there',
-    'it pushed something forward that had been sitting still',
+    'i am not trying to figure out where i am — just staying here',
+    'something is pushing forward that has been sitting still',
   ],
 ];
 
