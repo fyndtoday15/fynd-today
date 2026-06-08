@@ -388,6 +388,14 @@ html, body {
   opacity: 1;
   pointer-events: all;
 }
+.listen-stmts-track {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--dimmer);
+  text-align: center;
+  margin-bottom: 8px;
+}
 .listen-stmts-prompt {
   font-size: 10px;
   letter-spacing: 0.2em;
@@ -797,6 +805,22 @@ html, body {
   transition: color 0.2s ease;
 }
 .share-close:active { color: var(--fg); }
+.share-card-stmt {
+  font-size: 12px;
+  color: var(--dim);
+  text-align: center;
+  font-style: italic;
+  line-height: 1.5;
+  padding: 0 8px;
+}
+.share-card-track {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--dimmer);
+  text-align: center;
+  margin-top: 4px;
+}
 .share-copy {
   background: none;
   border: 1px solid rgba(240,237,230,0.18);
@@ -826,6 +850,8 @@ html, body {
   <button class="share-close" id="share-close">×</button>
   <div class="share-card">
     <div class="share-card-line" id="share-card-line"></div>
+    <div class="share-card-stmt" id="share-card-stmt"></div>
+    <div class="share-card-track" id="share-card-track"></div>
     <div class="share-card-mark">FYND TODAY</div>
     <button class="share-copy" id="share-copy">copy to share</button>
   </div>
@@ -848,8 +874,9 @@ html, body {
 <!-- S-ENTRY -->
 <div class="screen" id="s-entry">
   <div class="entry-line" id="el-1">You've heard a song that changed the room.</div>
-  <div class="entry-line" id="el-2">You've felt music move you before you understood why.</div>
-  <div class="entry-line" id="el-3">This is built around that.</div>
+  <div class="entry-line" id="el-2">You've felt music move you</div>
+  <div class="entry-line" id="el-3">before you understood why.</div>
+  <div class="entry-line" id="el-4">This is built around that.</div>
   <div class="entry-paths" id="entry-paths">
     <button class="path-btn" id="btn-search">Find a track</button>
     <div class="path-sep">or</div>
@@ -885,11 +912,12 @@ html, body {
     <div class="listen-title" id="listen-title"></div>
     <div class="listen-artist" id="listen-artist"></div>
   </div>
-  <button class="listen-stop" id="listen-stop">stop for now</button>
+  <button class="listen-stop" id="listen-stop">← back</button>
 
   <!-- Statements overlay — appears at 30s while track still plays -->
   <div class="listen-stmts" id="listen-stmts">
-    <div class="listen-stmts-prompt">what did the sound do?</div>
+    <div class="listen-stmts-track" id="listen-stmts-track"></div>
+    <div class="listen-stmts-prompt">what is happening right now?</div>
     <button class="listen-stmt-btn" id="listen-stmt-a"></button>
     <button class="listen-stmt-btn" id="listen-stmt-b"></button>
     <button class="listen-stmt-neither" id="listen-stmt-neither">neither</button>
@@ -1062,15 +1090,15 @@ function init() {
 function showEntry() {
   show('s-entry');
   // Reset lines
-  ['el-1','el-2','el-3'].forEach(function(id) {
+  ['el-1','el-2','el-3','el-4'].forEach(function(id) {
     var el = document.getElementById(id);
     if (el) el.classList.remove('show');
   });
   var ep = document.getElementById('entry-paths');
   if (ep) ep.classList.remove('show');
 
-  // Animate in
-  ['el-1','el-2','el-3'].forEach(function(id, i) {
+  // Animate in — each line gets its own fade
+  ['el-1','el-2','el-3','el-4'].forEach(function(id, i) {
     setTimeout(function() {
       var el = document.getElementById(id);
       if (el) el.classList.add('show');
@@ -1079,7 +1107,7 @@ function showEntry() {
   setTimeout(function() {
     var ep2 = document.getElementById('entry-paths');
     if (ep2) ep2.classList.add('show');
-  }, 300 + 3 * 900);
+  }, 300 + 4 * 900);
 }
 
 function showBefore() {
@@ -1275,6 +1303,7 @@ function playYouTube(ytId) {
       modestbranding: 1,
       rel: 0,
       playsinline: 1,
+      iv_load_policy: 3,
       origin: window.location.origin,
     },
     events: {
@@ -1333,6 +1362,12 @@ function showStatementsOverlay() {
 
   document.getElementById('listen-stmt-a').textContent = pair[0];
   document.getElementById('listen-stmt-b').textContent = pair[1];
+
+  // Show track name on overlay
+  var trackLabel = document.getElementById('listen-stmts-track');
+  if (trackLabel) {
+    trackLabel.textContent = sess.trackTitle + (sess.trackArtist ? ' — ' + sess.trackArtist : '');
+  }
 
   sess.choiceTime = Date.now();
 
@@ -1650,7 +1685,20 @@ function showEmail() {
 // ── SHARE ─────────────────────────────────────────────────────────────────────
 function showShare() {
   if (!sess.reflectionLine) return;
+
   document.getElementById('share-card-line').textContent = sess.reflectionLine;
+
+  var stmtEl = document.getElementById('share-card-stmt');
+  if (stmtEl) {
+    stmtEl.textContent = (sess.chosenStatement && sess.chosenStatement !== 'neither')
+      ? '"' + sess.chosenStatement + '"' : '';
+  }
+  var trackEl = document.getElementById('share-card-track');
+  if (trackEl) {
+    trackEl.textContent = sess.trackTitle
+      ? sess.trackTitle + (sess.trackArtist ? ' — ' + sess.trackArtist : '') : '';
+  }
+
   document.getElementById('share-overlay').classList.add('show');
 }
 
@@ -1785,7 +1833,16 @@ function bindEvents() {
     document.getElementById('share-overlay').classList.remove('show');
   });
   document.getElementById('share-copy').addEventListener('click', function() {
-    var text = sess.reflectionLine + '\n\nfyndtoday.com';
+    // Build shareable text: reflection + what they chose + track + brand
+    var parts = [sess.reflectionLine];
+    if (sess.chosenStatement && sess.chosenStatement !== 'neither') {
+      parts.push('\n"' + sess.chosenStatement + '"');
+    }
+    if (sess.trackTitle) {
+      parts.push('\n' + sess.trackTitle + (sess.trackArtist ? ' — ' + sess.trackArtist : ''));
+    }
+    parts.push('\n\nfyndtoday.com');
+    var text = parts.join('\n');
     var btn = document.getElementById('share-copy');
     if (navigator.share) {
       navigator.share({ text: text }).catch(function() {});
