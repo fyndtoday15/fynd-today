@@ -154,11 +154,13 @@ Open — the sound shifted something. Recognition is still occurring. Space just
 Mixed — the sound landed somewhere between. Hold the tension.
 
 THE VOICE:
+Present tense only — everything is happening right now, not past, not future.
 Lowercase. No punctuation at the end. Under 12 words.
 Direct. Specific. Quiet. Like someone who noticed something and said it once.
 
 HARD RULES — every line fails if any of these are true:
 1. Mentions the track, artist, music, sound, listening, songs — NEVER. The line is about the person, not the music.
+0. Uses past or future tense — NEVER. Everything is present tense. Not "you held" but "you are holding". Not "something shifted" but "something is shifting".
 2. Uses: feel, feeling, emotion, mood, vibe, energy, journey, experience, healing, growth, space, deeper, beautiful, frame, break, shatter, crack
 3. Motivational — "keep going", "you're ready", "you've got this", "you're stronger"
 4. Therapeutic — "you've been carrying", "you needed that", "give yourself permission", "honor"
@@ -295,27 +297,27 @@ Write the reflection line and the before line now.`;
 function getFallbackReflection(dominant) {
   const lines = {
     stay: [
-      'the sound confirmed you were already where you needed to be',
-      'you held the weight without trying to move it',
-      'staying was the whole decision',
-      'you know exactly where you are right now',
+      'you are exactly where you need to be right now',
+      'you are holding the weight without trying to move it',
+      'staying is the whole decision',
+      'you know where you are and you are staying there',
     ],
     move: [
-      'the resistance was real and you moved through it anyway',
-      'something shifted before you decided it would',
-      'the sound found you mid-motion and confirmed the direction',
-      'the answer came before the question finished forming',
+      'the resistance is real and you are moving through it anyway',
+      'something is shifting before you decide it should',
+      'you are already moving before you know it',
+      'you are catching up to something you have been reaching for',
     ],
     open: [
-      'the sound opened something that did not have a name yet',
-      'you were not ready for that and it came anyway',
-      'something arrived that was not in the room before',
-      'the recognition happened before the explanation',
+      'you are noticing something that does not have a category yet',
+      'neither direction is wrong — something else is happening',
+      'something is changing that you cannot name yet and that is the whole thing',
+      'you are somewhere the two options cannot reach',
     ],
     mixed: [
-      'you were in more than one place at once and held it',
-      'the sound confirmed something that was not finished resolving',
-      'you held more than one direction and neither was wrong',
+      'you are in more than one place at once and holding it',
+      'something is still resolving and you are holding it',
+      'you are carrying more than one direction and neither is wrong',
     ],
   };
   const options = lines[dominant] || lines.open;
@@ -323,22 +325,23 @@ function getFallbackReflection(dominant) {
 }
 
 function getFallbackBeforeLine(dominant) {
+  // Before lines intentionally reference the previous session
   const lines = {
     stay: [
-      'last time the sound confirmed what you were already holding',
+      'last time something in you held still and it was the right call',
       'last time staying was the whole decision',
     ],
     move: [
-      'last time something in you was already in motion before you arrived',
-      'last time the sound found you mid-motion and confirmed the direction',
+      'last time something in you was already moving before you arrived',
+      'last time you moved through resistance that was real',
     ],
     open: [
-      'last time something arrived that was not in the room before',
-      'last time the sound opened something that did not have a name yet',
+      'last time something shifted that neither option could name',
+      'last time you were somewhere the two options could not reach',
     ],
     mixed: [
       'last time you held more than one direction at once',
-      'last time the sound confirmed something still resolving',
+      'last time something was still resolving and you held it',
     ],
   };
   const options = lines[dominant] || lines.open;
