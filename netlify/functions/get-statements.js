@@ -48,7 +48,6 @@ exports.handler = async function(event, context) {
   if (event.httpMethod === 'OPTIONS') {
     return { statusCode: 200, headers: corsHeaders, body: '' };
   }
-
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: 'Method Not Allowed' };
   }
@@ -59,69 +58,85 @@ exports.handler = async function(event, context) {
   }
 
   let data;
-  try {
-    data = JSON.parse(event.body);
-  } catch(e) {
-    return { statusCode: 400, body: 'Invalid JSON' };
-  }
+  try { data = JSON.parse(event.body); }
+  catch(e) { return { statusCode: 400, body: 'Invalid JSON' }; }
 
   const { title = '', artist = '' } = data;
-
   if (!title && !artist) {
     return fallbackResponse(allowedOrigin, corsHeaders);
   }
 
-  // ── SYSTEM PROMPT ─────────────────────────────────────────────────────────
-  // Claude researches the specific track and writes two statements
-  // that are structurally true to what that song actually does to people.
-  // Not mood labels. Not genre descriptions. Felt directions.
-  const systemPrompt = `You are working for FYND TODAY — a music-powered recognition system built around three positions: Stay, Move, and Open.
+  const systemPrompt = `You are working for FYND TODAY — a music-powered recognition system.
 
-Your job: research a specific track and write TWO statements that describe what that track structurally does to a person while listening. These statements appear on screen after the track plays. The person picks the one that is more true for them right now — or neither.
+After someone listens to a track, two statements appear on screen. The person picks whichever one is more true for them right now — or neither.
 
-THE THREE POSITIONS (internal reference only — never use these words in output):
-— Stay: the track holds the listener still. Something settles. Stillness confirmed.
-— Move: the track pulls the listener forward or through something. Momentum confirmed.
-— Open: the track shifts something that wasn't there before. A door. Space. Noticing.
+These are NOT descriptions of the music. They are descriptions of what can happen inside a person while listening to this specific track. The person reads them and one of them either fits or it doesn't. That recognition is the whole point.
 
-YOUR TWO STATEMENTS:
-Statement A should lean toward Stay — something that grounds, settles, holds, remains.
-Statement B should lean toward Move — something that pulls, lifts, propels, shifts forward.
+TWO POSITIONS THE STATEMENTS REPRESENT:
+Statement A — something settled, held still, stayed, grounded. The person remained where they were.
+Statement B — something moved, shifted forward, lifted, or pushed through. The person was pulled somewhere.
 
-The person picking neither implies Open — the track opened something that neither statement captures.
+If neither fits — that's the third option. Something opened that these two can't name.
 
-RULES:
-— Research the actual track. Know its tempo, texture, tone, energy arc, lyrical direction if any.
-— Write from what the track structurally DOES — not what it is about or what genre it belongs to.
-— Both statements must be in first person: "i felt..." or "something..."
-— Each statement: 5-8 words maximum. Short. Landed. No trailing off.
-— Lowercase. No punctuation at the end.
-— Never use: emotion, mood, feel, vibe, energy, journey, healing, space, beautiful, amazing
-— Never describe the music itself — describe what happens to the person
-— Never be so generic the statements could apply to any track
-— The statements should feel like they were written for THIS track specifically
-— Both must be genuinely plausible responses to this track — not one obviously right, one obviously wrong
+HOW TO WRITE THEM:
+Research the track. Know its tempo, texture, tone, the arc of how it builds or doesn't build, whether it holds space or creates momentum.
 
-EXAMPLES for a slow, heavy, grounding track:
-A: "something in me stopped moving"
-B: "i felt the weight shift forward"
+Write two statements that a real person could genuinely feel after listening to that specific track. Both must be plausible — not one obviously right and one obviously wrong. The track should be able to produce either response depending on where the person is that day.
 
-EXAMPLES for a building, forward-moving track:
-A: "i stayed exactly where i was"
-B: "something started pulling me through"
+Write in plain, natural language. First person. How a person actually talks.
+Not poetic. Not metaphorical. Not clinical. Just honest and specific to this track.
 
-EXAMPLES for an unexpected, textured track:
-A: "it held me where i already was"
-B: "i moved somewhere i didn't plan"
+Length: one complete thought. 6-12 words. Long enough to feel true, short enough to land immediately.
 
-Respond in JSON only:
+Lowercase. No punctuation at the end.
+
+WHAT MAKES A GOOD STATEMENT PAIR:
+— Both feel like real things a person could think or say after this track
+— They are clearly different directions — one settling, one moving
+— Neither one sounds like a lyric, a caption, or a motivational quote
+— A person reading them immediately knows which one fits (or that neither does)
+— They are specific enough that you could not swap them in for a completely different track
+
+WHAT TO AVOID:
+— Metaphors about places, travel, destinations, doors, paths
+— The words: journey, space, heal, beautiful, deep, vibe, energy
+— Describing the music — never say what the song does, say what the person experienced
+— Anything that sounds like a therapy prompt or an Instagram caption
+— Fragments that feel incomplete
+— Both statements leaning the same direction
+— Assigning specific emotional content — never name what the weight IS, what hurt, what was lost
+  The track tells you the DIRECTION (settling vs moving). The person brings the CONTENT.
+  Right: "i sat with what i was carrying and didn't try to put it down" — direction without content
+  Wrong: "i sat with something that hurt and didn't try to fix it" — assigns emotional content
+  The statement must work for someone who brought grief AND for someone who brought anticipation.
+  Same direction. Different content. That's the calibration.
+
+STRONG EXAMPLES (study these — this is the register to hit):
+
+For a slow, atmospheric, emotionally heavy track:
+A: "i sat with what i was carrying and didn't try to put it down"
+B: "something in me loosened and i let it go"
+
+For an urgent, driving, forward-moving track:
+A: "i stayed in the tension instead of moving through it"
+B: "i felt myself catch up to something i was already reaching for"
+
+For a track with a lot of space and restraint:
+A: "i stopped trying to figure out where i was and just stayed there"
+B: "it pushed something through that had been sitting still"
+
+For an emotionally direct, confessional track:
+A: "i recognized something i had been holding without naming it"
+B: "it moved something that was ready to go"
+
+Respond in JSON only. No markdown. No explanation:
 {"statementA": "...", "statementB": "..."}`;
 
   const userPrompt = `Track: "${title}" by ${artist}
 
-Research this track. Write the two recognition statements for it now. JSON only.`;
+Research this track carefully. Write the two recognition statements for someone who just listened to it. JSON only.`;
 
-  try {
+  async function callClaude() {
     const result = await httpsPost(
       'https://api.anthropic.com/v1/messages',
       {
@@ -130,57 +145,73 @@ Research this track. Write the two recognition statements for it now. JSON only.
       },
       {
         model: 'claude-sonnet-4-5',
-        max_tokens: 150,
+        max_tokens: 200,
         system: systemPrompt,
         messages: [{ role: 'user', content: userPrompt }],
       }
     );
 
     if (result.status !== 200) {
-      console.error('Claude API error:', result.status, JSON.stringify(result.body));
-      return fallbackResponse(allowedOrigin, corsHeaders);
+      throw new Error('API returned ' + result.status);
     }
 
-    const raw = result.body;
-    const text = (raw.content && raw.content[0] && raw.content[0].text)
-      ? raw.content[0].text.trim()
-      : '';
+    const text = (result.body.content && result.body.content[0] && result.body.content[0].text)
+      ? result.body.content[0].text.trim() : '';
 
-    if (!text) {
-      return fallbackResponse(allowedOrigin, corsHeaders);
-    }
+    if (!text) throw new Error('Empty response');
 
+    const clean = text.replace(/```json|```/g, '').trim();
+    return JSON.parse(clean);
+  }
+
+  try {
     let parsed;
     try {
-      const clean = text.replace(/```json|```/g, '').trim();
-      parsed = JSON.parse(clean);
-    } catch(e) {
-      console.error('JSON parse failed:', text);
-      return fallbackResponse(allowedOrigin, corsHeaders);
+      parsed = await callClaude();
+    } catch(firstErr) {
+      console.log('First attempt failed, retrying:', firstErr.message);
+      parsed = await callClaude();
+    }
+
+    if (!parsed.statementA || !parsed.statementB) {
+      throw new Error('Missing statements in response');
     }
 
     return {
       statusCode: 200,
       headers: corsHeaders,
       body: JSON.stringify({
-        statementA: parsed.statementA || FALLBACK_PAIRS[0][0],
-        statementB: parsed.statementB || FALLBACK_PAIRS[0][1],
+        statementA: parsed.statementA,
+        statementB: parsed.statementB,
       }),
     };
 
   } catch(err) {
-    console.error('get-statements error:', err);
+    console.error('get-statements failed:', err.message);
     return fallbackResponse(allowedOrigin, corsHeaders);
   }
 };
 
 // ── FALLBACKS ─────────────────────────────────────────────────────────────────
+// Only fire if API completely unreachable.
+// Written to the same standard — natural, specific, plausible.
 const FALLBACK_PAIRS = [
-  ['something in me got quieter', 'something started moving'],
-  ['i felt held where i was', 'i felt pulled somewhere'],
-  ['it settled something', 'it shifted something'],
-  ['i stayed inside it', 'it took me somewhere'],
-  ['something in me slowed', 'something in me lifted'],
+  [
+    'i sat with it instead of trying to move through it',
+    'something shifted and i let it',
+  ],
+  [
+    'i recognized something i had been holding without naming it',
+    'it moved something that was ready to go',
+  ],
+  [
+    'i stayed in the weight of it',
+    'i felt myself catch up to something i was already reaching for',
+  ],
+  [
+    'i stopped trying to figure out where i was and stayed there',
+    'it pushed something forward that had been sitting still',
+  ],
 ];
 
 function fallbackResponse(allowedOrigin, corsHeaders) {
