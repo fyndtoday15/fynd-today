@@ -381,8 +381,8 @@ html, body {
   opacity: 0;
   pointer-events: none;
   transition: opacity 1.2s ease;
-  background: rgba(10,10,10,0.85);
-  z-index: 20;
+  background: #0a0a0a;
+  z-index: 30;
 }
 .listen-stmts.show {
   opacity: 1;
@@ -1336,6 +1336,16 @@ function showStatementsOverlay() {
 
   sess.choiceTime = Date.now();
 
+  // Hide listen screen elements underneath so nothing bleeds through
+  var dot = document.getElementById('pulse-dot');
+  var info = document.getElementById('track-info');
+  var stop = document.getElementById('listen-stop');
+  var tag = document.getElementById('curated-tag');
+  if (dot) dot.style.opacity = '0';
+  if (info) info.style.opacity = '0';
+  if (stop) stop.style.opacity = '0';
+  if (tag) tag.style.opacity = '0';
+
   // Fade in the overlay
   stmtWrap.classList.add('show');
 }
@@ -1379,34 +1389,22 @@ function handleListenChoice(position, btnEl) {
     sess.chosenStatement = 'neither'; // open position
   }
 
-  // Fade audio out gracefully over 1.5s while screen transitions
+  // Don't fade audio yet — music keeps playing through reflection appearing
+  // Audio fades AFTER reflection line is visible (handled in goReflection)
   clearTimeout(sess.recognitionTimer);
   clearTimeout(sess.stopTimer);
   sess.pendingChoice = position;
 
-  if (sess.ytPlayer && typeof sess.ytPlayer.setVolume === 'function') {
-    var vol = 100;
-    var fadeInterval = setInterval(function() {
-      vol -= 5;
-      if (vol <= 0) {
-        clearInterval(fadeInterval);
-        try { sess.ytPlayer.stopVideo(); } catch(e) {}
-        try { sess.ytPlayer.setVolume(100); } catch(e) {} // reset for next track
-      } else {
-        try { sess.ytPlayer.setVolume(vol); } catch(e) {}
-      }
-    }, 75); // 100/5 steps * 75ms = 1500ms fade
-  }
-
-  // Go to recognition after fade starts (not waits for full fade)
-  setTimeout(function() {
-    goRecognitionWithChoice(position);
-  }, 600);
+  // Go straight to recognition/reflection — no audio fade yet
+  goRecognitionWithChoice(position);
 }
 
 // ── RECOGNITION ───────────────────────────────────────────────────────────────
 function goRecognitionWithChoice(position) {
-  stopAudio();
+  // Don't stop audio here — music plays through to reflection screen
+  clearTimeout(sess.recognitionTimer);
+  clearTimeout(sess.stopTimer);
+  document.getElementById('pulse-dot').classList.remove('active');
 
   // For curated tracks — reveal title/artist
   show('s-recognition');
@@ -1513,6 +1511,23 @@ function confirmChoice(position) {
 }
 
 // ── REFLECTION ────────────────────────────────────────────────────────────────
+function fadeAudioOut() {
+  // Fade audio out after reflection appears — music plays through the transition
+  if (sess.ytPlayer && typeof sess.ytPlayer.setVolume === 'function') {
+    var vol = 100;
+    var fadeInterval = setInterval(function() {
+      vol -= 5;
+      if (vol <= 0) {
+        clearInterval(fadeInterval);
+        try { sess.ytPlayer.stopVideo(); } catch(e) {}
+        try { sess.ytPlayer.setVolume(100); } catch(e) {} // reset volume for next track
+      } else {
+        try { sess.ytPlayer.setVolume(vol); } catch(e) {}
+      }
+    }, 75); // ~1.5s fade
+  }
+}
+
 function goReflection() {
   show('s-reflection');
 
@@ -1520,6 +1535,9 @@ function goReflection() {
   var acts = document.getElementById('reflection-actions');
   txt.classList.remove('show');
   acts.classList.remove('show');
+
+  // Music still playing — fade it out now that reflection screen is showing
+  setTimeout(function() { fadeAudioOut(); }, 400);
 
   // Silence 20% of time after first track (point 3)
   var doSilence = sess.trackCount > 1 && Math.random() < 0.2;
