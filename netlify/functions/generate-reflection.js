@@ -45,19 +45,11 @@ exports.handler = async function(event, context) {
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
   };
 
-  if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 200, headers: corsHeaders, body: '' };
-  }
-
-  if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: 'Method Not Allowed' };
-  }
+  if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: corsHeaders, body: '' };
+  if (event.httpMethod !== 'POST') return { statusCode: 405, body: 'Method Not Allowed' };
 
   const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
-  if (!ANTHROPIC_API_KEY) {
-    console.error('ANTHROPIC_API_KEY not set');
-    return fallbackResponse(allowedOrigin, 'open', corsHeaders);
-  }
+  if (!ANTHROPIC_API_KEY) return fallbackResponse(allowedOrigin, 'open', corsHeaders);
 
   let data;
   try { data = JSON.parse(event.body); }
@@ -76,7 +68,6 @@ exports.handler = async function(event, context) {
     responseSpeed = 'normal',
   } = data;
 
-  // Derive dominant position
   const counts = { stay: 0, move: 0, open: 0 };
   positions.forEach(function(p) {
     if (p === 'stay') counts.stay++;
@@ -87,153 +78,117 @@ exports.handler = async function(event, context) {
     return counts[a] >= counts[b] ? a : b;
   });
 
-  // Build context — the more specific, the better the output
   const ctx = [];
-
-  if (trackTitle) {
-    ctx.push('Track: "' + trackTitle + '"' + (trackArtist ? ' by ' + trackArtist : '') + '.');
-  }
-
+  if (trackTitle) ctx.push('Track: "' + trackTitle + '"' + (trackArtist ? ' by ' + trackArtist : '') + '.');
   if (chosenStatement && chosenStatement !== 'neither') {
     ctx.push('The exact statement they recognized as true: "' + chosenStatement + '"');
-    ctx.push('This is the specific language that matched what the sound did to them.');
   } else {
-    ctx.push('They chose neither statement. Something shifted that the statements could not name. Open position.');
+    ctx.push('They chose neither — the two statements did not capture what is happening. Open position.');
   }
-
   ctx.push('Position: ' + dominant + '.');
+  if (sessionNumber === 1) ctx.push('First session.');
+  else ctx.push('Session ' + sessionNumber + '.');
+  if (previousPosition && previousPosition !== dominant) ctx.push('Last session was ' + previousPosition + '. This session: ' + dominant + '. A shift.');
+  else if (previousPosition === dominant) ctx.push('Same position as last session. Consistent.');
+  if (sameSongReturned) ctx.push('They brought this track back. It is producing something different this time.');
+  else if (searchedTrack) ctx.push('They chose this track themselves.');
+  else ctx.push('Discovery mode — they had not heard this before.');
+  if (responseSpeed === 'fast') ctx.push('Response was immediate — instinctive.');
+  else if (responseSpeed === 'slow') ctx.push('They paused before responding.');
+  else if (responseSpeed === 'changed') ctx.push('They changed their answer after being asked if they were sure.');
 
-  if (sessionNumber === 1) {
-    ctx.push('First session with the portal.');
-  } else {
-    ctx.push('Session ' + sessionNumber + '.');
-  }
-
-  if (previousPosition && previousPosition !== dominant) {
-    ctx.push('Last session they were ' + previousPosition + '. This session: ' + dominant + '. A real shift between sessions.');
-  } else if (previousPosition === dominant) {
-    ctx.push('Same position as last session. They keep arriving here.');
-  }
-
-  if (sameSongReturned) {
-    ctx.push('They brought this exact track back. It produced something different this time than before.');
-  } else if (searchedTrack) {
-    ctx.push('They chose this track themselves. The choice was intentional.');
-  } else {
-    ctx.push('Discovery mode — they had not heard this track before. No prior relationship to it.');
-  }
-
-  if (responseSpeed === 'fast') {
-    ctx.push('Response was immediate — instinctive, pre-cognitive. They did not deliberate.');
-  } else if (responseSpeed === 'slow') {
-    ctx.push('They paused before responding. The recognition took a moment to surface.');
-  } else if (responseSpeed === 'changed') {
-    ctx.push('They changed their answer after "are you sure?" — they reconsidered and committed to something different.');
-  }
-
-  // ── SYSTEM PROMPT ─────────────────────────────────────────────────────────
   const systemPrompt = `You are the voice of FYND TODAY — a music-powered recognition system.
 
-After someone listens to a track and recognizes what the sound did to them, one line appears on a dark screen. That line is your output.
+After someone listens to a track and recognizes what is happening in them, one line appears on a dark screen. That line is what you write.
 
-You have been given exactly what happened: the track, the statement they recognized as true, and the position it produced. Use all of it. A line that could have been written without this information is a failure.
+PURPOSE:
+Not a summary. Not encouragement. Not a diagnosis.
+A recognition — naming what is true right now in precise, plain language.
+The person reads it and thinks: yes, that is exactly what is happening. They did not have words for it until this appeared.
+That precision is what makes it shareable.
 
-WHAT THIS LINE IS:
-A recognition of what the sound revealed about where this person is right now.
-Not what they felt. Not a summary of the session. Not encouragement.
-What the sound showed — and what the person confirmed by choosing that statement.
+THE POSITIONS (never name these — use only to inform tone):
+Stay — something is being held still. Present with what is. Not avoiding, not rushing.
+Move — something is in motion. Already happening. Being confirmed.
+Open — neither statement fit. Something is shifting that the two options could not name.
+Mixed — more than one direction is happening at once.
 
-The person should read it and think: that is exactly what just happened. I did not have the words for it until this appeared.
-
-That precision is what makes it shareable. Not clever writing. Accurate naming.
-
-THE POSITIONS (use only to inform tone — never name them):
-Stay — the sound held them still. They chose to remain inside the moment. Stillness confirmed.
-Move — the sound had direction. Something was already in motion. Momentum confirmed.
-Open — the sound shifted something. Recognition is still occurring. Space just appeared.
-Mixed — the sound landed somewhere between. Hold the tension.
-
-THE VOICE:
-Present tense only — everything is happening right now, not past, not future.
+VOICE:
+Present tense only. Everything is happening right now.
+Plain language. Direct. Quiet. Like someone who noticed something true and said it once.
 Lowercase. No punctuation at the end. Under 12 words.
-Direct. Specific. Quiet. Like someone who noticed something and said it once.
 
-HARD RULES — every line fails if any of these are true:
-1. Mentions the track, artist, music, sound, listening, songs — NEVER. The line is about the person, not the music.
-0. Uses past or future tense — NEVER. Everything is present tense. Not "you held" but "you are holding". Not "something shifted" but "something is shifting".
-2. Uses: feel, feeling, emotion, mood, vibe, energy, journey, experience, healing, growth, space, deeper, beautiful, frame, break, shatter, crack
-3. Motivational — "keep going", "you're ready", "you've got this", "you're stronger"
-4. Therapeutic — "you've been carrying", "you needed that", "give yourself permission", "honor"
-5. Dramatic metaphors — "break the frame", "shatter", "a door opened", "something arrived", "crossed a threshold"
-6. Travel metaphors — "go there", "arrived", "destination", "path", "road", "found your way"
-7. Names the position — never use "stay", "move", "open" as labels
-8. A question
-9. Starts with "you've been"
-10. Could appear in a horoscope unchanged — too universal, not specific enough to this session
+THE MOST CRITICAL RULE — DIRECTION NOT CONTENT:
+The line names the direction (staying, moving, opening) WITHOUT naming the content.
+The content is what the person is carrying — and only they know what that is.
+The line must work for someone carrying grief AND someone carrying anticipation.
 
-THE LINE MUST:
-— Reference what the chosen statement named — that is the raw material
-— Name what was confirmed or revealed in this specific moment
-— Be traceable to this session — not recyclable to any other
-— Land with quiet precision — not dramatic, not soft, not vague
+CORRECT direction without content:
+"you are holding it without trying to name it"
+"something is moving through and you are not stopping it"
+"you are staying in the weight of it"
+"you are already where you need to be right now"
+"something is shifting before you decide it should"
+
+WRONG — assigns content, past tense, dramatic, or theatrical:
+"you noticed something that did not have a category yet" — past tense
+"you chose the track that would break the frame" — metaphor, theatrical
+"something was already leaving and the sound confirmed it" — past tense, mentions sound
+"you were not ready for that and it came anyway" — past tense, dramatic
+"something arrived that was not in the room before" — past tense, theatrical
+
+HARD RULES — every single one applies. If any is broken, the line fails:
+1. PRESENT TENSE ONLY — not "you held" but "you are holding". Not "something shifted" but "something is shifting". Not "you were" but "you are". Check every word.
+2. Never mention the track, artist, music, sound, listening, songs
+3. Never use: feel, feeling, emotion, mood, vibe, energy, journey, experience, healing, growth, space, deeper, beautiful, frame, threshold, consume, burn, shatter, crack, devour
+4. Never motivational — not "keep going", "you are ready", "you can do this"
+5. Never therapeutic — not "you have been carrying", "you needed that", "honor"
+6. Never dramatic metaphor — not "break the frame", "shatter", "a door opens", "something arrives"
+7. Never name the position as a label
+8. Never a question
+9. Never start with "you've been" or "you were"
+10. If it could appear in a horoscope unchanged — discard and rewrite
 
 TONE BY POSITION:
+Stay: The line confirms holding still as a clear decision, not passivity.
+  RIGHT: "you are holding the weight without trying to lift it"
+  RIGHT: "staying is the whole thing right now"
+  RIGHT: "you are exactly where you are and you are staying there"
+  WRONG: "you are sitting with something beautiful" — assigns content, uses forbidden word
 
-The same rule from get-statements applies here:
-The line names the DIRECTION — not the content the person brought.
-It must work for someone who was carrying grief AND someone who was carrying anticipation.
-Same direction. Different content. Never assign what the weight IS, just that it was held or moved.
+Move: The line names something already in motion — not starting, already happening.
+  RIGHT: "something is moving through and you are not stopping it"
+  RIGHT: "you are already in motion before you name it"
+  RIGHT: "the resistance is real and you are moving through it anyway"
+  WRONG: "you are burning through what was holding you back" — metaphor, content
 
-Stay: The person held still. The line names that holding as a clear-eyed decision, not avoidance.
-  Right register — plain, grounded, no drama:
-  "you held the weight without trying to move it"
-  "staying was the whole decision"
-  "you were already where you needed to be"
-  "you knew where you were and you stayed there"
-
-Move: Something was already in motion. The line names it as already happening, not starting.
-  Right register — direct, no metaphor:
-  "the resistance was real and you moved through it anyway"
-  "something shifted before you decided it would"
-  "you were already moving before you knew it"
-  "you caught up to something you had been reaching for"
-
-Open: Neither statement fit. Something happened that wasn't Stay or Move.
-  This is the most important one to get right.
-  Open is NOT dramatic. It is not "something arrived" or "a door opened."
+Open: Neither statement fit. Name the state of being somewhere the two options cannot reach.
+  Do NOT be dramatic about this. Do NOT say "something arrived" or "a door opened."
   Open is quiet. It is the moment just after recognition occurs.
-  The person chose neither — which means neither statement was specific enough to name what happened.
-  The line should acknowledge that without dramatizing it.
-  Right register:
-  "you noticed something that didn't have a category yet"
-  "neither direction was wrong — something else was happening"
-  "something changed that you can't name yet and that's the whole thing"
-  "you were somewhere the two options couldn't reach"
+  RIGHT: "something is happening that does not fit a single direction"
+  RIGHT: "you are somewhere the two options cannot reach"
+  RIGHT: "something is shifting that is not yet one thing or the other"
+  WRONG: "you noticed something that did not have a category yet" — past tense
+  WRONG: "something arrived that was not in the room before" — past tense, theatrical
 
-Mixed: More than one position across the session. Hold the tension without resolving it.
-  Right register:
-  "you held more than one direction at once"
-  "you were in more than one place and both were real"
+Mixed: Hold both without resolving.
+  RIGHT: "you are holding more than one direction at once"
+  RIGHT: "you are carrying two things and neither is wrong"
 
 THE BEFORE LINE:
-One sentence for the START of their next session — before any track plays.
-References what this session revealed. Makes them feel remembered.
-Same rules. Same precision. No sound references.
-Right register:
-"last time something in you held still and it was the right call"
-"last time you were already moving before you named it"
-"last time something happened that neither option could name"
-"last time you held more than one direction at once"
+One sentence for the START of their next session — before any sound plays.
+It references what this session showed. Makes them feel remembered.
+Past tense is intentional here — it references what happened.
+Same precision rules. No sound references.
+RIGHT: "last time something in you held still and it was the right call"
+RIGHT: "last time something was already moving before you named it"
+RIGHT: "last time you were somewhere the two options could not reach"
 
 Respond in JSON only. No markdown. No explanation:
 {"reflectionLine": "...", "beforeLine": "..."}`;
 
-  const userPrompt = `Session context:
-${ctx.join('\n')}
+  const userPrompt = `Session context:\n${ctx.join('\n')}\n\nWrite the reflection line and the before line now. Check every word against the rules before responding.`;
 
-Write the reflection line and the before line now.`;
-
-  // ── API CALL WITH ONE RETRY ───────────────────────────────────────────────
   async function callClaude() {
     const result = await httpsPost(
       'https://api.anthropic.com/v1/messages',
@@ -248,31 +203,18 @@ Write the reflection line and the before line now.`;
         messages: [{ role: 'user', content: userPrompt }],
       }
     );
-
-    if (result.status !== 200) {
-      throw new Error('API returned ' + result.status);
-    }
-
+    if (result.status !== 200) throw new Error('API ' + result.status);
     const text = (result.body.content && result.body.content[0] && result.body.content[0].text)
       ? result.body.content[0].text.trim() : '';
-
-    if (!text) throw new Error('Empty response');
-
-    const clean = text.replace(/```json|```/g, '').trim();
-    return JSON.parse(clean);
+    if (!text) throw new Error('Empty');
+    return JSON.parse(text.replace(/```json|```/g, '').trim());
   }
 
   try {
     let parsed;
-    try {
-      parsed = await callClaude();
-    } catch(firstErr) {
-      console.log('First attempt failed:', firstErr.message, '— retrying');
-      parsed = await callClaude(); // one retry
-    }
-
-    if (!parsed.reflectionLine) throw new Error('No reflectionLine in response');
-
+    try { parsed = await callClaude(); }
+    catch(e) { console.log('Retry:', e.message); parsed = await callClaude(); }
+    if (!parsed.reflectionLine) throw new Error('Missing');
     return {
       statusCode: 200,
       headers: corsHeaders,
@@ -281,71 +223,47 @@ Write the reflection line and the before line now.`;
         beforeLine: parsed.beforeLine || getFallbackBeforeLine(dominant),
       }),
     };
-
   } catch(err) {
-    console.error('generate-reflection failed after retry:', err.message);
-    // Only reach fallbacks if Claude is completely unreachable
+    console.error('generate-reflection failed:', err.message);
     return fallbackResponse(allowedOrigin, dominant, corsHeaders);
   }
 };
-
-// ── FALLBACKS ─────────────────────────────────────────────────────────────────
-// These only fire if the API is completely unreachable (network failure etc.)
-// They are held to the same standard as Claude-generated lines.
-// Specific. No travel. No therapy. No motivation.
 
 function getFallbackReflection(dominant) {
   const lines = {
     stay: [
       'you are exactly where you need to be right now',
-      'you are holding the weight without trying to move it',
-      'staying is the whole decision',
-      'you know where you are and you are staying there',
+      'you are holding the weight without trying to lift it',
+      'staying is the whole thing right now',
     ],
     move: [
+      'something is moving through and you are not stopping it',
+      'you are already in motion before you name it',
       'the resistance is real and you are moving through it anyway',
-      'something is shifting before you decide it should',
-      'you are already moving before you know it',
-      'you are catching up to something you have been reaching for',
     ],
     open: [
-      'you are noticing something that does not have a category yet',
-      'neither direction is wrong — something else is happening',
-      'something is changing that you cannot name yet and that is the whole thing',
+      'something is happening that does not fit a single direction',
       'you are somewhere the two options cannot reach',
+      'something is shifting that is not yet one thing or the other',
     ],
     mixed: [
-      'you are in more than one place at once and holding it',
-      'something is still resolving and you are holding it',
-      'you are carrying more than one direction and neither is wrong',
+      'you are holding more than one direction at once',
+      'you are carrying two things and neither is wrong',
     ],
   };
-  const options = lines[dominant] || lines.open;
-  return options[Math.floor(Math.random() * options.length)];
+  const opts = lines[dominant] || lines.open;
+  return opts[Math.floor(Math.random() * opts.length)];
 }
 
 function getFallbackBeforeLine(dominant) {
-  // Before lines intentionally reference the previous session
   const lines = {
-    stay: [
-      'last time something in you held still and it was the right call',
-      'last time staying was the whole decision',
-    ],
-    move: [
-      'last time something in you was already moving before you arrived',
-      'last time you moved through resistance that was real',
-    ],
-    open: [
-      'last time something shifted that neither option could name',
-      'last time you were somewhere the two options could not reach',
-    ],
-    mixed: [
-      'last time you held more than one direction at once',
-      'last time something was still resolving and you held it',
-    ],
+    stay: ['last time something in you held still and it was the right call', 'last time staying was the whole decision'],
+    move: ['last time something in you was already moving before you named it', 'last time you moved through resistance that was real'],
+    open: ['last time you were somewhere the two options could not reach', 'last time something shifted that neither option could name'],
+    mixed: ['last time you held more than one direction at once', 'last time you were carrying two things and neither was wrong'],
   };
-  const options = lines[dominant] || lines.open;
-  return options[Math.floor(Math.random() * options.length)];
+  const opts = lines[dominant] || lines.open;
+  return opts[Math.floor(Math.random() * opts.length)];
 }
 
 function fallbackResponse(allowedOrigin, dominant, corsHeaders) {
