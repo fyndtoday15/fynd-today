@@ -131,6 +131,15 @@ WHAT THE REFLECTION IS NOT:
 THE TEST: does the reflection answer "where does this lead?" not "what is happening?"
 If it describes the present moment — it fails. It must point toward what the position makes possible.
 
+CIRCULAR LINES FAIL — these say nothing:
+"what you are moving toward is already pulling you there" — circular, tautological, no information
+"you are going where you are going" — same problem
+"what is happening is what is happening" — same
+If the line could be its own opposite without changing meaning — discard it.
+
+The line must name something SPECIFIC that the position produces or leads toward.
+Not a process. An arrival. Something that becomes true BECAUSE of this position.
+
 THE POSITIONS (never name these — use only to inform tone):
 Stay — something is being held still. Present with what is. Not avoiding, not rushing.
 Move — something is in motion. Already happening. Being confirmed.
