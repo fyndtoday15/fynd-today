@@ -121,11 +121,15 @@ Self-relevance: it confirms who they are right now.
 Social relevance: it expresses something they want others to know about them.
 
 WHAT THE REFLECTION IS NOT:
-— Not a restatement of the statement ("you are moving through what has been sitting on you" when they chose a Move statement)
-— Not a description of the past ("you were already past the point...")
+— Not a second recognition — the statement already did that. The reflection does not describe what is happening.
+— Not a restatement ("you are holding the pace when everything else is rushing" when they chose to let something build — that is still observation, not direction)
+— Not a description of the past
 — Not encouragement ("you've got this", "keep going")
 — Not a diagnosis ("you are in a Stay state")
-— Not theatrical or metaphorical ("the frame is breaking", "a door is opening")
+— Not theatrical or metaphorical
+
+THE TEST: does the reflection answer "where does this lead?" not "what is happening?"
+If it describes the present moment — it fails. It must point toward what the position makes possible.
 
 THE POSITIONS (never name these — use only to inform tone):
 Stay — something is being held still. Present with what is. Not avoiding, not rushing.
@@ -174,40 +178,34 @@ HARD RULES — every single one applies. If any is broken, the line fails:
 
 TONE BY POSITION — what the reflection does for each:
 
-Stay: The person is choosing to remain in the moment. The reflection names what that choice makes available.
-  The world pressures people to move, to resolve, to progress. Choosing to stay is an act of agency.
-  The reflection validates that agency and points toward what stillness makes possible.
-  Ask: what becomes available when you stay? What does staying make room for?
-  RIGHT: "you are making room for something that needs time"
-  RIGHT: "staying is how you know what is actually here"
-  RIGHT: "you are present with something that most people move past"
-  RIGHT: "stillness is how you find out what is real"
-  WRONG: "you are holding the weight" — describes what they chose, not what it makes available
-  WRONG: "you know exactly where you are" — too neutral, no direction, not shareable
+Stay: Staying is a choice. The reflection names what that choice is making possible — not what staying feels like.
+  Ask: what will this stillness produce? What opens up because they stayed?
+  RIGHT: "what you are staying for is becoming clearer"
+  RIGHT: "you are making room for what can only arrive slowly"
+  RIGHT: "what you are in is becoming something you can name"
+  RIGHT: "something is clarifying because you are not moving away from it"
+  WRONG: "you are holding the pace when everything else is rushing" — describes the staying, not where it leads
+  WRONG: "you are present with something that most people move past" — observation, not direction
 
-Move: The person is moving through something. The reflection names where that movement is taking them.
-  Not describing the motion — pointing forward. What is the movement making room for?
-  Ask: where does this movement lead? What is becoming possible as they move?
-  RIGHT: "you are making room for what comes next"
-  RIGHT: "something is clearing as you move through it"
-  RIGHT: "you are moving toward something that has been waiting"
-  RIGHT: "you are further into it than you realize"
-  WRONG: "you are in motion and the motion is real" — describes motion, doesn't point forward
-  WRONG: "you are further along than you were letting yourself know" — backward-looking, no direction
+Move: Moving is already happening. The reflection names where it is going — not that it is happening.
+  Ask: what is this movement building toward? What arrives because they moved?
+  RIGHT: "what has been building is about to land"
+  RIGHT: "you are letting it become what it is"
+  RIGHT: "something is arriving that the movement is making room for"
+  RIGHT: "the releasing is making space for what comes in"
+  WRONG: "you are making room for what comes next" — vague, no specific arrival
+  WRONG: "something is clearing as you move through it" — describes the motion, not the destination
 
-Open: Neither statement fit. Something is happening that Stay and Move cannot contain.
-  The reflection names what it means to be in that emerging space — not ambiguity as a problem, but as arrival.
-  Ask: what is this openness making possible that staying or moving could not?
-  RIGHT: "you are in the moment before something becomes what it is"
-  RIGHT: "something is forming that is not finished yet and you are already in it"
-  RIGHT: "you are where the new thing starts before it has a name"
-  RIGHT: "you are ahead of your own understanding and that is exactly right"
-  WRONG: "something is happening that does not fit" — neutral, no direction
-  WRONG: "you are holding something that is still forming" — describes state, not direction
+Open: Neither direction fit. The reflection names what becomes available in that unresolved space.
+  Ask: what can only happen here — in the space between Stay and Move?
+  RIGHT: "something is forming that neither direction could have reached"
+  RIGHT: "what is arriving does not have a name yet and it does not need one"
+  RIGHT: "you are in the only place where this specific thing can happen"
+  WRONG: "you are in the moment before something becomes what it is" — describes the state, not what it produces
 
-Mixed: More than one position is real. The reflection holds the multiplicity as valuable, not conflicting.
-  RIGHT: "you are moving in more than one direction and both are real"
-  RIGHT: "you are in more than one place at once and neither is wrong"
+Mixed: Both directions are real. The reflection confirms that multiplicity as productive.
+  RIGHT: "both of what you are carrying are moving you forward"
+  RIGHT: "you are in more than one place and both are taking you somewhere"
 
 THE BEFORE LINE:
 One sentence for the START of their next session — before any sound plays.
@@ -266,23 +264,23 @@ Respond in JSON only. No markdown. No explanation:
 function getFallbackReflection(dominant) {
   const lines = {
     stay: [
-      'you are making room for something that needs time',
-      'you are present with something that most people move past',
-      'stillness is how you find out what is real',
+      'what you are staying for is becoming clearer',
+      'you are making room for what can only arrive slowly',
+      'something is clarifying because you are not moving away from it',
     ],
     move: [
-      'you are making room for what comes next',
-      'something is clearing as you move through it',
-      'you are further into it than you realize',
+      'what has been building is about to land',
+      'you are letting it become what it is',
+      'the releasing is making space for what comes in',
     ],
     open: [
-      'you are in the moment before something becomes what it is',
-      'you are where the new thing starts before it has a name',
-      'you are ahead of your own understanding and that is exactly right',
+      'something is forming that neither direction could have reached',
+      'what is arriving does not have a name yet and it does not need one',
+      'you are in the only place where this specific thing can happen',
     ],
     mixed: [
-      'you are moving in more than one direction and both are real',
-      'you are in more than one place at once and neither is wrong',
+      'both of what you are carrying are moving you forward',
+      'you are in more than one place and both are taking you somewhere',
     ],
   };
   const opts = lines[dominant] || lines.open;
