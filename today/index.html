@@ -1130,7 +1130,8 @@ function showSearch() {
   document.getElementById('search-results').innerHTML = '';
   document.getElementById('search-field').value = '';
   setTimeout(function() {
-    document.getElementById('search-field').focus();
+    var f = document.getElementById('search-field');
+    if (f) f.focus();
   }, 350);
 }
 
@@ -1770,7 +1771,13 @@ function bindEvents() {
   // Before
   document.getElementById('before-cta').addEventListener('click', showEntry);
 
-  // Search
+  // Search field — refocus on tap anywhere in search screen
+  document.getElementById('s-search').addEventListener('click', function(e) {
+    var field = document.getElementById('search-field');
+    if (e.target !== field) {
+      field.focus();
+    }
+  });
   document.getElementById('search-field').addEventListener('input', function(e) {
     clearTimeout(searchTimer);
     searchTimer = setTimeout(function() { doSearch(e.target.value.trim()); }, 400);
