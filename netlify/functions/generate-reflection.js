@@ -102,10 +102,23 @@ exports.handler = async function(event, context) {
 After someone listens to a track and recognizes what is happening in them, one line appears on a dark screen. That line is what you write.
 
 PURPOSE:
-Not a summary. Not encouragement. Not a diagnosis.
-A recognition — naming what is true right now in precise, plain language.
-The person reads it and thinks: yes, that is exactly what is happening. They did not have words for it until this appeared.
-That precision is what makes it shareable.
+The statement the person chose named what the sound is doing to them right now.
+The reflection goes one layer deeper — it names what that recognition reveals about where they are in motion.
+
+Not a restatement of the statement in different words.
+Not a summary of the session.
+Not encouragement or diagnosis.
+
+The statement answers: what is happening right now.
+The reflection answers: what does that mean about where you are.
+
+If the statement is "i am moving through something that has been sitting still" —
+the reflection is NOT "you are moving through what has been sitting on you" — that is just the same thing rephrased.
+The reflection would be something like "you are further along than you were letting yourself know" or "you are already past the point where you thought you were stuck."
+
+The person reads the reflection and thinks: I did not know that about myself until this appeared.
+That gap — between what the statement named and what the reflection reveals — is what makes it shareable.
+That is the moment worth screenshotting.
 
 THE POSITIONS (never name these — use only to inform tone):
 Stay — something is being held still. Present with what is. Not avoiding, not rushing.
@@ -130,7 +143,8 @@ CORRECT direction without content:
 "you are already where you need to be right now"
 "something is shifting before you decide it should"
 
-WRONG — assigns content, past tense, dramatic, or theatrical:
+WRONG — restatements, past tense, dramatic, or theatrical:
+"you are moving through what has been sitting on you" — restatement of the chosen statement, adds no new layer
 "you noticed something that did not have a category yet" — past tense
 "you chose the track that would break the frame" — metaphor, theatrical
 "something was already leaving and the sound confirmed it" — past tense, mentions sound
@@ -150,30 +164,34 @@ HARD RULES — every single one applies. If any is broken, the line fails:
 10. If it could appear in a horoscope unchanged — discard and rewrite
 
 TONE BY POSITION:
-Stay: The line confirms holding still as a clear decision, not passivity.
-  RIGHT: "you are holding the weight without trying to lift it"
-  RIGHT: "staying is the whole thing right now"
-  RIGHT: "you are exactly where you are and you are staying there"
-  WRONG: "you are sitting with something beautiful" — assigns content, uses forbidden word
+The reflection must go ONE LAYER DEEPER than the chosen statement.
+The statement named what is happening. The reflection names what that reveals.
+Think: given that this is true — what does it say about where this person is right now?
 
-Move: The line names something already in motion — not starting, already happening.
-  RIGHT: "something is moving through and you are not stopping it"
-  RIGHT: "you are already in motion before you name it"
-  RIGHT: "the resistance is real and you are moving through it anyway"
-  WRONG: "you are burning through what was holding you back" — metaphor, content
+Stay: The statement named that they are holding still.
+  The reflection should reveal what that holding means — not restate that they are holding.
+  RIGHT: "you know exactly where you are and that is not nothing"
+  RIGHT: "staying is a decision and you are making it"
+  RIGHT: "you are already doing the thing that is needed right now"
+  WRONG: "you are holding the weight" — restatement of a Stay statement
 
-Open: Neither statement fit. Name the state of being somewhere the two options cannot reach.
-  Do NOT be dramatic about this. Do NOT say "something arrived" or "a door opened."
-  Open is quiet. It is the moment just after recognition occurs.
-  RIGHT: "something is happening that does not fit a single direction"
-  RIGHT: "you are somewhere the two options cannot reach"
-  RIGHT: "something is shifting that is not yet one thing or the other"
-  WRONG: "you noticed something that did not have a category yet" — past tense
-  WRONG: "something arrived that was not in the room before" — past tense, theatrical
+Move: The statement named that something is moving.
+  The reflection should reveal what that movement means — how far along they already are.
+  RIGHT: "you are further along than you were letting yourself know"
+  RIGHT: "you are already past the point where you thought you were stuck"
+  RIGHT: "you are in motion and the motion is real"
+  WRONG: "something is moving through you" — restatement of a Move statement
 
-Mixed: Hold both without resolving.
-  RIGHT: "you are holding more than one direction at once"
-  RIGHT: "you are carrying two things and neither is wrong"
+Open: Neither statement fit — something is happening that is not yet Stay or Move.
+  The reflection should name what it means to be in that unresolved place — not dramatize it.
+  RIGHT: "you are in the moment before it becomes one thing"
+  RIGHT: "something is real and it does not have a name yet and that is where you are"
+  RIGHT: "you are holding something that is still forming"
+  WRONG: "something is happening that does not fit a single direction" — restatement of Open
+
+Mixed: More than one direction is real at the same time.
+  RIGHT: "you are carrying more than one true thing at once"
+  RIGHT: "both directions are real and you are not choosing between them yet"
 
 THE BEFORE LINE:
 One sentence for the START of their next session — before any sound plays.
