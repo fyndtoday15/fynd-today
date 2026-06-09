@@ -50,12 +50,20 @@ exports.handler = async function(event, context) {
 
   try {
     // Search YouTube for music tracks
+    // Smart query: if query looks like artist name only, add 'music' to bias toward songs
+    // If query looks like artist + song, leave as is for accuracy
+    const words = query.trim().split(/\s+/);
+    const searchQuery = words.length <= 2
+      ? query + ' music'
+      : query;
+
     const searchUrl = 'https://www.googleapis.com/youtube/v3/search'
       + '?part=snippet'
-      + '&q=' + encodeURIComponent(query + ' official audio')
+      + '&q=' + encodeURIComponent(searchQuery)
       + '&type=video'
-      + '&videoCategoryId=10'  // Music category
-      + '&maxResults=6'
+      + '&videoCategoryId=10'
+      + '&maxResults=8'
+      + '&relevanceLanguage=en'
       + '&key=' + YOUTUBE_API_KEY;
 
     const res = await fetch(searchUrl);
@@ -79,12 +87,15 @@ exports.handler = async function(event, context) {
     }
 
     // Map to clean track objects
-    const results = ytData.items.map(item => ({
-      id: item.id.videoId,
-      title: cleanTitle(item.snippet.title),
-      artist: item.snippet.channelTitle,
-      thumbnail: item.snippet.thumbnails?.default?.url || '',
-    }));
+    const results = ytData.items
+      .filter(isLikelyMusic)
+      .slice(0, 6)
+      .map(item => ({
+        id: item.id.videoId,
+        title: cleanTitle(item.snippet.title),
+        artist: cleanTitle(item.snippet.channelTitle.replace(/VEVO$/i, '').replace(/- Topic$/i, '').trim()),
+        thumbnail: item.snippet.thumbnails?.default?.url || '',
+      }));
 
     return {
       statusCode: 200,
@@ -102,15 +113,36 @@ exports.handler = async function(event, context) {
   }
 };
 
-// Clean common YouTube title noise
+// Decode HTML entities and clean YouTube title noise
 function cleanTitle(title) {
-  return title
+  // Decode common HTML entities YouTube returns
+  const decoded = title
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/&amp;/gi, '&')
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&nbsp;/gi, ' ');
+
+  return decoded
     .replace(/\(Official (Audio|Video|Music Video|Lyric Video|Visualizer)\)/gi, '')
     .replace(/\[Official (Audio|Video|Music Video|Lyric Video|Visualizer)\]/gi, '')
     .replace(/\(Audio\)/gi, '')
     .replace(/\[Audio\]/gi, '')
-    .replace(/\(Lyrics\)/gi, '')
-    .replace(/\[Lyrics\]/gi, '')
-    .replace(/ft\./gi, 'ft.')
+    .replace(/\(Lyrics?\)/gi, '')
+    .replace(/\[Lyrics?\]/gi, '')
+    .replace(/\(feat\./gi, 'ft.')
+    .replace(/\(ft\./gi, 'ft.')
+    .replace(/\s{2,}/g, ' ')
     .trim();
+}
+
+// Filter out clearly non-music results
+function isLikelyMusic(item) {
+  const title = (item.snippet.title || '').toLowerCase();
+  const channel = (item.snippet.channelTitle || '').toLowerCase();
+  // Exclude obvious non-music: meditation frequencies, subliminal, ASMR, compilations
+  const junk = ['hz', 'subliminal', 'asmr', 'binaural', 'frequency', 'meditation',
+    'sleep music', 'study music', 'compilation', 'mix - topic', 'workout music'];
+  return !junk.some(function(j) { return title.includes(j) || channel.includes(j); });
 }
