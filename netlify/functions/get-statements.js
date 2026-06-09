@@ -82,40 +82,44 @@ Use the track's structural qualities — tempo, texture, weight, whether it buil
 Write in plain natural language. First person. Present tense only.
 One complete thought. 8-12 words. Lowercase. No punctuation at the end.
 
-THE MOST IMPORTANT RULE — DIRECTION NOT CONTENT:
+THE TWO RULES THAT MATTER MOST:
+
+RULE 1 — ANCHORED IN THE LISTENING:
+The statement must feel like it could only come from listening to sound right now.
+Not a thought the person could have anywhere. A recognition that the sound is producing in them.
+Use "it" or "this" to refer to the experience of listening — not to a named feeling or situation.
+
+CORRECT: "i am staying in the pull of it instead of following where it wants to go"
+— "it" is the sound. The person feels the statement is about what listening is producing. Still no content assigned.
+
+CORRECT: "i am letting it move through me instead of trying to hold it still"
+— The "it" is the sound doing something. Direction clear. Content not assigned.
+
+WRONG: "i am staying in something that wants to move faster than i can follow"
+— Could describe a conversation, a relationship, a deadline. No anchor to listening.
+
+WRONG: "i am letting something build that i have been trying to keep steady"
+— This is a thought, not a listening recognition. The sound is absent.
+
+RULE 2 — DIRECTION NOT CONTENT:
 The track tells you the DIRECTION (settling vs moving).
-The person brings the CONTENT (what they are carrying, what the weight is).
-The statement must name the direction WITHOUT naming the content.
+The person brings the CONTENT (what they are carrying).
+The statement names the direction without naming the content.
+Works for someone carrying grief AND someone carrying nothing in particular.
 
-CORRECT: "i am sitting with it instead of trying to move through it"
-— Names the direction (staying). Does not name what "it" is. Works for someone carrying grief. Works for someone carrying anticipation. Works for anyone.
+WRONG: "i am sitting with what is hurting" — names the content
+WRONG: "i am letting myself burn through what is holding me back" — names the content AND uses metaphor
+RIGHT: "i am staying in it instead of pushing through" — direction only, no content
 
-WRONG: "i held still in something that wanted to consume me"
-— Assigns dramatic content ("consume me"). Past tense. Theatrical. Fails.
-
-WRONG: "i am letting myself burn through what is holding me back"
-— Too specific to this track's title/imagery. Assigns content ("holding me back"). Metaphorical.
-
-WRONG: "i am sitting with what is hurting"
-— Names the content (hurt). Not everyone brings hurt to this track.
-
-RIGHT register — study these:
-"i am sitting with it instead of trying to move through it"
-"i am staying in the weight of it without trying to lift it"
-"i am recognizing something i have been carrying without naming it"
-"something is shifting and i am not stopping it"
-"i am moving through something that has been sitting still"
-"i am letting something go that i have been holding"
-
-HARD RULES — if any are broken, rewrite:
-1. Present tense ONLY. Not "i held" — "i am holding". Not "something shifted" — "something is shifting".
-2. No dramatic language — not "consume", "burn", "shatter", "devour", "destroy", "break free"
-3. No metaphors about fire, burning, breaking, cracking, doors, paths, travel
-4. No assigning emotional content — not "hurt", "pain", "fear", "grief", "anger", "loss"
-5. No describing the music — never say what the track does, say what is happening in the person
-6. Both statements must be genuinely plausible for this track — not one obviously right
-7. Statement A must lean toward staying/grounding. Statement B must lean toward moving/releasing.
-8. Neither statement should be so specific it only works for one emotional state
+HARD RULES:
+1. Present tense ONLY
+2. Must feel anchored to the listening experience — "it" or "this" refers to what the sound is doing
+3. No dramatic language — not "consume", "burn", "shatter", "devour", "break free"
+4. No metaphors about fire, burning, breaking, cracking, doors, paths, travel
+5. No assigning emotional content — not "hurt", "pain", "fear", "grief", "loss"
+6. Both statements genuinely plausible for this track — not one obviously right
+7. Statement A leans toward staying/grounding. Statement B leans toward moving/releasing.
+8. Neither so specific it only works for one emotional state
 
 Respond in JSON only. No markdown:
 {"statementA": "...", "statementB": "..."}`;
