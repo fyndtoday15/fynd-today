@@ -873,10 +873,11 @@ html, body {
 
 <!-- S-ENTRY -->
 <div class="screen" id="s-entry">
-  <div class="entry-line" id="el-1">You've heard a song that changed the room.</div>
-  <div class="entry-line" id="el-2">You've felt music move you</div>
-  <div class="entry-line" id="el-3">before you understood why.</div>
-  <div class="entry-line" id="el-4">This is built around that.</div>
+  <div class="entry-line" id="el-1">You've heard a song</div>
+  <div class="entry-line" id="el-2">that changed the room.</div>
+  <div class="entry-line" id="el-3">You've felt music move you</div>
+  <div class="entry-line" id="el-4">before you understood why.</div>
+  <div class="entry-line" id="el-5">This is built around that.</div>
   <div class="entry-paths" id="entry-paths">
     <button class="path-btn" id="btn-search">Find a track</button>
     <div class="path-sep">or</div>
@@ -1090,7 +1091,7 @@ function init() {
 function showEntry() {
   show('s-entry');
   // Reset lines
-  ['el-1','el-2','el-3','el-4'].forEach(function(id) {
+  ['el-1','el-2','el-3','el-4','el-5'].forEach(function(id) {
     var el = document.getElementById(id);
     if (el) el.classList.remove('show');
   });
@@ -1098,16 +1099,16 @@ function showEntry() {
   if (ep) ep.classList.remove('show');
 
   // Animate in — each line gets its own fade
-  ['el-1','el-2','el-3','el-4'].forEach(function(id, i) {
+  ['el-1','el-2','el-3','el-4','el-5'].forEach(function(id, i) {
     setTimeout(function() {
       var el = document.getElementById(id);
       if (el) el.classList.add('show');
-    }, 300 + i * 900);
+    }, 300 + i * 700);
   });
   setTimeout(function() {
     var ep2 = document.getElementById('entry-paths');
     if (ep2) ep2.classList.add('show');
-  }, 300 + 4 * 900);
+  }, 300 + 5 * 700);
 }
 
 function showBefore() {
