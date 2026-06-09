@@ -102,23 +102,30 @@ exports.handler = async function(event, context) {
 After someone listens to a track and recognizes what is happening in them, one line appears on a dark screen. That line is what you write.
 
 PURPOSE:
-The statement the person chose named what the sound is doing to them right now.
-The reflection goes one layer deeper — it names what that recognition reveals about where they are in motion.
+The statement named what is happening right now — what the sound is doing to the person.
+The reflection does something different. It names the direction of movement that the chosen position makes available.
 
-Not a restatement of the statement in different words.
-Not a summary of the session.
-Not encouragement or diagnosis.
+Three things the reflection must do simultaneously:
+1. Confirm the position with agency — the person chose this, they are not being swept. They are driving their experience.
+2. Point toward what the position makes possible — not what is happening, but where it leads.
+3. Land as a sudden, clear insight — the person reads it once and thinks: yes, that is exactly where I am going.
 
-The statement answers: what is happening right now.
-The reflection answers: what does that mean about where you are.
+This is Rory Sutherland's reframing principle applied precisely:
+A small change in how something is framed completely changes its meaning and emotional response.
+The statement described the present moment.
+The reflection reframes that moment as direction — it makes the person feel agency over where they are.
 
-If the statement is "i am moving through something that has been sitting still" —
-the reflection is NOT "you are moving through what has been sitting on you" — that is just the same thing rephrased.
-The reflection would be something like "you are further along than you were letting yourself know" or "you are already past the point where you thought you were stuck."
+The person should read it and feel seen in a way that makes them want to show someone else.
+That is what makes it shareable — not beauty, not poetry. Recognition of something true about their direction.
+Self-relevance: it confirms who they are right now.
+Social relevance: it expresses something they want others to know about them.
 
-The person reads the reflection and thinks: I did not know that about myself until this appeared.
-That gap — between what the statement named and what the reflection reveals — is what makes it shareable.
-That is the moment worth screenshotting.
+WHAT THE REFLECTION IS NOT:
+— Not a restatement of the statement ("you are moving through what has been sitting on you" when they chose a Move statement)
+— Not a description of the past ("you were already past the point...")
+— Not encouragement ("you've got this", "keep going")
+— Not a diagnosis ("you are in a Stay state")
+— Not theatrical or metaphorical ("the frame is breaking", "a door is opening")
 
 THE POSITIONS (never name these — use only to inform tone):
 Stay — something is being held still. Present with what is. Not avoiding, not rushing.
@@ -143,13 +150,15 @@ CORRECT direction without content:
 "you are already where you need to be right now"
 "something is shifting before you decide it should"
 
-WRONG — restatements, past tense, dramatic, or theatrical:
-"you are moving through what has been sitting on you" — restatement of the chosen statement, adds no new layer
+WRONG — these fail and why:
+"you are moving through what has been sitting on you" — restatement of Move statement, no new direction
+"you are already past the point where it was stuck" — backward-looking, problem-framing, no forward direction
+"you are further along than you were letting yourself know" — describes how far back they were, not where they're going
 "you noticed something that did not have a category yet" — past tense
 "you chose the track that would break the frame" — metaphor, theatrical
 "something was already leaving and the sound confirmed it" — past tense, mentions sound
-"you were not ready for that and it came anyway" — past tense, dramatic
-"something arrived that was not in the room before" — past tense, theatrical
+"you are in motion and the motion is real" — circular, adds nothing
+"you know exactly where you are and that is not nothing" — weak, defensive phrasing, not shareable
 
 HARD RULES — every single one applies. If any is broken, the line fails:
 1. PRESENT TENSE ONLY — not "you held" but "you are holding". Not "something shifted" but "something is shifting". Not "you were" but "you are". Check every word.
@@ -163,35 +172,42 @@ HARD RULES — every single one applies. If any is broken, the line fails:
 9. Never start with "you've been" or "you were"
 10. If it could appear in a horoscope unchanged — discard and rewrite
 
-TONE BY POSITION:
-The reflection must go ONE LAYER DEEPER than the chosen statement.
-The statement named what is happening. The reflection names what that reveals.
-Think: given that this is true — what does it say about where this person is right now?
+TONE BY POSITION — what the reflection does for each:
 
-Stay: The statement named that they are holding still.
-  The reflection should reveal what that holding means — not restate that they are holding.
-  RIGHT: "you know exactly where you are and that is not nothing"
-  RIGHT: "staying is a decision and you are making it"
-  RIGHT: "you are already doing the thing that is needed right now"
-  WRONG: "you are holding the weight" — restatement of a Stay statement
+Stay: The person is choosing to remain in the moment. The reflection names what that choice makes available.
+  The world pressures people to move, to resolve, to progress. Choosing to stay is an act of agency.
+  The reflection validates that agency and points toward what stillness makes possible.
+  Ask: what becomes available when you stay? What does staying make room for?
+  RIGHT: "you are making room for something that needs time"
+  RIGHT: "staying is how you know what is actually here"
+  RIGHT: "you are present with something that most people move past"
+  RIGHT: "stillness is how you find out what is real"
+  WRONG: "you are holding the weight" — describes what they chose, not what it makes available
+  WRONG: "you know exactly where you are" — too neutral, no direction, not shareable
 
-Move: The statement named that something is moving.
-  The reflection should reveal what that movement means — how far along they already are.
-  RIGHT: "you are further along than you were letting yourself know"
-  RIGHT: "you are already past the point where you thought you were stuck"
-  RIGHT: "you are in motion and the motion is real"
-  WRONG: "something is moving through you" — restatement of a Move statement
+Move: The person is moving through something. The reflection names where that movement is taking them.
+  Not describing the motion — pointing forward. What is the movement making room for?
+  Ask: where does this movement lead? What is becoming possible as they move?
+  RIGHT: "you are making room for what comes next"
+  RIGHT: "something is clearing as you move through it"
+  RIGHT: "you are moving toward something that has been waiting"
+  RIGHT: "you are further into it than you realize"
+  WRONG: "you are in motion and the motion is real" — describes motion, doesn't point forward
+  WRONG: "you are further along than you were letting yourself know" — backward-looking, no direction
 
-Open: Neither statement fit — something is happening that is not yet Stay or Move.
-  The reflection should name what it means to be in that unresolved place — not dramatize it.
-  RIGHT: "you are in the moment before it becomes one thing"
-  RIGHT: "something is real and it does not have a name yet and that is where you are"
-  RIGHT: "you are holding something that is still forming"
-  WRONG: "something is happening that does not fit a single direction" — restatement of Open
+Open: Neither statement fit. Something is happening that Stay and Move cannot contain.
+  The reflection names what it means to be in that emerging space — not ambiguity as a problem, but as arrival.
+  Ask: what is this openness making possible that staying or moving could not?
+  RIGHT: "you are in the moment before something becomes what it is"
+  RIGHT: "something is forming that is not finished yet and you are already in it"
+  RIGHT: "you are where the new thing starts before it has a name"
+  RIGHT: "you are ahead of your own understanding and that is exactly right"
+  WRONG: "something is happening that does not fit" — neutral, no direction
+  WRONG: "you are holding something that is still forming" — describes state, not direction
 
-Mixed: More than one direction is real at the same time.
-  RIGHT: "you are carrying more than one true thing at once"
-  RIGHT: "both directions are real and you are not choosing between them yet"
+Mixed: More than one position is real. The reflection holds the multiplicity as valuable, not conflicting.
+  RIGHT: "you are moving in more than one direction and both are real"
+  RIGHT: "you are in more than one place at once and neither is wrong"
 
 THE BEFORE LINE:
 One sentence for the START of their next session — before any sound plays.
@@ -250,23 +266,23 @@ Respond in JSON only. No markdown. No explanation:
 function getFallbackReflection(dominant) {
   const lines = {
     stay: [
-      'you are exactly where you need to be right now',
-      'you are holding the weight without trying to lift it',
-      'staying is the whole thing right now',
+      'you are making room for something that needs time',
+      'you are present with something that most people move past',
+      'stillness is how you find out what is real',
     ],
     move: [
-      'something is moving through and you are not stopping it',
-      'you are already in motion before you name it',
-      'the resistance is real and you are moving through it anyway',
+      'you are making room for what comes next',
+      'something is clearing as you move through it',
+      'you are further into it than you realize',
     ],
     open: [
-      'something is happening that does not fit a single direction',
-      'you are somewhere the two options cannot reach',
-      'something is shifting that is not yet one thing or the other',
+      'you are in the moment before something becomes what it is',
+      'you are where the new thing starts before it has a name',
+      'you are ahead of your own understanding and that is exactly right',
     ],
     mixed: [
-      'you are holding more than one direction at once',
-      'you are carrying two things and neither is wrong',
+      'you are moving in more than one direction and both are real',
+      'you are in more than one place at once and neither is wrong',
     ],
   };
   const opts = lines[dominant] || lines.open;
