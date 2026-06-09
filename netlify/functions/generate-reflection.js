@@ -102,43 +102,37 @@ exports.handler = async function(event, context) {
 After someone listens to a track and recognizes what is happening in them, one line appears on a dark screen. That line is what you write.
 
 PURPOSE:
-The statement named what is happening right now — what the sound is doing to the person.
-The reflection does something different. It names the direction of movement that the chosen position makes available.
+The statement named the recognition — what the person is doing in the moment of listening.
+The reflection does one specific thing: it names what that position makes available that the person did not know was there.
 
-Three things the reflection must do simultaneously:
-1. Confirm the position with agency — the person chose this, they are not being swept. They are driving their experience.
-2. Point toward what the position makes possible — not what is happening, but where it leads.
-3. Land as a sudden, clear insight — the person reads it once and thinks: yes, that is exactly where I am going.
+This is guidance without instruction.
+Not "here is what is happening" — the statement did that.
+Not "here is what you should do" — that is instruction.
+But "here is what becomes possible because of where you are" — that is guidance.
 
-This is Rory Sutherland's reframing principle applied precisely:
-A small change in how something is framed completely changes its meaning and emotional response.
-The statement described the present moment.
-The reflection reframes that moment as direction — it makes the person feel agency over where they are.
+Rory Sutherland: changing the frame of something changes its meaning entirely without changing the facts.
+The person chose their position. The reflection reframes that position as an advantage — something valuable is available there that they could not access from anywhere else.
 
-The person should read it and feel seen in a way that makes them want to show someone else.
-That is what makes it shareable — not beauty, not poetry. Recognition of something true about their direction.
-Self-relevance: it confirms who they are right now.
-Social relevance: it expresses something they want others to know about them.
+Stay: what becomes available because they are holding still that would not be available if they moved?
+Move: what becomes possible because they are moving through that could not exist if they stayed?
+Open: what becomes accessible because they are in this unresolved space that would close if it resolved?
+
+The person reads the reflection and thinks: I did not know that was there. Now I do.
+That is the moment worth sharing — not because it is beautiful, but because it names something true about their direction that they could not have named themselves.
 
 WHAT THE REFLECTION IS NOT:
-— Not a second recognition — the statement already did that. The reflection does not describe what is happening.
-— Not a restatement ("you are holding the pace when everything else is rushing" when they chose to let something build — that is still observation, not direction)
-— Not a description of the past
-— Not encouragement ("you've got this", "keep going")
-— Not a diagnosis ("you are in a Stay state")
-— Not theatrical or metaphorical
+— Not a third recognition ("what you are staying for is starting to show itself" — still observation)
+— Not a restatement of the statement in different words
+— Not encouragement ("you've got this")
+— Not a process description ("something is clearing")
+— Not circular ("what you are moving toward is already pulling you there")
+— Not theatrical metaphor
 
-THE TEST: does the reflection answer "where does this lead?" not "what is happening?"
-If it describes the present moment — it fails. It must point toward what the position makes possible.
-
-CIRCULAR LINES FAIL — these say nothing:
-"what you are moving toward is already pulling you there" — circular, tautological, no information
-"you are going where you are going" — same problem
-"what is happening is what is happening" — same
-If the line could be its own opposite without changing meaning — discard it.
-
-The line must name something SPECIFIC that the position produces or leads toward.
-Not a process. An arrival. Something that becomes true BECAUSE of this position.
+THE TEST:
+Does it name something the person could not have known before reading it?
+Does it tell them something specific about where their position leads?
+If someone read it without knowing the context — would they feel it was written for them?
+If yes to all three — it works.
 
 THE POSITIONS (never name these — use only to inform tone):
 Stay — something is being held still. Present with what is. Not avoiding, not rushing.
@@ -185,36 +179,42 @@ HARD RULES — every single one applies. If any is broken, the line fails:
 9. Never start with "you've been" or "you were"
 10. If it could appear in a horoscope unchanged — discard and rewrite
 
-TONE BY POSITION — what the reflection does for each:
+TONE BY POSITION:
 
-Stay: Staying is a choice. The reflection names what that choice is making possible — not what staying feels like.
-  Ask: what will this stillness produce? What opens up because they stayed?
-  RIGHT: "what you are staying for is becoming clearer"
-  RIGHT: "you are making room for what can only arrive slowly"
-  RIGHT: "what you are in is becoming something you can name"
-  RIGHT: "something is clarifying because you are not moving away from it"
-  WRONG: "you are holding the pace when everything else is rushing" — describes the staying, not where it leads
-  WRONG: "you are present with something that most people move past" — observation, not direction
+Stay: The person is holding still. What becomes available because of that stillness?
+  Not what staying feels like. What it produces that nothing else can produce.
+  The guidance names the specific advantage of staying — something the person did not know was there.
+  RIGHT: "you are in the part where clarity forms"
+  RIGHT: "what you actually think is becoming audible"
+  RIGHT: "you are letting what is real separate from what is not"
+  RIGHT: "this is the only place where what you need can reach you"
+  WRONG: "what you are staying for is starting to show itself" — vague observation, no specific guidance
+  WRONG: "something is clarifying because you are not moving" — describes process, not destination
+  WRONG: "you are present with something that most people move past" — observation, not guidance
 
-Move: Moving is already happening. The reflection names where it is going — not that it is happening.
-  Ask: what is this movement building toward? What arrives because they moved?
-  RIGHT: "what has been building is about to land"
-  RIGHT: "you are letting it become what it is"
-  RIGHT: "something is arriving that the movement is making room for"
-  RIGHT: "the releasing is making space for what comes in"
-  WRONG: "you are making room for what comes next" — vague, no specific arrival
-  WRONG: "something is clearing as you move through it" — describes the motion, not the destination
+Move: The person is moving through. What becomes possible because they are moving?
+  Not what the movement feels like. Where it is taking them specifically.
+  RIGHT: "you are clearing the way for what you actually want"
+  RIGHT: "what has been in the way is behind you"
+  RIGHT: "you are making room for something that could not exist before this"
+  RIGHT: "the next thing is already forming because you are moving toward it"
+  WRONG: "what has been building is about to land" — vague, no specificity about what arrives
+  WRONG: "you are letting it become what it is" — still observation, not guidance
+  WRONG: "you are further into it than you realize" — backward-looking, no forward direction
 
-Open: Neither direction fit. The reflection names what becomes available in that unresolved space.
-  Ask: what can only happen here — in the space between Stay and Move?
-  RIGHT: "something is forming that neither direction could have reached"
-  RIGHT: "what is arriving does not have a name yet and it does not need one"
-  RIGHT: "you are in the only place where this specific thing can happen"
-  WRONG: "you are in the moment before something becomes what it is" — describes the state, not what it produces
+Open: Neither direction fit. What can only be accessed from this unresolved space?
+  This is the most powerful position for guidance — Open is where new things start.
+  The guidance names what becomes possible specifically because they are not yet Stay or Move.
+  RIGHT: "you are at the beginning of something that does not exist yet"
+  RIGHT: "what is forming here could not have started anywhere else"
+  RIGHT: "you are in the only moment where this specific thing can begin"
+  RIGHT: "something is becoming possible that required this exact place"
+  WRONG: "you are in the moment before something becomes what it is" — describes state
+  WRONG: "something is forming that neither direction could have reached" — observation not guidance
 
-Mixed: Both directions are real. The reflection confirms that multiplicity as productive.
-  RIGHT: "both of what you are carrying are moving you forward"
-  RIGHT: "you are in more than one place and both are taking you somewhere"
+Mixed: Both positions are real. The guidance confirms that holding both is itself a direction.
+  RIGHT: "you are moving in two directions and both of them are right"
+  RIGHT: "carrying both is how you find out which one is true"
 
 THE BEFORE LINE:
 One sentence for the START of their next session — before any sound plays.
@@ -273,23 +273,23 @@ Respond in JSON only. No markdown. No explanation:
 function getFallbackReflection(dominant) {
   const lines = {
     stay: [
-      'what you are staying for is becoming clearer',
-      'you are making room for what can only arrive slowly',
-      'something is clarifying because you are not moving away from it',
+      'you are in the part where clarity forms',
+      'what you actually think is becoming audible',
+      'this is the only place where what you need can reach you',
     ],
     move: [
-      'what has been building is about to land',
-      'you are letting it become what it is',
-      'the releasing is making space for what comes in',
+      'you are clearing the way for what you actually want',
+      'what has been in the way is behind you',
+      'the next thing is already forming because you are moving toward it',
     ],
     open: [
-      'something is forming that neither direction could have reached',
-      'what is arriving does not have a name yet and it does not need one',
-      'you are in the only place where this specific thing can happen',
+      'you are at the beginning of something that does not exist yet',
+      'what is forming here could not have started anywhere else',
+      'something is becoming possible that required this exact place',
     ],
     mixed: [
-      'both of what you are carrying are moving you forward',
-      'you are in more than one place and both are taking you somewhere',
+      'you are moving in two directions and both of them are right',
+      'carrying both is how you find out which one is true',
     ],
   };
   const opts = lines[dominant] || lines.open;
