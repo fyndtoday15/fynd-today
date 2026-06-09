@@ -84,22 +84,24 @@ One complete thought. 8-12 words. Lowercase. No punctuation at the end.
 
 THE TWO RULES THAT MATTER MOST:
 
-RULE 1 — ANCHORED IN THE LISTENING:
-The statement must feel like it could only come from listening to sound right now.
-Not a thought the person could have anywhere. A recognition that the sound is producing in them.
-Use "it" or "this" to refer to the experience of listening — not to a named feeling or situation.
+RULE 1 — THE PERSON IS THE SUBJECT, THE SOUND IS THE CONTEXT:
+The statement is about what the PERSON is doing — not what the sound is doing to them.
+The sound creates the moment. The person is choosing how to be in it.
 
-CORRECT: "i am staying in the pull of it instead of following where it wants to go"
-— "it" is the sound. The person feels the statement is about what listening is producing. Still no content assigned.
+WRONG — sound as subject:
+"i am letting it hold me in place" — the sound is holding them. They are passive.
+"i am letting it move me" — the sound is moving them. They are passive.
+"i am riding it forward" — they are riding the sound. Sound-focused.
 
-CORRECT: "i am letting it move through me instead of trying to hold it still"
-— The "it" is the sound doing something. Direction clear. Content not assigned.
+RIGHT — person as subject:
+"i am staying in this instead of following where it pulls" — person choosing to stay
+"i am staying with what is here instead of reaching for what comes next" — person's choice
+"i am moving through this instead of waiting for it to pass" — person's action
+"i am letting what is building continue instead of stopping it" — person allowing, not being acted upon
 
-WRONG: "i am staying in something that wants to move faster than i can follow"
-— Could describe a conversation, a relationship, a deadline. No anchor to listening.
-
-WRONG: "i am letting something build that i have been trying to keep steady"
-— This is a thought, not a listening recognition. The sound is absent.
+The statement names what the person is doing IN the moment of listening.
+The track informs whether that choice leans toward staying or moving.
+"this" refers to the moment — not the sound specifically, not a named feeling.
 
 RULE 2 — DIRECTION NOT CONTENT:
 The track tells you the DIRECTION (settling vs moving).
