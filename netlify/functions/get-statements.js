@@ -38,19 +38,14 @@ exports.handler = async function(event, context) {
 
   const origin = event.headers.origin || event.headers.Origin || '';
   const allowedOrigin = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
-
   const corsHeaders = {
     'Access-Control-Allow-Origin': allowedOrigin,
     'Access-Control-Allow-Headers': 'Content-Type',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
   };
 
-  if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 200, headers: corsHeaders, body: '' };
-  }
-  if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: 'Method Not Allowed' };
-  }
+  if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: corsHeaders, body: '' };
+  if (event.httpMethod !== 'POST') return { statusCode: 405, body: 'Method Not Allowed' };
 
   const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
   if (!ANTHROPIC_API_KEY) return fallbackResponse(allowedOrigin, corsHeaders);
@@ -62,93 +57,78 @@ exports.handler = async function(event, context) {
   const { title = '', artist = '' } = data;
   if (!title && !artist) return fallbackResponse(allowedOrigin, corsHeaders);
 
-  const systemPrompt = `You are writing for FYND TODAY — a music-powered recognition system.
+  const systemPrompt = `You are writing recognition statements for FYND TODAY — a music-powered system that identifies how sound positions people.
 
-After someone listens to a track, two short statements appear on screen. The person picks the one that is more true for them right now — or neither if neither fits.
+After someone listens to a track, two statements appear. The person picks the one that is true for them right now — or neither.
 
-WHAT THESE STATEMENTS ARE:
-They describe what is happening inside a person while listening to this specific track.
-They are NOT about the music. They are about the person.
-The person reads them and one either fits or it does not.
+WHAT THE STATEMENTS ARE:
+These are first-person recognition statements. The person reads them and one either fits or it doesn't.
+They describe what the person is doing — how they are relating to what they are in right now.
+They do NOT describe the music, the sound, the song, or the listening experience.
+The track informs the direction (holding vs moving), but the statement is about the person.
 
 THE TWO DIRECTIONS:
-Statement A leans toward stillness — staying, holding, remaining, grounding.
-Statement B leans toward movement — shifting forward, releasing, moving through.
-Neither = something opened that these two cannot name.
+Statement A: the person is holding their position — staying in something, not pushing through it yet
+Statement B: the person is moving through something — releasing, pushing forward, letting go
+
+If neither fits — that's valid. It means something else is happening (the Open position).
 
 HOW TO WRITE THEM:
-Use the track's structural qualities — tempo, texture, weight, whether it builds or holds — to inform which direction each statement leans and how strongly. That is all the track research is for.
+Research the track. Understand its structural qualities — does it hold space or create momentum? Is it heavy and contained or building and releasing? That tells you which direction each statement leans and how strongly.
 
-Write in plain natural language. First person. Present tense only.
-One complete thought. 8-12 words. Lowercase. No punctuation at the end.
+Write two statements in plain, natural, everyday first-person language.
+The kind of thing a person might actually say or think.
+Not poetic. Not clever. Not constructed. Just honest.
 
-THE TWO RULES THAT MATTER MOST:
+LENGTH: one sentence. 8-14 words. Complete thought. Not a fragment.
 
-RULE 1 — THE PERSON IS THE SUBJECT, THE SOUND IS THE CONTEXT:
-The statement is about what the PERSON is doing — not what the sound is doing to them.
-The sound creates the moment. The person is choosing how to be in it.
+BANNED WORDS AND CONCEPTS — if any appear, rewrite:
+Music vocabulary: loop, pulse, beat, rhythm, tempo, flow, wave, frequency, tone, melody, sound, music, song, track, listen
+Metaphors: riding, surfing, waves, fire, burning, doors, paths, roads, frames, breaking through
+Vague pronouns: "it" alone with no referent — must say what "it" is OR rewrite without it
+Abstract nouns: energy, space, vibe, healing, journey, experience, emotion, feeling
+Therapy language: carrying, holding on, letting go of pain, processing, healing
 
-WRONG — sound as subject:
-"i am letting it hold me in place" — the sound is holding them. They are passive.
-"i am letting it move me" — the sound is moving them. They are passive.
-"i am riding it forward" — they are riding the sound. Sound-focused.
+WHAT GOOD STATEMENTS LOOK LIKE:
+They name a specific human position — something a person can recognize as true or not true for them right now.
+Both must be genuinely plausible for someone listening to this specific track.
+Neither one should be obviously "better" — both are valid human positions.
 
-RIGHT — person as subject:
-"i am staying in this instead of following where it pulls" — person choosing to stay
-"i am staying with what is here instead of reaching for what comes next" — person's choice
-"i am moving through this instead of waiting for it to pass" — person's action
-"i am letting what is building continue instead of stopping it" — person allowing, not being acted upon
+EXAMPLES OF RIGHT REGISTER:
+For a slow, heavy, emotionally weighted track:
+A: "i am staying in this instead of pushing through it"
+B: "i am ready to move through this even if it is not comfortable"
 
-The statement names what the person is doing IN the moment of listening.
-The track informs whether that choice leans toward staying or moving.
-"this" refers to the moment — not the sound specifically, not a named feeling.
+For an urgent, building, forward-moving track:
+A: "i am taking this slowly even though it wants to move fast"
+B: "i am moving with this and not holding back"
 
-RULE 2 — DIRECTION NOT CONTENT:
-The track tells you the DIRECTION (settling vs moving).
-The person brings the CONTENT (what they are carrying).
-The statement names the direction without naming the content.
-Works for someone carrying grief AND someone carrying nothing in particular.
+For a raw, confessional, emotionally direct track:
+A: "i am sitting with what is true instead of looking away"
+B: "i am naming what is real and moving past it"
 
-WRONG: "i am sitting with what is hurting" — names the content
-WRONG: "i am letting myself burn through what is holding me back" — names the content AND uses metaphor
-RIGHT: "i am staying in it instead of pushing through" — direction only, no content
-
-HARD RULES:
-1. Present tense ONLY
-2. Must feel anchored to the listening experience — "it" or "this" refers to what the sound is doing
-3. No dramatic language — not "consume", "burn", "shatter", "devour", "break free"
-4. No metaphors about fire, burning, breaking, cracking, doors, paths, travel
-5. No assigning emotional content — not "hurt", "pain", "fear", "grief", "loss"
-6. Both statements genuinely plausible for this track — not one obviously right
-7. Statement A leans toward staying/grounding. Statement B leans toward moving/releasing.
-8. Neither so specific it only works for one emotional state
+WRONG — do not write like this:
+"i am letting it loop without needing it to resolve" — "it" is the sound, music vocabulary (loop)
+"i am riding the pulse forward" — riding + pulse = music metaphors
+"i am letting it move through me" — passive, sound as actor, vague "it"
+"i am staying in the weight of it" — vague "it" with no referent
 
 Respond in JSON only. No markdown:
 {"statementA": "...", "statementB": "..."}`;
 
   const userPrompt = `Track: "${title}" by ${artist}
 
-Research this track's structural qualities — tempo, texture, weight, energy arc.
-Use that to calibrate how strongly each statement leans in its direction.
-Write the two recognition statements now. JSON only.`;
+Research this track. Write two recognition statements for someone who just listened to it. JSON only.`;
 
   async function callClaude() {
     const result = await httpsPost(
       'https://api.anthropic.com/v1/messages',
-      {
-        'x-api-key': ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01',
-      },
-      {
-        model: 'claude-sonnet-4-5',
-        max_tokens: 200,
-        system: systemPrompt,
-        messages: [{ role: 'user', content: userPrompt }],
-      }
+      { 'x-api-key': ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' },
+      { model: 'claude-sonnet-4-5', max_tokens: 200, system: systemPrompt,
+        messages: [{ role: 'user', content: userPrompt }] }
     );
     if (result.status !== 200) throw new Error('API ' + result.status);
-    const text = (result.body.content && result.body.content[0] && result.body.content[0].text)
-      ? result.body.content[0].text.trim() : '';
+    const text = (result.body.content && result.body.content[0] && result.body.content[0].text) ? result.body.content[0].text.trim() : '';
     if (!text) throw new Error('Empty');
     return JSON.parse(text.replace(/```json|```/g, '').trim());
   }
@@ -157,12 +137,8 @@ Write the two recognition statements now. JSON only.`;
     let parsed;
     try { parsed = await callClaude(); }
     catch(e) { console.log('Retry:', e.message); parsed = await callClaude(); }
-    if (!parsed.statementA || !parsed.statementB) throw new Error('Missing');
-    return {
-      statusCode: 200,
-      headers: corsHeaders,
-      body: JSON.stringify({ statementA: parsed.statementA, statementB: parsed.statementB }),
-    };
+    if (!parsed.statementA || !parsed.statementB) throw new Error('Missing statements');
+    return { statusCode: 200, headers: corsHeaders, body: JSON.stringify({ statementA: parsed.statementA, statementB: parsed.statementB }) };
   } catch(err) {
     console.error('get-statements failed:', err.message);
     return fallbackResponse(allowedOrigin, corsHeaders);
@@ -170,17 +146,13 @@ Write the two recognition statements now. JSON only.`;
 };
 
 const FALLBACK_PAIRS = [
-  ['i am sitting with it instead of trying to move through it', 'something is shifting and i am letting it'],
-  ['i am staying in the weight of it', 'i am moving through something that has been sitting still'],
-  ['i am recognizing something i have been carrying without naming it', 'i am letting something go that i have been holding'],
-  ['i am not trying to resolve it — just staying here', 'something is moving forward and i am moving with it'],
+  ['i am staying in this instead of pushing through it', 'i am ready to move through this even though it is not easy'],
+  ['i am taking this slowly even though part of me wants to rush', 'i am moving with this and not holding back'],
+  ['i am sitting with what is true instead of looking away', 'i am naming what is real and moving past it'],
+  ['i am staying with what is here instead of reaching for what comes next', 'i am letting what needs to shift actually shift'],
 ];
 
 function fallbackResponse(allowedOrigin, corsHeaders) {
   const pair = FALLBACK_PAIRS[Math.floor(Math.random() * FALLBACK_PAIRS.length)];
-  return {
-    statusCode: 200,
-    headers: corsHeaders,
-    body: JSON.stringify({ statementA: pair[0], statementB: pair[1] }),
-  };
+  return { statusCode: 200, headers: corsHeaders, body: JSON.stringify({ statementA: pair[0], statementB: pair[1] }) };
 }
