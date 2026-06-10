@@ -89,11 +89,18 @@ exports.handler = async function(event, context) {
     // Map to clean track objects
     const results = ytData.items
       .filter(isLikelyMusic)
+      .sort((a, b) => sourceScore(b) - sourceScore(a))
       .slice(0, 6)
       .map(item => ({
         id: item.id.videoId,
         title: cleanTitle(item.snippet.title),
-        artist: cleanTitle(item.snippet.channelTitle.replace(/VEVO$/i, '').replace(/- Topic$/i, '').trim()),
+        artist: cleanTitle(
+          item.snippet.channelTitle
+            .replace(/VEVO$/i, '')
+            .replace(/\s*-\s*Topic$/i, '')
+            .replace(/\s*-\s*topic$/i, '')
+            .trim()
+        ),
         thumbnail: item.snippet.thumbnails?.default?.url || '',
       }));
 
@@ -137,12 +144,25 @@ function cleanTitle(title) {
     .trim();
 }
 
+// Score result by source credibility — prefer official channels
+function sourceScore(item) {
+  const channel = (item.snippet.channelTitle || '').toLowerCase();
+  const title = (item.snippet.title || '').toLowerCase();
+  // Highest trust: VEVO, artist's own channel marked as Topic, major labels
+  if (channel.includes('vevo')) return 10;
+  if (channel.includes('- topic')) return 9;
+  if (channel.includes('records') || channel.includes('music') || channel.includes('entertainment')) return 7;
+  if (channel.includes('rap nation') || channel.includes('worldstar') || channel.includes('lyric')) return 4;
+  // Penalize known aggregator/unofficial patterns
+  if (channel.includes('fan') || channel.includes('best of') || channel.includes('playlist')) return 1;
+  return 5; // neutral
+}
+
 // Filter out clearly non-music results
 function isLikelyMusic(item) {
   const title = (item.snippet.title || '').toLowerCase();
   const channel = (item.snippet.channelTitle || '').toLowerCase();
-  // Exclude obvious non-music: meditation frequencies, subliminal, ASMR, compilations
-  const junk = ['hz', 'subliminal', 'asmr', 'binaural', 'frequency', 'meditation',
-    'sleep music', 'study music', 'compilation', 'mix - topic', 'workout music'];
+  const junk = [' hz', 'subliminal', 'asmr', 'binaural', 'frequency meditation',
+    'sleep music', 'study music', 'workout music', 'motivational', 'affirmation'];
   return !junk.some(function(j) { return title.includes(j) || channel.includes(j); });
 }
