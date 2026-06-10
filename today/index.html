@@ -123,7 +123,7 @@ html, body {
   color: var(--fg);
   opacity: 0;
   transform: translateY(6px);
-  transition: opacity 1.2s ease, transform 1.2s ease;
+  transition: opacity 0.9s ease, transform 0.9s ease;
   max-width: 440px;
   padding: 0 8px;
 }
@@ -243,6 +243,9 @@ html, body {
   margin-top: 28px;
   display: flex;
   flex-direction: column;
+  max-height: 420px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .search-result {
@@ -330,7 +333,7 @@ html, body {
   font-size: 12px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--dimmer);
+  color: rgba(240,237,230,0.55);
   margin-bottom: 14px;
   line-height: 1.5;
 }
@@ -343,7 +346,7 @@ html, body {
   font-size: 11px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--dim);
+  color: rgba(240,237,230,0.7);
   margin-top: 7px;
 }
 
@@ -358,7 +361,7 @@ html, body {
   font-size: 10px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--dimmer);
+  color: rgba(240,237,230,0.65);
   cursor: pointer;
   padding: 12px 0;
   opacity: 0;
@@ -1105,12 +1108,12 @@ function showEntry() {
     setTimeout(function() {
       var el = document.getElementById(id);
       if (el) el.classList.add('show');
-    }, 600 + i * 1800);
+    }, 500 + i * 1500);
   });
   setTimeout(function() {
     var ep2 = document.getElementById('entry-paths');
     if (ep2) ep2.classList.add('show');
-  }, 600 + 5 * 1800 + 800);
+  }, 500 + 5 * 1500 + 600);
 }
 
 function showBefore() {
@@ -1166,6 +1169,10 @@ function doSearch(q) {
   });
 }
 
+function cleanDisplay(str) {
+  return (str || '').replace(/#\w+/g, '').replace(/\s{2,}/g, ' ').trim();
+}
+
 function renderResults(tracks) {
   var container = document.getElementById('search-results');
   container.innerHTML = '';
@@ -1174,13 +1181,16 @@ function renderResults(tracks) {
     return;
   }
   tracks.forEach(function(t) {
+    var displayTitle = cleanDisplay(t.title);
+    var displayArtist = cleanDisplay(t.artist);
+    if (!displayTitle) return;
     var el = document.createElement('div');
     el.className = 'search-result';
     el.innerHTML =
-      '<div class="result-title">' + esc(t.title) + '</div>' +
-      '<div class="result-sub">' + esc(t.artist) + '</div>';
+      '<div class="result-title">' + esc(displayTitle) + '</div>' +
+      '<div class="result-sub">' + esc(displayArtist) + '</div>';
     el.addEventListener('click', function() {
-      selectTrack({ title: t.title, artist: t.artist, ytId: t.id }, false);
+      selectTrack({ title: displayTitle, artist: displayArtist, ytId: t.id }, false);
     });
     container.appendChild(el);
   });
