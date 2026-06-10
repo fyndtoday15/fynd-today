@@ -64,6 +64,8 @@ exports.handler = async function(event, context) {
     chosenPosition = '',
     searchedTrack = false,
     sameSongReturned = false,
+    sameSongCount = 0,
+    sameSongPreviousPosition = null,
     previousPosition = null,
     responseSpeed = 'normal',
   } = data;
@@ -90,7 +92,17 @@ exports.handler = async function(event, context) {
   else ctx.push('Session ' + sessionNumber + '.');
   if (previousPosition && previousPosition !== dominant) ctx.push('Last session was ' + previousPosition + '. This session: ' + dominant + '. A shift.');
   else if (previousPosition === dominant) ctx.push('Same position as last session. Consistent.');
-  if (sameSongReturned) ctx.push('They brought this track back. It is producing something different this time.');
+  if (sameSongReturned && sameSongCount > 1) {
+    const countWord = sameSongCount === 2 ? 'twice' : sameSongCount + ' times';
+    ctx.push('They have brought this exact track ' + countWord + ' now.');
+    if (sameSongPreviousPosition && sameSongPreviousPosition !== chosenPosition) {
+      ctx.push('Last time this track produced ' + sameSongPreviousPosition + '. This time: ' + chosenPosition + '. Same song. Different position.');
+    } else if (sameSongPreviousPosition === chosenPosition) {
+      ctx.push('This track consistently produces ' + chosenPosition + ' for them. Every time they bring it back.');
+    }
+  } else if (sameSongReturned) {
+    ctx.push('They brought this track back. It is producing something different this time.');
+  }
   else if (searchedTrack) ctx.push('They chose this track themselves.');
   else ctx.push('Discovery mode — they had not heard this before.');
   if (responseSpeed === 'fast') ctx.push('Response was immediate — instinctive.');
@@ -168,16 +180,19 @@ WRONG — these fail and why:
 "you know exactly where you are and that is not nothing" — weak, defensive phrasing, not shareable
 
 HARD RULES — every single one applies. If any is broken, the line fails:
-1. PRESENT TENSE ONLY — not "you held" but "you are holding". Not "something shifted" but "something is shifting". Not "you were" but "you are". Check every word.
-2. Never mention the track, artist, music, sound, listening, songs
-3. Never use: feel, feeling, emotion, mood, vibe, energy, journey, experience, healing, growth, space, deeper, beautiful, frame, threshold, consume, burn, shatter, crack, devour
-4. Never motivational — not "keep going", "you are ready", "you can do this"
-5. Never therapeutic — not "you have been carrying", "you needed that", "honor"
-6. Never dramatic metaphor — not "break the frame", "shatter", "a door opens", "something arrives"
-7. Never name the position as a label
-8. Never a question
-9. Never start with "you've been" or "you were"
-10. If it could appear in a horoscope unchanged — discard and rewrite
+1. PRESENT TENSE ONLY — not "you held" but "you are holding". Not "something shifted" but "something is shifting". Check every word.
+2. NATURAL HUMAN LANGUAGE — read it aloud. Would a real person say this? If it sounds constructed or awkward — rewrite. "you are where what you need is forming" is NOT natural language. Never write inverted or convoluted sentence structure.
+3. Never mention the track, artist, music, sound, listening, songs
+4. Never use: feel, feeling, emotion, mood, vibe, energy, journey, experience, healing, growth, space, deeper, beautiful, frame, threshold, consume, burn, shatter, crack, devour
+5. Never motivational — not "keep going", "you are ready", "you can do this"
+6. Never therapeutic — not "you have been carrying", "you needed that", "honor"
+7. Never dramatic metaphor — not "break the frame", "shatter", "a door opens"
+8. Never circular — "you are moving toward what is pulling you" says nothing
+9. Never name the position as a label
+10. Never a question
+11. Never start with "you've been" or "you were"
+12. If it could appear in a horoscope unchanged — discard and rewrite
+13. Under 12 words. Simple subject-verb structure. Nothing convoluted.
 
 TONE BY POSITION:
 
