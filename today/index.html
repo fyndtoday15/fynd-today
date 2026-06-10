@@ -123,7 +123,7 @@ html, body {
   color: var(--fg);
   opacity: 0;
   transform: translateY(6px);
-  transition: opacity 1s ease, transform 1s ease;
+  transition: opacity 1.2s ease, transform 1.2s ease;
   max-width: 440px;
   padding: 0 8px;
 }
@@ -1024,6 +1024,7 @@ var sess = {
   email: null,
   firstName: null,
   sessionCount: 0,
+  reflectionTimers: [],
   beforeLine: null,
   trackTitle: null,
   trackArtist: null,
@@ -1037,6 +1038,7 @@ var sess = {
   chosenStatement: '',
   responseSpeed: 'normal',
   reflectionLine: null,
+  reflectionToken: 0,
   curatedIdx: 0,
   pendingStatements: null,
   chosenStatement: '',
@@ -1098,17 +1100,17 @@ function showEntry() {
   var ep = document.getElementById('entry-paths');
   if (ep) ep.classList.remove('show');
 
-  // Animate in — each line gets its own fade
+  // Animate in — each line gets its own fade at natural reading pace
   ['el-1','el-2','el-3','el-4','el-5'].forEach(function(id, i) {
     setTimeout(function() {
       var el = document.getElementById(id);
       if (el) el.classList.add('show');
-    }, 300 + i * 700);
+    }, 600 + i * 1800);
   });
   setTimeout(function() {
     var ep2 = document.getElementById('entry-paths');
     if (ep2) ep2.classList.add('show');
-  }, 300 + 5 * 700);
+  }, 600 + 5 * 1800 + 800);
 }
 
 function showBefore() {
@@ -1195,8 +1197,13 @@ function selectTrack(track, isCurated) {
   sess.chosenPosition = null;
   sess.trackCount++;
 
-  // Reset statements to null — will be fetched from Claude
+  // Reset statements and increment token to cancel any pending callbacks
   sess.pendingStatements = null;
+  sess.reflectionToken = (sess.reflectionToken || 0) + 1;
+
+  // Check if they have brought this exact song before
+  var history = getTrackHistory(track.title, track.artist);
+  sess.sameSongHistory = history; // { lastPosition, count, previousPosition, lastDate } or null
 
   // Fetch Claude-researched statements for this specific track in background
   // By the time 60s of listening is done, statements will be ready
@@ -1544,6 +1551,10 @@ function confirmChoice(position) {
   document.getElementById('sure-overlay').classList.remove('show');
   sess.chosenPosition = position;
   sess.positions.push(position);
+  // Save this track + position to history
+  if (sess.trackTitle) {
+    saveTrackHistory(sess.trackTitle, sess.trackArtist || '', position);
+  }
   goReflection();
 }
 
@@ -1594,6 +1605,7 @@ function goReflection() {
 
 function getReflection(cb) {
   var dominant = getDominant();
+  var token = sess.reflectionToken; // capture current token
   fetch('/.netlify/functions/generate-reflection', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -1605,7 +1617,9 @@ function getReflection(cb) {
       chosenStatement: sess.chosenStatement || '',
       chosenPosition: sess.chosenPosition || dominant,
       searchedTrack: sess.isSearched,
-      sameSongReturned: false,
+      sameSongReturned: !!(sess.sameSongHistory),
+      sameSongCount: sess.sameSongHistory ? sess.sameSongHistory.count : 0,
+      sameSongPreviousPosition: sess.sameSongHistory ? sess.sameSongHistory.lastPosition : null,
       previousPosition: LS.get('lastPosition'),
       responseSpeed: sess.responseSpeed,
       firstName: sess.firstName,
@@ -1613,10 +1627,15 @@ function getReflection(cb) {
   })
   .then(function(r) { return r.json(); })
   .then(function(data) {
+    // Ignore if a new track started since this request was made
+    if (token !== sess.reflectionToken) return;
     if (data.beforeLine) LS.set('beforeLine', data.beforeLine);
     cb(data.reflectionLine || fallback(dominant));
   })
-  .catch(function() { cb(fallback(dominant)); });
+  .catch(function() {
+    if (token !== sess.reflectionToken) return;
+    cb(fallback(dominant));
+  });
 }
 
 function getDominant() {
@@ -1872,6 +1891,37 @@ function bindEvents() {
   document.getElementById('email-input').addEventListener('keydown', function(e) {
     if (e.key === 'Enter') submitEmail();
   });
+}
+
+// ── TRACK HISTORY ────────────────────────────────────────────────────────────
+function getTrackKey(title, artist) {
+  // Normalize: lowercase, remove punctuation, trim
+  return (title + '___' + artist).toLowerCase().replace(/[^a-z0-9___]/g, '').trim();
+}
+
+function getTrackHistory(title, artist) {
+  var key = getTrackKey(title, artist);
+  try {
+    var all = JSON.parse(localStorage.getItem('fynd_trackHistory') || '{}');
+    return all[key] || null;
+  } catch(e) { return null; }
+}
+
+function saveTrackHistory(title, artist, position) {
+  var key = getTrackKey(title, artist);
+  try {
+    var all = JSON.parse(localStorage.getItem('fynd_trackHistory') || '{}');
+    var prev = all[key];
+    all[key] = {
+      title: title,
+      artist: artist,
+      lastPosition: position,
+      lastDate: new Date().toISOString().slice(0, 10),
+      count: prev ? (prev.count + 1) : 1,
+      previousPosition: prev ? prev.lastPosition : null,
+    };
+    localStorage.setItem('fynd_trackHistory', JSON.stringify(all));
+  } catch(e) {}
 }
 
 // ── UTILS ─────────────────────────────────────────────────────────────────────
