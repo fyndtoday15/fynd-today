@@ -6,7 +6,7 @@ const ALLOWED_ORIGINS = [
   'https://www.fyndtoday.com',
 ];
 
-function httpsPost(url, headers, body) {
+function httpsPost(url, headers, body) { 
   return new Promise(function(resolve, reject) {
     const parsed = new URL(url);
     const data = JSON.stringify(body);
