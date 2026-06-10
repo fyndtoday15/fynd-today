@@ -82,10 +82,28 @@ Not poetic. Not clever. Not constructed. Just honest.
 
 LENGTH: one sentence. 8-14 words. Complete thought. Not a fragment.
 
+CRITICAL RULE — THE MOST IMPORTANT ONE:
+Do NOT infer emotional content from the track title, lyrics, or artist.
+"Bad Romance" does not mean the person is in a bad romance.
+"Burn Beautiful" does not mean the person is burning or in pain.
+"Lose Control" does not mean the person is losing control.
+The track title and artist tell you the structural qualities of the sound — tempo, weight, momentum.
+They do NOT tell you what the person is experiencing in their life.
+Statements that assign life context from track titles are wrong every time.
+
+WRONG:
+"i am staying in what i know even though part of me wants out" — inferred from "Bad Romance" lyrics
+"i am walking away from this instead of waiting anymore" — inferred from song content
+"i am letting myself feel this even though it hurts" — assigned emotional content
+
+RIGHT:
+"i am staying in this instead of pushing through it" — no life context, pure position
+"i am moving through this even though it is not comfortable" — no life context, pure position
+
 BANNED WORDS AND CONCEPTS — if any appear, rewrite:
 Music vocabulary: loop, pulse, beat, rhythm, tempo, flow, wave, frequency, tone, melody, sound, music, song, track, listen
 Metaphors: riding, surfing, waves, fire, burning, doors, paths, roads, frames, breaking through
-Vague pronouns: "it" alone with no referent — must say what "it" is OR rewrite without it
+Emotional content from lyrics: anything that references the song's subject matter, storyline, or title meaning
 Abstract nouns: energy, space, vibe, healing, journey, experience, emotion, feeling
 Therapy language: carrying, holding on, letting go of pain, processing, healing
 
@@ -146,10 +164,10 @@ Research this track. Write two recognition statements for someone who just liste
 };
 
 const FALLBACK_PAIRS = [
-  ['i am staying in this instead of pushing through it', 'i am ready to move through this even though it is not easy'],
-  ['i am taking this slowly even though part of me wants to rush', 'i am moving with this and not holding back'],
-  ['i am sitting with what is true instead of looking away', 'i am naming what is real and moving past it'],
-  ['i am staying with what is here instead of reaching for what comes next', 'i am letting what needs to shift actually shift'],
+  ['i am staying in this instead of pushing through it', 'i am moving through this even though it is not easy'],
+  ['i am taking this in slowly', 'i am letting what wants to move actually move'],
+  ['i am staying with what is here', 'i am moving through what is here'],
+  ['i am not rushing this', 'i am not holding this back'],
 ];
 
 function fallbackResponse(allowedOrigin, corsHeaders) {
