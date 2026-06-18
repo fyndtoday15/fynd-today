@@ -65,9 +65,7 @@ html, body {
     calc(env(safe-area-inset-bottom, 20px) + 20px);
   overflow: hidden;
 }
-#s-search {
-  overflow-y: auto;
-}
+
 .screen.active {
   opacity: 1;
   pointer-events: all;
@@ -1169,6 +1167,11 @@ function showBefore() {
 var searchTimer = null;
 
 function showSearch() {
+  // Safety: force-clear any overlay that might be stuck blocking clicks
+  document.getElementById('sure-overlay').classList.remove('show');
+  document.getElementById('listen-stmts').classList.remove('show');
+  document.getElementById('share-overlay').classList.remove('show');
+
   show('s-search');
   document.getElementById('search-results').innerHTML = '';
   document.getElementById('search-field').value = '';
@@ -1224,13 +1227,13 @@ function renderResults(tracks) {
     if (!displayTitle) return;
     var el = document.createElement('div');
     el.className = 'search-result';
+    el.setAttribute('data-title', displayTitle);
+    el.setAttribute('data-artist', displayArtist);
+    el.setAttribute('data-ytid', t.id);
     var audioTag = t.isAudio ? ' <span class="result-audio-tag">audio</span>' : '';
     el.innerHTML =
       '<div class="result-title">' + esc(displayTitle) + audioTag + '</div>' +
       '<div class="result-sub">' + esc(displayArtist) + '</div>';
-    el.addEventListener('click', function() {
-      selectTrack({ title: displayTitle, artist: displayArtist, ytId: t.id }, false);
-    });
     container.appendChild(el);
   });
 }
@@ -1840,9 +1843,6 @@ function bindEvents() {
   document.getElementById('before-cta').addEventListener('click', showEntry);
 
   // Tap on search field wrapper to re-open keyboard on mobile
-  document.getElementById('search-field').addEventListener('blur', function() {
-    // Don't force refocus — let the user tap results freely
-  });
   document.getElementById('search-field').addEventListener('input', function(e) {
     clearTimeout(searchTimer);
     searchTimer = setTimeout(function() { doSearch(e.target.value.trim()); }, 400);
@@ -1850,11 +1850,23 @@ function bindEvents() {
 
   // Search back button
   document.getElementById('search-back').addEventListener('click', function() {
-    // Go back to entry or stopped depending on session state
     if (sess.trackCount > 0) {
       showStopped();
     } else {
       showEntry();
+    }
+  });
+
+  // Event delegation for search results — handles clicks even on
+  // dynamically-rendered results, immune to stale listener bugs
+  document.getElementById('search-results').addEventListener('click', function(e) {
+    var resultEl = e.target.closest('.search-result');
+    if (!resultEl) return;
+    var title = resultEl.getAttribute('data-title');
+    var artist = resultEl.getAttribute('data-artist');
+    var ytId = resultEl.getAttribute('data-ytid');
+    if (title && ytId) {
+      selectTrack({ title: title, artist: artist, ytId: ytId }, false);
     }
   });
 
