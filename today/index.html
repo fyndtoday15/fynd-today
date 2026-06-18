@@ -355,6 +355,10 @@ html, body {
   50% { transform: scale(1.7); opacity: 0.85; }
 }
 
+.hidden-under-overlay {
+  opacity: 0 !important;
+}
+
 .listen-track-info {
   text-align: center;
   opacity: 0;
@@ -1080,6 +1084,8 @@ var sess = {
   reflectionToken: 0,
   curatedIdx: 0,
   pendingStatements: null,
+  positionA: 'stay',
+  positionB: 'move',
   chosenStatement: '',
   currentStatements: { a: '', b: '' },
   choiceTime: null,
@@ -1282,9 +1288,13 @@ function goListen() {
   var tag = document.getElementById('curated-tag');
 
   dot.classList.remove('active');
+  dot.classList.remove('hidden-under-overlay');
   stop.classList.remove('show');
+  stop.classList.remove('hidden-under-overlay');
   info.classList.remove('show');
+  info.classList.remove('hidden-under-overlay');
   tag.classList.remove('show');
+  tag.classList.remove('hidden-under-overlay');
 
   clearTimeout(sess.recognitionTimer);
   clearTimeout(sess.stopTimer);
@@ -1437,10 +1447,10 @@ function showStatementsOverlay() {
   var info = document.getElementById('track-info');
   var stop = document.getElementById('listen-stop');
   var tag = document.getElementById('curated-tag');
-  if (dot) dot.style.opacity = '0';
-  if (info) info.style.opacity = '0';
-  if (stop) stop.style.opacity = '0';
-  if (tag) tag.style.opacity = '0';
+  if (dot) dot.classList.add('hidden-under-overlay');
+  if (info) info.classList.add('hidden-under-overlay');
+  if (stop) stop.classList.add('hidden-under-overlay');
+  if (tag) tag.classList.add('hidden-under-overlay');
 
   // Fade in the overlay
   stmtWrap.classList.add('show');
@@ -1457,15 +1467,27 @@ function fetchStatements(title, artist) {
   })
   .then(function(r) { return r.json(); })
   .then(function(data) {
-    // Store on sess — goRecognition reads this
     sess.pendingStatements = {
       a: data.statementA || null,
       b: data.statementB || null,
     };
+    sess.positionA = data.positionA || 'stay';
+    sess.positionB = data.positionB || 'move';
   })
   .catch(function() {
-    sess.pendingStatements = null; // will use fallback pairs
+    sess.pendingStatements = null;
+    sess.positionA = 'stay';
+    sess.positionB = 'move';
   });
+}
+
+function getThirdPosition() {
+  var all = ['stay', 'move', 'open'];
+  var used = [sess.positionA, sess.positionB];
+  for (var i = 0; i < all.length; i++) {
+    if (used.indexOf(all[i]) === -1) return all[i];
+  }
+  return 'open'; // fallback
 }
 
 // ── HANDLE CHOICE FROM LISTEN OVERLAY ────────────────────────────────────────
@@ -1650,14 +1672,23 @@ function goReflection() {
   getReflection(function(line) {
     sess.reflectionLine = line;
     txt.textContent = line;
-    setTimeout(function() { txt.classList.add('show'); }, 400);
-    setTimeout(function() { acts.classList.add('show'); }, 1500);
+    txt.classList.add('show');
+    acts.classList.add('show');
   });
 }
 
 function getReflection(cb) {
   var dominant = getDominant();
   var token = sess.reflectionToken; // capture current token
+  var settled = false;
+
+  // Safety: if fetch takes too long, show fallback after 4s so user is never stuck
+  var safetyTimer = setTimeout(function() {
+    if (settled) return;
+    settled = true;
+    cb(fallback(dominant));
+  }, 4000);
+
   fetch('/.netlify/functions/generate-reflection', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -1679,13 +1710,17 @@ function getReflection(cb) {
   })
   .then(function(r) { return r.json(); })
   .then(function(data) {
-    // Ignore if a new track started since this request was made
-    if (token !== sess.reflectionToken) return;
+    if (settled) return; // safety timer already fired
+    settled = true;
+    clearTimeout(safetyTimer);
+    if (token !== sess.reflectionToken) return; // genuinely stale — new track started
     if (data.beforeLine) LS.set('beforeLine', data.beforeLine);
     cb(data.reflectionLine || fallback(dominant));
   })
   .catch(function() {
-    if (token !== sess.reflectionToken) return;
+    if (settled) return;
+    settled = true;
+    clearTimeout(safetyTimer);
     cb(fallback(dominant));
   });
 }
@@ -1872,13 +1907,13 @@ function bindEvents() {
 
   // Listen screen statement buttons (appear at 30s, track still playing)
   document.getElementById('listen-stmt-a').addEventListener('click', function() {
-    handleListenChoice('stay', this);
+    handleListenChoice(sess.positionA || 'stay', this);
   });
   document.getElementById('listen-stmt-b').addEventListener('click', function() {
-    handleListenChoice('move', this);
+    handleListenChoice(sess.positionB || 'move', this);
   });
   document.getElementById('listen-stmt-neither').addEventListener('click', function() {
-    handleListenChoice('open', null);
+    handleListenChoice(getThirdPosition(), null);
   });
 
   // Listen
