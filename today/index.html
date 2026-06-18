@@ -63,6 +63,10 @@ html, body {
     calc(env(safe-area-inset-top, 20px) + 20px)
     32px
     calc(env(safe-area-inset-bottom, 20px) + 20px);
+  overflow: hidden;
+}
+#s-search {
+  overflow-y: auto;
 }
 .screen.active {
   opacity: 1;
@@ -204,7 +208,25 @@ html, body {
 .before-cta:active { color: var(--fg); }
 
 /* ── S-SEARCH ── */
-#s-search { justify-content: flex-start; padding-top: clamp(80px, 15vh, 120px); gap: 0; }
+#s-search { justify-content: flex-start; padding-top: clamp(80px, 15vh, 120px); gap: 0; overflow: hidden; }
+
+.search-back {
+  position: absolute;
+  top: calc(env(safe-area-inset-top, 20px) + 20px);
+  left: 32px;
+  background: none;
+  border: none;
+  font-family: var(--f);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(240,237,230,0.5);
+  cursor: pointer;
+  padding: 8px 0;
+  transition: color 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.search-back:active { color: var(--fg); }
 
 .search-label {
   font-size: 11px;
@@ -243,9 +265,24 @@ html, body {
   margin-top: 28px;
   display: flex;
   flex-direction: column;
-  max-height: 420px;
-  overflow-y: auto;
+  max-height: 52vh;
+  overflow-y: scroll;
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+.result-audio-tag {
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--dimmer);
+  border: 1px solid rgba(240,237,230,0.15);
+  border-radius: 2px;
+  padding: 1px 5px;
+  margin-left: 7px;
+  vertical-align: middle;
+  position: relative;
+  top: -1px;
 }
 
 .search-result {
@@ -896,6 +933,7 @@ html, body {
 
 <!-- S-SEARCH -->
 <div class="screen" id="s-search">
+  <button class="search-back" id="search-back">← back</button>
   <div class="search-label">bring a track you've been drawn to</div>
   <div class="search-field-wrap">
     <input class="search-field" id="search-field" type="text"
@@ -1186,8 +1224,9 @@ function renderResults(tracks) {
     if (!displayTitle) return;
     var el = document.createElement('div');
     el.className = 'search-result';
+    var audioTag = t.isAudio ? ' <span class="result-audio-tag">audio</span>' : '';
     el.innerHTML =
-      '<div class="result-title">' + esc(displayTitle) + '</div>' +
+      '<div class="result-title">' + esc(displayTitle) + audioTag + '</div>' +
       '<div class="result-sub">' + esc(displayArtist) + '</div>';
     el.addEventListener('click', function() {
       selectTrack({ title: displayTitle, artist: displayArtist, ytId: t.id }, false);
@@ -1800,16 +1839,23 @@ function bindEvents() {
   // Before
   document.getElementById('before-cta').addEventListener('click', showEntry);
 
-  // Search field — refocus on tap anywhere in search screen
-  document.getElementById('s-search').addEventListener('click', function(e) {
-    var field = document.getElementById('search-field');
-    if (e.target !== field) {
-      field.focus();
-    }
+  // Tap on search field wrapper to re-open keyboard on mobile
+  document.getElementById('search-field').addEventListener('blur', function() {
+    // Don't force refocus — let the user tap results freely
   });
   document.getElementById('search-field').addEventListener('input', function(e) {
     clearTimeout(searchTimer);
     searchTimer = setTimeout(function() { doSearch(e.target.value.trim()); }, 400);
+  });
+
+  // Search back button
+  document.getElementById('search-back').addEventListener('click', function() {
+    // Go back to entry or stopped depending on session state
+    if (sess.trackCount > 0) {
+      showStopped();
+    } else {
+      showEntry();
+    }
   });
 
   // Listen screen statement buttons (appear at 30s, track still playing)
