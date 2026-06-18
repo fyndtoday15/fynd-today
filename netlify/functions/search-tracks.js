@@ -50,19 +50,20 @@ exports.handler = async function(event, context) {
 
   try {
     // Search YouTube for music tracks
-    // Smart query: if query looks like artist name only, add 'music' to bias toward songs
-    // If query looks like artist + song, leave as is for accuracy
+    // Query strategy:
+    // 1-2 words (artist only): append 'official audio' to get audio tracks not music videos
+    // 3+ words (song + artist): append 'official audio' to prefer audio-only uploads
     const words = query.trim().split(/\s+/);
     const searchQuery = words.length <= 2
-      ? query + ' music'
-      : query;
+      ? query + ' official audio'
+      : query + ' official audio';
 
     const searchUrl = 'https://www.googleapis.com/youtube/v3/search'
       + '?part=snippet'
       + '&q=' + encodeURIComponent(searchQuery)
       + '&type=video'
       + '&videoCategoryId=10'
-      + '&maxResults=8'
+      + '&maxResults=10'
       + '&relevanceLanguage=en'
       + '&key=' + YOUTUBE_API_KEY;
 
@@ -98,9 +99,9 @@ exports.handler = async function(event, context) {
           item.snippet.channelTitle
             .replace(/VEVO$/i, '')
             .replace(/\s*-\s*Topic$/i, '')
-            .replace(/\s*-\s*topic$/i, '')
             .trim()
         ),
+        isAudio: isTopic(item),
         thumbnail: item.snippet.thumbnails?.default?.url || '',
       }));
 
@@ -144,18 +145,32 @@ function cleanTitle(title) {
     .trim();
 }
 
-// Score result by source credibility — prefer official channels
+// Score result by source credibility and audio-first likelihood
 function sourceScore(item) {
   const channel = (item.snippet.channelTitle || '').toLowerCase();
   const title = (item.snippet.title || '').toLowerCase();
-  // Highest trust: VEVO, artist's own channel marked as Topic, major labels
-  if (channel.includes('vevo')) return 10;
-  if (channel.includes('- topic')) return 9;
-  if (channel.includes('records') || channel.includes('music') || channel.includes('entertainment')) return 7;
-  if (channel.includes('rap nation') || channel.includes('worldstar') || channel.includes('lyric')) return 4;
-  // Penalize known aggregator/unofficial patterns
-  if (channel.includes('fan') || channel.includes('best of') || channel.includes('playlist')) return 1;
-  return 5; // neutral
+
+  let score = 5;
+
+  // Boost: official audio in title = no intro, music starts immediately
+  if (title.includes('official audio')) score += 5;
+  else if (title.includes('audio')) score += 3;
+  // Penalize: music video likely has intro/talking before music
+  if (title.includes('official video') || title.includes('official music video')) score -= 3;
+  // Penalize: sped up, slowed, reverb = altered versions
+  if (title.includes('sped up') || title.includes('slowed') || title.includes('reverb')) score -= 4;
+  // Penalize: live, concert, performance = not studio
+  if (title.includes('live') || title.includes('concert') || title.includes('performance')) score -= 3;
+  // Penalize: remix, cover, mashup
+  if (title.includes('remix') || title.includes('cover') || title.includes('mashup')) score -= 2;
+
+  // Channel trust
+  if (channel.includes('vevo')) score += 4;
+  if (channel.includes('- topic')) score += 4;
+  if (channel.includes('records') || channel.includes('entertainment')) score += 2;
+  if (channel.includes('fan') || channel.includes('best of') || channel.includes('playlist')) score -= 3;
+
+  return score;
 }
 
 // Filter out clearly non-music results
@@ -165,4 +180,11 @@ function isLikelyMusic(item) {
   const junk = [' hz', 'subliminal', 'asmr', 'binaural', 'frequency meditation',
     'sleep music', 'study music', 'workout music', 'motivational', 'affirmation'];
   return !junk.some(function(j) { return title.includes(j) || channel.includes(j); });
+}
+
+// Topic channels are YouTube's auto-generated pure audio — no video intro
+function isTopic(item) {
+  const channel = (item.snippet.channelTitle || '').toLowerCase();
+  const title = (item.snippet.title || '').toLowerCase();
+  return channel.includes('- topic') || channel.endsWith('topic') || title.includes('official audio');
 }
