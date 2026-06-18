@@ -6,7 +6,7 @@ const ALLOWED_ORIGINS = [
   'https://www.fyndtoday.com',
 ];
 
-function httpsPost(url, headers, body) { 
+function httpsPost(url, headers, body) {
   return new Promise(function(resolve, reject) {
     const parsed = new URL(url);
     const data = JSON.stringify(body);
@@ -61,88 +61,62 @@ exports.handler = async function(event, context) {
 
 After someone listens to a track, two statements appear. The person picks the one that is true for them right now — or neither.
 
+THREE POSSIBLE POSITIONS — every track maps to exactly two of these three:
+STAY — the person is holding their position. Staying in something. Not pushing through yet. Present with what is.
+MOVE — the person is moving through something. Releasing, pushing forward, letting go.
+OPEN — the person is just becoming aware of something. Recognition is occurring. Something shifted and they are still inside the moment of noticing.
+
+YOUR FIRST JOB — RESEARCH AND DECIDE:
+Research the track's structural qualities — tempo, weight, density, how it builds or doesn't, whether it resolves or stays suspended, whether it has a clear forward motion or sits in stillness, whether it's emotionally direct or more disorienting/unexpected.
+
+Based on that research, decide which TWO of the three positions (Stay, Move, Open) are most plausible for someone listening to this specific track. Not every track is a Stay-vs-Move track. Some tracks are more naturally Stay-vs-Open (a track that either holds you still or catches you off guard). Some are Move-vs-Open (a track that either pushes you forward or opens something unexpected). Choose the pair that genuinely fits this track's character — don't default to Stay-vs-Move out of habit.
+
+THE THIRD POSITION NOT REPRESENTED becomes available as "neither" — so across many sessions, all three positions should appear as direct statement options roughly equally, not just Stay and Move with Open always relegated to "neither."
+
 WHAT THE STATEMENTS ARE:
-These are first-person recognition statements. The person reads them and one either fits or it doesn't.
-They describe what the person is doing — how they are relating to what they are in right now.
-They do NOT describe the music, the sound, the song, or the listening experience.
-The track informs the direction (holding vs moving), but the statement is about the person.
+First-person recognition statements describing what the person is doing — never what the sound is doing to them.
+The track informs which two positions are plausible. The person brings the content. Never assign emotional content from the track title or lyrics.
 
-THE TWO DIRECTIONS:
-Statement A: the person is holding their position — staying in something, not pushing through it yet
-Statement B: the person is moving through something — releasing, pushing forward, letting go
-
-If neither fits — that's valid. It means something else is happening (the Open position).
-
-HOW TO WRITE THEM:
-Research the track. Understand its structural qualities — does it hold space or create momentum? Is it heavy and contained or building and releasing? That tells you which direction each statement leans and how strongly.
-
-Write two statements in plain, natural, everyday first-person language.
-The kind of thing a person might actually say or think.
-Not poetic. Not clever. Not constructed. Just honest.
-
-LENGTH: one sentence. 8-14 words. Complete thought. Not a fragment.
-
-CRITICAL RULE — THE MOST IMPORTANT ONE:
+CRITICAL RULE:
 Do NOT infer emotional content from the track title, lyrics, or artist.
 "Bad Romance" does not mean the person is in a bad romance.
-"Burn Beautiful" does not mean the person is burning or in pain.
-"Lose Control" does not mean the person is losing control.
-The track title and artist tell you the structural qualities of the sound — tempo, weight, momentum.
-They do NOT tell you what the person is experiencing in their life.
-Statements that assign life context from track titles are wrong every time.
+The track title tells you structural qualities of the sound. Not what the person is experiencing in their life.
 
-WRONG:
-"i am staying in what i know even though part of me wants out" — inferred from "Bad Romance" lyrics
-"i am walking away from this instead of waiting anymore" — inferred from song content
-"i am letting myself feel this even though it hurts" — assigned emotional content
+HOW TO WRITE EACH POSITION AS A STATEMENT:
+Stay: "i am staying in this instead of [pushing through / reaching for what's next / resolving it]"
+Move: "i am moving through this even though [it is not easy / part of it is unresolved]"
+Open: "i am noticing something i did not expect" / "something just shifted and i am still in it" / "i did not see that coming and i am still right here in it"
 
-RIGHT:
-"i am staying in this instead of pushing through it" — no life context, pure position
-"i am moving through this even though it is not comfortable" — no life context, pure position
+LENGTH: one sentence, 8-14 words, complete thought, natural everyday language. Lowercase. No punctuation at the end.
 
-BANNED WORDS AND CONCEPTS — if any appear, rewrite:
-Music vocabulary: loop, pulse, beat, rhythm, tempo, flow, wave, frequency, tone, melody, sound, music, song, track, listen
-Metaphors: riding, surfing, waves, fire, burning, doors, paths, roads, frames, breaking through
-Emotional content from lyrics: anything that references the song's subject matter, storyline, or title meaning
-Abstract nouns: energy, space, vibe, healing, journey, experience, emotion, feeling
-Therapy language: carrying, holding on, letting go of pain, processing, healing
-
-WHAT GOOD STATEMENTS LOOK LIKE:
-They name a specific human position — something a person can recognize as true or not true for them right now.
-Both must be genuinely plausible for someone listening to this specific track.
-Neither one should be obviously "better" — both are valid human positions.
+BANNED WORDS: loop, pulse, beat, rhythm, tempo, flow, wave, frequency, tone, melody, sound, music, song, track, listen, riding, surfing, burning, doors, paths, energy, space, vibe, healing, journey, emotion, feeling.
 
 EXAMPLES OF RIGHT REGISTER:
-For a slow, heavy, emotionally weighted track:
+
+For a heavy, contained, emotionally weighted track (Stay vs Move fits):
 A: "i am staying in this instead of pushing through it"
-B: "i am ready to move through this even if it is not comfortable"
+B: "i am moving through this even though it is not easy"
 
-For an urgent, building, forward-moving track:
-A: "i am taking this slowly even though it wants to move fast"
-B: "i am moving with this and not holding back"
+For a track that is steady and grounded but has one unexpected shift in it (Stay vs Open fits):
+A: "i am staying with what is familiar here"
+B: "something just caught me off guard and i am still in it"
 
-For a raw, confessional, emotionally direct track:
-A: "i am sitting with what is true instead of looking away"
-B: "i am naming what is real and moving past it"
+For an unpredictable, genre-shifting, or surprising track (Move vs Open fits):
+A: "i am moving with this and not slowing down"
+B: "i did not expect that and i am still taking it in"
 
-WRONG — do not write like this:
-"i am letting it loop without needing it to resolve" — "it" is the sound, music vocabulary (loop)
-"i am riding the pulse forward" — riding + pulse = music metaphors
-"i am letting it move through me" — passive, sound as actor, vague "it"
-"i am staying in the weight of it" — vague "it" with no referent
-
-Respond in JSON only. No markdown:
-{"statementA": "...", "statementB": "..."}`;
+Respond in JSON only — include which two positions you chose:
+{"positionA": "stay|move|open", "statementA": "...", "positionB": "stay|move|open", "statementB": "..."}`;
 
   const userPrompt = `Track: "${title}" by ${artist}
 
-Research this track. Write two recognition statements for someone who just listened to it. JSON only.`;
+Research this track. Decide which two of the three positions (stay, move, open) fit it best. Write the two recognition statements. JSON only.`;
 
   async function callClaude() {
     const result = await httpsPost(
       'https://api.anthropic.com/v1/messages',
       { 'x-api-key': ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' },
-      { model: 'claude-sonnet-4-5', max_tokens: 200, system: systemPrompt,
+      { model: 'claude-sonnet-4-5', max_tokens: 250, system: systemPrompt,
         messages: [{ role: 'user', content: userPrompt }] }
     );
     if (result.status !== 200) throw new Error('API ' + result.status);
@@ -156,21 +130,32 @@ Research this track. Write two recognition statements for someone who just liste
     try { parsed = await callClaude(); }
     catch(e) { console.log('Retry:', e.message); parsed = await callClaude(); }
     if (!parsed.statementA || !parsed.statementB) throw new Error('Missing statements');
-    return { statusCode: 200, headers: corsHeaders, body: JSON.stringify({ statementA: parsed.statementA, statementB: parsed.statementB }) };
+    return {
+      statusCode: 200, headers: corsHeaders,
+      body: JSON.stringify({
+        statementA: parsed.statementA,
+        statementB: parsed.statementB,
+        positionA: parsed.positionA || 'stay',
+        positionB: parsed.positionB || 'move',
+      }),
+    };
   } catch(err) {
     console.error('get-statements failed:', err.message);
     return fallbackResponse(allowedOrigin, corsHeaders);
   }
 };
 
-const FALLBACK_PAIRS = [
-  ['i am staying in this instead of pushing through it', 'i am moving through this even though it is not easy'],
-  ['i am taking this in slowly', 'i am letting what wants to move actually move'],
-  ['i am staying with what is here', 'i am moving through what is here'],
-  ['i am not rushing this', 'i am not holding this back'],
+// Fallbacks cycle through all three pairings so Open isn't permanently absent
+const FALLBACK_SETS = [
+  { positionA: 'stay', statementA: 'i am staying in this instead of pushing through it',
+    positionB: 'move', statementB: 'i am moving through this even though it is not easy' },
+  { positionA: 'stay', statementA: 'i am staying with what is familiar here',
+    positionB: 'open', statementB: 'something just caught me off guard and i am still in it' },
+  { positionA: 'move', statementA: 'i am moving with this and not slowing down',
+    positionB: 'open', statementB: 'i did not expect that and i am still taking it in' },
 ];
 
 function fallbackResponse(allowedOrigin, corsHeaders) {
-  const pair = FALLBACK_PAIRS[Math.floor(Math.random() * FALLBACK_PAIRS.length)];
-  return { statusCode: 200, headers: corsHeaders, body: JSON.stringify({ statementA: pair[0], statementB: pair[1] }) };
+  const set = FALLBACK_SETS[Math.floor(Math.random() * FALLBACK_SETS.length)];
+  return { statusCode: 200, headers: corsHeaders, body: JSON.stringify(set) };
 }
