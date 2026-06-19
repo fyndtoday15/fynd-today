@@ -76,11 +76,21 @@ OPEN — noticing something unexpected, a shift, recognition occurring, off-guar
 
 Pick words/short phrases for each position that suit what THIS track structurally does. A heavy, slow, contained track should pull more naturally toward Stay-leaning words being prominent in the pool. A driving, building track pulls toward Move-leaning words. A track with unpredictable shifts, genre changes, or surprising turns pulls toward Open-leaning words. The pool should still include some words from all three categories (never zero from any one position) but the proportion and the chosen specific words should be shaped by the actual track.
 
-ALSO INCLUDE 2 COLOR WORDS — actual color names (red, blue, gold, green, purple, amber, silver, violet, crimson, teal, white, black, pink, orange, grey) that suit this track's character. These render visually IN that color on screen, so the person can recognize a color instantly, the same fast way they recognize a Stay/Move/Open word — no interpretation needed, just "yes, that one." Pick colors that genuinely suit the track's tone (a heavy, dark, contained track might pull toward black, crimson, violet; a bright, driving track might pull toward gold, orange, teal). These carry no position weight — they only add tonal flavor to the eventual output, but must be ACTUAL color names, never mood words like "warm" or "heavy" standing in for a color.
+ALSO INCLUDE 2 COLOR WORDS, chosen using this fixed logic — not aesthetic guessing:
+
+Color comes from the same structural reading you just did for Stay/Move/Open. Use these rules:
+— Track is heavy, slow, low-register, contained → pull from: black, crimson, violet, grey
+— Track is bright, driving, high-energy, fast-building → pull from: gold, orange, red, teal
+— Track is light, airy, sparse, delicate → pull from: white, silver, blue, pink
+— Track is dense, dark, intense, brooding → pull from: black, purple, crimson, violet
+— Track is warm, soulful, mid-tempo, groove-based → pull from: amber, gold, orange, green
+Pick exactly 2 colors from the single category above that best matches the track's dominant structural character. Do not mix colors from different categories. This keeps the color choice traceable to the same research you already did, not a separate aesthetic judgment.
+
+These render visually IN that color on screen, so the person can recognize a color instantly, the same fast way they recognize a Stay/Move/Open word — no interpretation needed, just "yes, that one." These carry no position weight — they only add tonal flavor to the eventual output, but must be ACTUAL color names, never mood words like "warm" or "heavy" standing in for a color.
 
 RULES FOR THE WORDS THEMSELVES:
 — Single words preferred. Occasional 2-word phrases only if a single word doesn't work (e.g. "not yet" for Open).
-— Plain, ordinary, human words. Not clinical, not poetic, not music jargon (never: tempo, beat, rhythm, melody, sound, song).
+— Plain, ordinary, human words anyone would recognize instantly. Not clinical, not poetic, not music jargon (never: tempo, beat, rhythm, melody, sound, song). Never a word that requires a dictionary — a stranger should read it and instantly know what it means, no exceptions.
 — Never assign emotional content from the track's title or lyrics. Research informs STRUCTURE (does it hold or move or surprise), never assigns what the listener is going through in their life.
 — Words must work for someone in any life situation — broad enough to be honestly tappable by many different people for many different reasons.
 — Color words must be from this exact list only: red, blue, gold, green, purple, amber, silver, violet, crimson, teal, white, black, pink, orange, grey
