@@ -446,30 +446,40 @@ html, body {
   text-align: center;
   margin-bottom: 20px;
 }
-.listen-stmt-btn {
+.tap-word-scatter {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 14px 16px;
+  max-width: 380px;
+  margin: 8px 0 36px;
+}
+.tap-word {
   background: none;
-  border: 1px solid rgba(240,237,230,0.1);
-  border-radius: 1px;
-  padding: 20px 22px;
+  border: 1px solid rgba(240,237,230,0.16);
+  border-radius: 20px;
+  padding: 9px 18px;
   font-family: var(--f);
-  font-size: clamp(15px, 3.8vw, 18px);
+  font-size: clamp(14px, 3.6vw, 16px);
   color: var(--fg);
   cursor: pointer;
-  text-align: left;
-  line-height: 1.55;
-  width: 100%;
-  max-width: 340px;
-  transition: border-color 0.2s ease, background 0.15s ease;
+  transition: border-color 0.2s ease, background 0.15s ease, transform 0.1s ease, opacity 0.2s ease;
+  opacity: 0;
+  transform: translateY(6px);
 }
-.listen-stmt-btn:active {
-  background: rgba(240,237,230,0.05);
-  border-color: rgba(240,237,230,0.3);
+.tap-word.show {
+  opacity: 1;
+  transform: translateY(0);
 }
-.listen-stmt-btn.chosen {
-  border-color: rgba(240,237,230,0.35);
-  background: rgba(240,237,230,0.04);
+.tap-word:active {
+  transform: scale(0.96);
 }
-.listen-stmt-neither {
+.tap-word.tapped {
+  border-color: rgba(240,237,230,0.6);
+  background: rgba(240,237,230,0.1);
+}
+.tap-done-btn {
   background: none;
   border: none;
   font-family: var(--f);
@@ -479,9 +489,18 @@ html, body {
   color: var(--dimmer);
   cursor: pointer;
   padding: 14px 0;
-  transition: color 0.2s ease;
+  transition: color 0.2s ease, opacity 0.2s ease;
+  opacity: 0;
 }
-.listen-stmt-neither:active { color: var(--fg); }
+.tap-done-btn.show { opacity: 1; }
+.tap-done-btn:active { color: var(--fg); }
+.tap-word.atmo-warm { color: #e8b88a; border-color: rgba(232,184,138,0.3); }
+.tap-word.atmo-cold { color: #9fc6d9; border-color: rgba(159,198,217,0.3); }
+.tap-word.atmo-heavy { color: #b89bd9; border-color: rgba(184,155,217,0.3); }
+.tap-word.atmo-bright { color: #f0e6a8; border-color: rgba(240,230,168,0.3); }
+.tap-word.atmo-electric { color: #8ad9d0; border-color: rgba(138,217,208,0.3); }
+.tap-word.atmo-soft { color: #e0c8d8; border-color: rgba(224,200,216,0.3); }
+
 #s-recognition { gap: 0; padding: 0 36px; }
 
 .recog-reveal {
@@ -616,6 +635,18 @@ html, body {
 
 /* ── S-REFLECTION ── */
 #s-reflection { gap: 0; padding: 0 40px; }
+
+.reflection-memory {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: rgba(240,237,230,0.5);
+  text-align: center;
+  margin-bottom: 18px;
+  opacity: 0;
+  transition: opacity 1s ease;
+  max-width: 340px;
+}
+.reflection-memory.show { opacity: 1; }
 
 .reflection-text {
   font-size: clamp(20px, 5vw, 30px);
@@ -887,18 +918,6 @@ html, body {
 <!-- WORDMARK -->
 <div id="wordmark">FYND<br>TODAY</div>
 
-<!-- SHARE OVERLAY -->
-<div id="share-overlay">
-  <button class="share-close" id="share-close">×</button>
-  <div class="share-card">
-    <div class="share-card-line" id="share-card-line"></div>
-    <div class="share-card-stmt" id="share-card-stmt"></div>
-    <div class="share-card-track" id="share-card-track"></div>
-    <div class="share-card-mark">FYND TODAY</div>
-    <button class="share-copy" id="share-copy">copy to share</button>
-  </div>
-</div>
-
 <!-- ARE YOU SURE -->
 <div id="sure-overlay">
   <div class="sure-text">are you sure?</div>
@@ -958,13 +977,12 @@ html, body {
   </div>
   <button class="listen-stop" id="listen-stop">← back</button>
 
-  <!-- Statements overlay — appears at 30s while track still plays -->
+  <!-- Tap-word recognition overlay — appears at 30s while track still plays -->
   <div class="listen-stmts" id="listen-stmts">
     <div class="listen-stmts-track" id="listen-stmts-track"></div>
-    <div class="listen-stmts-prompt">what is happening right now?</div>
-    <button class="listen-stmt-btn" id="listen-stmt-a"></button>
-    <button class="listen-stmt-btn" id="listen-stmt-b"></button>
-    <button class="listen-stmt-neither" id="listen-stmt-neither">neither</button>
+    <div class="listen-stmts-prompt">tap what's true right now</div>
+    <div class="tap-word-scatter" id="tap-word-scatter"></div>
+    <button class="tap-done-btn" id="tap-done-btn">that's it</button>
   </div>
 </div>
 
@@ -984,10 +1002,10 @@ html, body {
 
 <!-- S-REFLECTION -->
 <div class="screen" id="s-reflection">
+  <div class="reflection-memory" id="reflection-memory"></div>
   <div class="reflection-text" id="reflection-text"></div>
   <div class="reflection-actions" id="reflection-actions">
     <button class="keep-going-btn" id="keep-going-btn">keep going</button>
-    <button class="share-btn" id="share-btn">share this</button>
   </div>
 </div>
 
@@ -1176,7 +1194,6 @@ function showSearch() {
   // Safety: force-clear any overlay that might be stuck blocking clicks
   document.getElementById('sure-overlay').classList.remove('show');
   document.getElementById('listen-stmts').classList.remove('show');
-  document.getElementById('share-overlay').classList.remove('show');
 
   show('s-search');
   document.getElementById('search-results').innerHTML = '';
@@ -1255,17 +1272,17 @@ function selectTrack(track, isCurated) {
   sess.chosenPosition = null;
   sess.trackCount++;
 
-  // Reset statements and increment token to cancel any pending callbacks
-  sess.pendingStatements = null;
+  // Reset tap state and increment token to cancel any pending callbacks
+  sess.wordPool = null;
+  sess.tappedWords = [];
   sess.reflectionToken = (sess.reflectionToken || 0) + 1;
 
   // Check if they have brought this exact song before
   var history = getTrackHistory(track.title, track.artist);
   sess.sameSongHistory = history; // { lastPosition, count, previousPosition, lastDate } or null
 
-  // Fetch Claude-researched statements for this specific track in background
-  // By the time 60s of listening is done, statements will be ready
-  fetchStatements(track.title, track.artist);
+  // Fetch Claude-researched word pool for this specific track in background
+  fetchWordPool(track.title, track.artist);
 
   goListen();
 }
@@ -1417,22 +1434,35 @@ function showStatementsOverlay() {
   var stmtWrap = document.getElementById('listen-stmts');
   if (!stmtWrap) return;
 
-  // Populate with Claude-researched or fallback pair
-  var pair;
-  if (sess.pendingStatements && sess.pendingStatements.a && sess.pendingStatements.b) {
-    pair = [sess.pendingStatements.a, sess.pendingStatements.b];
-  } else {
-    var PAIRS_LOCAL = [
-      ['something in me got quieter', 'something started moving'],
-      ['i felt held where i was', 'i felt pulled somewhere'],
-      ['it settled something', 'it shifted something'],
-      ['i stayed inside it', 'it took me somewhere'],
-    ];
-    pair = PAIRS_LOCAL[Math.floor(Math.random() * PAIRS_LOCAL.length)];
-  }
+  var pool = (sess.wordPool && sess.wordPool.length >= 6) ? sess.wordPool : FALLBACK_WORD_POOL;
+  sess.tappedWords = [];
 
-  document.getElementById('listen-stmt-a').textContent = pair[0];
-  document.getElementById('listen-stmt-b').textContent = pair[1];
+  var scatter = document.getElementById('tap-word-scatter');
+  scatter.innerHTML = '';
+
+  // Shuffle pool so position order is never readable as a pattern
+  var shuffled = pool.slice().sort(function() { return Math.random() - 0.5; });
+
+  shuffled.forEach(function(w, i) {
+    var btn = document.createElement('button');
+    btn.className = 'tap-word';
+    btn.textContent = w.text;
+    if (w.position === 'atmosphere') {
+      var atmoClass = atmosphereColorClass(w.text);
+      if (atmoClass) btn.classList.add(atmoClass);
+    }
+    btn.setAttribute('data-position', w.position);
+    btn.addEventListener('click', function() {
+      toggleTapWord(btn, w);
+    });
+    scatter.appendChild(btn);
+    setTimeout(function() { btn.classList.add('show'); }, 80 * i);
+  });
+
+  // Show "that's it" button after a short delay so they have time to read first
+  var doneBtn = document.getElementById('tap-done-btn');
+  doneBtn.classList.remove('show');
+  setTimeout(function() { doneBtn.classList.add('show'); }, 80 * shuffled.length + 600);
 
   // Show track name on overlay
   var trackLabel = document.getElementById('listen-stmts-track');
@@ -1452,69 +1482,86 @@ function showStatementsOverlay() {
   if (stop) stop.classList.add('hidden-under-overlay');
   if (tag) tag.classList.add('hidden-under-overlay');
 
-  // Fade in the overlay
   stmtWrap.classList.add('show');
 }
 
-// ── FETCH STATEMENTS FROM CLAUDE ─────────────────────────────────────────────
+function atmosphereColorClass(text) {
+  var map = {
+    warm: 'atmo-warm', cold: 'atmo-cold', heavy: 'atmo-heavy',
+    bright: 'atmo-bright', electric: 'atmo-electric', soft: 'atmo-soft',
+    sharp: 'atmo-electric', loud: 'atmo-electric', muted: 'atmo-cold',
+    slow: 'atmo-cold', fading: 'atmo-soft',
+  };
+  return map[text.toLowerCase()] || null;
+}
+
+function toggleTapWord(btn, wordObj) {
+  var idx = sess.tappedWords.findIndex(function(w) { return w.text === wordObj.text; });
+  if (idx === -1) {
+    sess.tappedWords.push(wordObj);
+    btn.classList.add('tapped');
+  } else {
+    sess.tappedWords.splice(idx, 1);
+    btn.classList.remove('tapped');
+  }
+}
+
+// ── FETCH WORD POOL FROM CLAUDE ───────────────────────────────────────────────
 // Fires when track is selected — runs in background during listening.
-// By the time recognition screen appears, statements are ready.
-function fetchStatements(title, artist) {
-  fetch('/.netlify/functions/get-statements', {
+// By the time recognition screen appears, the pool is ready.
+function fetchWordPool(title, artist) {
+  fetch('/.netlify/functions/get-word-pool', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ title: title, artist: artist }),
   })
   .then(function(r) { return r.json(); })
   .then(function(data) {
-    sess.pendingStatements = {
-      a: data.statementA || null,
-      b: data.statementB || null,
-    };
-    sess.positionA = data.positionA || 'stay';
-    sess.positionB = data.positionB || 'move';
+    sess.wordPool = (data.words && data.words.length >= 6) ? data.words : FALLBACK_WORD_POOL;
   })
   .catch(function() {
-    sess.pendingStatements = null;
-    sess.positionA = 'stay';
-    sess.positionB = 'move';
+    sess.wordPool = FALLBACK_WORD_POOL;
   });
 }
 
-function getThirdPosition() {
-  var all = ['stay', 'move', 'open'];
-  var used = [sess.positionA, sess.positionB];
-  for (var i = 0; i < all.length; i++) {
-    if (used.indexOf(all[i]) === -1) return all[i];
-  }
-  return 'open'; // fallback
-}
+var FALLBACK_WORD_POOL = [
+  { text: 'still', position: 'stay' },
+  { text: 'held', position: 'stay' },
+  { text: 'quiet', position: 'stay' },
+  { text: 'forward', position: 'move' },
+  { text: 'pulling', position: 'move' },
+  { text: 'building', position: 'move' },
+  { text: 'unexpected', position: 'open' },
+  { text: 'shift', position: 'open' },
+  { text: 'warm', position: 'atmosphere' },
+  { text: 'heavy', position: 'atmosphere' },
+];
 
 // ── HANDLE CHOICE FROM LISTEN OVERLAY ────────────────────────────────────────
 // Track fades out, then recognition screen appears
-function handleListenChoice(position, btnEl) {
+function computeDominantFromTaps() {
+  var counts = { stay: 0, move: 0, open: 0 };
+  sess.tappedWords.forEach(function(w) {
+    if (counts[w.position] !== undefined) counts[w.position]++;
+  });
+  var max = Math.max(counts.stay, counts.move, counts.open);
+  if (max === 0) return 'open'; // tapped nothing or only atmosphere — treat as Open
+  var winners = Object.keys(counts).filter(function(k) { return counts[k] === max; });
+  if (winners.length > 1) return 'mixed';
+  return winners[0];
+}
+
+function handleTapDone() {
   var elapsed = Date.now() - sess.choiceTime;
-  sess.responseSpeed = elapsed < 3000 ? 'fast' : elapsed > 12000 ? 'slow' : 'normal';
+  sess.responseSpeed = elapsed < 3000 ? 'fast' : elapsed > 25000 ? 'slow' : 'normal';
 
-  // Store the actual statement text chosen for Claude's reflection context
-  if (btnEl) {
-    document.querySelectorAll('.listen-stmt-btn').forEach(function(b) {
-      b.classList.remove('chosen');
-    });
-    btnEl.classList.add('chosen');
-    sess.chosenStatement = btnEl.textContent || '';
-  } else {
-    sess.chosenStatement = 'neither'; // open position
-  }
+  var dominant = computeDominantFromTaps();
+  sess.pendingChoice = dominant;
 
-  // Don't fade audio yet — music keeps playing through reflection appearing
-  // Audio fades AFTER reflection line is visible (handled in goReflection)
   clearTimeout(sess.recognitionTimer);
   clearTimeout(sess.stopTimer);
-  sess.pendingChoice = position;
 
-  // Go straight to recognition/reflection — no audio fade yet
-  goRecognitionWithChoice(position);
+  goRecognitionWithChoice(dominant);
 }
 
 // ── RECOGNITION ───────────────────────────────────────────────────────────────
@@ -1536,11 +1583,6 @@ function goRecognitionWithChoice(position) {
       sess.trackTitle + ' — ' + sess.trackArtist;
     setTimeout(function() { reveal.classList.add('show'); }, 300);
   }
-
-  // Hide the statement buttons on recognition screen (already chose on listen screen)
-  document.getElementById('stmt-a').style.display = 'none';
-  document.getElementById('stmt-b').style.display = 'none';
-  document.getElementById('stmt-neither').style.display = 'none';
 
   // Push back 30% of time after first track
   if (sess.trackCount > 1 && Math.random() < 0.3) {
@@ -1653,76 +1695,81 @@ function fadeAudioOut() {
 function goReflection() {
   show('s-reflection');
 
+  var mem = document.getElementById('reflection-memory');
   var txt = document.getElementById('reflection-text');
   var acts = document.getElementById('reflection-actions');
+  mem.classList.remove('show');
+  mem.textContent = '';
   txt.classList.remove('show');
   acts.classList.remove('show');
 
   // Music still playing — fade it out now that reflection screen is showing
   setTimeout(function() { fadeAudioOut(); }, 400);
 
-  // Silence 20% of time after first track (point 3)
-  var doSilence = sess.trackCount > 1 && Math.random() < 0.2;
-
-  if (doSilence) {
-    setTimeout(function() { acts.classList.add('show'); }, 3200);
-    return;
-  }
-
-  getReflection(function(line) {
-    sess.reflectionLine = line;
-    txt.textContent = line;
+  getForm(function(memoryLine, challenge) {
+    sess.reflectionLine = challenge;
+    if (memoryLine) {
+      mem.textContent = memoryLine;
+      mem.classList.add('show');
+    }
+    txt.textContent = challenge;
     txt.classList.add('show');
     acts.classList.add('show');
   });
 }
 
-function getReflection(cb) {
-  var dominant = getDominant();
-  var token = sess.reflectionToken; // capture current token
+function getForm(cb) {
+  var token = sess.reflectionToken;
   var settled = false;
+  var dominant = sess.chosenPosition || computeDominantFromTaps();
 
-  // Safety: if fetch takes too long, show fallback after 4s so user is never stuck
+  var history = sess.sameSongHistory; // set in selectTrack via getTrackHistory
+  var hasHistory = !!history;
+
   var safetyTimer = setTimeout(function() {
     if (settled) return;
     settled = true;
-    cb(fallback(dominant));
-  }, 4000);
+    cb('', getFallbackChallenge(dominant));
+  }, 4500);
 
-  fetch('/.netlify/functions/generate-reflection', {
+  fetch('/.netlify/functions/generate-form', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      sessionNumber: sess.sessionCount + 1,
-      positions: sess.positions,
       trackTitle: sess.trackTitle || '',
       trackArtist: sess.trackArtist || '',
-      chosenStatement: sess.chosenStatement || '',
-      chosenPosition: sess.chosenPosition || dominant,
-      searchedTrack: sess.isSearched,
-      sameSongReturned: !!(sess.sameSongHistory),
-      sameSongCount: sess.sameSongHistory ? sess.sameSongHistory.count : 0,
-      sameSongPreviousPosition: sess.sameSongHistory ? sess.sameSongHistory.lastPosition : null,
-      previousPosition: LS.get('lastPosition'),
-      responseSpeed: sess.responseSpeed,
-      firstName: sess.firstName,
+      tappedWords: sess.tappedWords || [],
+      dominantPosition: dominant,
+      hasHistory: hasHistory,
+      historyCount: hasHistory ? (history.count + 1) : 1,
+      historyPreviousPosition: hasHistory ? history.lastPosition : null,
     }),
   })
   .then(function(r) { return r.json(); })
   .then(function(data) {
-    if (settled) return; // safety timer already fired
+    if (settled) return;
     settled = true;
     clearTimeout(safetyTimer);
-    if (token !== sess.reflectionToken) return; // genuinely stale — new track started
-    if (data.beforeLine) LS.set('beforeLine', data.beforeLine);
-    cb(data.reflectionLine || fallback(dominant));
+    if (token !== sess.reflectionToken) return;
+    cb(data.memoryLine || '', data.challenge || getFallbackChallenge(dominant));
   })
   .catch(function() {
     if (settled) return;
     settled = true;
     clearTimeout(safetyTimer);
-    cb(fallback(dominant));
+    cb('', getFallbackChallenge(dominant));
   });
+}
+
+function getFallbackChallenge(position) {
+  var lines = {
+    stay: ["don't rush whatever's next, you're not behind", 'stay in it a little longer, no one is timing you'],
+    move: ['go finish the thing you keep circling', "let it pull you somewhere loud for once"],
+    open: ["say yes to the next weird thing, on purpose", 'let this one stay unresolved a little longer'],
+    mixed: ["you're carrying two directions right now, that's allowed"],
+  };
+  var opts = lines[position] || lines.stay;
+  return opts[Math.floor(Math.random() * opts.length)];
 }
 
 function getDominant() {
@@ -1791,25 +1838,6 @@ function showEmail() {
 }
 
 // ── SHARE ─────────────────────────────────────────────────────────────────────
-function showShare() {
-  if (!sess.reflectionLine) return;
-
-  document.getElementById('share-card-line').textContent = sess.reflectionLine;
-
-  var stmtEl = document.getElementById('share-card-stmt');
-  if (stmtEl) {
-    stmtEl.textContent = (sess.chosenStatement && sess.chosenStatement !== 'neither')
-      ? '"' + sess.chosenStatement + '"' : '';
-  }
-  var trackEl = document.getElementById('share-card-track');
-  if (trackEl) {
-    trackEl.textContent = sess.trackTitle
-      ? sess.trackTitle + (sess.trackArtist ? ' — ' + sess.trackArtist : '') : '';
-  }
-
-  document.getElementById('share-overlay').classList.add('show');
-}
-
 // ── EMAIL SUBMIT ──────────────────────────────────────────────────────────────
 function submitEmail() {
   var name = document.getElementById('name-input').value.trim();
@@ -1905,15 +1933,9 @@ function bindEvents() {
     }
   });
 
-  // Listen screen statement buttons (appear at 30s, track still playing)
-  document.getElementById('listen-stmt-a').addEventListener('click', function() {
-    handleListenChoice(sess.positionA || 'stay', this);
-  });
-  document.getElementById('listen-stmt-b').addEventListener('click', function() {
-    handleListenChoice(sess.positionB || 'move', this);
-  });
-  document.getElementById('listen-stmt-neither').addEventListener('click', function() {
-    handleListenChoice(getThirdPosition(), null);
+  // Tap-word "that's it" button (appears at 30s, track still playing)
+  document.getElementById('tap-done-btn').addEventListener('click', function() {
+    handleTapDone();
   });
 
   // Listen
@@ -1956,33 +1978,6 @@ function bindEvents() {
 
   // Reflection
   document.getElementById('keep-going-btn').addEventListener('click', keepGoing);
-  document.getElementById('share-btn').addEventListener('click', showShare);
-
-  // Share
-  document.getElementById('share-close').addEventListener('click', function() {
-    document.getElementById('share-overlay').classList.remove('show');
-  });
-  document.getElementById('share-copy').addEventListener('click', function() {
-    // Build shareable text: reflection + what they chose + track + brand
-    var parts = [sess.reflectionLine];
-    if (sess.chosenStatement && sess.chosenStatement !== 'neither') {
-      parts.push('\n"' + sess.chosenStatement + '"');
-    }
-    if (sess.trackTitle) {
-      parts.push('\n' + sess.trackTitle + (sess.trackArtist ? ' — ' + sess.trackArtist : ''));
-    }
-    parts.push('\n\nfyndtoday.com');
-    var text = parts.join('\n');
-    var btn = document.getElementById('share-copy');
-    if (navigator.share) {
-      navigator.share({ text: text }).catch(function() {});
-    } else {
-      navigator.clipboard.writeText(text).then(function() {
-        btn.textContent = 'copied';
-        setTimeout(function() { btn.textContent = 'copy to share'; }, 2000);
-      }).catch(function() {});
-    }
-  });
 
   // Stopped
   document.getElementById('btn-keep-going-2').addEventListener('click', keepGoing);
