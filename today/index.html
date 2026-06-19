@@ -482,24 +482,35 @@ html, body {
 .tap-done-btn {
   background: none;
   border: none;
+  border-bottom: 1px solid rgba(240,237,230,0.4);
   font-family: var(--f);
-  font-size: 10px;
-  letter-spacing: 0.2em;
+  font-size: 11px;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: var(--dimmer);
+  color: var(--fg);
   cursor: pointer;
-  padding: 14px 0;
-  transition: color 0.2s ease, opacity 0.2s ease;
+  padding: 10px 4px;
+  margin-top: 8px;
+  transition: opacity 0.2s ease, border-color 0.2s ease;
   opacity: 0;
 }
 .tap-done-btn.show { opacity: 1; }
-.tap-done-btn:active { color: var(--fg); }
-.tap-word.atmo-warm { color: #e8b88a; border-color: rgba(232,184,138,0.3); }
-.tap-word.atmo-cold { color: #9fc6d9; border-color: rgba(159,198,217,0.3); }
-.tap-word.atmo-heavy { color: #b89bd9; border-color: rgba(184,155,217,0.3); }
-.tap-word.atmo-bright { color: #f0e6a8; border-color: rgba(240,230,168,0.3); }
-.tap-word.atmo-electric { color: #8ad9d0; border-color: rgba(138,217,208,0.3); }
-.tap-word.atmo-soft { color: #e0c8d8; border-color: rgba(224,200,216,0.3); }
+.tap-done-btn:active { border-color: rgba(240,237,230,0.8); opacity: 0.7; }
+.tap-word.colorword-red { color: #e26a6a; border-color: rgba(226,106,106,0.35); }
+.tap-word.colorword-blue { color: #7aa8e0; border-color: rgba(122,168,224,0.35); }
+.tap-word.colorword-gold { color: #d4af6a; border-color: rgba(212,175,106,0.35); }
+.tap-word.colorword-green { color: #7ec98f; border-color: rgba(126,201,143,0.35); }
+.tap-word.colorword-purple { color: #b08ad9; border-color: rgba(176,138,217,0.35); }
+.tap-word.colorword-amber { color: #e0a05a; border-color: rgba(224,160,90,0.35); }
+.tap-word.colorword-silver { color: #c9cdd3; border-color: rgba(201,205,211,0.35); }
+.tap-word.colorword-violet { color: #9b8ad9; border-color: rgba(155,138,217,0.35); }
+.tap-word.colorword-crimson { color: #d14d5a; border-color: rgba(209,77,90,0.35); }
+.tap-word.colorword-teal { color: #6ec4bc; border-color: rgba(110,196,188,0.35); }
+.tap-word.colorword-white { color: #f5f3ed; border-color: rgba(245,243,237,0.4); }
+.tap-word.colorword-black { color: #9a9690; border-color: rgba(154,150,144,0.4); }
+.tap-word.colorword-pink { color: #e09ab8; border-color: rgba(224,154,184,0.35); }
+.tap-word.colorword-orange { color: #e08a52; border-color: rgba(224,138,82,0.35); }
+.tap-word.colorword-grey { color: #a8a8a8; border-color: rgba(168,168,168,0.35); }
 
 #s-recognition { gap: 0; padding: 0 36px; }
 
@@ -980,9 +991,9 @@ html, body {
   <!-- Tap-word recognition overlay — appears at 30s while track still plays -->
   <div class="listen-stmts" id="listen-stmts">
     <div class="listen-stmts-track" id="listen-stmts-track"></div>
-    <div class="listen-stmts-prompt">tap what's true right now</div>
+    <div class="listen-stmts-prompt">recognize</div>
     <div class="tap-word-scatter" id="tap-word-scatter"></div>
-    <button class="tap-done-btn" id="tap-done-btn">that's it</button>
+    <button class="tap-done-btn" id="tap-done-btn">carry this forward</button>
   </div>
 </div>
 
@@ -1447,9 +1458,9 @@ function showStatementsOverlay() {
     var btn = document.createElement('button');
     btn.className = 'tap-word';
     btn.textContent = w.text;
-    if (w.position === 'atmosphere') {
-      var atmoClass = atmosphereColorClass(w.text);
-      if (atmoClass) btn.classList.add(atmoClass);
+    if (w.position === 'color') {
+      var colorClass = colorWordClass(w.text);
+      if (colorClass) btn.classList.add(colorClass);
     }
     btn.setAttribute('data-position', w.position);
     btn.addEventListener('click', function() {
@@ -1485,12 +1496,16 @@ function showStatementsOverlay() {
   stmtWrap.classList.add('show');
 }
 
-function atmosphereColorClass(text) {
+function colorWordClass(text) {
+  // Literal color words render in their own actual color — instant recognition,
+  // no interpretation. "gold" looks gold. "blue" looks blue.
   var map = {
-    warm: 'atmo-warm', cold: 'atmo-cold', heavy: 'atmo-heavy',
-    bright: 'atmo-bright', electric: 'atmo-electric', soft: 'atmo-soft',
-    sharp: 'atmo-electric', loud: 'atmo-electric', muted: 'atmo-cold',
-    slow: 'atmo-cold', fading: 'atmo-soft',
+    red: 'colorword-red', blue: 'colorword-blue', gold: 'colorword-gold',
+    green: 'colorword-green', purple: 'colorword-purple', amber: 'colorword-amber',
+    silver: 'colorword-silver', violet: 'colorword-violet', crimson: 'colorword-crimson',
+    teal: 'colorword-teal', white: 'colorword-white', black: 'colorword-black',
+    pink: 'colorword-pink', orange: 'colorword-orange', grey: 'colorword-grey',
+    gray: 'colorword-grey',
   };
   return map[text.toLowerCase()] || null;
 }
@@ -1533,8 +1548,8 @@ var FALLBACK_WORD_POOL = [
   { text: 'building', position: 'move' },
   { text: 'unexpected', position: 'open' },
   { text: 'shift', position: 'open' },
-  { text: 'warm', position: 'atmosphere' },
-  { text: 'heavy', position: 'atmosphere' },
+  { text: 'gold', position: 'color' },
+  { text: 'blue', position: 'color' },
 ];
 
 // ── HANDLE CHOICE FROM LISTEN OVERLAY ────────────────────────────────────────
@@ -1545,7 +1560,7 @@ function computeDominantFromTaps() {
     if (counts[w.position] !== undefined) counts[w.position]++;
   });
   var max = Math.max(counts.stay, counts.move, counts.open);
-  if (max === 0) return 'open'; // tapped nothing or only atmosphere — treat as Open
+  if (max === 0) return 'open'; // tapped nothing or only color words — treat as Open
   var winners = Object.keys(counts).filter(function(k) { return counts[k] === max; });
   if (winners.length > 1) return 'mixed';
   return winners[0];
