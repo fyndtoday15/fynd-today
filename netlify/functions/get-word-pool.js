@@ -76,21 +76,22 @@ OPEN — noticing something unexpected, a shift, recognition occurring, off-guar
 
 Pick words/short phrases for each position that suit what THIS track structurally does. A heavy, slow, contained track should pull more naturally toward Stay-leaning words being prominent in the pool. A driving, building track pulls toward Move-leaning words. A track with unpredictable shifts, genre changes, or surprising turns pulls toward Open-leaning words. The pool should still include some words from all three categories (never zero from any one position) but the proportion and the chosen specific words should be shaped by the actual track.
 
-ALSO INCLUDE 2-3 ATMOSPHERE WORDS — words describing texture/temperature/intensity (e.g. warm, heavy, sharp, electric, muted, bright, slow, loud, soft, cold) that suit this track's character. These carry no position weight — they only add tonal flavor to the eventual output.
+ALSO INCLUDE 2 COLOR WORDS — actual color names (red, blue, gold, green, purple, amber, silver, violet, crimson, teal, white, black, pink, orange, grey) that suit this track's character. These render visually IN that color on screen, so the person can recognize a color instantly, the same fast way they recognize a Stay/Move/Open word — no interpretation needed, just "yes, that one." Pick colors that genuinely suit the track's tone (a heavy, dark, contained track might pull toward black, crimson, violet; a bright, driving track might pull toward gold, orange, teal). These carry no position weight — they only add tonal flavor to the eventual output, but must be ACTUAL color names, never mood words like "warm" or "heavy" standing in for a color.
 
 RULES FOR THE WORDS THEMSELVES:
 — Single words preferred. Occasional 2-word phrases only if a single word doesn't work (e.g. "not yet" for Open).
 — Plain, ordinary, human words. Not clinical, not poetic, not music jargon (never: tempo, beat, rhythm, melody, sound, song).
 — Never assign emotional content from the track's title or lyrics. Research informs STRUCTURE (does it hold or move or surprise), never assigns what the listener is going through in their life.
 — Words must work for someone in any life situation — broad enough to be honestly tappable by many different people for many different reasons.
+— Color words must be from this exact list only: red, blue, gold, green, purple, amber, silver, violet, crimson, teal, white, black, pink, orange, grey
 
 EXAMPLE WORD BANKS BY POSITION (style reference — generate your own fitting this specific track, do not reuse these verbatim every time):
 Stay-style: still, held, quiet, steady, grounded, settled, here, slow, anchored, present, rooted, paused
 Move-style: forward, pulling, lifting, going, building, rising, reaching, faster, ahead, loosening, releasing
 Open-style: unexpected, shift, surprised, different, sudden, awake, cracked open, strange, fresh, off guard, surfacing, new
 
-Respond in JSON only — exactly 10 words/phrases total (mix of stay/move/open/atmosphere), each tagged:
-{"words": [{"text": "...", "position": "stay|move|open|atmosphere"}, ... 10 total]}`;
+Respond in JSON only — exactly 10 words/phrases total (mix of stay/move/open/color), each tagged:
+{"words": [{"text": "...", "position": "stay|move|open|color"}, ... 10 total]}`;
 
   const userPrompt = `Track: "${title}" by ${artist}
 
@@ -132,8 +133,8 @@ const FALLBACK_WORDS = [
   { text: 'building', position: 'move' },
   { text: 'unexpected', position: 'open' },
   { text: 'shift', position: 'open' },
-  { text: 'warm', position: 'atmosphere' },
-  { text: 'heavy', position: 'atmosphere' },
+  { text: 'gold', position: 'color' },
+  { text: 'blue', position: 'color' },
 ];
 
 function fallbackResponse(allowedOrigin, corsHeaders) {
