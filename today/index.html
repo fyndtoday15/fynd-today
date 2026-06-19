@@ -991,9 +991,9 @@ html, body {
   <!-- Tap-word recognition overlay — appears at 30s while track still plays -->
   <div class="listen-stmts" id="listen-stmts">
     <div class="listen-stmts-track" id="listen-stmts-track"></div>
-    <div class="listen-stmts-prompt">recognize</div>
+    <div class="listen-stmts-prompt">tap what you recognize</div>
     <div class="tap-word-scatter" id="tap-word-scatter"></div>
-    <button class="tap-done-btn" id="tap-done-btn">carry this forward</button>
+    <button class="tap-done-btn" id="tap-done-btn">done — see what it means</button>
   </div>
 </div>
 
@@ -1146,7 +1146,33 @@ document.addEventListener('DOMContentLoaded', function() {
   }, 700);
 });
 
+function checkResetParam() {
+  try {
+    var params = new URLSearchParams(window.location.search);
+    if (params.get('reset') === 'true') {
+      // Clear all FYND TODAY storage — both the prefixed session keys
+      // and the per-track memory history
+      var keysToRemove = [];
+      for (var i = 0; i < localStorage.length; i++) {
+        var key = localStorage.key(i);
+        if (key && (key.indexOf('fynd2_') === 0 || key === 'fynd_trackHistory')) {
+          keysToRemove.push(key);
+        }
+      }
+      keysToRemove.forEach(function(k) { localStorage.removeItem(k); });
+
+      // Clean the URL so a refresh doesn't re-trigger reset
+      var cleanUrl = window.location.pathname;
+      window.history.replaceState({}, document.title, cleanUrl);
+      return true;
+    }
+  } catch(e) {}
+  return false;
+}
+
 function init() {
+  checkResetParam();
+
   sess.email = LS.get('email');
   sess.firstName = LS.get('firstName');
   sess.sessionCount = LS.get('sessionCount') || 0;
@@ -1414,25 +1440,25 @@ function playYouTube(ytId) {
         // YT.PlayerState.ENDED = 0
         if (e.data === 0) {
           clearTimeout(sess.recognitionTimer);
-          // If statements already showing, do nothing — user will pick
-          // If not yet showing, show them now (short track)
+          // If words aren't showing yet (short track ended before 30s), show them now
           var stmtWrap = document.getElementById('listen-stmts');
           if (stmtWrap && !stmtWrap.classList.contains('show')) {
             showStatementsOverlay();
           }
-          // If track ended without user picking, go to recognition after 8s
-          setTimeout(function() {
-            var stmtWrapCheck = document.getElementById('listen-stmts');
-            if (stmtWrapCheck && stmtWrapCheck.classList.contains('show')) {
-              goRecognition();
-            }
-          }, 8000);
+          // Track audio has ended — that's fine. The word scatter and the
+          // forward button stay exactly as they are. The person decides
+          // when they're done by tapping the button themselves.
+          // No auto-advance, no timer, no silent screen change.
         }
       },
       onError: function() {
-        // Track unavailable — move to recognition
+        // Track unavailable — show the word scatter so they aren't stuck
+        // on a dead player with nothing to do
         clearTimeout(sess.recognitionTimer);
-        goRecognition();
+        var stmtWrap = document.getElementById('listen-stmts');
+        if (stmtWrap && !stmtWrap.classList.contains('show')) {
+          showStatementsOverlay();
+        }
       },
     },
   });
