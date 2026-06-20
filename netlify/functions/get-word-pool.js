@@ -89,18 +89,20 @@ Pick exactly 2 colors from the single category above that best matches the track
 These render visually IN that color on screen, so the person can recognize a color instantly, the same fast way they recognize a Stay/Move/Open word — no interpretation needed, just "yes, that one." These carry no position weight — they only add tonal flavor to the eventual output, but must be ACTUAL color names, never mood words like "warm" or "heavy" standing in for a color.
 
 RULES FOR THE WORDS THEMSELVES:
+— PRESENT MOMENT ONLY, NO EXCEPTIONS, but this is a meaning test, not a spelling test. A word qualifies if it describes a true condition of right now, even if the word's grammatical form looks past tense. "held" is fine because it describes the state of being held right now, the same way "i am held" is present. "paused" is fine because it describes being in a pause right now. "still" is fine. What is NOT allowed is a word that can only describe something already finished and over, like "ended," "left," "decided," or "finished," where the action is complete and the moment has passed. Test each word by asking: could a person honestly think this about themselves in this exact second while the song is playing? If yes, it qualifies regardless of its grammatical tense.
+— NEVER use a dash or hyphen anywhere in any word, phrase, or surrounding text.
 — Single words preferred. Occasional 2-word phrases only if a single word doesn't work (e.g. "not yet" for Open).
 — Plain, ordinary, human words anyone would recognize instantly. Not clinical, not poetic, not music jargon (never: tempo, beat, rhythm, melody, sound, song). Never a word that requires a dictionary — a stranger should read it and instantly know what it means, no exceptions.
 — Never assign emotional content from the track's title or lyrics. Research informs STRUCTURE (does it hold or move or surprise), never assigns what the listener is going through in their life.
 — Words must work for someone in any life situation — broad enough to be honestly tappable by many different people for many different reasons.
 — Color words must be from this exact list only: red, blue, gold, green, purple, amber, silver, violet, crimson, teal, white, black, pink, orange, grey
 
-EXAMPLE WORD BANKS BY POSITION (style reference — generate your own fitting this specific track, do not reuse these verbatim every time):
-Stay-style: still, held, quiet, steady, grounded, settled, here, slow, anchored, present, rooted, paused
-Move-style: forward, pulling, lifting, going, building, rising, reaching, faster, ahead, loosening, releasing
-Open-style: unexpected, shift, surprised, different, sudden, awake, cracked open, strange, fresh, off guard, surfacing, new
+EXAMPLE WORD BANKS BY POSITION (style reference, all present tense, generate your own fitting this specific track, do not reuse these verbatim every time):
+Stay style: still, holding, quiet, steady, grounded, settling, here, slow, anchored, present, rooting, pausing
+Move style: forward, pulling, lifting, going, building, rising, reaching, faster, ahead, loosening, releasing
+Open style: unexpected, shifting, surprising, different, sudden, awake, cracking open, strange, fresh, off guard, surfacing, new
 
-Respond in JSON only — exactly 10 words/phrases total (mix of stay/move/open/color), each tagged:
+Respond in JSON only, exactly 10 words/phrases total (mix of stay/move/open/color), each tagged:
 {"words": [{"text": "...", "position": "stay|move|open|color"}, ... 10 total]}`;
 
   const userPrompt = `Track: "${title}" by ${artist}
@@ -136,7 +138,7 @@ Research this track's structural character. Build the 10-word pool now. JSON onl
 // Balanced default pool used only if the API is unreachable.
 const FALLBACK_WORDS = [
   { text: 'still', position: 'stay' },
-  { text: 'held', position: 'stay' },
+  { text: 'holding', position: 'stay' },
   { text: 'quiet', position: 'stay' },
   { text: 'forward', position: 'move' },
   { text: 'pulling', position: 'move' },
