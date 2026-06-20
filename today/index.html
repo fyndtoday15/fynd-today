@@ -620,50 +620,6 @@ html, body {
 .neither-btn.show { opacity: 1; }
 .neither-btn:active { color: var(--fg); }
 
-/* ── ARE YOU SURE ── */
-#sure-overlay {
-  position: fixed;
-  inset: 0;
-  background: var(--bg);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 36px;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.4s ease;
-  z-index: 50;
-  padding: 0 40px;
-}
-#sure-overlay.show {
-  opacity: 1;
-  pointer-events: all;
-}
-.sure-text {
-  font-size: clamp(18px, 4.5vw, 26px);
-  color: var(--fg);
-  text-align: center;
-  line-height: 1.5;
-}
-.sure-actions {
-  display: flex;
-  gap: 40px;
-}
-.sure-btn {
-  background: none;
-  border: none;
-  font-family: var(--f);
-  font-size: 10px;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--fg);
-  cursor: pointer;
-  padding: 10px 0;
-  transition: opacity 0.2s ease;
-}
-.sure-btn:active { opacity: 0.5; }
-
 /* ── S-REFLECTION ── */
 #s-reflection { gap: 0; padding: 0 40px; }
 
@@ -949,15 +905,6 @@ html, body {
 <!-- WORDMARK -->
 <img id="wordmark" src="/logo.png" alt="FYND TODAY">
 
-<!-- ARE YOU SURE -->
-<div id="sure-overlay">
-  <div class="sure-text">are you sure?</div>
-  <div class="sure-actions">
-    <button class="sure-btn" id="sure-yes">yes</button>
-    <button class="sure-btn" id="sure-no">actually, no</button>
-  </div>
-</div>
-
 <!-- YOUTUBE PLAYER (hidden) -->
 <div id="yt-wrap" style="position:fixed;width:1px;height:1px;top:-9999px;left:-9999px;opacity:0;pointer-events:none;">
   <div id="yt-player"></div>
@@ -1026,12 +973,9 @@ html, body {
     <div class="recog-reveal-label">that was</div>
     <div class="recog-reveal-name" id="recog-reveal-name"></div>
   </div>
-  <div class="recog-prompt" id="recog-prompt">what just happened?</div>
-  <div class="recog-stmts">
-    <button class="stmt-btn" id="stmt-a"></button>
-    <button class="stmt-btn" id="stmt-b"></button>
-  </div>
-  <button class="neither-btn" id="stmt-neither">neither</button>
+  <div class="listen-stmts-prompt">while you listen, tap what colors stand out to you</div>
+  <div class="tap-word-scatter" id="color-word-scatter"></div>
+  <button class="tap-done-btn" id="color-done-btn">done</button>
 </div>
 
 <!-- S-REFLECTION -->
@@ -1142,6 +1086,8 @@ var sess = {
   currentStatements: { a: '', b: '' },
   choiceTime: null,
   pendingChoice: null,
+  tappedWords: [],
+  tappedColorsList: [],
   recognitionTimer: null,
   stopTimer: null,
   ytPlayer: null,
@@ -1252,7 +1198,6 @@ var searchTimer = null;
 
 function showSearch() {
   // Safety: force-clear any overlay that might be stuck blocking clicks
-  document.getElementById('sure-overlay').classList.remove('show');
   document.getElementById('listen-stmts').classList.remove('show');
 
   show('s-search');
@@ -1504,6 +1449,45 @@ function playYouTube(ytId) {
 }
 
 // ── STATEMENTS OVERLAY ────────────────────────────────────────────────────────
+function showColorScreen() {
+  var scatter = document.getElementById('color-word-scatter');
+  scatter.innerHTML = '';
+  sess.tappedColorsList = [];
+
+  // Always the same eleven, no shuffle needed since order doesn't carry meaning here,
+  // but shuffle anyway so it never feels like a fixed memorized layout
+  var shuffled = MAIN_COLORS.slice().sort(function() { return Math.random() - 0.5; });
+
+  shuffled.forEach(function(colorName, i) {
+    var btn = document.createElement('button');
+    btn.className = 'tap-word';
+    btn.textContent = colorName;
+    var colorClass = colorWordClass(colorName);
+    if (colorClass) btn.classList.add(colorClass);
+    btn.setAttribute('data-position', 'color');
+    btn.addEventListener('click', function() {
+      toggleColorTap(btn, colorName);
+    });
+    scatter.appendChild(btn);
+    setTimeout(function() { btn.classList.add('show'); }, 80 * i);
+  });
+
+  var doneBtn = document.getElementById('color-done-btn');
+  doneBtn.classList.remove('show');
+  setTimeout(function() { doneBtn.classList.add('show'); }, 80 * shuffled.length + 600);
+}
+
+function toggleColorTap(btn, colorName) {
+  var idx = sess.tappedColorsList.indexOf(colorName);
+  if (idx === -1) {
+    sess.tappedColorsList.push(colorName);
+    btn.classList.add('tapped');
+  } else {
+    sess.tappedColorsList.splice(idx, 1);
+    btn.classList.remove('tapped');
+  }
+}
+
 // Shows statements ON the listen screen while track keeps playing.
 // User picks — THEN track fades and recognition screen appears.
 function showStatementsOverlay() {
@@ -1559,6 +1543,10 @@ function showStatementsOverlay() {
 
   stmtWrap.classList.add('show');
 }
+
+// The eleven main colors, fixed, always the same, always shown in full —
+// this is genuine human choice, not research narrowed or Claude selected.
+var MAIN_COLORS = ['black', 'white', 'red', 'green', 'yellow', 'blue', 'brown', 'orange', 'pink', 'purple', 'grey'];
 
 function colorWordClass(text) {
   // Literal color words render in their own actual color — instant recognition,
@@ -1653,9 +1641,7 @@ function goRecognitionWithChoice(position) {
   // For curated tracks — reveal title/artist
   show('s-recognition');
   var reveal = document.getElementById('recog-reveal');
-  var prompt = document.getElementById('recog-prompt');
   reveal.classList.remove('show');
-  prompt.classList.remove('show');
 
   if (sess.isCurated) {
     document.getElementById('recog-reveal-name').textContent =
@@ -1663,87 +1649,13 @@ function goRecognitionWithChoice(position) {
     setTimeout(function() { reveal.classList.add('show'); }, 300);
   }
 
-  // Push back 30% of time after first track
-  if (sess.trackCount > 1 && Math.random() < 0.3) {
-    sess.pendingChoice = position;
-    document.getElementById('sure-overlay').classList.add('show');
-  } else {
-    confirmChoice(position);
-  }
+  // Now show the color tap screen — person picks colors directly,
+  // genuine human choice, no research narrowing this down for them
+  showColorScreen();
 }
 
-function goRecognition() {
-  stopAudio();
-  show('s-recognition');
-
-  // Reset display in case previous round hid them
-  document.getElementById('stmt-a').style.display = '';
-  document.getElementById('stmt-b').style.display = '';
-  document.getElementById('stmt-neither').style.display = '';
-
-  // Also reset listen overlay
-  var stmtWrap = document.getElementById('listen-stmts');
-  if (stmtWrap) stmtWrap.classList.remove('show');
-
-  var reveal = document.getElementById('recog-reveal');
-  var prompt = document.getElementById('recog-prompt');
-  var btnA = document.getElementById('stmt-a');
-  var btnB = document.getElementById('stmt-b');
-  var neither = document.getElementById('stmt-neither');
-
-  reveal.classList.remove('show');
-  prompt.classList.remove('show');
-  btnA.classList.remove('show', 'chosen');
-  btnB.classList.remove('show', 'chosen');
-  neither.classList.remove('show');
-
-  sess.pendingChoice = null;
-  sess.choiceTime = Date.now();
-
-  // Curated track reveal (point 4)
-  if (sess.isCurated) {
-    document.getElementById('recog-reveal-name').textContent =
-      sess.trackTitle + ' · ' + sess.trackArtist;
-    setTimeout(function() { reveal.classList.add('show'); }, 300);
-  }
-
-  // Use Claude-researched statements if ready, otherwise fallback to generic pairs
-  var pair;
-  if (sess.pendingStatements && sess.pendingStatements.a && sess.pendingStatements.b) {
-    pair = [sess.pendingStatements.a, sess.pendingStatements.b];
-  } else {
-    pair = PAIRS[Math.floor(Math.random() * PAIRS.length)];
-  }
-  btnA.textContent = pair[0];
-  btnB.textContent = pair[1];
-
-  setTimeout(function() { prompt.classList.add('show'); }, 200);
-  setTimeout(function() { btnA.classList.add('show'); }, 500);
-  setTimeout(function() { btnB.classList.add('show'); }, 800);
-  setTimeout(function() { neither.classList.add('show'); }, 1200);
-}
-
-function handleChoice(position, btnEl) {
-  var elapsed = Date.now() - sess.choiceTime;
-  sess.responseSpeed = elapsed < 3000 ? 'fast' : elapsed > 12000 ? 'slow' : 'normal';
-
-  document.querySelectorAll('.stmt-btn').forEach(function(b) {
-    b.classList.remove('chosen');
-  });
-  if (btnEl) btnEl.classList.add('chosen');
-
-  sess.pendingChoice = position;
-
-  // Push back 30% of time after first track (point 5)
-  if (sess.trackCount > 1 && Math.random() < 0.3) {
-    document.getElementById('sure-overlay').classList.add('show');
-  } else {
-    confirmChoice(position);
-  }
-}
 
 function confirmChoice(position) {
-  document.getElementById('sure-overlay').classList.remove('show');
   sess.chosenPosition = position;
   sess.positions.push(position);
   // Save this track + position to history
@@ -1812,8 +1724,8 @@ function getForm(cb) {
     cb('', getFallbackChallenge(dominant));
   }, 4500);
 
-  var positionWords = (sess.tappedWords || []).filter(function(w) { return w.position !== 'color'; });
-  var colorWords = (sess.tappedWords || []).filter(function(w) { return w.position === 'color'; });
+  var positionWords = sess.tappedWords || [];
+  var colorWords = (sess.tappedColorsList || []).map(function(c) { return { text: c, position: 'color' }; });
 
   fetch('/.netlify/functions/generate-form', {
     method: 'POST',
@@ -2029,36 +1941,9 @@ function bindEvents() {
   });
   document.getElementById('listen-replay').addEventListener('click', handleReplay);
 
-  // Recognition
-  document.getElementById('stmt-a').addEventListener('click', function() {
-    handleChoice('stay', this);
-  });
-  document.getElementById('stmt-b').addEventListener('click', function() {
-    handleChoice('move', this);
-  });
-  document.getElementById('stmt-neither').addEventListener('click', function() {
-    handleChoice('open', null);
-  });
-
-  // Sure
-  document.getElementById('sure-yes').addEventListener('click', function() {
-    sess.responseSpeed = 'changed';
+  // Color screen
+  document.getElementById('color-done-btn').addEventListener('click', function() {
     confirmChoice(sess.pendingChoice);
-  });
-  document.getElementById('sure-no').addEventListener('click', function() {
-    document.getElementById('sure-overlay').classList.remove('show');
-    sess.responseSpeed = 'changed';
-    sess.pendingChoice = null;
-    sess.choiceTime = Date.now();
-
-    // Always go back to listen screen with the statements overlay visible
-    // so the user can re-choose cleanly
-    show('s-listen');
-    document.querySelectorAll('.listen-stmt-btn').forEach(function(b) {
-      b.classList.remove('chosen');
-    });
-    var listenStmts = document.getElementById('listen-stmts');
-    if (listenStmts) listenStmts.classList.add('show');
   });
 
   // Reflection
