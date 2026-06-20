@@ -74,12 +74,12 @@ html, body {
 /* ── WORDMARK ── */
 #wordmark {
   position: fixed;
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 20px);
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 18px);
   left: 50%;
   transform: translateX(-50%);
-  height: 28px;
+  height: 52px;
   width: auto;
-  opacity: 0.9;
+  opacity: 1;
   z-index: 10;
   pointer-events: none;
 }
@@ -388,9 +388,8 @@ html, body {
 
 .listen-stop {
   position: fixed;
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 56px);
-  left: 50%;
-  transform: translateX(-50%);
+  top: calc(env(safe-area-inset-top, 20px) + 20px);
+  left: 32px;
   background: none;
   border: none;
   font-family: var(--f);
@@ -399,17 +398,18 @@ html, body {
   text-transform: uppercase;
   color: var(--fg);
   cursor: pointer;
-  padding: 12px 0;
+  padding: 8px 0;
   opacity: 0;
+  z-index: 40;
   transition: opacity 0.5s ease, color 0.2s ease, transform 0.1s ease;
   white-space: nowrap;
 }
 .listen-stop.show { opacity: 1; }
-.listen-stop:active { color: var(--fg); transform: translateX(-50%) scale(0.97); }
+.listen-stop:active { color: var(--fg); transform: scale(0.97); }
 
 .listen-replay {
   position: fixed;
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 56px);
+  top: calc(env(safe-area-inset-top, 20px) + 20px);
   right: 32px;
   background: none;
   border: none;
@@ -419,34 +419,14 @@ html, body {
   text-transform: uppercase;
   color: var(--fg);
   cursor: pointer;
-  padding: 12px 0;
+  padding: 8px 0;
   opacity: 0;
+  z-index: 40;
   transition: opacity 0.5s ease, color 0.2s ease, transform 0.1s ease;
   white-space: nowrap;
 }
 .listen-replay.show { opacity: 1; }
 .listen-replay:active { transform: scale(0.97); }
-
-.overlay-back {
-  position: absolute;
-  top: calc(env(safe-area-inset-top, 20px) + 20px);
-  left: 32px;
-  bottom: auto;
-  transform: none;
-  opacity: 1;
-}
-.overlay-back:active { transform: scale(0.97); }
-
-.overlay-replay {
-  position: absolute;
-  top: calc(env(safe-area-inset-top, 20px) + 20px);
-  right: 32px;
-  bottom: auto;
-  left: auto;
-  transform: none;
-  opacity: 1;
-}
-.overlay-replay:active { transform: scale(0.97); }
 
 /* ── LISTEN STATEMENTS OVERLAY ── */
 .listen-stmts {
@@ -1026,18 +1006,18 @@ html, body {
     <div class="listen-title" id="listen-title"></div>
     <div class="listen-artist" id="listen-artist"></div>
   </div>
-  <button class="listen-stop" id="listen-stop">back to search</button>
-  <button class="listen-replay" id="listen-replay">replay</button>
 
   <!-- Tap-word recognition overlay — appears at 30s while track still plays -->
   <div class="listen-stmts" id="listen-stmts">
-    <button class="listen-stop overlay-back" id="overlay-back">back to search</button>
-    <button class="listen-replay overlay-replay" id="overlay-replay">replay</button>
     <div class="listen-stmts-track" id="listen-stmts-track"></div>
     <div class="listen-stmts-prompt">while you listen, tap what stands out to you</div>
     <div class="tap-word-scatter" id="tap-word-scatter"></div>
     <button class="tap-done-btn" id="tap-done-btn">done</button>
   </div>
+
+  <!-- Single back and replay controls, fixed position, sit above both states -->
+  <button class="listen-stop" id="listen-stop">back to search</button>
+  <button class="listen-replay" id="listen-replay">replay</button>
 </div>
 
 <!-- S-RECOGNITION -->
@@ -1450,39 +1430,15 @@ function stopAudio() {
 }
 
 function handleReplay() {
-  // Restart the track from the beginning, reset recognition state and timers,
-  // hide the word overlay if it's already showing, exactly as a fresh listen.
-  clearTimeout(sess.recognitionTimer);
-  clearTimeout(sess.stopTimer);
-
-  sess.tappedWords = [];
-
-  var stmtWrap = document.getElementById('listen-stmts');
-  if (stmtWrap) stmtWrap.classList.remove('show');
-
-  // Restore base screen elements that were hidden underneath the overlay
-  var dot = document.getElementById('pulse-dot');
-  var info = document.getElementById('track-info');
-  var stop = document.getElementById('listen-stop');
-  var replay = document.getElementById('listen-replay');
-  var tag = document.getElementById('curated-tag');
-  if (dot) dot.classList.remove('hidden-under-overlay');
-  if (info) info.classList.remove('hidden-under-overlay');
-  if (stop) stop.classList.remove('hidden-under-overlay');
-  if (replay) replay.classList.remove('hidden-under-overlay');
-  if (tag) tag.classList.remove('hidden-under-overlay');
-
-  stop.classList.remove('show');
-  replay.classList.remove('show');
-
+  // Restart the track from the beginning. Nothing else changes.
+  // The screen, the word overlay, whatever was tapped already, all of it
+  // stays exactly as it was. This only touches the audio.
   if (sess.ytPlayer && typeof sess.ytPlayer.seekTo === 'function') {
     try {
       sess.ytPlayer.seekTo(0, true);
       sess.ytPlayer.playVideo();
     } catch(e) {}
   }
-
-  startListenTimers();
 }
 
 // ── YOUTUBE PLAYER ────────────────────────────────────────────────────────────
@@ -1592,16 +1548,13 @@ function showStatementsOverlay() {
 
   sess.choiceTime = Date.now();
 
-  // Hide listen screen elements underneath so nothing bleeds through
+  // Hide listen screen elements underneath so nothing bleeds through.
+  // Back and replay stay visible the whole time, they sit above the overlay.
   var dot = document.getElementById('pulse-dot');
   var info = document.getElementById('track-info');
-  var stop = document.getElementById('listen-stop');
-  var replay = document.getElementById('listen-replay');
   var tag = document.getElementById('curated-tag');
   if (dot) dot.classList.add('hidden-under-overlay');
   if (info) info.classList.add('hidden-under-overlay');
-  if (stop) stop.classList.add('hidden-under-overlay');
-  if (replay) replay.classList.add('hidden-under-overlay');
   if (tag) tag.classList.add('hidden-under-overlay');
 
   stmtWrap.classList.add('show');
@@ -2070,12 +2023,7 @@ function bindEvents() {
     stopAudio();
     showSearch();
   });
-  document.getElementById('overlay-back').addEventListener('click', function() {
-    stopAudio();
-    showSearch();
-  });
   document.getElementById('listen-replay').addEventListener('click', handleReplay);
-  document.getElementById('overlay-replay').addEventListener('click', handleReplay);
 
   // Recognition
   document.getElementById('stmt-a').addEventListener('click', function() {
