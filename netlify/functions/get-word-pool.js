@@ -82,26 +82,32 @@ OPEN, noticing something unexpected, a shift, recognition occurring, off guard
 
 BALANCE IS REQUIRED, NOT OPTIONAL: of the 15 total words, exactly 4 must be Stay, exactly 4 must be Move, exactly 4 must be Open, and exactly 3 must be color words. This 4 and 4 and 4 and 3 split never changes, regardless of the track. The track's character should shape WHICH specific words you pick within each position (a heavy slow track gets heavier feeling Stay words, a driving track gets more urgent Move words) but it must never shrink or skip a position. All three positions always get a real, equal shot at being tapped.
 
-COLOR WORDS, chosen using this fixed logic, not aesthetic guessing:
-Color comes from the melody and overall mood of the track only, a separate read from the Stay or Move or Open research above. Use these rules:
-Track is heavy, slow, low and serious, pick from: black, red, purple, grey
-Track is bright, driving, high energy, pick from: gold, orange, yellow, red
-Track is light, soft, delicate, pick from: white, blue, pink, silver
-Track is dark, intense, brooding, pick from: black, purple, red, grey
-Track is warm, soulful, mid tempo, pick from: orange, gold, brown, green
-Pick exactly 3 colors from the single category above that best matches the track's overall mood and melody. Do not mix colors from different categories. Color words carry no position weight at all, they never count toward Stay, Move, or Open, because we cannot know how color affects a person, it is simply an extra option pulled from the song's mood.
+COLOR WORDS, chosen using research backed logic, not aesthetic guessing:
+This logic is based on published cross modal correspondence research. Palmer, Schloss, Xu, Prado Leon, Proceedings of the National Academy of Sciences, 2013, found that music to color association runs through the emotion the music carries, driven mainly by tempo and major or minor key feel, replicated across US and Mexican participants with correlation strength 0.89 to 0.99. Fast tempo and a major, upbeat key feel produce color associations that are lighter, more saturated, and warmer toward yellow. Slow tempo and a minor, somber key feel produce color associations that are darker, less saturated, and cooler toward blue. A follow up study, Whiteford, Schloss, Helwig, Palmer, 2018, found that on a separate agitated versus calm dimension, agitated music correlates toward red and calm music correlates toward green.
+
+Use these rules, based directly on that research:
+Track is fast tempo, upbeat, major key feeling, pick from: gold, yellow, orange
+Track is slow tempo, somber, minor key feeling, pick from: blue, grey, purple
+Track is intense, angry, aggressive in energy, pick from: red, black
+Track is calm, gentle, peaceful in energy, pick from: green, white, silver, blue
+Track is warm, full, rich in tone without being fast or aggressive, pick from: orange, brown, gold
+Pick exactly 3 colors from the single category above that best matches the track's actual tempo and emotional character. Do not mix colors from different categories. Color words carry no position weight at all, they never count toward Stay, Move, or Open. They are a separate, research informed read of the track's tempo and key feel, never a guess about the listener's own life or mood.
 
 Color words must be ONLY from this exact list, no others ever: red, blue, gold, green, purple, white, black, pink, orange, grey, yellow, brown, silver
 
 THE VOCABULARY RULE, THIS IS THE MOST IMPORTANT RULE:
 Every single word, including the color words, must be a word an average eight year old already knows and uses, without ever needing it explained. Read every word out loud before including it and ask: would a third grader understand this instantly, with zero hesitation? If there is ANY doubt, do not use it.
 
-BANNED, words like this must never appear, they are too advanced or unclear even though they may seem simple to an adult: restless, caught, suspended, anchored, surfacing, off guard, awake (as a feeling word), loosening, settling, rooting, contained, brooding.
+BANNED, words like this must never appear, they are too advanced or unclear even though they may seem simple to an adult: restless, suspended, anchored, surfacing, awake (as a feeling word), loosening, settling, rooting, contained, brooding, off guard, double take, stopped short, thrown, tilted.
 
-Stick to extremely common, everyday words a child says all the time. Examples of the right difficulty level:
-Stay style words: still, quiet, slow, here, calm, safe, soft, waiting
-Move style words: forward, fast, going, pulling, rising, faster, ready, pushing
-Open style words: new, surprised, different, sudden, strange, fresh, awake, weird
+VARIETY MATTERS: the lists below are a large pool of acceptable words at the right difficulty level, not a short list to pick the same four from every time. Pull different combinations for different tracks. Two different songs should rarely produce the exact same 4 words for a position unless they are genuinely very similar tracks. Reach across the full list, not just the first few words that come to mind.
+
+Stay style words, pick from this wide pool, do not default to the same 4 every time: still, quiet, slow, here, calm, safe, soft, resting, steady, peaceful, gentle, easy, warm, cozy, settled, patient, paused, holding, staying, slowing down, grounded, not going anywhere, staying put, sitting with it, not rushing
+Move style words, pick from this wide pool. Every word here describes the plain, simple feeling of moving forward toward a next thing, the same plain everyday register as the Stay words above, not dramatic, not a specific physical action like running or racing, just forward motion toward what comes next.
+The full flat Move list to choose from: forward, ready, loose, drawn forward, moving, carrying, going, ahead, pulling, unstuck, onward, reaching, coming, heading, approaching, toward, next, closing in, leaving, arriving, continuing, advancing, passing through, on track, departing
+
+Open style words, pick from this wide pool. Every word here describes the plain, simple feeling of the mind opening, noticing something new, or seeing something differently, the same plain everyday register as the Stay words above, not dramatic, not clinical, just the ordinary feeling of becoming aware of something.
+The full flat Open list to choose from: new, different, curious, clicking into place, rethinking, fresh, surprised, awakened, alert, shifting, change, noticing, clicking, dawning, realizing, getting it, changing, turning, different than before, switching, wondering, paying attention, waking up, looking again, seeing it now
 
 RULES FOR THE WORDS THEMSELVES:
 Present moment only, no exceptions, but this is a meaning test, not a spelling test. A word qualifies if it describes a true condition of right now, even if the word's grammatical form looks past tense. "held" is fine because it describes being held right now. "still" is fine. What is not allowed is a word that can only describe something already finished and done, like "ended" or "left" or "finished," where the action is fully over. Test each word by asking, could a kid say this about right now while the song plays? If yes, it qualifies.
