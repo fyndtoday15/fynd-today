@@ -48,14 +48,20 @@ exports.handler = async function(event, context) {
   if (event.httpMethod !== 'POST') return { statusCode: 405, body: 'Method Not Allowed' };
 
   const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
-  if (!ANTHROPIC_API_KEY) return fallbackResponse(allowedOrigin, corsHeaders);
+  if (!ANTHROPIC_API_KEY) {
+    console.error('get-word-pool: ANTHROPIC_API_KEY not set, using fallback');
+    return fallbackResponse(allowedOrigin, corsHeaders);
+  }
 
   let data;
   try { data = JSON.parse(event.body); }
   catch(e) { return { statusCode: 400, body: 'Invalid JSON' }; }
 
   const { title = '', artist = '' } = data;
-  if (!title && !artist) return fallbackResponse(allowedOrigin, corsHeaders);
+  if (!title && !artist) {
+    console.error('get-word-pool: no title or artist provided, using fallback');
+    return fallbackResponse(allowedOrigin, corsHeaders);
+  }
 
   // ── CALL 1: RESEARCH THE TRACK AND BUILD A WORD POOL ────────────────────────
   // This pool feeds the tap-to-recognize interaction during listening.
@@ -110,29 +116,40 @@ Respond in JSON only, exactly 15 words/phrases total, 4 stay, 4 move, 4 open, 3 
 
   const userPrompt = `Track: "${title}" by ${artist}
 
-Research this track's structural character. Build the 10-word pool now. JSON only.`;
+Research this track's structural character. Build the 15-word pool now. JSON only.`;
 
   async function callClaude() {
     const result = await httpsPost(
       'https://api.anthropic.com/v1/messages',
       { 'x-api-key': ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' },
-      { model: 'claude-sonnet-4-5', max_tokens: 400, system: systemPrompt,
+      { model: 'claude-sonnet-4-5', max_tokens: 700, system: systemPrompt,
         messages: [{ role: 'user', content: userPrompt }] }
     );
-    if (result.status !== 200) throw new Error('API ' + result.status);
+    if (result.status !== 200) {
+      console.error('get-word-pool: Claude API returned', result.status, JSON.stringify(result.body));
+      throw new Error('API ' + result.status);
+    }
     const text = (result.body.content && result.body.content[0] && result.body.content[0].text) ? result.body.content[0].text.trim() : '';
     if (!text) throw new Error('Empty');
-    return JSON.parse(text.replace(/```json|```/g, '').trim());
+    try {
+      return JSON.parse(text.replace(/```json|```/g, '').trim());
+    } catch(parseErr) {
+      console.error('get-word-pool: failed to parse Claude response as JSON:', text);
+      throw parseErr;
+    }
   }
 
   try {
     let parsed;
     try { parsed = await callClaude(); }
-    catch(e) { console.log('Retry:', e.message); parsed = await callClaude(); }
-    if (!parsed.words || !Array.isArray(parsed.words) || parsed.words.length < 6) throw new Error('Bad word pool');
+    catch(e) { console.log('get-word-pool: first attempt failed, retrying:', e.message); parsed = await callClaude(); }
+    if (!parsed.words || !Array.isArray(parsed.words) || parsed.words.length < 6) {
+      console.error('get-word-pool: word pool failed validation, got:', JSON.stringify(parsed));
+      throw new Error('Bad word pool');
+    }
     return { statusCode: 200, headers: corsHeaders, body: JSON.stringify({ words: parsed.words }) };
   } catch(err) {
-    console.error('get-word-pool failed:', err.message);
+    console.error('get-word-pool: all attempts failed, using fallback. Reason:', err.message);
     return fallbackResponse(allowedOrigin, corsHeaders);
   }
 };
