@@ -118,7 +118,7 @@ html, body {
 #s-entry { gap: 0; }
 
 .entry-line {
-  font-size: clamp(17px, 4.2vw, 26px);
+  font-size: clamp(13px, 2.7vw, 16px);
   font-weight: 400;
   line-height: 1.6;
   text-align: center;
@@ -126,7 +126,7 @@ html, body {
   opacity: 0;
   transform: translateY(6px);
   transition: opacity 0.8s ease, transform 0.8s ease;
-  max-width: 440px;
+  max-width: 400px;
   padding: 0 8px;
 }
 .entry-line.show {
@@ -409,6 +409,16 @@ html, body {
 }
 .listen-stop.show { opacity: 1; }
 .listen-stop:active { color: var(--fg); transform: translateX(-50%) scale(0.97); }
+
+.overlay-back {
+  position: absolute;
+  top: calc(env(safe-area-inset-top, 20px) + 20px);
+  left: 32px;
+  bottom: auto;
+  transform: none;
+  opacity: 1;
+}
+.overlay-back:active { transform: scale(0.97); }
 
 /* ── LISTEN STATEMENTS OVERLAY ── */
 .listen-stmts {
@@ -986,14 +996,15 @@ html, body {
     <div class="listen-title" id="listen-title"></div>
     <div class="listen-artist" id="listen-artist"></div>
   </div>
-  <button class="listen-stop" id="listen-stop">← back</button>
+  <button class="listen-stop" id="listen-stop">back to search</button>
 
   <!-- Tap-word recognition overlay — appears at 30s while track still plays -->
   <div class="listen-stmts" id="listen-stmts">
+    <button class="listen-stop overlay-back" id="overlay-back">back to search</button>
     <div class="listen-stmts-track" id="listen-stmts-track"></div>
-    <div class="listen-stmts-prompt">tap what you recognize</div>
+    <div class="listen-stmts-prompt">tap what this sounds like right now</div>
     <div class="tap-word-scatter" id="tap-word-scatter"></div>
-    <button class="tap-done-btn" id="tap-done-btn">done — see what it means</button>
+    <button class="tap-done-btn" id="tap-done-btn">done</button>
   </div>
 </div>
 
@@ -1504,7 +1515,7 @@ function showStatementsOverlay() {
   // Show track name on overlay
   var trackLabel = document.getElementById('listen-stmts-track');
   if (trackLabel) {
-    trackLabel.textContent = sess.trackTitle + (sess.trackArtist ? ' — ' + sess.trackArtist : '');
+    trackLabel.textContent = sess.trackTitle + (sess.trackArtist ? ' · ' + sess.trackArtist : '');
   }
 
   sess.choiceTime = Date.now();
@@ -1567,7 +1578,7 @@ function fetchWordPool(title, artist) {
 
 var FALLBACK_WORD_POOL = [
   { text: 'still', position: 'stay' },
-  { text: 'held', position: 'stay' },
+  { text: 'holding', position: 'stay' },
   { text: 'quiet', position: 'stay' },
   { text: 'forward', position: 'move' },
   { text: 'pulling', position: 'move' },
@@ -1621,7 +1632,7 @@ function goRecognitionWithChoice(position) {
 
   if (sess.isCurated) {
     document.getElementById('recog-reveal-name').textContent =
-      sess.trackTitle + ' — ' + sess.trackArtist;
+      sess.trackTitle + ' · ' + sess.trackArtist;
     setTimeout(function() { reveal.classList.add('show'); }, 300);
   }
 
@@ -1665,7 +1676,7 @@ function goRecognition() {
   // Curated track reveal (point 4)
   if (sess.isCurated) {
     document.getElementById('recog-reveal-name').textContent =
-      sess.trackTitle + ' — ' + sess.trackArtist;
+      sess.trackTitle + ' · ' + sess.trackArtist;
     setTimeout(function() { reveal.classList.add('show'); }, 300);
   }
 
@@ -1982,7 +1993,11 @@ function bindEvents() {
   // Listen
   document.getElementById('listen-stop').addEventListener('click', function() {
     stopAudio();
-    showStopped();
+    showSearch();
+  });
+  document.getElementById('overlay-back').addEventListener('click', function() {
+    stopAudio();
+    showSearch();
   });
 
   // Recognition
