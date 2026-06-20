@@ -1812,13 +1812,17 @@ function getForm(cb) {
     cb('', getFallbackChallenge(dominant));
   }, 4500);
 
+  var positionWords = (sess.tappedWords || []).filter(function(w) { return w.position !== 'color'; });
+  var colorWords = (sess.tappedWords || []).filter(function(w) { return w.position === 'color'; });
+
   fetch('/.netlify/functions/generate-form', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       trackTitle: sess.trackTitle || '',
       trackArtist: sess.trackArtist || '',
-      tappedWords: sess.tappedWords || [],
+      tappedWords: positionWords,
+      tappedColors: colorWords,
       dominantPosition: dominant,
       hasHistory: hasHistory,
       historyCount: hasHistory ? (history.count + 1) : 1,
