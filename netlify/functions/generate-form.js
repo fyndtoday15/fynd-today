@@ -102,7 +102,9 @@ A short, casual dare that pushes them to carry today's position into the next th
 Tone: blend of three things —
 (a) blunt and universal enough to apply to literally any person in any life situation
 (b) a little playful, a little confident, some personality
-(c) casual texting voice — lowercase, no ending punctuation, contractions fine, reads like something a person would actually type to a friend
+(c) casual texting voice, lowercase, no ending punctuation, contractions fine, reads like something a person would actually type to a friend
+(d) NEVER use a dash or hyphen anywhere in the output, no exceptions
+(e) PRESENT TENSE ONLY, this is about today, right now, never yesterday or tomorrow
 
 Never formal. Never therapeutic. Never explain the position. Never say "stay," "move," or "open" as words. Never use: journey, energy, space, vibe, heal, feel, feeling, emotion.
 
@@ -111,15 +113,15 @@ If they have a CONFIRMED REPEATED PATTERN with this track (same position multipl
 EXAMPLES OF THE RIGHT CHALLENGE REGISTER BY POSITION:
 
 Stay (first time): "don't rush whatever's next, you're not behind"
-Stay (confirmed pattern, 3rd+ time): "you keep choosing to stay here — trust that on something bigger today"
+Stay (confirmed pattern, 3rd+ time): "you keep choosing to stay here, trust that on something bigger today"
 Stay (different texture, warm/steady words): "stay in it a little longer, no one's timing you"
 
 Move (first time): "go finish the thing you keep circling"
-Move (confirmed pattern): "you always move through this one — stop waiting for permission elsewhere"
+Move (confirmed pattern): "you always move through this one, stop waiting for permission elsewhere"
 Move (different texture, loud/rising words): "let it pull you somewhere loud for once"
 
 Open (first time): "say yes to the next weird thing, on purpose"
-Open (confirmed pattern): "this one always catches you off guard — let something else catch you too"
+Open (confirmed pattern): "this one always catches you off guard, let something else catch you too"
 Open (mixed with stay-leaning word): "let this one stay unresolved a little longer"
 
 Mixed (tapped words spread across positions evenly): "you're carrying two directions right now, that's allowed"
