@@ -57,7 +57,8 @@ exports.handler = async function(event, context) {
   const {
     trackTitle = '',
     trackArtist = '',
-    tappedWords = [],       // [{text, position}, ...] — what they actually tapped
+    tappedWords = [],       // [{text, position}, ...] — real Stay/Move/Open recognition words only
+    tappedColors = [],      // [{text, position:'color'}, ...] — color words, never count toward position
     dominantPosition = '',  // 'stay' | 'move' | 'open' | 'mixed' — computed by portal from tally
     hasHistory = false,     // have they brought this exact track before?
     historyCount = 0,       // how many times total (including this one)
@@ -65,14 +66,18 @@ exports.handler = async function(event, context) {
   } = data;
 
   const tappedList = tappedWords.map(function(w) { return w.text; }).join(', ');
+  const tappedColorList = tappedColors.map(function(w) { return w.text; }).join(', ');
   const sameAsLast = hasHistory && historyPreviousPosition === dominantPosition;
   const differentFromLast = hasHistory && historyPreviousPosition && historyPreviousPosition !== dominantPosition;
 
   // ── BUILD CONTEXT FOR CLAUDE ────────────────────────────────────────────────
   const ctx = [];
   if (trackTitle) ctx.push('Track: "' + trackTitle + '"' + (trackArtist ? ' by ' + trackArtist : '') + '.');
-  ctx.push('Words they tapped: ' + tappedList + '.');
+  ctx.push('Words they tapped: ' + (tappedList || 'none') + '.');
   ctx.push('Dominant position from their taps: ' + dominantPosition + '.');
+  if (tappedColorList) {
+    ctx.push('They also tapped these colors: ' + tappedColorList + '. These are pulled from the song\'s mood only and carry zero weight toward the position. Optional, light flavor only if it genuinely fits, never required.');
+  }
 
   if (!hasHistory) {
     ctx.push('First time bringing this exact track. No history to compare.');
@@ -86,6 +91,8 @@ exports.handler = async function(event, context) {
   const systemPrompt = `You are the voice of FYND TODAY — a music-powered recognition system.
 
 A person just listened to a track and tapped words that felt true to what was happening in them. You are writing the FORM — the thing they carry forward. This is not a summary of what they felt. They already know what they felt; that was the recognition step. Your job is different and has up to two parts:
+
+ON COLOR, IF ANY WAS TAPPED: a color word may appear separately in the context below. It is pulled from the song's mood only, never from the person, and it never counts toward Stay, Move, or Open in any way. You may let it lightly color your word choice in the challenge if it genuinely fits without effort, for example reaching for a slightly warmer or cooler word naturally. Never mention the color directly, never build the challenge around it, never let it override or compete with the real tapped words. If using it would force anything, ignore it completely.
 
 PART 1 — THE MEMORY LINE (only if history exists, otherwise skip entirely):
 If this is the first time with this track, skip this part completely — write nothing for it.
