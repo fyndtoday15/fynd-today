@@ -521,6 +521,8 @@ html, body {
 .tap-word.colorword-pink { color: #e09ab8; border-color: rgba(224,154,184,0.35); }
 .tap-word.colorword-orange { color: #e08a52; border-color: rgba(224,138,82,0.35); }
 .tap-word.colorword-grey { color: #a8a8a8; border-color: rgba(168,168,168,0.35); }
+.tap-word.colorword-yellow { color: #e0d05a; border-color: rgba(224,208,90,0.35); }
+.tap-word.colorword-brown { color: #a8825a; border-color: rgba(168,130,90,0.35); }
 
 #s-recognition { gap: 0; padding: 0 36px; }
 
@@ -1002,7 +1004,7 @@ html, body {
   <div class="listen-stmts" id="listen-stmts">
     <button class="listen-stop overlay-back" id="overlay-back">back to search</button>
     <div class="listen-stmts-track" id="listen-stmts-track"></div>
-    <div class="listen-stmts-prompt">tap what this sounds like right now</div>
+    <div class="listen-stmts-prompt">tap what matches this song</div>
     <div class="tap-word-scatter" id="tap-word-scatter"></div>
     <button class="tap-done-btn" id="tap-done-btn">done</button>
   </div>
@@ -1542,7 +1544,7 @@ function colorWordClass(text) {
     silver: 'colorword-silver', violet: 'colorword-violet', crimson: 'colorword-crimson',
     teal: 'colorword-teal', white: 'colorword-white', black: 'colorword-black',
     pink: 'colorword-pink', orange: 'colorword-orange', grey: 'colorword-grey',
-    gray: 'colorword-grey',
+    gray: 'colorword-grey', yellow: 'colorword-yellow', brown: 'colorword-brown',
   };
   return map[text.toLowerCase()] || null;
 }
