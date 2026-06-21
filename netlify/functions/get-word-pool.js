@@ -104,8 +104,8 @@ Never music jargon, never: tempo, beat, rhythm, melody, sound, song.
 Never assign emotional content from the track's title or lyrics. Research informs structure only, never assigns what the listener is going through in their life.
 Words must work for anyone in any life situation, broad enough to be honestly tappable by many different people for many different reasons.
 
-Respond in JSON only, exactly 15 words/phrases total, 5 stay, 5 move, 5 open, each tagged:
-{"words": [{"text": "...", "position": "stay|move|open"}, ... 15 total]}`;
+Respond in JSON only, exactly 15 words/phrases total, 5 stay, 5 move, 5 open, each tagged, plus one short structural tag describing the track's sound only, 3 to 5 plain words, never a claim about meaning, story, or what the listener feels, purely physical/structural facts like tempo and density, for example "slow, sparse, mostly still" or "fast, dense, builds hard" or "steady, mid tempo, warm tone":
+{"words": [{"text": "...", "position": "stay|move|open"}, ... 15 total], "structuralTag": "..."}`;
 
   const userPrompt = `Track: "${title}" by ${artist}
 
@@ -140,7 +140,13 @@ Research this track's structural character. Build the 15-word pool now. JSON onl
       console.error('get-word-pool: word pool failed validation, got:', JSON.stringify(parsed));
       throw new Error('Bad word pool');
     }
-    return { statusCode: 200, headers: corsHeaders, body: JSON.stringify({ words: parsed.words }) };
+    return {
+      statusCode: 200, headers: corsHeaders,
+      body: JSON.stringify({
+        words: parsed.words,
+        structuralTag: parsed.structuralTag || '',
+      }),
+    };
   } catch(err) {
     console.error('get-word-pool: all attempts failed, using fallback. Reason:', err.message);
     return fallbackResponse(allowedOrigin, corsHeaders);
@@ -168,5 +174,5 @@ const FALLBACK_WORDS = [
 ];
 
 function fallbackResponse(allowedOrigin, corsHeaders) {
-  return { statusCode: 200, headers: corsHeaders, body: JSON.stringify({ words: FALLBACK_WORDS }) };
+  return { statusCode: 200, headers: corsHeaders, body: JSON.stringify({ words: FALLBACK_WORDS, structuralTag: '' }) };
 }
