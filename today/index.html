@@ -1226,18 +1226,23 @@ function showReturn() {
   // show() itself takes 350ms to swap screens (old one fades out first).
   // Anchor all timing off that, not off the moment this function was
   // called, so nothing starts fading in before the screen is even visible.
+  // Extra 150ms buffer on top accounts for the keyboard-dismiss viewport
+  // resize triggered by blurring the search field right before this is
+  // called — without it, the resize can land mid-fade and disrupt the
+  // animation, reading as a flash/disappear before the screen settles.
+  var BUFFER = 150;
   setTimeout(function() {
     if (line) line.classList.add('show');
-  }, 350 + 150);
+  }, 350 + BUFFER + 150);
   setTimeout(function() {
     if (paths) paths.classList.add('show');
-  }, 350 + 700);
+  }, 350 + BUFFER + 700);
   setTimeout(function() {
     if (link) link.classList.add('show');
-  }, 350 + 1100);
+  }, 350 + BUFFER + 1100);
   setTimeout(function() {
     sess.returnScreenAnimating = false;
-  }, 350 + 1100 + 600);
+  }, 350 + BUFFER + 1100 + 600);
 }
 
 function showBefore() {
@@ -2168,6 +2173,14 @@ function bindEvents() {
   // screen, so behavior is consistent every time you hit back, whether
   // it's your first search or your fifth.
   document.getElementById('search-back').addEventListener('click', function() {
+    // Force the keyboard to dismiss synchronously before the return
+    // screen's timed animation starts. If the search field still has
+    // focus when back is tapped, iOS Safari dismisses the keyboard as
+    // a side effect, resizing the visual viewport — if that resize
+    // lands mid-transition it disrupts showReturn()'s animation timing,
+    // which reads as the screen flashing/disappearing before settling.
+    var f = document.getElementById('search-field');
+    if (f) f.blur();
     showReturn();
   });
 
