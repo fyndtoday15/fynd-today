@@ -175,6 +175,22 @@ html, body {
   color: var(--fg);
 }
 
+.landing-link {
+  display: block;
+  margin-top: 40px;
+  font-family: var(--f);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(240,237,230,0.5);
+  text-decoration: none;
+  text-align: center;
+  opacity: 0;
+  transition: opacity 1s ease, color 0.2s ease;
+}
+.landing-link.show { opacity: 1; }
+.landing-link:active { color: var(--fg); }
+
 /* ── S-BEFORE (return visit) ── */
 #s-before { gap: 0; }
 
@@ -406,11 +422,12 @@ html, body {
   cursor: pointer;
   padding: 8px 0;
   opacity: 0;
+  pointer-events: none;
   z-index: 40;
   transition: opacity 0.5s ease, color 0.2s ease, transform 0.1s ease;
   white-space: nowrap;
 }
-.listen-stop.show { opacity: 1; }
+.listen-stop.show { opacity: 1; pointer-events: all; }
 .listen-stop:active { color: var(--fg); transform: scale(0.97); }
 
 .listen-replay {
@@ -427,11 +444,12 @@ html, body {
   cursor: pointer;
   padding: 8px 0;
   opacity: 0;
+  pointer-events: none;
   z-index: 40;
   transition: opacity 0.5s ease, color 0.2s ease, transform 0.1s ease;
   white-space: nowrap;
 }
-.listen-replay.show { opacity: 1; }
+.listen-replay.show { opacity: 1; pointer-events: all; }
 .listen-replay:active { transform: scale(0.97); }
 
 /* ── LISTEN STATEMENTS OVERLAY ── */
@@ -848,6 +866,7 @@ html, body {
     <div class="path-sep">or</div>
     <button class="path-btn" id="btn-discover">Let sound find you</button>
   </div>
+  <a class="landing-link" id="landing-link" href="/">go back to the landing page</a>
 </div>
 
 <!-- S-BEFORE -->
@@ -1088,6 +1107,8 @@ function showEntry() {
   });
   var ep = document.getElementById('entry-paths');
   if (ep) ep.classList.remove('show');
+  var ll = document.getElementById('landing-link');
+  if (ll) ll.classList.remove('show');
 
   // Animate in — each line gets its own fade at natural reading pace
   ['el-1','el-2','el-3','el-4','el-5'].forEach(function(id, i) {
@@ -1100,6 +1121,10 @@ function showEntry() {
     var ep2 = document.getElementById('entry-paths');
     if (ep2) ep2.classList.add('show');
   }, 400 + 5 * 1200 + 500);
+  setTimeout(function() {
+    var ll2 = document.getElementById('landing-link');
+    if (ll2) ll2.classList.add('show');
+  }, 400 + 5 * 1200 + 900);
 }
 
 function showBefore() {
@@ -1242,6 +1267,16 @@ function goListen() {
   info.classList.remove('hidden-under-overlay');
   tag.classList.remove('show');
   tag.classList.remove('hidden-under-overlay');
+
+  // Fully reset the word-tap overlay from any previous track — without
+  // this, the old track's tapped words stay visible in the DOM and
+  // briefly flash on screen before the new track's words load in.
+  var stmtWrap = document.getElementById('listen-stmts');
+  if (stmtWrap) stmtWrap.classList.remove('show');
+  var scatter = document.getElementById('tap-word-scatter');
+  if (scatter) scatter.innerHTML = '';
+  var doneBtn = document.getElementById('tap-done-btn');
+  if (doneBtn) doneBtn.classList.remove('show');
 
   clearTimeout(sess.recognitionTimer);
   clearTimeout(sess.stopTimer);
@@ -1559,6 +1594,16 @@ function goRecognitionWithChoice(position) {
   clearTimeout(sess.recognitionTimer);
   clearTimeout(sess.stopTimer);
   document.getElementById('pulse-dot').classList.remove('active');
+
+  // Clear any leftover color buttons from a previous track BEFORE the
+  // screen becomes visible — otherwise the old track's tapped colors
+  // sit fully visible for a moment while the screen fades in, then
+  // get wiped and repopulated, which is what caused the flash.
+  var scatter = document.getElementById('color-word-scatter');
+  if (scatter) scatter.innerHTML = '';
+  var colorDoneBtn = document.getElementById('color-done-btn');
+  if (colorDoneBtn) colorDoneBtn.classList.remove('show');
+  sess.tappedColorsList = [];
 
   show('s-recognition');
 
