@@ -360,6 +360,9 @@ html, body {
   align-items: center;
   justify-content: center;
   margin-bottom: 52px;
+  width: 44px;
+  height: 44px;
+  cursor: pointer;
 }
 .pulse-dot {
   width: 7px;
@@ -368,14 +371,23 @@ html, body {
   background: var(--fg);
   opacity: 0;
   transition: opacity 0.4s ease;
+  pointer-events: none;
 }
 .pulse-dot.active {
   opacity: 0.65;
   animation: pulse 2.6s ease-in-out infinite;
 }
+.pulse-dot.tappable {
+  opacity: 0.55;
+  animation: pulse-waiting 1.8s ease-in-out infinite;
+}
 @keyframes pulse {
   0%, 100% { transform: scale(1); opacity: 0.45; }
   50% { transform: scale(1.7); opacity: 0.85; }
+}
+@keyframes pulse-waiting {
+  0%, 100% { transform: scale(1); opacity: 0.3; }
+  50% { transform: scale(1.3); opacity: 0.6; }
 }
 
 .hidden-under-overlay {
@@ -909,7 +921,7 @@ html, body {
 <!-- S-LISTEN -->
 <div class="screen" id="s-listen">
   <div class="listen-curated-tag" id="curated-tag">we wanted you to hear this</div>
-  <div class="listen-pulse-wrap">
+  <div class="listen-pulse-wrap" id="listen-pulse-wrap">
     <div class="pulse-dot" id="pulse-dot"></div>
   </div>
   <div class="listen-track-info" id="track-info">
@@ -1344,6 +1356,7 @@ function goListen() {
   var tag = document.getElementById('curated-tag');
 
   dot.classList.remove('active');
+  dot.classList.remove('tappable');
   dot.classList.remove('hidden-under-overlay');
   stop.classList.remove('show');
   stop.classList.remove('hidden-under-overlay');
@@ -1367,6 +1380,10 @@ function goListen() {
   clearTimeout(sess.recognitionTimer);
   clearTimeout(sess.stopTimer);
 
+  // Fresh per-track state for the tap-to-listen gate
+  sess.ytStarted = false;
+  sess.listenStartedAt = false;
+
   if (sess.isCurated) {
     if (sess.isInterrupted) tag.classList.add('show');
     document.getElementById('listen-framing').textContent = '';
@@ -1380,7 +1397,8 @@ function goListen() {
     setTimeout(function() { info.classList.add('show'); }, 700);
   }
 
-  // Start YouTube player — timers start in player onReady callback
+  // Start YouTube player — cued, not autoplaying. The pulse dot becomes
+  // tappable once onReady fires; tapping it calls startListening().
   if (sess.trackId) {
     playYouTube(sess.trackId);
   } else {
@@ -1453,6 +1471,7 @@ function playYouTube(ytId) {
     catch(e) { _ytDebug('destroy() threw: ' + e.message); }
     sess.ytPlayer = null;
   }
+  sess.ytStarted = false;
 
   // destroy() removes the #yt-player element itself from the DOM (it gets
   // replaced by the player iframe, which destroy() then removes without
@@ -1478,41 +1497,22 @@ function playYouTube(ytId) {
     return;
   }
 
-  // Mobile silent-play guard — playVideo() can be silently dropped by
-  // WebKit even when the player reports ready. Confirm real playback
-  // started (PLAYING state) and retry if it doesn't fire in time, same
-  // pattern used on the old SoundCloud widget version.
-  var _playConfirmed = false;
-  var _playRetryTimer = null;
-  function _confirmPlay(player) {
-    _playConfirmed = false;
-    clearTimeout(_playRetryTimer);
-    _playRetryTimer = setTimeout(function() {
-      if (_playConfirmed) {
-        _ytDebug('play confirm check: already confirmed, skipping retry');
-        return;
-      }
-      _ytDebug('play NOT confirmed after 1.5s, retrying playVideo()');
-      try { player.playVideo(); } catch(e) { _ytDebug('retry playVideo() threw: ' + e.message); }
-      setTimeout(function() {
-        if (!_playConfirmed) {
-          _ytDebug('play STILL not confirmed after 2nd attempt, retrying once more');
-          try { player.playVideo(); } catch(e) { _ytDebug('2nd retry playVideo() threw: ' + e.message); }
-        } else {
-          _ytDebug('play confirmed on 2nd check');
-        }
-      }, 1000);
-    }, 1500);
-  }
-
-  _ytDebug('creating new YT.Player...');
+  // Unmuted autoplay on iOS Safari proved genuinely unreliable — same
+  // video, same code, sometimes plays, sometimes silently stalls at
+  // UNSTARTED with no error, confirmed across many test rounds. Instead
+  // of fighting that gate, the player now CUES the video (loads it fully,
+  // ready to play instantly) without autoplaying. Actual playback only
+  // starts from startListening(), called directly inside the pulse dot's
+  // tap handler — a fresh, real user gesture every time, which WebKit
+  // always honors regardless of any autoplay heuristic.
+  _ytDebug('creating new YT.Player (cue, not autoplay)...');
   try {
     sess.ytPlayer = new YT.Player('yt-player', {
       height: '200',
       width: '200',
       videoId: ytId,
       playerVars: {
-        autoplay: 1,
+        autoplay: 0,
         controls: 0,
         disablekb: 1,
         fs: 0,
@@ -1524,47 +1524,19 @@ function playYouTube(ytId) {
       },
       events: {
         onReady: function(e) {
-          _ytDebug('onReady fired, calling playVideo()');
-          try {
-            e.target.playVideo();
-            _ytDebug('playVideo() called without throwing');
-          } catch(err) {
-            _ytDebug('playVideo() THREW: ' + err.message);
-          }
-          _confirmPlay(e.target);
-          startListenTimers();
-
-          // Direct state poll, independent of events — onStateChange has
-          // been observed to fire once (UNSTARTED) then go silent with no
-          // further events and no onError. This checks getPlayerState()
-          // directly to see if the player itself disagrees with its events.
-          var pollCount = 0;
-          var stateNames2 = { '-1': 'UNSTARTED', '0': 'ENDED', '1': 'PLAYING', '2': 'PAUSED', '3': 'BUFFERING', '5': 'CUED' };
-          var pollTimer = setInterval(function() {
-            pollCount++;
-            try {
-              var st = e.target.getPlayerState();
-              _ytDebug('direct poll #' + pollCount + ': getPlayerState()=' + (stateNames2[st] !== undefined ? stateNames2[st] : st));
-            } catch(err) {
-              _ytDebug('direct poll #' + pollCount + ' THREW: ' + err.message);
-            }
-            if (pollCount >= 6) clearInterval(pollTimer);
-          }, 500);
+          _ytDebug('onReady fired (cued, waiting for tap)');
+          showTapToListen();
         },
         onStateChange: function(e) {
           var stateNames = { '-1': 'UNSTARTED', '0': 'ENDED', '1': 'PLAYING', '2': 'PAUSED', '3': 'BUFFERING', '5': 'CUED' };
           _ytDebug('onStateChange: ' + (stateNames[e.data] || e.data));
-          try {
-            var dur = e.target.getDuration();
-            var vdata = e.target.getVideoData ? e.target.getVideoData() : null;
-            _ytDebug('  duration=' + dur + ' videoData=' + JSON.stringify(vdata));
-          } catch(err) {
-            _ytDebug('  getDuration/getVideoData THREW: ' + err.message);
-          }
           // YT.PlayerState.PLAYING = 1
           if (e.data === 1) {
-            _playConfirmed = true;
-            clearTimeout(_playRetryTimer);
+            hideTapToListen();
+            if (!sess.listenStartedAt) {
+              sess.listenStartedAt = true;
+              startListenTimers();
+            }
           }
           // YT.PlayerState.ENDED = 0
           if (e.data === 0) {
@@ -1585,7 +1557,6 @@ function playYouTube(ytId) {
           _ytDebug('onError fired! code=' + e.data + ' (' + (errCodes[e.data] || 'unknown') + ')');
           // Track unavailable — show the word scatter so they aren't stuck
           // on a dead player with nothing to do
-          clearTimeout(_playRetryTimer);
           clearTimeout(sess.recognitionTimer);
           var stmtWrap = document.getElementById('listen-stmts');
           if (stmtWrap && !stmtWrap.classList.contains('show')) {
@@ -1598,6 +1569,31 @@ function playYouTube(ytId) {
   } catch(err) {
     _ytDebug('new YT.Player() THREW: ' + err.message);
   }
+}
+
+// Called directly from the pulse dot's click handler — a fresh, real
+// user gesture every time, so playVideo() here is always fully trusted
+// by WebKit regardless of how autoplay heuristics are behaving.
+function startListening() {
+  if (!sess.ytPlayer || typeof sess.ytPlayer.playVideo !== 'function') return;
+  if (sess.ytStarted) return;
+  sess.ytStarted = true;
+  try {
+    sess.ytPlayer.playVideo();
+    _ytDebug('startListening: playVideo() called from direct tap');
+  } catch(e) {
+    _ytDebug('startListening: playVideo() threw: ' + e.message);
+  }
+}
+
+function showTapToListen() {
+  var dot = document.getElementById('pulse-dot');
+  if (dot) dot.classList.add('tappable');
+}
+
+function hideTapToListen() {
+  var dot = document.getElementById('pulse-dot');
+  if (dot) dot.classList.remove('tappable');
 }
 
 // ── STATEMENTS OVERLAY ────────────────────────────────────────────────────────
@@ -2042,6 +2038,11 @@ function bindEvents() {
   document.getElementById('btn-discover').addEventListener('click', function() {
     if (CURATED.length > 0) { selectCurated(false); } else { showSearch(); }
   });
+
+  // Tap to listen — the pulse dot is the only thing that ever calls
+  // playVideo(). This is a direct, fresh user gesture every time, which
+  // is the one case WebKit always honors regardless of autoplay heuristics.
+  document.getElementById('listen-pulse-wrap').addEventListener('click', startListening);
 
   // Return screen — same two actions, same landing link, just reached
   // from the lighter mid-session screen instead of the full first-time one
