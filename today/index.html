@@ -1446,7 +1446,7 @@ function _ytDebug(msg) {
 }
 
 function playYouTube(ytId) {
-  _ytDebug('playYouTube called, ytId=' + ytId + ', window.YT exists=' + !!window.YT);
+  _ytDebug('playYouTube called, ytId=' + ytId + ', window.YT exists=' + !!window.YT + ', navigator.onLine=' + navigator.onLine);
   // Destroy previous player
   if (sess.ytPlayer && typeof sess.ytPlayer.destroy === 'function') {
     try { sess.ytPlayer.destroy(); _ytDebug('old player destroyed'); }
@@ -1554,6 +1554,13 @@ function playYouTube(ytId) {
         onStateChange: function(e) {
           var stateNames = { '-1': 'UNSTARTED', '0': 'ENDED', '1': 'PLAYING', '2': 'PAUSED', '3': 'BUFFERING', '5': 'CUED' };
           _ytDebug('onStateChange: ' + (stateNames[e.data] || e.data));
+          try {
+            var dur = e.target.getDuration();
+            var vdata = e.target.getVideoData ? e.target.getVideoData() : null;
+            _ytDebug('  duration=' + dur + ' videoData=' + JSON.stringify(vdata));
+          } catch(err) {
+            _ytDebug('  getDuration/getVideoData THREW: ' + err.message);
+          }
           // YT.PlayerState.PLAYING = 1
           if (e.data === 1) {
             _playConfirmed = true;
