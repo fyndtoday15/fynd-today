@@ -6,6 +6,8 @@
 <meta name="theme-color" id="theme-color" content="#0a0a0a">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="icon" type="image/png" href="/FYND_TODAY_logo_1024x1024_white_bckg.png">
+<link rel="apple-touch-icon" href="/FYND_TODAY_logo_1024x1024_white_bckg.png">
 <title>FYND TODAY</title>
 <style>
 @font-face {
@@ -1004,6 +1006,7 @@ var sess = {
   email: null,
   firstName: null,
   sessionCount: 0,
+  returnScreenAnimating: false,
   reflectionTimers: [],
   beforeLine: null,
   trackTitle: null,
@@ -1143,6 +1146,12 @@ function showEntry() {
 // search mid-session. No five-line slow buildup — just one line, then
 // the same three options, loading in quickly.
 function showReturn() {
+  // Guard against rapid re-clicks of the back button restarting this
+  // screen's fade mid-transition, which looks like a flash/disappear/
+  // flash-again instead of one clean fade in.
+  if (sess.returnScreenAnimating) return;
+  sess.returnScreenAnimating = true;
+
   show('s-return');
   var line = document.getElementById('return-line');
   var paths = document.getElementById('return-paths');
@@ -1151,15 +1160,21 @@ function showReturn() {
   if (paths) paths.classList.remove('show');
   if (link) link.classList.remove('show');
 
+  // show() itself takes 350ms to swap screens (old one fades out first).
+  // Anchor all timing off that, not off the moment this function was
+  // called, so nothing starts fading in before the screen is even visible.
   setTimeout(function() {
     if (line) line.classList.add('show');
-  }, 300);
+  }, 350 + 150);
   setTimeout(function() {
     if (paths) paths.classList.add('show');
-  }, 900);
+  }, 350 + 700);
   setTimeout(function() {
     if (link) link.classList.add('show');
-  }, 1300);
+  }, 350 + 1100);
+  setTimeout(function() {
+    sess.returnScreenAnimating = false;
+  }, 350 + 1100 + 600);
 }
 
 function showBefore() {
