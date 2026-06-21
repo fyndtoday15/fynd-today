@@ -60,6 +60,7 @@ exports.handler = async function(event, context) {
     tappedWords = [],       // [{text, position}, ...] — real Stay/Move/Open recognition words only
     tappedColors = [],      // [{text, position:'color'}, ...] — color words, never count toward position
     dominantPosition = '',  // 'stay' | 'move' | 'open' | 'mixed' — computed by portal from tally
+    structuralTag = '',     // e.g. "slow, sparse, mostly still" — sound only, never meaning, see firewall below
     hasHistory = false,     // have they brought this exact track before?
     historyCount = 0,       // how many times total (including this one)
     historyPreviousPosition = null, // what position won last time for this track
@@ -77,6 +78,9 @@ exports.handler = async function(event, context) {
   ctx.push('Dominant position from their taps: ' + dominantPosition + '.');
   if (tappedColorList) {
     ctx.push('They also tapped these colors: ' + tappedColorList + '. These are pulled from the song\'s mood only and carry zero weight toward the position. Optional, light flavor only if it genuinely fits, never required.');
+  }
+  if (structuralTag) {
+    ctx.push('This track\'s structural character: ' + structuralTag + '. This describes the SOUND only — tempo, density, build. It is NOT a claim about what the song means, what it is about, or what the listener is going through. Never let it override or compete with the tapped words. Use it only to lightly inform word choice texture, the same way the color may, never as the main source of the challenge.');
   }
 
   if (!hasHistory) {
@@ -131,21 +135,41 @@ If they have a CONFIRMED REPEATED PATTERN with this track (same position multipl
 
 EXAMPLES OF THE RIGHT CHALLENGE REGISTER BY POSITION:
 
-Stay (first time): "Don't rush whatever's next, you're not behind"
-Stay (confirmed pattern, 3rd+ time): "You keep choosing to stay here, trust that on something bigger today"
-Stay (different texture, warm/steady words): "Stay in it a little longer, no one's timing you"
+These examples exist to teach you the TONE and LENGTH only. They are not a menu. Never output any of these lines verbatim or near-verbatim — if your output is closer to one of these than it is to something new, rewrite it. Use the tapped words to land on something different every time, the same way two different people saying "I'm staying put" still mean different things depending on what they're staying put about.
 
-Move (first time): "Go finish the thing you keep circling"
-Move (confirmed pattern): "You always move through this one, stop waiting for permission elsewhere"
-Move (different texture, loud/rising words): "Let it pull you somewhere loud for once"
+Stay — five different first-time examples, each pulled from a different texture of tapped words, study the range, don't default to the first one:
+"Don't rush whatever's next, you're not behind"
+"Stay in it a little longer, no one's timing you"
+"Let it be slow today, that's allowed"
+"You don't owe anyone a faster version of this"
+"Hold still, you're not missing anything"
 
-Open (first time): "Say yes to the next weird thing, on purpose"
-Open (confirmed pattern): "This one always catches you off guard, let something else catch you too"
-Open (mixed with stay-leaning word): "Let this one stay unresolved a little longer"
+Stay — confirmed pattern (3rd+ time): "You keep choosing to stay here, trust that on something bigger today"
 
-Mixed (tapped words spread across positions evenly): "You're carrying two directions right now, that's allowed"
+Move — five different first-time examples:
+"Go finish the thing you keep circling"
+"Let it pull you somewhere loud for once"
+"Stop waiting for a better moment to start"
+"You already know what you're moving toward, go"
+"Take the exit you keep talking yourself out of"
 
-Pull the actual texture from the words they tapped — don't default to the generic first-time version if the specific words suggest a different flavor (warmth, urgency, surprise, etc).
+Move — confirmed pattern: "You always move through this one, stop waiting for permission elsewhere"
+
+Open — five different first-time examples:
+"Say yes to the next weird thing, on purpose"
+"Let this one stay unresolved a little longer"
+"Follow the thing that just caught your attention"
+"You don't have to explain why it surprised you"
+"Let today take a turn you didn't plan"
+
+Open — confirmed pattern: "This one always catches you off guard, let something else catch you too"
+
+Mixed (tapped words spread across positions evenly), three examples:
+"You're carrying two directions right now, that's allowed"
+"You don't have to pick one today"
+"Both of those are true at once, sit with that"
+
+Pull the actual texture from the words they tapped — don't default to the generic first example if the specific words suggest a different flavor (warmth, urgency, surprise, defiance, relief, etc). If a structural tag is present, let it lightly inform word choice the same way color does, never the main driver.
 
 Respond in JSON only:
 {"memoryLine": "... or empty string if no history", "challenge": "..."}`;
@@ -186,10 +210,32 @@ Respond in JSON only:
 // ── FALLBACKS ─────────────────────────────────────────────────────────────────
 function getFallbackChallenge(position) {
   const lines = {
-    stay: ["Don't rush whatever's next, you're not behind", 'Stay in it a little longer, no one is timing you'],
-    move: ['Go finish the thing you keep circling', "Let it pull you somewhere loud for once"],
-    open: ["Say yes to the next weird thing, on purpose", 'Let this one stay unresolved a little longer'],
-    mixed: ["You're carrying two directions right now, that's allowed"],
+    stay: [
+      "Don't rush whatever's next, you're not behind",
+      'Stay in it a little longer, no one is timing you',
+      "Let it be slow today, that's allowed",
+      "You don't owe anyone a faster version of this",
+      "Hold still, you're not missing anything",
+    ],
+    move: [
+      'Go finish the thing you keep circling',
+      'Let it pull you somewhere loud for once',
+      "Stop waiting for a better moment to start",
+      "You already know what you're moving toward, go",
+      'Take the exit you keep talking yourself out of',
+    ],
+    open: [
+      'Say yes to the next weird thing, on purpose',
+      'Let this one stay unresolved a little longer',
+      'Follow the thing that just caught your attention',
+      "You don't have to explain why it surprised you",
+      "Let today take a turn you didn't plan",
+    ],
+    mixed: [
+      "You're carrying two directions right now, that's allowed",
+      "You don't have to pick one today",
+      'Both of those are true at once, sit with that',
+    ],
   };
   const opts = lines[position] || lines.stay;
   return opts[Math.floor(Math.random() * opts.length)];
