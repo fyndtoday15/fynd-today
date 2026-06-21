@@ -1430,10 +1430,27 @@ function handleReplay() {
 }
 
 // ── YOUTUBE PLAYER ────────────────────────────────────────────────────────────
+// ── TEMP DEBUG OVERLAY (remove once playback issue is found) ──────────────────
+function _ytDebug(msg) {
+  var panel = document.getElementById('yt-debug-panel');
+  if (!panel) {
+    panel = document.createElement('div');
+    panel.id = 'yt-debug-panel';
+    panel.style.cssText = 'position:fixed;top:0;left:0;right:0;max-height:40vh;overflow-y:auto;background:rgba(0,0,0,0.92);color:#0f0;font-family:monospace;font-size:11px;line-height:1.5;padding:8px;z-index:99999;pointer-events:none;white-space:pre-wrap;';
+    document.body.appendChild(panel);
+  }
+  var line = document.createElement('div');
+  line.textContent = new Date().toISOString().slice(11,23) + '  ' + msg;
+  panel.appendChild(line);
+  panel.scrollTop = panel.scrollHeight;
+}
+
 function playYouTube(ytId) {
+  _ytDebug('playYouTube called, ytId=' + ytId + ', window.YT exists=' + !!window.YT);
   // Destroy previous player
   if (sess.ytPlayer && typeof sess.ytPlayer.destroy === 'function') {
-    try { sess.ytPlayer.destroy(); } catch(e) {}
+    try { sess.ytPlayer.destroy(); _ytDebug('old player destroyed'); }
+    catch(e) { _ytDebug('destroy() threw: ' + e.message); }
     sess.ytPlayer = null;
   }
 
@@ -1450,10 +1467,13 @@ function playYouTube(ytId) {
     var freshTarget = document.createElement('div');
     freshTarget.id = 'yt-player';
     ytWrap.appendChild(freshTarget);
+    _ytDebug('fresh #yt-player div created');
+  } else {
+    _ytDebug('ERROR: #yt-wrap not found in DOM');
   }
 
   if (!window.YT || !window.YT.Player) {
-    // API not ready yet — retry
+    _ytDebug('YT API not ready yet, retrying in 300ms');
     setTimeout(function() { playYouTube(ytId); }, 300);
     return;
   }
@@ -1468,69 +1488,92 @@ function playYouTube(ytId) {
     _playConfirmed = false;
     clearTimeout(_playRetryTimer);
     _playRetryTimer = setTimeout(function() {
-      if (_playConfirmed) return;
-      try { player.playVideo(); } catch(e) {}
+      if (_playConfirmed) {
+        _ytDebug('play confirm check: already confirmed, skipping retry');
+        return;
+      }
+      _ytDebug('play NOT confirmed after 1.5s, retrying playVideo()');
+      try { player.playVideo(); } catch(e) { _ytDebug('retry playVideo() threw: ' + e.message); }
       setTimeout(function() {
         if (!_playConfirmed) {
-          try { player.playVideo(); } catch(e) {}
+          _ytDebug('play STILL not confirmed after 2nd attempt, retrying once more');
+          try { player.playVideo(); } catch(e) { _ytDebug('2nd retry playVideo() threw: ' + e.message); }
+        } else {
+          _ytDebug('play confirmed on 2nd check');
         }
       }, 1000);
     }, 1500);
   }
 
-  sess.ytPlayer = new YT.Player('yt-player', {
-    height: '1',
-    width: '1',
-    videoId: ytId,
-    playerVars: {
-      autoplay: 1,
-      controls: 0,
-      disablekb: 1,
-      fs: 0,
-      modestbranding: 1,
-      rel: 0,
-      playsinline: 1,
-      iv_load_policy: 3,
-      origin: window.location.origin,
-    },
-    events: {
-      onReady: function(e) {
-        e.target.playVideo();
-        _confirmPlay(e.target);
-        startListenTimers();
+  _ytDebug('creating new YT.Player...');
+  try {
+    sess.ytPlayer = new YT.Player('yt-player', {
+      height: '1',
+      width: '1',
+      videoId: ytId,
+      playerVars: {
+        autoplay: 1,
+        controls: 0,
+        disablekb: 1,
+        fs: 0,
+        modestbranding: 1,
+        rel: 0,
+        playsinline: 1,
+        iv_load_policy: 3,
+        origin: window.location.origin,
       },
-      onStateChange: function(e) {
-        // YT.PlayerState.PLAYING = 1
-        if (e.data === 1) {
-          _playConfirmed = true;
+      events: {
+        onReady: function(e) {
+          _ytDebug('onReady fired, calling playVideo()');
+          try {
+            e.target.playVideo();
+            _ytDebug('playVideo() called without throwing');
+          } catch(err) {
+            _ytDebug('playVideo() THREW: ' + err.message);
+          }
+          _confirmPlay(e.target);
+          startListenTimers();
+        },
+        onStateChange: function(e) {
+          var stateNames = { '-1': 'UNSTARTED', '0': 'ENDED', '1': 'PLAYING', '2': 'PAUSED', '3': 'BUFFERING', '5': 'CUED' };
+          _ytDebug('onStateChange: ' + (stateNames[e.data] || e.data));
+          // YT.PlayerState.PLAYING = 1
+          if (e.data === 1) {
+            _playConfirmed = true;
+            clearTimeout(_playRetryTimer);
+          }
+          // YT.PlayerState.ENDED = 0
+          if (e.data === 0) {
+            clearTimeout(sess.recognitionTimer);
+            // If words aren't showing yet (short track ended before 30s), show them now
+            var stmtWrap = document.getElementById('listen-stmts');
+            if (stmtWrap && !stmtWrap.classList.contains('show')) {
+              showStatementsOverlay();
+            }
+            // Track audio has ended — that's fine. The word scatter and the
+            // forward button stay exactly as they are. The person decides
+            // when they're done by tapping the button themselves.
+            // No auto-advance, no timer, no silent screen change.
+          }
+        },
+        onError: function(e) {
+          var errCodes = { '2': 'invalid video ID', '5': 'HTML5 player error', '100': 'video not found/private', '101': 'embedding disabled by uploader', '150': 'embedding disabled by uploader' };
+          _ytDebug('onError fired! code=' + e.data + ' (' + (errCodes[e.data] || 'unknown') + ')');
+          // Track unavailable — show the word scatter so they aren't stuck
+          // on a dead player with nothing to do
           clearTimeout(_playRetryTimer);
-        }
-        // YT.PlayerState.ENDED = 0
-        if (e.data === 0) {
           clearTimeout(sess.recognitionTimer);
-          // If words aren't showing yet (short track ended before 30s), show them now
           var stmtWrap = document.getElementById('listen-stmts');
           if (stmtWrap && !stmtWrap.classList.contains('show')) {
             showStatementsOverlay();
           }
-          // Track audio has ended — that's fine. The word scatter and the
-          // forward button stay exactly as they are. The person decides
-          // when they're done by tapping the button themselves.
-          // No auto-advance, no timer, no silent screen change.
-        }
+        },
       },
-      onError: function() {
-        // Track unavailable — show the word scatter so they aren't stuck
-        // on a dead player with nothing to do
-        clearTimeout(_playRetryTimer);
-        clearTimeout(sess.recognitionTimer);
-        var stmtWrap = document.getElementById('listen-stmts');
-        if (stmtWrap && !stmtWrap.classList.contains('show')) {
-          showStatementsOverlay();
-        }
-      },
-    },
-  });
+    });
+    _ytDebug('new YT.Player() call completed, sess.ytPlayer set');
+  } catch(err) {
+    _ytDebug('new YT.Player() THREW: ' + err.message);
+  }
 }
 
 // ── STATEMENTS OVERLAY ────────────────────────────────────────────────────────
@@ -1957,11 +2000,15 @@ function showStopped() {
 (function() {
   var tag = document.createElement('script');
   tag.src = 'https://www.youtube.com/iframe_api';
+  tag.onerror = function() { _ytDebug('YT iframe_api script FAILED to load'); };
+  tag.onload = function() { _ytDebug('YT iframe_api script tag loaded (onYouTubeIframeAPIReady should fire next)'); };
   document.head.appendChild(tag);
+  _ytDebug('YT iframe_api script tag appended to head');
 })();
 
 window.onYouTubeIframeAPIReady = function() {
   sess.ytReady = true;
+  _ytDebug('onYouTubeIframeAPIReady fired, window.YT.Player exists=' + !!(window.YT && window.YT.Player));
 };
 
 // ── EVENTS ────────────────────────────────────────────────────────────────────
