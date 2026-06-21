@@ -504,13 +504,15 @@ html, body {
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  padding: calc(env(safe-area-inset-top, 20px) + 110px) 36px 0;
+  padding: calc(env(safe-area-inset-top, 20px) + 110px) 36px 70px;
   gap: 16px;
   opacity: 0;
   pointer-events: none;
   transition: opacity 1.2s ease;
   background: #0a0a0a;
   z-index: 30;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 .listen-stmts.show {
   opacity: 1;
@@ -603,7 +605,9 @@ html, body {
 #s-recognition {
   justify-content: flex-start;
   gap: 24px;
-  padding: calc(env(safe-area-inset-top, 20px) + 110px) 36px 0;
+  padding: calc(env(safe-area-inset-top, 20px) + 110px) 36px 70px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .recog-reveal {
@@ -1367,6 +1371,16 @@ function selectTrack(track, isCurated) {
   // Fetch Claude-researched word pool for this specific track in background
   fetchWordPool(track.title, track.artist);
 
+  // Start the YouTube player loading NOW, not after the listen screen
+  // appears. Creating the iframe and waiting for YouTube's cross-origin
+  // load is the actual source of the multi-second wait before "press
+  // play" shows up. Starting it here overlaps that load time with the
+  // screen transition that's about to happen anyway, so the player is
+  // usually already cued and ready by the time the listen screen settles.
+  if (sess.trackId) {
+    playYouTube(sess.trackId);
+  }
+
   goListen();
 }
 
@@ -1436,12 +1450,11 @@ function goListen() {
     setTimeout(function() { info.classList.add('show'); }, 700);
   }
 
-  // Start YouTube player — cued, not autoplaying. The pulse dot becomes
-  // tappable once onReady fires; tapping it calls startListening().
-  if (sess.trackId) {
-    playYouTube(sess.trackId);
-  } else {
-    // Curated track with no ytId yet — start timers directly
+  // YouTube player loading was already kicked off in selectTrack(), as
+  // early as possible. The pulse dot becomes tappable once its onReady
+  // fires; tapping it calls startListening(). Only the no-ytId curated
+  // fallback needs handling here, since that path never had a player.
+  if (!sess.trackId) {
     startListenTimers();
   }
 }
