@@ -119,6 +119,7 @@ html, body {
 
 /* ── S-ENTRY ── */
 #s-entry { gap: 0; }
+#s-return { gap: 0; }
 
 .entry-line {
   font-size: clamp(13px, 2.7vw, 16px);
@@ -862,11 +863,22 @@ html, body {
   <div class="entry-line" id="el-4">before you understood why.</div>
   <div class="entry-line" id="el-5">This is built around that.</div>
   <div class="entry-paths" id="entry-paths">
-    <button class="path-btn" id="btn-search">Find a track</button>
+    <button class="path-btn" id="btn-search">Search for a track</button>
     <div class="path-sep">or</div>
     <button class="path-btn" id="btn-discover">Let sound find you</button>
   </div>
   <a class="landing-link" id="landing-link" href="/">go back to the landing page</a>
+</div>
+
+<!-- S-RETURN (lighter screen for the back button mid-session) -->
+<div class="screen" id="s-return">
+  <div class="entry-line" id="return-line">Sound will always be here.</div>
+  <div class="entry-paths" id="return-paths">
+    <button class="path-btn" id="return-btn-search">Search for a track</button>
+    <div class="path-sep">or</div>
+    <button class="path-btn" id="return-btn-discover">Let sound find you</button>
+  </div>
+  <a class="landing-link" id="return-landing-link" href="/">go back to the landing page</a>
 </div>
 
 <!-- S-BEFORE -->
@@ -1120,11 +1132,34 @@ function showEntry() {
   setTimeout(function() {
     var ep2 = document.getElementById('entry-paths');
     if (ep2) ep2.classList.add('show');
-  }, 400 + 5 * 1200 + 500);
+  }, 400 + 4 * 1200 + 600);
   setTimeout(function() {
     var ll2 = document.getElementById('landing-link');
     if (ll2) ll2.classList.add('show');
-  }, 400 + 5 * 1200 + 900);
+  }, 400 + 4 * 1200 + 1000);
+}
+
+// Lighter, faster version of the entry screen used when backing out of
+// search mid-session. No five-line slow buildup — just one line, then
+// the same three options, loading in quickly.
+function showReturn() {
+  show('s-return');
+  var line = document.getElementById('return-line');
+  var paths = document.getElementById('return-paths');
+  var link = document.getElementById('return-landing-link');
+  if (line) line.classList.remove('show');
+  if (paths) paths.classList.remove('show');
+  if (link) link.classList.remove('show');
+
+  setTimeout(function() {
+    if (line) line.classList.add('show');
+  }, 300);
+  setTimeout(function() {
+    if (paths) paths.classList.add('show');
+  }, 900);
+  setTimeout(function() {
+    if (link) link.classList.add('show');
+  }, 1300);
 }
 
 function showBefore() {
@@ -1226,6 +1261,7 @@ function selectTrack(track, isCurated) {
 
   // Reset tap state and increment token to cancel any pending callbacks
   sess.wordPool = null;
+  sess.structuralTag = '';
   sess.tappedWords = [];
   sess.reflectionToken = (sess.reflectionToken || 0) + 1;
 
@@ -1542,9 +1578,11 @@ function fetchWordPool(title, artist) {
   .then(function(r) { return r.json(); })
   .then(function(data) {
     sess.wordPool = (data.words && data.words.length >= 6) ? data.words : FALLBACK_WORD_POOL;
+    sess.structuralTag = data.structuralTag || '';
   })
   .catch(function() {
     sess.wordPool = FALLBACK_WORD_POOL;
+    sess.structuralTag = '';
   });
 }
 
@@ -1709,6 +1747,7 @@ function getForm(cb) {
       tappedWords: positionWords,
       tappedColors: colorWords,
       dominantPosition: dominant,
+      structuralTag: sess.structuralTag || '',
       hasHistory: hasHistory,
       historyCount: hasHistory ? (history.count + 1) : 1,
       historyPreviousPosition: hasHistory ? history.lastPosition : null,
@@ -1814,6 +1853,13 @@ function bindEvents() {
     if (CURATED.length > 0) { selectCurated(false); } else { showSearch(); }
   });
 
+  // Return screen — same two actions, same landing link, just reached
+  // from the lighter mid-session screen instead of the full first-time one
+  document.getElementById('return-btn-search').addEventListener('click', showSearch);
+  document.getElementById('return-btn-discover').addEventListener('click', function() {
+    if (CURATED.length > 0) { selectCurated(false); } else { showSearch(); }
+  });
+
   // Before
   document.getElementById('before-cta').addEventListener('click', showEntry);
 
@@ -1827,7 +1873,7 @@ function bindEvents() {
   // screen, so behavior is consistent every time you hit back, whether
   // it's your first search or your fifth.
   document.getElementById('search-back').addEventListener('click', function() {
-    showEntry();
+    showReturn();
   });
 
   // Event delegation for search results — handles clicks even on
