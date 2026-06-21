@@ -1650,9 +1650,12 @@ function goRecognitionWithChoice(position) {
     trackLabel.textContent = sess.trackTitle + (sess.trackArtist ? ' · ' + sess.trackArtist : '');
   }
 
-  // Now show the color tap screen — person picks colors directly,
-  // genuine human choice, no research narrowing this down for them
-  showColorScreen();
+  // Let the screen's own fade-in settle before the color words start
+  // populating and staggering in — avoids two competing fades happening
+  // at once, which is what made this transition feel rough before.
+  setTimeout(function() {
+    showColorScreen();
+  }, 350);
 }
 
 
@@ -1911,13 +1914,11 @@ function bindEvents() {
     searchTimer = setTimeout(function() { doSearch(e.target.value.trim()); }, 400);
   });
 
-  // Search back button
+  // Search back button — always returns to entry, the one stable home
+  // screen, so behavior is consistent every time you hit back, whether
+  // it's your first search or your fifth.
   document.getElementById('search-back').addEventListener('click', function() {
-    if (sess.trackCount > 0) {
-      showStopped();
-    } else {
-      showEntry();
-    }
+    showEntry();
   });
 
   // Event delegation for search results — handles clicks even on
