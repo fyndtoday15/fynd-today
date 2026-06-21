@@ -364,6 +364,16 @@ body:has(#s-recognition.active) #wordmark {
 }
 .listen-curated-tag.show { opacity: 1; }
 
+.listen-video-wrap {
+  width: 200px;
+  height: 200px;
+  margin: 0 auto 32px;
+  overflow: hidden;
+  border: 1px solid rgba(252,251,244,.14);
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+.listen-video-wrap.show { opacity: 1; }
 .listen-pulse-wrap {
   display: flex;
   align-items: center;
@@ -910,15 +920,6 @@ body:has(#s-recognition.active) #wordmark {
 <!-- WORDMARK -->
 <img id="wordmark" src="/logo.png" alt="FYND TODAY">
 
-<!-- YOUTUBE PLAYER (hidden) -->
-<!-- Must stay inside the visible viewport on iOS Safari. Off-screen
-     positioning (top/left: -9999px) causes WebKit to silently block
-     or fail to start playback even with playsinline set. Keeping it
-     at 1x1 inside the viewport with opacity:0 avoids that. -->
-<div id="yt-wrap" style="position:fixed;width:200px;height:200px;top:0;left:0;opacity:0;pointer-events:none;z-index:0;overflow:hidden;transform:translate(-300px,-300px);">
-  <div id="yt-player"></div>
-</div>
-
 <!-- S-ENTRY -->
 <div class="screen" id="s-entry">
   <div class="entry-line" id="el-1">You've heard a song</div>
@@ -966,6 +967,7 @@ body:has(#s-recognition.active) #wordmark {
 <!-- S-LISTEN -->
 <div class="screen" id="s-listen">
   <div class="listen-curated-tag" id="curated-tag">we wanted you to hear this</div>
+  <div class="listen-video-wrap" id="listen-video-wrap"></div>
   <div class="listen-pulse-wrap" id="listen-pulse-wrap">
     <button class="listen-play-btn" id="listen-play-btn">press play</button>
     <div class="pulse-dot" id="pulse-dot"></div>
@@ -1322,9 +1324,24 @@ function doSearch(q) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ query: q }),
   })
-  .then(function(r) { return r.json(); })
-  .then(function(data) {
+  .then(function(r) {
+    // fetch() only rejects on network failure, never on HTTP error status
+    // codes — a 500 from the server (quota exhausted, API key issue, etc)
+    // was silently parsing as JSON and falling through to the same "not
+    // here yet" message as a genuine empty result, hiding real failures.
+    return r.json().then(function(body) {
+      return { ok: r.ok, status: r.status, body: body };
+    });
+  })
+  .then(function(result) {
     if (thisToken !== searchRequestToken) return; // stale response, ignore
+    if (!result.ok) {
+      console.error('search-tracks failed:', result.status, result.body);
+      document.getElementById('search-results').innerHTML =
+        '<div class="search-empty">something went wrong.<br>try again.</div>';
+      return;
+    }
+    var data = result.body;
     if (data.results && data.results.length > 0) {
       renderResults(data.results);
     } else {
@@ -1434,6 +1451,7 @@ function goListen() {
   // Reset elements
   var dot = document.getElementById('pulse-dot');
   var playBtn = document.getElementById('listen-play-btn');
+  var videoWrap = document.getElementById('listen-video-wrap');
   var stop = document.getElementById('listen-stop');
   var replay = document.getElementById('listen-replay');
   var info = document.getElementById('track-info');
@@ -1441,6 +1459,7 @@ function goListen() {
 
   dot.classList.remove('active');
   dot.classList.remove('hidden-under-overlay');
+  if (videoWrap) videoWrap.classList.remove('show');
   if (playBtn) {
     playBtn.classList.remove('tappable');
     playBtn.classList.remove('loading');
@@ -1574,16 +1593,23 @@ function playYouTube(ytId) {
   // new YT.Player('yt-player', ...) call has no element to attach to and
   // silently fails — this is why the second track never played while the
   // first one did.
-  var ytWrap = document.getElementById('yt-wrap');
-  if (ytWrap) {
+  //
+  // The player now attaches into the visible #listen-video-wrap on the
+  // listen screen instead of a hidden off-screen container. YouTube's
+  // developer policies require the player and its branding to actually
+  // be visible to the viewer, not hidden — a fully hidden player used
+  // purely as an audio source is explicitly against their terms.
+  var videoWrap = document.getElementById('listen-video-wrap');
+  if (videoWrap) {
     var oldTarget = document.getElementById('yt-player');
     if (oldTarget) oldTarget.remove();
     var freshTarget = document.createElement('div');
     freshTarget.id = 'yt-player';
-    ytWrap.appendChild(freshTarget);
-    _ytDebug('fresh #yt-player div created');
+    videoWrap.appendChild(freshTarget);
+    videoWrap.classList.add('show');
+    _ytDebug('fresh #yt-player div created in visible video wrap');
   } else {
-    _ytDebug('ERROR: #yt-wrap not found in DOM');
+    _ytDebug('ERROR: #listen-video-wrap not found in DOM');
   }
 
   if (!window.YT || !window.YT.Player) {
@@ -1611,7 +1637,6 @@ function playYouTube(ytId) {
         controls: 0,
         disablekb: 1,
         fs: 0,
-        modestbranding: 1,
         rel: 0,
         playsinline: 1,
         iv_load_policy: 3,
