@@ -90,6 +90,15 @@ html, body {
   opacity: 1;
   z-index: 10;
   pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+/* Hide the wordmark during the word-tap and color-tap overlays — these
+   are full-screen takeovers and the logo has no reason to compete for
+   space with content that can run long (Done button colliding with the
+   logo on tracks with more tapped words than usual). */
+body:has(.listen-stmts.show) #wordmark,
+body:has(#s-recognition.active) #wordmark {
+  opacity: 0;
 }
 
 /* ── LOADER ── */
@@ -1257,6 +1266,8 @@ function showSearch() {
   document.getElementById('listen-stmts').classList.remove('show');
   document.getElementById('listen-stop').classList.remove('show');
   document.getElementById('listen-replay').classList.remove('show');
+  var wm = document.getElementById('wordmark');
+  if (wm) wm.style.opacity = '';
 
   show('s-search');
   document.getElementById('search-results').innerHTML = '';
@@ -1675,6 +1686,11 @@ function showColorScreen() {
   scatter.innerHTML = '';
   sess.tappedColorsList = [];
 
+  // Wordmark can't be scrolled away (position:fixed to viewport) and this
+  // screen's content reaches where it sits — hide it directly.
+  var wm = document.getElementById('wordmark');
+  if (wm) wm.style.opacity = '0';
+
   // Always the same eleven, no shuffle needed since order doesn't carry meaning here,
   // but shuffle anyway so it never feels like a fixed memorized layout
   var shuffled = MAIN_COLORS.slice().sort(function() { return Math.random() - 0.5; });
@@ -1714,6 +1730,12 @@ function toggleColorTap(btn, colorName) {
 function showStatementsOverlay() {
   var stmtWrap = document.getElementById('listen-stmts');
   if (!stmtWrap) return;
+
+  // Belt-and-suspenders alongside the CSS :has() rule that hides the
+  // wordmark during this overlay — explicit JS hide in case of any
+  // browser without :has() support.
+  var wm = document.getElementById('wordmark');
+  if (wm) wm.style.opacity = '0';
 
   var pool = (sess.wordPool && sess.wordPool.length >= 6) ? sess.wordPool : FALLBACK_WORD_POOL;
   sess.tappedWords = [];
@@ -1763,6 +1785,13 @@ function showStatementsOverlay() {
   if (playBtn) playBtn.classList.add('hidden-under-overlay');
   if (info) info.classList.add('hidden-under-overlay');
   if (tag) tag.classList.add('hidden-under-overlay');
+
+  // The wordmark is position:fixed to the viewport, not the document, so
+  // it can't be scrolled away or cleared with padding — this overlay's
+  // content genuinely reaches where it sits. Hide it directly while the
+  // overlay is up.
+  var wm = document.getElementById('wordmark');
+  if (wm) wm.style.opacity = '0';
 
   stmtWrap.classList.add('show');
 }
