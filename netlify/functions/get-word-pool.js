@@ -80,29 +80,16 @@ STAY, holding still, remaining, present with what is, not rushing
 MOVE, moving through, releasing, pushing forward, letting go
 OPEN, noticing something unexpected, a shift, recognition occurring, off guard
 
-BALANCE IS REQUIRED, NOT OPTIONAL: of the 15 total words, exactly 4 must be Stay, exactly 4 must be Move, exactly 4 must be Open, and exactly 3 must be color words. This 4 and 4 and 4 and 3 split never changes, regardless of the track. The track's character should shape WHICH specific words you pick within each position (a heavy slow track gets heavier feeling Stay words, a driving track gets more urgent Move words) but it must never shrink or skip a position. All three positions always get a real, equal shot at being tapped.
-
-COLOR WORDS, chosen using research backed logic, not aesthetic guessing:
-This logic is based on published cross modal correspondence research. Palmer, Schloss, Xu, Prado Leon, Proceedings of the National Academy of Sciences, 2013, found that music to color association runs through the emotion the music carries, driven mainly by tempo and major or minor key feel, replicated across US and Mexican participants with correlation strength 0.89 to 0.99. Fast tempo and a major, upbeat key feel produce color associations that are lighter, more saturated, and warmer toward yellow. Slow tempo and a minor, somber key feel produce color associations that are darker, less saturated, and cooler toward blue. A follow up study, Whiteford, Schloss, Helwig, Palmer, 2018, found that on a separate agitated versus calm dimension, agitated music correlates toward red and calm music correlates toward green.
-
-Use these rules, based directly on that research:
-Track is fast tempo, upbeat, major key feeling, pick from: gold, yellow, orange
-Track is slow tempo, somber, minor key feeling, pick from: blue, grey, purple
-Track is intense, angry, aggressive in energy, pick from: red, black
-Track is calm, gentle, peaceful in energy, pick from: green, white, silver, blue
-Track is warm, full, rich in tone without being fast or aggressive, pick from: orange, brown, gold
-Pick exactly 3 colors from the single category above that best matches the track's actual tempo and emotional character. Do not mix colors from different categories. Color words carry no position weight at all, they never count toward Stay, Move, or Open. They are a separate, research informed read of the track's tempo and key feel, never a guess about the listener's own life or mood.
-
-Color words must be ONLY from this exact list, no others ever: red, blue, gold, green, purple, white, black, pink, orange, grey, yellow, brown, silver
+BALANCE IS REQUIRED, NOT OPTIONAL: of the 15 total words, exactly 5 must be Stay, exactly 5 must be Move, exactly 5 must be Open. This 5 and 5 and 5 split never changes, regardless of the track. The track's character should shape WHICH specific words you pick within each position (a heavy slow track gets heavier feeling Stay words, a driving track gets more urgent Move words) but it must never shrink or skip a position. All three positions always get a real, equal shot at being tapped.
 
 THE VOCABULARY RULE, THIS IS THE MOST IMPORTANT RULE:
-Every single word, including the color words, must be a word an average eight year old already knows and uses, without ever needing it explained. Read every word out loud before including it and ask: would a third grader understand this instantly, with zero hesitation? If there is ANY doubt, do not use it.
+Every single word must be a word an average eight year old already knows and uses, without ever needing it explained. Read every word out loud before including it and ask: would a third grader understand this instantly, with zero hesitation? If there is ANY doubt, do not use it.
 
 BANNED, words like this must never appear, they are too advanced or unclear even though they may seem simple to an adult: restless, suspended, anchored, surfacing, awake (as a feeling word), loosening, settling, rooting, contained, brooding, off guard, double take, stopped short, thrown, tilted.
 
-VARIETY MATTERS: the lists below are a large pool of acceptable words at the right difficulty level, not a short list to pick the same four from every time. Pull different combinations for different tracks. Two different songs should rarely produce the exact same 4 words for a position unless they are genuinely very similar tracks. Reach across the full list, not just the first few words that come to mind.
+VARIETY MATTERS: the lists below are a large pool of acceptable words at the right difficulty level, not a short list to pick the same five from every time. Pull different combinations for different tracks. Two different songs should rarely produce the exact same 5 words for a position unless they are genuinely very similar tracks. Reach across the full list, not just the first few words that come to mind.
 
-Stay style words, pick from this wide pool, do not default to the same 4 every time: still, quiet, slow, here, calm, safe, soft, resting, steady, peaceful, gentle, easy, warm, cozy, settled, patient, paused, holding, staying, slowing down, grounded, not going anywhere, staying put, sitting with it, not rushing
+Stay style words, pick from this wide pool, do not default to the same 5 every time: still, quiet, slow, here, calm, safe, soft, resting, steady, peaceful, gentle, easy, warm, cozy, settled, patient, paused, holding, staying, slowing down, grounded, not going anywhere, staying put, sitting with it, not rushing
 Move style words, pick from this wide pool. Every word here describes the plain, simple feeling of moving forward toward a next thing, the same plain everyday register as the Stay words above, not dramatic, not a specific physical action like running or racing, just forward motion toward what comes next.
 The full flat Move list to choose from: forward, ready, loose, drawn forward, moving, carrying, going, ahead, pulling, unstuck, onward, reaching, coming, heading, approaching, toward, next, closing in, leaving, arriving, continuing, advancing, passing through, on track, departing
 
@@ -117,8 +104,8 @@ Never music jargon, never: tempo, beat, rhythm, melody, sound, song.
 Never assign emotional content from the track's title or lyrics. Research informs structure only, never assigns what the listener is going through in their life.
 Words must work for anyone in any life situation, broad enough to be honestly tappable by many different people for many different reasons.
 
-Respond in JSON only, exactly 15 words/phrases total, 4 stay, 4 move, 4 open, 3 color, each tagged:
-{"words": [{"text": "...", "position": "stay|move|open|color"}, ... 15 total]}`;
+Respond in JSON only, exactly 15 words/phrases total, 5 stay, 5 move, 5 open, each tagged:
+{"words": [{"text": "...", "position": "stay|move|open"}, ... 15 total]}`;
 
   const userPrompt = `Track: "${title}" by ${artist}
 
@@ -167,17 +154,17 @@ const FALLBACK_WORDS = [
   { text: 'quiet', position: 'stay' },
   { text: 'slow', position: 'stay' },
   { text: 'here', position: 'stay' },
+  { text: 'calm', position: 'stay' },
   { text: 'forward', position: 'move' },
-  { text: 'fast', position: 'move' },
+  { text: 'ready', position: 'move' },
   { text: 'going', position: 'move' },
   { text: 'pulling', position: 'move' },
+  { text: 'onward', position: 'move' },
   { text: 'new', position: 'open' },
   { text: 'surprised', position: 'open' },
   { text: 'different', position: 'open' },
-  { text: 'sudden', position: 'open' },
-  { text: 'gold', position: 'color' },
-  { text: 'blue', position: 'color' },
-  { text: 'red', position: 'color' },
+  { text: 'curious', position: 'open' },
+  { text: 'noticing', position: 'open' },
 ];
 
 function fallbackResponse(allowedOrigin, corsHeaders) {
