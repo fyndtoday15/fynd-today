@@ -1438,6 +1438,21 @@ function playYouTube(ytId) {
     sess.ytPlayer = null;
   }
 
+  // destroy() removes the #yt-player element itself from the DOM (it gets
+  // replaced by the player iframe, which destroy() then removes without
+  // restoring the original div). Without recreating it, the next
+  // new YT.Player('yt-player', ...) call has no element to attach to and
+  // silently fails — this is why the second track never played while the
+  // first one did.
+  var ytWrap = document.getElementById('yt-wrap');
+  if (ytWrap) {
+    var oldTarget = document.getElementById('yt-player');
+    if (oldTarget) oldTarget.remove();
+    var freshTarget = document.createElement('div');
+    freshTarget.id = 'yt-player';
+    ytWrap.appendChild(freshTarget);
+  }
+
   if (!window.YT || !window.YT.Player) {
     // API not ready yet — retry
     setTimeout(function() { playYouTube(ytId); }, 300);
@@ -1755,7 +1770,7 @@ function confirmChoice(position) {
 }
 
 // ── REFLECTION ────────────────────────────────────────────────────────────────
-function fadeAudioOut() {
+function fadeAudioOut(cb) {
   // Fade audio out after reflection appears — music plays through the transition
   if (sess.ytPlayer && typeof sess.ytPlayer.setVolume === 'function') {
     var vol = 100;
@@ -1765,10 +1780,15 @@ function fadeAudioOut() {
         clearInterval(fadeInterval);
         try { sess.ytPlayer.stopVideo(); } catch(e) {}
         try { sess.ytPlayer.setVolume(100); } catch(e) {} // reset volume for next track
+        if (typeof cb === 'function') cb();
       } else {
         try { sess.ytPlayer.setVolume(vol); } catch(e) {}
       }
     }, 75); // ~1.5s fade
+  } else if (typeof cb === 'function') {
+    // No player to fade — don't block the reveal waiting on a fade that
+    // will never report back
+    cb();
   }
 }
 
@@ -1784,10 +1804,19 @@ function goReflection() {
   txt.textContent = '';
   acts.classList.remove('show');
 
-  // Music still playing — fade it out now that reflection screen is showing
-  setTimeout(function() { fadeAudioOut(); }, 400);
+  // Start the form fetch immediately. Begin the audio fade once the
+  // reflection screen has visibly settled, then reveal the form text
+  // only once BOTH the fade has finished AND the form data has arrived —
+  // whichever takes longer. This keeps the music-out and form-in beats
+  // locked together regardless of network speed, instead of racing a
+  // fixed-delay fade against an independent fetch.
+  var fadeDone = false;
+  var formReady = false;
+  var formArgs = null;
 
-  getForm(function(memoryLine, challenge) {
+  function revealIfReady() {
+    if (!fadeDone || !formReady) return;
+    var memoryLine = formArgs[0], challenge = formArgs[1];
     sess.reflectionLine = challenge;
     if (memoryLine) {
       mem.textContent = memoryLine;
@@ -1796,6 +1825,19 @@ function goReflection() {
     txt.textContent = challenge;
     txt.classList.add('show');
     acts.classList.add('show');
+  }
+
+  setTimeout(function() {
+    fadeAudioOut(function() {
+      fadeDone = true;
+      revealIfReady();
+    });
+  }, 400);
+
+  getForm(function(memoryLine, challenge) {
+    formReady = true;
+    formArgs = [memoryLine, challenge];
+    revealIfReady();
   });
 }
 
