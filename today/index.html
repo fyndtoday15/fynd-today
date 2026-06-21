@@ -961,22 +961,22 @@ html, body {
     <div class="tap-word-scatter" id="tap-word-scatter"></div>
     <button class="tap-done-btn" id="tap-done-btn">done</button>
   </div>
-
-  <!-- Single back and replay controls, fixed position, sit above both states -->
-  <button class="listen-stop" id="listen-stop">back to search</button>
-  <button class="listen-replay" id="listen-replay">replay</button>
 </div>
 
 <!-- S-RECOGNITION -->
 <div class="screen" id="s-recognition">
-  <div class="recog-reveal" id="recog-reveal">
-    <div class="recog-reveal-label">that was</div>
-    <div class="recog-reveal-name" id="recog-reveal-name"></div>
-  </div>
+  <div class="listen-stmts-track" id="color-screen-track"></div>
   <div class="listen-stmts-prompt">while you listen, tap what colors stand out to you</div>
   <div class="tap-word-scatter" id="color-word-scatter"></div>
   <button class="tap-done-btn" id="color-done-btn">done</button>
 </div>
+
+<!-- Back and replay controls — standalone, NOT inside a .screen, so they
+     persist visibly across both the listen screen and the color screen.
+     Visibility controlled directly via JS, not tied to any single screen's
+     .active state. -->
+<button class="listen-stop" id="listen-stop">back to search</button>
+<button class="listen-replay" id="listen-replay">replay</button>
 
 <!-- S-REFLECTION -->
 <div class="screen" id="s-reflection">
@@ -1199,6 +1199,8 @@ var searchTimer = null;
 function showSearch() {
   // Safety: force-clear any overlay that might be stuck blocking clicks
   document.getElementById('listen-stmts').classList.remove('show');
+  document.getElementById('listen-stop').classList.remove('show');
+  document.getElementById('listen-replay').classList.remove('show');
 
   show('s-search');
   document.getElementById('search-results').innerHTML = '';
@@ -1638,15 +1640,14 @@ function goRecognitionWithChoice(position) {
   clearTimeout(sess.stopTimer);
   document.getElementById('pulse-dot').classList.remove('active');
 
-  // For curated tracks — reveal title/artist
   show('s-recognition');
-  var reveal = document.getElementById('recog-reveal');
-  reveal.classList.remove('show');
 
-  if (sess.isCurated) {
-    document.getElementById('recog-reveal-name').textContent =
-      sess.trackTitle + ' · ' + sess.trackArtist;
-    setTimeout(function() { reveal.classList.add('show'); }, 300);
+  // Always show track title and artist on the color screen — required
+  // for YouTube API compliance, same as the listen screen, regardless
+  // of whether this was a curated or searched track.
+  var trackLabel = document.getElementById('color-screen-track');
+  if (trackLabel) {
+    trackLabel.textContent = sess.trackTitle + (sess.trackArtist ? ' · ' + sess.trackArtist : '');
   }
 
   // Now show the color tap screen — person picks colors directly,
@@ -1662,6 +1663,9 @@ function confirmChoice(position) {
   if (sess.trackTitle) {
     saveTrackHistory(sess.trackTitle, sess.trackArtist || '', position);
   }
+  // Leaving the listen/color flow — hide the persistent back and replay controls
+  document.getElementById('listen-stop').classList.remove('show');
+  document.getElementById('listen-replay').classList.remove('show');
   goReflection();
 }
 
