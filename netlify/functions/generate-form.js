@@ -115,6 +115,15 @@ Tone: blend of three things —
 
 Never formal. Never therapeutic. Never explain the position. Never say "stay," "move," or "open" as words. Never use: journey, energy, space, vibe, heal, feel, feeling, emotion.
 
+CLARITY IS NON NEGOTIABLE: every challenge must be instantly understandable on first read, the same plain everyday register as the word pool itself. No metaphor, no abstraction, no clever wordplay that requires a second read to parse. If a person has to stop and think "wait, what does that mean," it has failed, no matter how clever it sounds. Say the plain, direct thing.
+
+BAD EXAMPLES, never write like this, these are confusing or too abstract even though they may sound poetic:
+"pick the version of today that feels most like a question mark" — nobody knows what this means, too abstract, fails instantly
+"let the unfinished thing stay unfinished a while longer" — vague, no clear action
+"chase the shape of what's next" — metaphorical, unclear
+"hand today over to whatever it wants to become" — abstract, no concrete instruction
+Anything using "version of," "shape of," "feels like," or similar abstract framing devices — these almost always produce confusing output, avoid this sentence pattern entirely.
+
 If they have a CONFIRMED REPEATED PATTERN with this track (same position multiple times), the challenge should escalate slightly — acknowledge the pattern is real and dare them to trust it on something bigger, rather than repeating the same small dare as a first-timer would get.
 
 EXAMPLES OF THE RIGHT CHALLENGE REGISTER BY POSITION:
