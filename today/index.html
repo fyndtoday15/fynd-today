@@ -360,9 +360,31 @@ html, body {
   align-items: center;
   justify-content: center;
   margin-bottom: 52px;
-  width: 44px;
-  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+}
+.listen-play-btn {
+  background: none;
+  border: none;
+  border-bottom: 1px solid rgba(240,237,230,0.22);
+  font-family: var(--f);
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--fg);
   cursor: pointer;
+  padding: 12px 4px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease, transform 0.1s ease;
+}
+.listen-play-btn.tappable {
+  opacity: 1;
+  pointer-events: all;
+  animation: pulse-waiting 1.8s ease-in-out infinite;
+}
+.listen-play-btn:active {
+  transform: scale(0.97);
 }
 .pulse-dot {
   width: 7px;
@@ -377,17 +399,13 @@ html, body {
   opacity: 0.65;
   animation: pulse 2.6s ease-in-out infinite;
 }
-.pulse-dot.tappable {
-  opacity: 0.55;
-  animation: pulse-waiting 1.8s ease-in-out infinite;
-}
 @keyframes pulse {
   0%, 100% { transform: scale(1); opacity: 0.45; }
   50% { transform: scale(1.7); opacity: 0.85; }
 }
 @keyframes pulse-waiting {
-  0%, 100% { transform: scale(1); opacity: 0.3; }
-  50% { transform: scale(1.3); opacity: 0.6; }
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
 }
 
 .hidden-under-overlay {
@@ -922,6 +940,7 @@ html, body {
 <div class="screen" id="s-listen">
   <div class="listen-curated-tag" id="curated-tag">we wanted you to hear this</div>
   <div class="listen-pulse-wrap" id="listen-pulse-wrap">
+    <button class="listen-play-btn" id="listen-play-btn">press play</button>
     <div class="pulse-dot" id="pulse-dot"></div>
   </div>
   <div class="listen-track-info" id="track-info">
@@ -1350,14 +1369,18 @@ function goListen() {
 
   // Reset elements
   var dot = document.getElementById('pulse-dot');
+  var playBtn = document.getElementById('listen-play-btn');
   var stop = document.getElementById('listen-stop');
   var replay = document.getElementById('listen-replay');
   var info = document.getElementById('track-info');
   var tag = document.getElementById('curated-tag');
 
   dot.classList.remove('active');
-  dot.classList.remove('tappable');
   dot.classList.remove('hidden-under-overlay');
+  if (playBtn) {
+    playBtn.classList.remove('tappable');
+    playBtn.classList.remove('hidden-under-overlay');
+  }
   stop.classList.remove('show');
   stop.classList.remove('hidden-under-overlay');
   replay.classList.remove('show');
@@ -1448,8 +1471,15 @@ function handleReplay() {
 }
 
 // ── YOUTUBE PLAYER ────────────────────────────────────────────────────────────
-// ── TEMP DEBUG OVERLAY (remove once playback issue is found) ──────────────────
+// ── YT DEBUG LOGGING (visible overlay disabled — core mechanism confirmed working) ──
+// Set to true only for active debugging sessions; logs go to console instead
+// of an on-screen panel so they never block real users' controls again.
+var YT_DEBUG_VISIBLE = false;
 function _ytDebug(msg) {
+  if (!YT_DEBUG_VISIBLE) {
+    if (window.console && console.log) console.log('[yt]', msg);
+    return;
+  }
   var panel = document.getElementById('yt-debug-panel');
   if (!panel) {
     panel = document.createElement('div');
@@ -1587,13 +1617,13 @@ function startListening() {
 }
 
 function showTapToListen() {
-  var dot = document.getElementById('pulse-dot');
-  if (dot) dot.classList.add('tappable');
+  var btn = document.getElementById('listen-play-btn');
+  if (btn) btn.classList.add('tappable');
 }
 
 function hideTapToListen() {
-  var dot = document.getElementById('pulse-dot');
-  if (dot) dot.classList.remove('tappable');
+  var btn = document.getElementById('listen-play-btn');
+  if (btn) btn.classList.remove('tappable');
 }
 
 // ── STATEMENTS OVERLAY ────────────────────────────────────────────────────────
@@ -1683,9 +1713,11 @@ function showStatementsOverlay() {
   // Hide listen screen elements underneath so nothing bleeds through.
   // Back and replay stay visible the whole time, they sit above the overlay.
   var dot = document.getElementById('pulse-dot');
+  var playBtn = document.getElementById('listen-play-btn');
   var info = document.getElementById('track-info');
   var tag = document.getElementById('curated-tag');
   if (dot) dot.classList.add('hidden-under-overlay');
+  if (playBtn) playBtn.classList.add('hidden-under-overlay');
   if (info) info.classList.add('hidden-under-overlay');
   if (tag) tag.classList.add('hidden-under-overlay');
 
@@ -2042,7 +2074,7 @@ function bindEvents() {
   // Tap to listen — the pulse dot is the only thing that ever calls
   // playVideo(). This is a direct, fresh user gesture every time, which
   // is the one case WebKit always honors regardless of autoplay heuristics.
-  document.getElementById('listen-pulse-wrap').addEventListener('click', startListening);
+  document.getElementById('listen-play-btn').addEventListener('click', startListening);
 
   // Return screen — same two actions, same landing link, just reached
   // from the lighter mid-session screen instead of the full first-time one
