@@ -362,6 +362,7 @@ html, body {
   margin-bottom: 52px;
   min-width: 44px;
   min-height: 44px;
+  position: relative;
 }
 .listen-play-btn {
   background: none;
@@ -383,10 +384,19 @@ html, body {
   pointer-events: all;
   animation: pulse-waiting 1.8s ease-in-out infinite;
 }
+.listen-play-btn.loading {
+  opacity: 0.5;
+  pointer-events: none;
+  animation: none;
+}
 .listen-play-btn:active {
   transform: scale(0.97);
 }
 .pulse-dot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   width: 7px;
   height: 7px;
   border-radius: 50%;
@@ -397,11 +407,11 @@ html, body {
 }
 .pulse-dot.active {
   opacity: 0.65;
-  animation: pulse 2.6s ease-in-out infinite;
+  animation: pulse-active 2.6s ease-in-out infinite;
 }
-@keyframes pulse {
-  0%, 100% { transform: scale(1); opacity: 0.45; }
-  50% { transform: scale(1.7); opacity: 0.85; }
+@keyframes pulse-active {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.45; }
+  50% { transform: translate(-50%, -50%) scale(1.7); opacity: 0.85; }
 }
 @keyframes pulse-waiting {
   0%, 100% { opacity: 0.55; }
@@ -493,8 +503,8 @@ html, body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: 0 36px;
+  justify-content: flex-start;
+  padding: calc(env(safe-area-inset-top, 20px) + 110px) 36px 0;
   gap: 16px;
   opacity: 0;
   pointer-events: none;
@@ -590,7 +600,11 @@ html, body {
 .tap-word.colorword-yellow { color: #e0d05a; border-color: rgba(224,208,90,0.35); }
 .tap-word.colorword-brown { color: #a8825a; border-color: rgba(168,130,90,0.35); }
 
-#s-recognition { gap: 24px; padding: 0 36px; }
+#s-recognition {
+  justify-content: flex-start;
+  gap: 24px;
+  padding: calc(env(safe-area-inset-top, 20px) + 110px) 36px 0;
+}
 
 .recog-reveal {
   text-align: center;
@@ -1379,7 +1393,9 @@ function goListen() {
   dot.classList.remove('hidden-under-overlay');
   if (playBtn) {
     playBtn.classList.remove('tappable');
+    playBtn.classList.remove('loading');
     playBtn.classList.remove('hidden-under-overlay');
+    playBtn.textContent = 'press play';
   }
   stop.classList.remove('show');
   stop.classList.remove('hidden-under-overlay');
@@ -1608,6 +1624,17 @@ function startListening() {
   if (!sess.ytPlayer || typeof sess.ytPlayer.playVideo !== 'function') return;
   if (sess.ytStarted) return;
   sess.ytStarted = true;
+
+  // Immediate visual acknowledgment — without this there's a dead gap
+  // between the tap and audio actually starting (player buffering takes
+  // a moment) where it looks like the tap didn't register at all.
+  var btn = document.getElementById('listen-play-btn');
+  if (btn) {
+    btn.textContent = 'loading...';
+    btn.classList.remove('tappable');
+    btn.classList.add('loading');
+  }
+
   try {
     sess.ytPlayer.playVideo();
     _ytDebug('startListening: playVideo() called from direct tap');
@@ -1623,7 +1650,10 @@ function showTapToListen() {
 
 function hideTapToListen() {
   var btn = document.getElementById('listen-play-btn');
-  if (btn) btn.classList.remove('tappable');
+  if (btn) {
+    btn.classList.remove('tappable');
+    btn.classList.remove('loading');
+  }
 }
 
 // ── STATEMENTS OVERLAY ────────────────────────────────────────────────────────
