@@ -285,10 +285,11 @@ html, body {
   margin-top: 28px;
   display: flex;
   flex-direction: column;
-  max-height: 52vh;
+  max-height: calc(52vh - 70px);
   overflow-y: scroll;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
+  padding-bottom: 70px;
 }
 
 .result-audio-tag {
@@ -853,7 +854,11 @@ html, body {
 <img id="wordmark" src="/logo.png" alt="FYND TODAY">
 
 <!-- YOUTUBE PLAYER (hidden) -->
-<div id="yt-wrap" style="position:fixed;width:1px;height:1px;top:-9999px;left:-9999px;opacity:0;pointer-events:none;">
+<!-- Must stay inside the visible viewport on iOS Safari. Off-screen
+     positioning (top/left: -9999px) causes WebKit to silently block
+     or fail to start playback even with playsinline set. Keeping it
+     at 1x1 inside the viewport with opacity:0 avoids that. -->
+<div id="yt-wrap" style="position:fixed;width:1px;height:1px;top:0;left:0;opacity:0;pointer-events:none;z-index:-1;">
   <div id="yt-player"></div>
 </div>
 
@@ -1192,6 +1197,13 @@ function showBefore() {
 var searchTimer = null;
 
 function showSearch() {
+  // Guard against rapid re-clicks restarting this screen's fade mid
+  // transition — same fix already applied to showReturn(). Without
+  // this, tapping into search a second time (e.g. from the return
+  // screen) can re-trigger show() before the first fade finishes.
+  if (sess.searchScreenAnimating) return;
+  sess.searchScreenAnimating = true;
+
   // Safety: force-clear any overlay that might be stuck blocking clicks
   document.getElementById('listen-stmts').classList.remove('show');
   document.getElementById('listen-stop').classList.remove('show');
@@ -1200,10 +1212,17 @@ function showSearch() {
   show('s-search');
   document.getElementById('search-results').innerHTML = '';
   document.getElementById('search-field').value = '';
+
+  // Wait for show()'s fade to fully finish (350ms swap + transition)
+  // before focusing the input. Focusing earlier pops the iOS Safari
+  // keyboard while the screen is still mid opacity-transition, which
+  // resizes the visual viewport and forces a repaint that reads as
+  // the screen flashing in, disappearing, then fading in again.
   setTimeout(function() {
     var f = document.getElementById('search-field');
     if (f) f.focus();
-  }, 350);
+    sess.searchScreenAnimating = false;
+  }, 700);
 }
 
 function doSearch(q) {
