@@ -1295,8 +1295,7 @@ function selectTrack(track, isCurated) {
   // for the rest of this gesture chain. Same fix used on the old
   // SoundCloud widget version.
   try {
-    var silentUnlock = new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAEAS' +
-      'AAQARAAAAAgABAAIAZGF0YQAAAAA=');
+    var silentUnlock = new Audio('data:audio/wav;base64,UklGRiUAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQEAAACA');
     silentUnlock.volume = 0;
     silentUnlock.play().catch(function(){});
   } catch(e) {}
