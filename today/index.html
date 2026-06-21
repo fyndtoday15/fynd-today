@@ -858,7 +858,7 @@ html, body {
      positioning (top/left: -9999px) causes WebKit to silently block
      or fail to start playback even with playsinline set. Keeping it
      at 1x1 inside the viewport with opacity:0 avoids that. -->
-<div id="yt-wrap" style="position:fixed;width:2px;height:2px;top:0;left:0;opacity:0.01;pointer-events:none;z-index:0;">
+<div id="yt-wrap" style="position:fixed;width:200px;height:200px;top:0;left:0;opacity:0;pointer-events:none;z-index:0;overflow:hidden;transform:translate(-300px,-300px);">
   <div id="yt-player"></div>
 </div>
 
@@ -1508,8 +1508,8 @@ function playYouTube(ytId) {
   _ytDebug('creating new YT.Player...');
   try {
     sess.ytPlayer = new YT.Player('yt-player', {
-      height: '2',
-      width: '2',
+      height: '200',
+      width: '200',
       videoId: ytId,
       playerVars: {
         autoplay: 1,
