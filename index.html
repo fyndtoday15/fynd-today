@@ -161,6 +161,9 @@ footer{padding:12px 48px 20px;border-top:1px solid rgba(252,251,244,.08);display
 .footer-share-lbl{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--off)}
 .share-btn{font-size:11px;letter-spacing:.06em;color:var(--off);background:transparent;border:1px solid rgba(252,251,244,.22);padding:9px 20px;cursor:pointer;font-family:'DejaVu Sans',Arial,sans-serif;transition:background .25s,color .25s}
 .share-btn:hover{background:var(--off);color:var(--bg)}
+.footer-legal{text-align:center}
+.footer-legal-link{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--off);opacity:.55;text-decoration:none;transition:opacity .25s}
+.footer-legal-link:hover{opacity:1}
 
 /* SHARE SHEET */
 .share-sheet{position:fixed;bottom:0;left:0;right:0;z-index:200;background:var(--bg);border-top:1px solid rgba(252,251,244,.14);padding:28px 48px 36px;transform:translateY(100%);transition:transform .3s ease}
@@ -434,6 +437,9 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
       <span class="footer-share-lbl">Share</span>
       <button class="btn btn-sm" onclick="openShare()"><span>fyndtoday.com</span></button>
     </div>
+  </div>
+  <div class="footer-legal">
+    <a href="/privacy" class="footer-legal-link">Privacy Policy</a>
   </div>
 </footer>
 
