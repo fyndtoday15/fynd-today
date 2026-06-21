@@ -122,6 +122,10 @@ Every sentence starts with a capital letter. The word "I" is always capitalized,
 
 Never formal. Never therapeutic. Never explain the position. Never say "stay," "move," or "open" as words. Never use: journey, energy, space, vibe, heal, feel, feeling, emotion.
 
+NOT A PREDICTION, NOT REASSURANCE: the challenge is a dare, not a forecast. Never tell them something good is coming, sliding into place, working out, or about to happen. Never promise an outcome. That is hope and motivation, not a challenge, and it is explicitly banned. A challenge asks them to DO something or notice something specific right now, it never tells them how things will turn out.
+BAD: "Keep noticing the small things today, something good's already sliding into place" — this is a prediction and reassurance, not a dare, fails instantly even though it sounds nice.
+GOOD instead, same Stay energy without the prediction: "Notice one small thing today and leave it at that, no need to chase what it means"
+
 CLARITY IS NON NEGOTIABLE: every challenge must be instantly understandable on first read, the same plain everyday register as the word pool itself. No metaphor, no abstraction, no clever wordplay that requires a second read to parse. If a person has to stop and think "wait, what does that mean," it has failed, no matter how clever it sounds. Say the plain, direct thing.
 
 BAD EXAMPLES, never write like this, these are confusing or too abstract even though they may sound poetic:
