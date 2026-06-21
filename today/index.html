@@ -858,7 +858,7 @@ html, body {
      positioning (top/left: -9999px) causes WebKit to silently block
      or fail to start playback even with playsinline set. Keeping it
      at 1x1 inside the viewport with opacity:0 avoids that. -->
-<div id="yt-wrap" style="position:fixed;width:1px;height:1px;top:0;left:0;opacity:0;pointer-events:none;z-index:-1;">
+<div id="yt-wrap" style="position:fixed;width:2px;height:2px;top:0;left:0;opacity:0.01;pointer-events:none;z-index:0;">
   <div id="yt-player"></div>
 </div>
 
@@ -1508,8 +1508,8 @@ function playYouTube(ytId) {
   _ytDebug('creating new YT.Player...');
   try {
     sess.ytPlayer = new YT.Player('yt-player', {
-      height: '1',
-      width: '1',
+      height: '2',
+      width: '2',
       videoId: ytId,
       playerVars: {
         autoplay: 1,
@@ -1533,6 +1533,23 @@ function playYouTube(ytId) {
           }
           _confirmPlay(e.target);
           startListenTimers();
+
+          // Direct state poll, independent of events — onStateChange has
+          // been observed to fire once (UNSTARTED) then go silent with no
+          // further events and no onError. This checks getPlayerState()
+          // directly to see if the player itself disagrees with its events.
+          var pollCount = 0;
+          var stateNames2 = { '-1': 'UNSTARTED', '0': 'ENDED', '1': 'PLAYING', '2': 'PAUSED', '3': 'BUFFERING', '5': 'CUED' };
+          var pollTimer = setInterval(function() {
+            pollCount++;
+            try {
+              var st = e.target.getPlayerState();
+              _ytDebug('direct poll #' + pollCount + ': getPlayerState()=' + (stateNames2[st] !== undefined ? stateNames2[st] : st));
+            } catch(err) {
+              _ytDebug('direct poll #' + pollCount + ' THREW: ' + err.message);
+            }
+            if (pollCount >= 6) clearInterval(pollTimer);
+          }, 500);
         },
         onStateChange: function(e) {
           var stateNames = { '-1': 'UNSTARTED', '0': 'ENDED', '1': 'PLAYING', '2': 'PAUSED', '3': 'BUFFERING', '5': 'CUED' };
