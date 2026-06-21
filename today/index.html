@@ -1106,17 +1106,21 @@ function show(id) {
   var current = document.querySelector('.screen.active');
   var next = document.getElementById(id);
   if (!next) return;
+  _ytDebug('show(' + id + ') called, current active=' + (current ? current.id : 'none'));
 
   if (current && current !== next) {
     // Fade the current screen all the way out first, then bring in the
     // next one. No crossfade — the old screen is fully gone before the
     // new one starts appearing, so nothing bleeds through underneath.
     current.classList.remove('active');
+    _ytDebug('  removed .active from ' + current.id);
     setTimeout(function() {
       next.classList.add('active');
+      _ytDebug('  added .active to ' + next.id + ' (after 350ms)');
     }, 350);
   } else {
     next.classList.add('active');
+    _ytDebug('  added .active to ' + next.id + ' (immediate, no current screen)');
   }
 }
 
@@ -1212,7 +1216,11 @@ function showReturn() {
   // Guard against rapid re-clicks of the back button restarting this
   // screen's fade mid-transition, which looks like a flash/disappear/
   // flash-again instead of one clean fade in.
-  if (sess.returnScreenAnimating) return;
+  _ytDebug('showReturn() called, returnScreenAnimating=' + sess.returnScreenAnimating);
+  if (sess.returnScreenAnimating) {
+    _ytDebug('  BLOCKED by guard, returning early');
+    return;
+  }
   sess.returnScreenAnimating = true;
 
   show('s-return');
@@ -1277,6 +1285,7 @@ function showSearch() {
   show('s-search');
   document.getElementById('search-results').innerHTML = '';
   document.getElementById('search-field').value = '';
+  searchRequestToken++; // invalidate any in-flight request from a previous visit to this screen
 
   // Wait for show()'s fade to fully finish (350ms swap + transition)
   // before focusing the input. Focusing earlier pops the iOS Safari
@@ -1290,6 +1299,8 @@ function showSearch() {
   }, 700);
 }
 
+var searchRequestToken = 0;
+
 function doSearch(q) {
   if (!q || q.length < 2) {
     document.getElementById('search-results').innerHTML = '';
@@ -1299,6 +1310,13 @@ function doSearch(q) {
   document.getElementById('search-results').innerHTML =
     '<div class="search-empty" id="search-status">searching...</div>';
 
+  // Tag this request. If the person keeps typing before this resolves,
+  // a newer search starts and bumps the token — when this older request's
+  // response eventually arrives, it's discarded instead of overwriting
+  // the screen with results (or a false "not here yet") for a query that
+  // isn't even what's in the search field anymore.
+  var thisToken = ++searchRequestToken;
+
   fetch('/.netlify/functions/search-tracks', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -1306,6 +1324,7 @@ function doSearch(q) {
   })
   .then(function(r) { return r.json(); })
   .then(function(data) {
+    if (thisToken !== searchRequestToken) return; // stale response, ignore
     if (data.results && data.results.length > 0) {
       renderResults(data.results);
     } else {
@@ -1314,6 +1333,7 @@ function doSearch(q) {
     }
   })
   .catch(function() {
+    if (thisToken !== searchRequestToken) return; // stale response, ignore
     document.getElementById('search-results').innerHTML =
       '<div class="search-empty">something went wrong.<br>try again.</div>';
   });
@@ -1519,7 +1539,7 @@ function handleReplay() {
 // ── YT DEBUG LOGGING (visible overlay disabled — core mechanism confirmed working) ──
 // Set to true only for active debugging sessions; logs go to console instead
 // of an on-screen panel so they never block real users' controls again.
-var YT_DEBUG_VISIBLE = false;
+var YT_DEBUG_VISIBLE = true;
 function _ytDebug(msg) {
   if (!YT_DEBUG_VISIBLE) {
     if (window.console && console.log) console.log('[yt]', msg);
@@ -2173,6 +2193,7 @@ function bindEvents() {
   // screen, so behavior is consistent every time you hit back, whether
   // it's your first search or your fifth.
   document.getElementById('search-back').addEventListener('click', function() {
+    _ytDebug('search-back clicked');
     // Force the keyboard to dismiss synchronously before the return
     // screen's timed animation starts. If the search field still has
     // focus when back is tapped, iOS Safari dismisses the keyboard as
