@@ -1284,6 +1284,23 @@ function renderResults(tracks) {
 
 // ── TRACK SELECTION ───────────────────────────────────────────────────────────
 function selectTrack(track, isCurated) {
+  // Unlock audio playback synchronously inside this user tap, before any
+  // async work (word pool fetch, YouTube iframe creation/load) starts.
+  // iOS Safari only treats play() as gesture-trusted within the original
+  // synchronous call stack of the tap. The YouTube IFrame Player's own
+  // playVideo() fires later, inside an async onReady callback, after the
+  // iframe has loaded — by then the gesture credential has expired and
+  // WebKit can silently block it. Playing a near-silent local audio
+  // element right here, synchronously, unlocks the page's audio context
+  // for the rest of this gesture chain. Same fix used on the old
+  // SoundCloud widget version.
+  try {
+    var silentUnlock = new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAEAS' +
+      'AAQARAAAAAgABAAIAZGF0YQAAAAA=');
+    silentUnlock.volume = 0;
+    silentUnlock.play().catch(function(){});
+  } catch(e) {}
+
   sess.trackTitle = track.title;
   sess.trackArtist = track.artist;
   sess.trackId = track.ytId || track.id || null;
@@ -1427,6 +1444,26 @@ function playYouTube(ytId) {
     return;
   }
 
+  // Mobile silent-play guard — playVideo() can be silently dropped by
+  // WebKit even when the player reports ready. Confirm real playback
+  // started (PLAYING state) and retry if it doesn't fire in time, same
+  // pattern used on the old SoundCloud widget version.
+  var _playConfirmed = false;
+  var _playRetryTimer = null;
+  function _confirmPlay(player) {
+    _playConfirmed = false;
+    clearTimeout(_playRetryTimer);
+    _playRetryTimer = setTimeout(function() {
+      if (_playConfirmed) return;
+      try { player.playVideo(); } catch(e) {}
+      setTimeout(function() {
+        if (!_playConfirmed) {
+          try { player.playVideo(); } catch(e) {}
+        }
+      }, 1000);
+    }, 1500);
+  }
+
   sess.ytPlayer = new YT.Player('yt-player', {
     height: '1',
     width: '1',
@@ -1445,9 +1482,15 @@ function playYouTube(ytId) {
     events: {
       onReady: function(e) {
         e.target.playVideo();
+        _confirmPlay(e.target);
         startListenTimers();
       },
       onStateChange: function(e) {
+        // YT.PlayerState.PLAYING = 1
+        if (e.data === 1) {
+          _playConfirmed = true;
+          clearTimeout(_playRetryTimer);
+        }
         // YT.PlayerState.ENDED = 0
         if (e.data === 0) {
           clearTimeout(sess.recognitionTimer);
@@ -1465,6 +1508,7 @@ function playYouTube(ytId) {
       onError: function() {
         // Track unavailable — show the word scatter so they aren't stuck
         // on a dead player with nothing to do
+        clearTimeout(_playRetryTimer);
         clearTimeout(sess.recognitionTimer);
         var stmtWrap = document.getElementById('listen-stmts');
         if (stmtWrap && !stmtWrap.classList.contains('show')) {
