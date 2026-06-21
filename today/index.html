@@ -1539,7 +1539,7 @@ function handleReplay() {
 // ── YT DEBUG LOGGING (visible overlay disabled — core mechanism confirmed working) ──
 // Set to true only for active debugging sessions; logs go to console instead
 // of an on-screen panel so they never block real users' controls again.
-var YT_DEBUG_VISIBLE = true;
+var YT_DEBUG_VISIBLE = false;
 function _ytDebug(msg) {
   if (!YT_DEBUG_VISIBLE) {
     if (window.console && console.log) console.log('[yt]', msg);
@@ -1549,7 +1549,7 @@ function _ytDebug(msg) {
   if (!panel) {
     panel = document.createElement('div');
     panel.id = 'yt-debug-panel';
-    panel.style.cssText = 'position:fixed;top:0;left:0;right:0;max-height:40vh;overflow-y:auto;background:rgba(0,0,0,0.92);color:#0f0;font-family:monospace;font-size:11px;line-height:1.5;padding:8px;z-index:99999;pointer-events:none;white-space:pre-wrap;';
+    panel.style.cssText = 'position:fixed;bottom:0;left:0;right:0;max-height:35vh;overflow-y:auto;background:rgba(0,0,0,0.92);color:#0f0;font-family:monospace;font-size:11px;line-height:1.5;padding:8px;z-index:99999;pointer-events:none;white-space:pre-wrap;';
     document.body.appendChild(panel);
   }
   var line = document.createElement('div');
