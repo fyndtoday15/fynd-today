@@ -58,17 +58,23 @@ html, body {
   justify-content: center;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.7s ease;
+  visibility: hidden;
+  z-index: 1;
+  transition: opacity 0.35s ease, visibility 0s linear 0.35s;
   padding:
     calc(env(safe-area-inset-top, 20px) + 20px)
     32px
     calc(env(safe-area-inset-bottom, 20px) + 20px);
   overflow: hidden;
+  background: var(--bg);
 }
 
 .screen.active {
   opacity: 1;
   pointer-events: all;
+  visibility: visible;
+  z-index: 2;
+  transition: opacity 0.7s ease, visibility 0s linear 0s;
 }
 
 /* ── WORDMARK ── */
@@ -532,7 +538,7 @@ html, body {
 .tap-word.colorword-yellow { color: #e0d05a; border-color: rgba(224,208,90,0.35); }
 .tap-word.colorword-brown { color: #a8825a; border-color: rgba(168,130,90,0.35); }
 
-#s-recognition { gap: 0; padding: 0 36px; }
+#s-recognition { gap: 24px; padding: 0 36px; }
 
 .recog-reveal {
   text-align: center;
@@ -731,86 +737,6 @@ html, body {
 }
 .stopped-btn:active { opacity: 0.5; transform: scale(0.97); }
 
-/* ── S-EMAIL ── */
-#s-email { gap: 0; padding: 0 40px; }
-
-.email-heading {
-  font-size: clamp(16px, 4vw, 20px);
-  color: var(--fg);
-  text-align: center;
-  max-width: 340px;
-  line-height: 1.65;
-  margin-bottom: 44px;
-  opacity: 0;
-  transition: opacity 0.9s ease;
-}
-.email-heading.show { opacity: 1; }
-
-.email-fields {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  width: 100%;
-  max-width: 300px;
-  opacity: 0;
-  transition: opacity 0.9s ease 0.3s;
-}
-.email-fields.show { opacity: 1; }
-
-.email-input {
-  background: none;
-  border: none;
-  border-bottom: 1px solid rgba(240,237,230,0.2);
-  padding: 12px 0;
-  font-family: var(--f);
-  font-size: clamp(15px, 3.8vw, 17px);
-  color: var(--fg);
-  outline: none;
-  caret-color: var(--fg);
-  letter-spacing: 0.01em;
-  transition: border-color 0.3s ease;
-}
-.email-input::placeholder { color: var(--dimmer); }
-.email-input:focus { border-color: rgba(240,237,230,0.45); }
-
-.email-error {
-  font-size: 11px;
-  letter-spacing: 0.08em;
-  color: var(--fg);
-  display: none;
-  text-align: center;
-}
-
-.email-submit-btn {
-  background: none;
-  border: 1px solid rgba(240,237,230,0.18);
-  border-radius: 1px;
-  font-family: var(--f);
-  font-size: 13px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--fg);
-  cursor: pointer;
-  padding: 14px 0;
-  margin-top: 8px;
-  transition: border-color 0.2s ease, opacity 0.15s ease, transform 0.1s ease;
-}
-.email-submit-btn:active { border-color: rgba(240,237,230,0.45); transform: scale(0.98); }
-
-.email-skip-btn {
-  background: none;
-  border: none;
-  font-family: var(--f);
-  font-size: 10px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--fg);
-  cursor: pointer;
-  padding: 10px 0;
-  transition: color 0.2s ease;
-}
-.email-skip-btn:active { color: var(--fg); }
-
 /* ── SHARE OVERLAY ── */
 #share-overlay {
   position: fixed;
@@ -998,22 +924,6 @@ html, body {
   </div>
 </div>
 
-<!-- S-EMAIL -->
-<div class="screen" id="s-email">
-  <div class="email-heading" id="email-heading">
-    leave your email.<br>we'll keep what sound shows you.
-  </div>
-  <div class="email-fields" id="email-fields">
-    <input class="email-input" id="name-input" type="text"
-      placeholder="first name" autocomplete="given-name">
-    <input class="email-input" id="email-input" type="email"
-      placeholder="email" autocomplete="email">
-    <div class="email-error" id="email-error"></div>
-    <button class="email-submit-btn" id="email-submit">i'm in</button>
-    <button class="email-skip-btn" id="email-skip">not yet</button>
-  </div>
-</div>
-
 <script>
 // ── FYND TODAY SOUND PORTAL v2 ────────────────────────────────────────────────
 
@@ -1096,11 +1006,21 @@ var sess = {
 
 // ── SCREENS ───────────────────────────────────────────────────────────────────
 function show(id) {
-  document.querySelectorAll('.screen').forEach(function(s) {
-    s.classList.remove('active');
-  });
-  var t = document.getElementById(id);
-  if (t) t.classList.add('active');
+  var current = document.querySelector('.screen.active');
+  var next = document.getElementById(id);
+  if (!next) return;
+
+  if (current && current !== next) {
+    // Fade the current screen all the way out first, then bring in the
+    // next one. No crossfade — the old screen is fully gone before the
+    // new one starts appearing, so nothing bleeds through underneath.
+    current.classList.remove('active');
+    setTimeout(function() {
+      next.classList.add('active');
+    }, 350);
+  } else {
+    next.classList.add('active');
+  }
 }
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
@@ -1650,12 +1570,13 @@ function goRecognitionWithChoice(position) {
     trackLabel.textContent = sess.trackTitle + (sess.trackArtist ? ' · ' + sess.trackArtist : '');
   }
 
-  // Let the screen's own fade-in settle before the color words start
-  // populating and staggering in — avoids two competing fades happening
-  // at once, which is what made this transition feel rough before.
+  // show() itself takes ~350ms to swap screens (old one fades out first),
+  // then the new screen fades in over another ~350ms. Wait for both to
+  // genuinely finish before the color words start populating and
+  // staggering in, so nothing competes with the screen's own motion.
   setTimeout(function() {
     showColorScreen();
-  }, 350);
+  }, 700);
 }
 
 
@@ -1814,12 +1735,7 @@ function endSession() {
   sess.sessionCount++;
   LS.set('sessionCount', sess.sessionCount);
   LS.set('lastPosition', getDominant());
-
-  if (!sess.email) {
-    showEmail();
-  } else {
-    showStopped();
-  }
+  showStopped();
 }
 
 function showStopped() {
@@ -1831,59 +1747,7 @@ function showStopped() {
     }, 600);
   }, 300);
 }
-
-function showEmail() {
-  show('s-email');
-  setTimeout(function() {
-    document.getElementById('email-heading').classList.add('show');
-    document.getElementById('email-fields').classList.add('show');
-  }, 400);
-}
-
 // ── SHARE ─────────────────────────────────────────────────────────────────────
-// ── EMAIL SUBMIT ──────────────────────────────────────────────────────────────
-function submitEmail() {
-  var name = document.getElementById('name-input').value.trim();
-  var email = document.getElementById('email-input').value.trim();
-  var errEl = document.getElementById('email-error');
-  var btn = document.getElementById('email-submit');
-
-  if (!name || !email || email.indexOf('@') < 0) {
-    errEl.textContent = 'both fields required.';
-    errEl.style.display = 'block';
-    return;
-  }
-
-  btn.disabled = true;
-  btn.style.opacity = '0.5';
-  errEl.style.display = 'none';
-
-  fetch('/.netlify/functions/send-welcome', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: email, firstName: name }),
-  })
-  .then(function(r) { return r.json(); })
-  .then(function(data) {
-    if (data.duplicate) {
-      errEl.textContent = 'an account with that email already exists.';
-      errEl.style.display = 'block';
-      btn.disabled = false;
-      btn.style.opacity = '';
-      document.getElementById('email-input').value = '';
-      return;
-    }
-    sess.email = email;
-    sess.firstName = name;
-    LS.set('email', email);
-    LS.set('firstName', name);
-    showStopped();
-  })
-  .catch(function() {
-    btn.disabled = false;
-    btn.style.opacity = '';
-  });
-}
 
 // ── YOUTUBE LOADER ───────────────────────────────────────────────────────────
 // Load YouTube API — must be inside main script so sess is in scope
@@ -1957,13 +1821,6 @@ function bindEvents() {
   // Stopped
   document.getElementById('btn-keep-going-2').addEventListener('click', keepGoing);
   document.getElementById('btn-done').addEventListener('click', endSession);
-
-  // Email
-  document.getElementById('email-submit').addEventListener('click', submitEmail);
-  document.getElementById('email-skip').addEventListener('click', showStopped);
-  document.getElementById('email-input').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') submitEmail();
-  });
 }
 
 // ── TRACK HISTORY ────────────────────────────────────────────────────────────
