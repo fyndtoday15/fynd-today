@@ -1492,12 +1492,12 @@ function playYouTube(ytId) {
         _ytDebug('play confirm check: already confirmed, skipping retry');
         return;
       }
-      _ytDebug('play NOT confirmed after 1.5s, retrying playVideo()');
-      try { player.playVideo(); } catch(e) { _ytDebug('retry playVideo() threw: ' + e.message); }
+      _ytDebug('play NOT confirmed after 1.5s, retrying mute()+playVideo()');
+      try { player.mute(); player.playVideo(); } catch(e) { _ytDebug('retry playVideo() threw: ' + e.message); }
       setTimeout(function() {
         if (!_playConfirmed) {
           _ytDebug('play STILL not confirmed after 2nd attempt, retrying once more');
-          try { player.playVideo(); } catch(e) { _ytDebug('2nd retry playVideo() threw: ' + e.message); }
+          try { player.mute(); player.playVideo(); } catch(e) { _ytDebug('2nd retry playVideo() threw: ' + e.message); }
         } else {
           _ytDebug('play confirmed on 2nd check');
         }
@@ -1524,12 +1524,13 @@ function playYouTube(ytId) {
       },
       events: {
         onReady: function(e) {
-          _ytDebug('onReady fired, calling playVideo()');
+          _ytDebug('onReady fired, muting then calling playVideo()');
           try {
+            e.target.mute();
             e.target.playVideo();
-            _ytDebug('playVideo() called without throwing');
+            _ytDebug('mute() + playVideo() called without throwing');
           } catch(err) {
-            _ytDebug('playVideo() THREW: ' + err.message);
+            _ytDebug('mute()/playVideo() THREW: ' + err.message);
           }
           _confirmPlay(e.target);
           startListenTimers();
@@ -1565,6 +1566,15 @@ function playYouTube(ytId) {
           if (e.data === 1) {
             _playConfirmed = true;
             clearTimeout(_playRetryTimer);
+            // Playback is confirmed running — safe to unmute now that
+            // we're past whatever gate blocked unmuted autoplay.
+            try {
+              e.target.unMute();
+              e.target.setVolume(100);
+              _ytDebug('  unmuted after confirmed PLAYING');
+            } catch(err) {
+              _ytDebug('  unMute() THREW: ' + err.message);
+            }
           }
           // YT.PlayerState.ENDED = 0
           if (e.data === 0) {
