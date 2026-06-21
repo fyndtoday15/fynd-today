@@ -98,9 +98,9 @@ PART 1 — THE MEMORY LINE (only if history exists, otherwise skip entirely):
 If this is the first time with this track, skip this part completely — write nothing for it.
 If they have brought this exact track before, write one short line reporting the comparison plainly. Same position as before, or different. This is genuinely unique information only this system can produce, because it required remembering this specific track and this specific person over time.
 Examples of the right register:
-"third time staying with this one"
-"last time this moved you. today it's holding you still"
-"this one keeps doing the same thing to you"
+"Third time staying with this one"
+"Last time this moved you. Today it's holding you still"
+"This one keeps doing the same thing to you"
 Keep it under 10 words. Plain. No drama. State the fact of the pattern or the shift.
 
 PART 2 — THE CHALLENGE (always required):
@@ -109,38 +109,41 @@ A short, casual dare that pushes them to carry today's position into the next th
 Tone: blend of three things —
 (a) blunt and universal enough to apply to literally any person in any life situation
 (b) a little playful, a little confident, some personality
-(c) casual texting voice, lowercase, no ending punctuation, contractions fine, reads like something a person would actually type to a friend
+(c) casual texting voice, contractions fine, reads like something a person would actually type to a friend
 (d) NEVER use a dash or hyphen anywhere in the output, no exceptions
 (e) PRESENT TENSE ONLY, this is about today, right now, never yesterday or tomorrow
+
+CAPITALIZATION RULES, ALWAYS FOLLOW THESE, NO EXCEPTIONS:
+Every sentence starts with a capital letter. The word "I" is always capitalized, never lowercase "i," in every position, every time. Proper nouns are capitalized normally. This is casual texting voice, not all lowercase texting voice. The challenge can still end without a period if that fits the casual register, but the FIRST letter of the sentence and every standalone "I" must always be capitalized correctly. Read your own output back and check this before finalizing it.
 
 Never formal. Never therapeutic. Never explain the position. Never say "stay," "move," or "open" as words. Never use: journey, energy, space, vibe, heal, feel, feeling, emotion.
 
 CLARITY IS NON NEGOTIABLE: every challenge must be instantly understandable on first read, the same plain everyday register as the word pool itself. No metaphor, no abstraction, no clever wordplay that requires a second read to parse. If a person has to stop and think "wait, what does that mean," it has failed, no matter how clever it sounds. Say the plain, direct thing.
 
 BAD EXAMPLES, never write like this, these are confusing or too abstract even though they may sound poetic:
-"pick the version of today that feels most like a question mark" — nobody knows what this means, too abstract, fails instantly
-"let the unfinished thing stay unfinished a while longer" — vague, no clear action
-"chase the shape of what's next" — metaphorical, unclear
-"hand today over to whatever it wants to become" — abstract, no concrete instruction
+"Pick the version of today that feels most like a question mark" — nobody knows what this means, too abstract, fails instantly
+"Let the unfinished thing stay unfinished a while longer" — vague, no clear action
+"Chase the shape of what's next" — metaphorical, unclear
+"Hand today over to whatever it wants to become" — abstract, no concrete instruction
 Anything using "version of," "shape of," "feels like," or similar abstract framing devices — these almost always produce confusing output, avoid this sentence pattern entirely.
 
 If they have a CONFIRMED REPEATED PATTERN with this track (same position multiple times), the challenge should escalate slightly — acknowledge the pattern is real and dare them to trust it on something bigger, rather than repeating the same small dare as a first-timer would get.
 
 EXAMPLES OF THE RIGHT CHALLENGE REGISTER BY POSITION:
 
-Stay (first time): "don't rush whatever's next, you're not behind"
-Stay (confirmed pattern, 3rd+ time): "you keep choosing to stay here, trust that on something bigger today"
-Stay (different texture, warm/steady words): "stay in it a little longer, no one's timing you"
+Stay (first time): "Don't rush whatever's next, you're not behind"
+Stay (confirmed pattern, 3rd+ time): "You keep choosing to stay here, trust that on something bigger today"
+Stay (different texture, warm/steady words): "Stay in it a little longer, no one's timing you"
 
-Move (first time): "go finish the thing you keep circling"
-Move (confirmed pattern): "you always move through this one, stop waiting for permission elsewhere"
-Move (different texture, loud/rising words): "let it pull you somewhere loud for once"
+Move (first time): "Go finish the thing you keep circling"
+Move (confirmed pattern): "You always move through this one, stop waiting for permission elsewhere"
+Move (different texture, loud/rising words): "Let it pull you somewhere loud for once"
 
-Open (first time): "say yes to the next weird thing, on purpose"
-Open (confirmed pattern): "this one always catches you off guard, let something else catch you too"
-Open (mixed with stay-leaning word): "let this one stay unresolved a little longer"
+Open (first time): "Say yes to the next weird thing, on purpose"
+Open (confirmed pattern): "This one always catches you off guard, let something else catch you too"
+Open (mixed with stay-leaning word): "Let this one stay unresolved a little longer"
 
-Mixed (tapped words spread across positions evenly): "you're carrying two directions right now, that's allowed"
+Mixed (tapped words spread across positions evenly): "You're carrying two directions right now, that's allowed"
 
 Pull the actual texture from the words they tapped — don't default to the generic first-time version if the specific words suggest a different flavor (warmth, urgency, surprise, etc).
 
@@ -183,10 +186,10 @@ Respond in JSON only:
 // ── FALLBACKS ─────────────────────────────────────────────────────────────────
 function getFallbackChallenge(position) {
   const lines = {
-    stay: ["don't rush whatever's next, you're not behind", 'stay in it a little longer, no one is timing you'],
-    move: ['go finish the thing you keep circling', "let it pull you somewhere loud for once"],
-    open: ["say yes to the next weird thing, on purpose", 'let this one stay unresolved a little longer'],
-    mixed: ["you're carrying two directions right now, that's allowed"],
+    stay: ["Don't rush whatever's next, you're not behind", 'Stay in it a little longer, no one is timing you'],
+    move: ['Go finish the thing you keep circling', "Let it pull you somewhere loud for once"],
+    open: ["Say yes to the next weird thing, on purpose", 'Let this one stay unresolved a little longer'],
+    mixed: ["You're carrying two directions right now, that's allowed"],
   };
   const opts = lines[position] || lines.stay;
   return opts[Math.floor(Math.random() * opts.length)];
