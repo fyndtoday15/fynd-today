@@ -183,6 +183,18 @@ footer{padding:12px 48px 20px;border-top:1px solid rgba(252,251,244,.08);display
   height: 220px;
   width: 100%;
   flex-shrink: 0;
+  position: relative;
+}
+.clothing-style-label {
+  position: absolute;
+  bottom: 16px;
+  left: 20px;
+  font-size: 10px;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: rgba(252,251,244,.9);
+  font-family: 'DejaVu Sans', Arial, sans-serif;
+  line-height: 1.6;
 }
 .clothing-color-1 { background: linear-gradient(160deg, #2c3e5a 0%, #1a2840 100%); }
 .clothing-color-2 { background: linear-gradient(160deg, #8b4a2a 0%, #c4784a 100%); }
@@ -628,98 +640,65 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
 <div class="clothing-section" id="clothing">
   <div class="clothing-intro rev">
     <span class="clothing-section-lbl">The Form</span>
-    <p class="clothing-section-head">Sound reveals where you are.<br>Clothing carries it into the world.<br>Three directions. Every person is in one right now.</p>
+    <p class="clothing-section-head">Sound reveals where you are.<br>Clothing carries it into the world.<br>Expressed in three directions.</p>
   </div>
   <div class="clothing-grid">
 
     <div class="clothing-card rev d1">
-      <div class="clothing-card-color clothing-color-1"></div>
+      <div class="clothing-card-color clothing-color-1">
+        <span class="clothing-style-label">Style 01<br>The Weight</span>
+      </div>
       <div class="clothing-card-body">
-        <span class="clothing-tag">Still</span>
-        <h3 class="clothing-name">The weight of not rushing.</h3>
+        <h3 class="clothing-name">Weighted to hold you where you are.</h3>
         <p class="clothing-desc">For the person who has decided not to rush. Not because they are behind. Because they know exactly where they are. This clothing does not perform. It confirms.</p>
       </div>
     </div>
 
     <div class="clothing-card rev d2">
-      <div class="clothing-card-color clothing-color-2"></div>
+      <div class="clothing-card-color clothing-color-2">
+        <span class="clothing-style-label">Style 02<br>The Pace</span>
+      </div>
       <div class="clothing-card-body">
-        <span class="clothing-tag">Forward</span>
-        <h3 class="clothing-name">Built to carry what is next.</h3>
+        <h3 class="clothing-name">Built to move when you do.</h3>
         <p class="clothing-desc">For the person already in motion. Something is pulling forward and the next thing is beginning to form. This clothing keeps pace. It carries purpose without announcing it.</p>
       </div>
     </div>
 
     <div class="clothing-card rev d3">
-      <div class="clothing-card-color clothing-color-3"></div>
+      <div class="clothing-card-color clothing-color-3">
+        <span class="clothing-style-label">Style 03<br>The Spark</span>
+      </div>
       <div class="clothing-card-body">
-        <span class="clothing-tag">Shifting</span>
-        <h3 class="clothing-name">For the moment things change.</h3>
-        <p class="clothing-desc">For the person mid shift. Something changed and they have not named it yet. This clothing does not ask them to. It moves with the question, not the answer.</p>
+        <h3 class="clothing-name">Designed to stand out the way that moment did.</h3>
+        <p class="clothing-desc">For the person who just caught something. A spark. An idea. A direction that was not there a moment ago. This clothing is designed to stand out. It carries that creative energy without holding it back.</p>
       </div>
     </div>
 
   </div>
   <div class="clothing-bridge rev">
-    <p class="clothing-bridge-line">Life sounds better in color.<br>The color only comes from the sound.</p>
-    <a href="#algo" class="btn btn-sm scroll-anchor"><span>What we are learning</span></a>
+    <p class="clothing-bridge-line">Where the color comes from is the whole story.</p>
+    <a href="#algo" class="btn btn-sm scroll-anchor"><span>See where it comes from</span></a>
   </div>
 </div>
 
-<!-- WHAT WE ARE BUILDING — OPTION A: THE GAP, FELT NOT EXPLAINED -->
+<!-- WHAT WE ARE BUILDING -->
 <div class="algo-section" id="algo">
   <canvas id="srf-wave"></canvas>
   <div class="algo-inner">
     <div class="algo-statement rev">
-      <span class="algo-lbl">Option A</span>
-      <h2 class="algo-h">You already know what sound does to you.<br>No one has ever asked.</h2>
+      <span class="algo-lbl">What we are building</span>
+      <h2 class="algo-h">Music has never been more available.<br>And yet somehow harder to find.</h2>
     </div>
     <div class="algo-body rev d1">
-      <p>There is a track that has been with you through something real. You did not choose it because it was trending. You chose it because something in it was already true about where you were. That is not a coincidence. That is recognition.</p>
-      <p>Every platform in the world knows what you listened to. What tempo. What genre. What people with similar taste played next. None of them know what the song actually did to you in that moment. That signal has never been collected because the question has never been asked at the right time, in the right way, with the right tools to hold the answer.</p>
-      <p>That is what we are building. A system that asks. That remembers. That builds a living picture of what sound does to people, not from what they say they like, but from how they actually respond. Over time that picture becomes something the clothing can carry. Something the color can confirm. A lifestyle built from real signal, not from what is trending this week.</p>
-      <p class="algo-close">This is music used the right way. Not to tell you what to feel. To show you where you already are.</p>
+      <p>How often do you find yourself hearing the same songs everywhere you go. The same sounds, the same artists, the same cycle repeating. And somewhere in that cycle the real connection to music, the kind that actually means something, gets harder to hold onto.</p>
+      <p>Right now music is surfaced by what sounds similar to what you already like. By what is trending. By what the algorithm has learned to predict about your taste. None of that is wrong. But none of it is recognition. It is recommendation. The difference is the distance between being told what to order and knowing what you actually need.</p>
+      <p>What if the music that found you also told you something. Not about your taste. About where you are. What if every time a track hit you could mark that moment, and what gets collected across people and moments builds something no platform has ever been built to produce.</p>
+      <p>That is what the sound portal is. A place to bring a track you have been drawn to and listen, or hear something chosen for a reason beyond what is trending. To mark what stands out. Not to build a playlist. To recognize something. And what gets learned from that, from real people and real listening moments, is what this lifestyle is built from.</p>
+      <p>A lifestyle where music is not background. Not trending. Not algorithmic noise. Where it carries where you are into what you wear, how you move, and how your day actually goes.</p>
+      <p class="algo-close">Different lives. Same rhythms. You are part of how we learn what those are.</p>
     </div>
   </div>
 </div>
-
-<!-- OPTION B: THE LIFESTYLE FIRST -->
-<!--
-<div class="algo-section" id="algo">
-  <canvas id="srf-wave"></canvas>
-  <div class="algo-inner">
-    <div class="algo-statement rev">
-      <span class="algo-lbl">Option B</span>
-      <h2 class="algo-h">Imagine knowing, every time a song hits,<br>exactly what it is pointing at.</h2>
-    </div>
-    <div class="algo-body rev d1">
-      <p>Not what mood it matches. Not what genre it belongs to. What it is pointing at in you, in that specific moment, on that specific day. That is a different relationship with music entirely. And it changes everything downstream. What you wear. How you move. How your day actually goes.</p>
-      <p>Right now, music is surfaced by what sounds similar to what you already like. By what is trending. By what the algorithm has learned to predict about your taste. None of that is wrong. But none of it is recognition. It is recommendation. The difference is the distance between being told what to order and knowing what you actually need.</p>
-      <p>FYND TODAY is being built around the data that closes that distance. Every time someone brings a track and marks what stands out, something real gets recorded. Not preference. Response. That data, collected across people and moments, is what the clothing color comes from. What the three directions are built on. A lifestyle grounded in what music actually does, not what it is supposed to make you feel.</p>
-      <p class="algo-close">Different lives. Same rhythms. That is what we are learning to recognize. And you are part of how we learn it.</p>
-    </div>
-  </div>
-</div>
--->
-
-<!-- OPTION C: MUSIC THE RIGHT WAY -->
-<!--
-<div class="algo-section" id="algo">
-  <canvas id="srf-wave"></canvas>
-  <div class="algo-inner">
-    <div class="algo-statement rev">
-      <span class="algo-lbl">Option C</span>
-      <h2 class="algo-h">Music has never been more available.<br>And somehow harder to find.</h2>
-    </div>
-    <div class="algo-body rev d1">
-      <p>Every day there are more songs, more playlists, more algorithmically surfaced sounds that are statistically likely to match your existing taste. The experience of discovering something that genuinely changes something in you is rarer than it has ever been. Not because the music got worse. Because the way it gets delivered has nothing to do with what you actually need from it.</p>
-      <p>TikTok teaches you what is trending. Spotify teaches you what sounds like what you already know. Neither one is asking what the music is doing to you right now. Not what you want to hear. What you need to hear. What the sound is pointing at that you have not been able to name yet.</p>
-      <p>That is the question FYND TODAY is built around. Bring a track that has been pulling at you and listen to it here. Not to be entertained. To recognize something. That recognition is what the clothing is built from. Three directions, all the color that comes from real behavioral signal. A lifestyle that does not follow what is popular. That follows what is true.</p>
-      <p class="algo-close">This is what music is actually for. We are just the first to build around it.</p>
-    </div>
-  </div>
-</div>
--->
 
 <!-- EMAIL SECTION -->
 <div class="email-section" id="early">
