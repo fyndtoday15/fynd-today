@@ -345,19 +345,52 @@ footer{padding:12px 48px 20px;border-top:1px solid rgba(252,251,244,.08);display
 .footer-legal-link:hover{opacity:1}
 .footer-legal-sep{font-size:10px;color:var(--off);opacity:.3;margin:0 10px}
 
+.clothing-intro {
+  max-width: 760px;
+  margin: 0 auto 64px;
+  text-align: center;
+}
+.clothing-section-lbl {
+  font-size: 10px;
+  letter-spacing: .26em;
+  text-transform: uppercase;
+  color: var(--off);
+  opacity: .45;
+  display: block;
+  margin-bottom: 20px;
+}
+.clothing-section-head {
+  font-size: clamp(18px, 2.2vw, 26px);
+  line-height: 1.5;
+  letter-spacing: -.01em;
+  color: var(--off);
+}
+.clothing-color-note {
+  max-width: 640px;
+  margin: 64px auto 0;
+  text-align: center;
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--off);
+  opacity: .6;
+  font-style: italic;
+}
+
 /* MOBILE — new sections */
 @media(max-width:720px){
   .clothing-section { padding: 60px 20px 80px; }
   .clothing-grid { grid-template-columns: 1fr; gap: 16px; }
   .clothing-card-color { height: 160px; }
   .clothing-card-body { padding: 24px 20px 32px; }
+  .clothing-intro { margin-bottom: 40px; }
+  .clothing-color-note { margin-top: 40px; }
   .algo-section { padding: 80px 20px; }
   .algo-inner { gap: 36px; }
   .email-section { padding: 80px 20px; }
   .email-field-wrap { flex-direction: column; }
   .email-submit { border-left: none; border-top: 1px solid rgba(252,251,244,.3); }
-  .rack-section { display: none; }
 }
+.share-sheet{position:fixed;bottom:0;left:0;right:0;z-index:200;background:var(--bg);border-top:1px solid rgba(252,251,244,.14);padding:28px 48px 36px;transform:translateY(100%);transition:transform .3s ease}
 .share-sheet.open{transform:translateY(0)}
 .share-lbl{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--off);margin-bottom:16px;display:block}
 .share-opts{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
@@ -576,44 +609,40 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
 
 
 <div class="rack-section" id="how">
-  <p class="rack-copy serif rev">Sound moves through the body differently every day.<br>The clothing is built around that.<br>Each piece carries the weight of a particular kind of movement.<br>Color is not decoration here — it is data.<br>Only the clothing is in color because color is what sound becomes<br>when it finds its form.</p>
+  <p class="rack-copy serif rev">This is a lifestyle built around sound and recognition.<br>What you discover in the music lives on.<br>Through how you move. Through what you wear.<br>Through today.</p>
 </div>
 
 <!-- CLOTHING — THREE DIRECTIONS -->
 <div class="clothing-section" id="clothing">
+  <div class="clothing-intro rev">
+    <span class="clothing-section-lbl">The Form</span>
+    <p class="clothing-section-head">Three ways sound takes shape in what you wear.<br>Color is the form recognition becomes.</p>
+  </div>
   <div class="clothing-grid">
 
     <div class="clothing-card rev d1">
       <div class="clothing-card-color clothing-color-1"></div>
       <div class="clothing-card-body">
-        <span class="clothing-tag">Still</span>
-        <h3 class="clothing-name">The weight of not rushing.</h3>
-        <p class="clothing-desc">Dense, grounded fabrics that hold their shape. Built for the person who has decided not to move yet — not because they can't, but because they know the difference. These pieces don't perform. They just are.</p>
-        <span class="clothing-fabric">Heavyweight canvas. Brushed fleece. Structured cotton.</span>
+        <p class="clothing-desc">For the person who has decided not to rush. Not because they are behind, but because they know exactly where they are. This is clothing that holds its ground. It does not perform. It simply stays.</p>
       </div>
     </div>
 
     <div class="clothing-card rev d2">
       <div class="clothing-card-color clothing-color-2"></div>
       <div class="clothing-card-body">
-        <span class="clothing-tag">Forward</span>
-        <h3 class="clothing-name">Built to carry what's next.</h3>
-        <p class="clothing-desc">Fabrics that move with intention — light enough to not slow you down, structured enough to mean it. For the person who already knows where they're going and needs clothing that keeps up. These pieces have momentum built in.</p>
-        <span class="clothing-fabric">Technical twill. Stretch poplin. Tapered jersey.</span>
+        <p class="clothing-desc">For the person already in motion. They are not waiting for the right moment because they already recognized it. This clothing keeps pace. It carries purpose without announcing it.</p>
       </div>
     </div>
 
     <div class="clothing-card rev d3">
       <div class="clothing-card-color clothing-color-3"></div>
       <div class="clothing-card-body">
-        <span class="clothing-tag">Shifting</span>
-        <h3 class="clothing-name">For the moment things change.</h3>
-        <p class="clothing-desc">Fluid cuts and materials that don't commit to a single silhouette. These pieces are for the person who is mid-turn — noticing something different, not sure where it leads yet. They move with the question, not the answer.</p>
-        <span class="clothing-fabric">Washed silk. Drapey linen. Open-weave knit.</span>
+        <p class="clothing-desc">For the person mid shift. Something just changed and they have not named it yet. This clothing does not ask them to. It moves with the question, not the answer.</p>
       </div>
     </div>
 
   </div>
+  <p class="clothing-color-note rev">Color is not decoration here. It is data. Only the clothing is in color because sound, when it finds its form, brings color to life.</p>
 </div>
 
 <!-- ALGORITHM ARGUMENT -->
@@ -621,14 +650,14 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
   <canvas id="srf-wave"></canvas>
   <div class="algo-inner">
     <div class="algo-statement rev">
-      <span class="algo-lbl">The difference</span>
-      <h2 class="algo-h">Spotify knows what you've listened to.<br>It doesn't know what it did to you.</h2>
+      <span class="algo-lbl">Something is missing</span>
+      <h2 class="algo-h">You have heard thousands of songs.<br>How many of them changed something in you?</h2>
     </div>
     <div class="algo-body rev d1">
-      <p>Every streaming platform is built on the same thing — mechanics. Tempo, key, genre, what's trending, what people like you have played before. Their algorithm is real and it's powerful, but it operates entirely on the sound itself. It has no way to learn what the sound is actually doing to the human listening to it.</p>
-      <p>That data doesn't exist yet. No one is collecting it. The industry controls what gets surfaced and when — TikTok decides a song blows up, the charts confirm it, the algorithm feeds it back. The cycle has nothing to do with what actually moves a person on a specific Tuesday morning.</p>
-      <p>This is a different experiment. Every time someone brings a track to FYND TODAY and taps what stands out to them — we're collecting something the platforms can't. Real behavioral data, tied to real listening moments, from real people. Over time, that becomes something no algorithm built on mechanics alone can produce: a map of what sound actually does to humans.</p>
-      <p class="algo-close">If that's worth building, this is where it starts.</p>
+      <p>The playlists keep coming. The recommendations get smarter. And somehow you still find yourself playing the same song on repeat, trying to land on something you cannot name. Spotify knows your listening history. Apple Music knows what is trending. Neither one knows what a song actually did to you when it hit.</p>
+      <p>That is not a failure of technology. It is a gap that no algorithm built on sound mechanics alone can close. The data that would close it, what music does to a human in a real moment, does not exist yet. No one is collecting it.</p>
+      <p>This is what FYND TODAY is building. Every time someone brings a track and taps what stands out, something gets added to that picture. Not what is popular. Not what sounds similar. What it actually did. Over time, that becomes something worth having. A real map of how sound moves people. A lifestyle built from that, not from trends.</p>
+      <p class="algo-close">The world that opens from this is not one built around what is next. It is one built around who you are when the right sound finds you.</p>
     </div>
   </div>
 </div>
@@ -638,8 +667,8 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
   <div class="email-inner">
     <div class="email-header rev">
       <span class="email-lbl">Stay in it</span>
-      <h2 class="email-h">Be part of what we're learning.</h2>
-      <p class="email-sub">First look at clothing drops. Five new tracks every week, chosen by what we're hearing from real listening sessions. And when something significant happens here, you'll know before anyone else.</p>
+      <h2 class="email-h">Be part of what we are learning.</h2>
+      <p class="email-sub">First look at clothing drops. New tracks from us when something is worth sharing. And when something significant happens here, you will know before anyone else.</p>
     </div>
     <form class="email-form rev d1" id="landing-email-form" onsubmit="handleEmailSubmit(event)">
       <div class="email-field-wrap">
@@ -660,11 +689,11 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
 <div class="enter" id="enter">
   <canvas id="rc"></canvas>
   <h2 class="eh serif rev">Bring a track.<br>Or let one find you.</h2>
-  <p class="es rev d1">Search something that's been pulling at you lately —<br>or take a chance and let the sound decide.</p>
+  <p class="es rev d1">Search something that has been pulling at you lately.<br>Or start with a track we picked, something you may not have heard yet.</p>
   <div class="rev d2">
     <a href="#" class="btn portal-trigger"><span>Enter Sound Portal</span></a>
   </div>
-  <p class="rev d3" style="margin-top:18px;font-size:11px;letter-spacing:.08em;color:var(--off)">Free. No account needed.</p>
+  <p class="rev d3 enter-note">Free. No account needed.</p>
 </div>
 
 
