@@ -198,7 +198,6 @@ footer{padding:12px 48px 20px;border-top:1px solid rgba(252,251,244,.08);display
   letter-spacing: .26em;
   text-transform: uppercase;
   color: var(--off);
-  opacity: .45;
 }
 .clothing-name {
   font-size: clamp(17px, 2vw, 22px);
@@ -210,13 +209,11 @@ footer{padding:12px 48px 20px;border-top:1px solid rgba(252,251,244,.08);display
   font-size: 14px;
   line-height: 1.8;
   color: var(--off);
-  opacity: .78;
 }
 .clothing-fabric {
   font-size: 11px;
   letter-spacing: .08em;
   color: var(--off);
-  opacity: .42;
   font-style: italic;
   margin-top: 4px;
 }
@@ -241,7 +238,6 @@ footer{padding:12px 48px 20px;border-top:1px solid rgba(252,251,244,.08);display
   letter-spacing: .26em;
   text-transform: uppercase;
   color: var(--off);
-  opacity: .45;
   display: block;
   margin-bottom: 20px;
 }
@@ -254,11 +250,9 @@ footer{padding:12px 48px 20px;border-top:1px solid rgba(252,251,244,.08);display
   font-size: clamp(14px, 1.5vw, 16px);
   line-height: 1.85;
   color: var(--off);
-  opacity: .78;
   margin-bottom: 20px;
 }
 .algo-body p.algo-close {
-  opacity: 1;
   font-style: italic;
   margin-bottom: 0;
 }
@@ -282,7 +276,6 @@ footer{padding:12px 48px 20px;border-top:1px solid rgba(252,251,244,.08);display
   letter-spacing: .26em;
   text-transform: uppercase;
   color: var(--off);
-  opacity: .45;
   display: block;
   margin-bottom: 20px;
 }
@@ -296,7 +289,6 @@ footer{padding:12px 48px 20px;border-top:1px solid rgba(252,251,244,.08);display
   font-size: clamp(14px, 1.5vw, 16px);
   line-height: 1.8;
   color: var(--off);
-  opacity: .72;
 }
 .email-field-wrap {
   display: flex;
@@ -327,7 +319,6 @@ footer{padding:12px 48px 20px;border-top:1px solid rgba(252,251,244,.08);display
   font-size: 11px;
   letter-spacing: .06em;
   color: var(--off);
-  opacity: .5;
   margin-top: 12px;
   min-height: 18px;
 }
@@ -355,7 +346,6 @@ footer{padding:12px 48px 20px;border-top:1px solid rgba(252,251,244,.08);display
   letter-spacing: .26em;
   text-transform: uppercase;
   color: var(--off);
-  opacity: .45;
   display: block;
   margin-bottom: 20px;
 }
@@ -372,7 +362,26 @@ footer{padding:12px 48px 20px;border-top:1px solid rgba(252,251,244,.08);display
   font-size: 14px;
   line-height: 1.8;
   color: var(--off);
-  opacity: .6;
+  font-style: italic;
+}
+
+.rack-cta {
+  margin-top: 40px;
+  text-align: center;
+}
+.clothing-bridge {
+  max-width: 640px;
+  margin: 72px auto 0;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32px;
+}
+.clothing-bridge-line {
+  font-size: clamp(14px, 1.5vw, 16px);
+  line-height: 1.8;
+  color: var(--off);
   font-style: italic;
 }
 
@@ -610,54 +619,63 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
 
 <div class="rack-section" id="how">
   <p class="rack-copy serif rev">This is a lifestyle built around sound and recognition.<br>What you discover in the music lives on.<br>Through how you move. Through what you wear.<br>Through today.</p>
+  <div class="rack-cta rev d2">
+    <a href="#clothing" class="btn btn-sm scroll-anchor"><span>See the clothing</span></a>
+  </div>
 </div>
 
 <!-- CLOTHING — THREE DIRECTIONS -->
 <div class="clothing-section" id="clothing">
   <div class="clothing-intro rev">
     <span class="clothing-section-lbl">The Form</span>
-    <p class="clothing-section-head">Three ways sound takes shape in what you wear.<br>Color is the form recognition becomes.</p>
+    <p class="clothing-section-head">Sound reveals where you are.<br>Clothing carries it into the world.</p>
   </div>
   <div class="clothing-grid">
 
     <div class="clothing-card rev d1">
       <div class="clothing-card-color clothing-color-1"></div>
       <div class="clothing-card-body">
-        <p class="clothing-desc">For the person who has decided not to rush. Not because they are behind, but because they know exactly where they are. This is clothing that holds its ground. It does not perform. It simply stays.</p>
+        <span class="clothing-tag">The garment holds.</span>
+        <p class="clothing-desc">For the person who has decided not to rush. Not because they are behind. Because they know exactly where they are. This clothing does not perform. It confirms.</p>
       </div>
     </div>
 
     <div class="clothing-card rev d2">
       <div class="clothing-card-color clothing-color-2"></div>
       <div class="clothing-card-body">
-        <p class="clothing-desc">For the person already in motion. They are not waiting for the right moment because they already recognized it. This clothing keeps pace. It carries purpose without announcing it.</p>
+        <span class="clothing-tag">The garment travels.</span>
+        <p class="clothing-desc">For the person already in motion. Something is pulling forward and the next thing is beginning to form. This clothing keeps pace. It carries purpose without announcing it.</p>
       </div>
     </div>
 
     <div class="clothing-card rev d3">
       <div class="clothing-card-color clothing-color-3"></div>
       <div class="clothing-card-body">
-        <p class="clothing-desc">For the person mid shift. Something just changed and they have not named it yet. This clothing does not ask them to. It moves with the question, not the answer.</p>
+        <span class="clothing-tag">The garment catches.</span>
+        <p class="clothing-desc">For the person mid shift. Something changed and they have not named it yet. This clothing does not ask them to. It moves with the question, not the answer.</p>
       </div>
     </div>
 
   </div>
-  <p class="clothing-color-note rev">Color is not decoration here. It is data. Only the clothing is in color because sound, when it finds its form, brings color to life.</p>
+  <div class="clothing-bridge rev">
+    <p class="clothing-bridge-line">Color is not chosen in advance here.<br>It is found through what sound does to people over time.</p>
+    <a href="#algo" class="btn btn-sm scroll-anchor"><span>How it gets built</span></a>
+  </div>
 </div>
 
-<!-- ALGORITHM ARGUMENT -->
+<!-- WHAT WE ARE BUILDING -->
 <div class="algo-section" id="algo">
   <canvas id="srf-wave"></canvas>
   <div class="algo-inner">
     <div class="algo-statement rev">
-      <span class="algo-lbl">Something is missing</span>
-      <h2 class="algo-h">You have heard thousands of songs.<br>How many of them changed something in you?</h2>
+      <span class="algo-lbl">What sound is actually doing</span>
+      <h2 class="algo-h">There is a track you keep coming back to.<br>What is it doing to you today?</h2>
     </div>
     <div class="algo-body rev d1">
-      <p>The playlists keep coming. The recommendations get smarter. And somehow you still find yourself playing the same song on repeat, trying to land on something you cannot name. Spotify knows your listening history. Apple Music knows what is trending. Neither one knows what a song actually did to you when it hit.</p>
-      <p>That is not a failure of technology. It is a gap that no algorithm built on sound mechanics alone can close. The data that would close it, what music does to a human in a real moment, does not exist yet. No one is collecting it.</p>
-      <p>This is what FYND TODAY is building. Every time someone brings a track and taps what stands out, something gets added to that picture. Not what is popular. Not what sounds similar. What it actually did. Over time, that becomes something worth having. A real map of how sound moves people. A lifestyle built from that, not from trends.</p>
-      <p class="algo-close">The world that opens from this is not one built around what is next. It is one built around who you are when the right sound finds you.</p>
+      <p>Every platform knows what you have played. They know what people like you tend to reach for next. What none of them can tell you is why a particular song hit differently on a particular day. That question has not been answered yet because no one is collecting the right signal to answer it.</p>
+      <p>Sound does not just match a mood. It reveals something about where a person is. The same track means something different at 7am on a Tuesday than it did the night everything changed. That difference is real. It is the most personal data that exists. And it disappears the moment you close the app and move on.</p>
+      <p>FYND TODAY is built around capturing that. Not what you listened to. What it showed you. Over time, those signals build something that no algorithm built on audio analysis alone can produce. A living map of what sound actually does to humans. That is what the clothing is built from. That is what this lifestyle is built from.</p>
+      <p class="algo-close">Not about what is trending. About where you are. How you are holding it. And where sound can take you from there.</p>
     </div>
   </div>
 </div>
@@ -839,6 +857,31 @@ function shareVia(type){
     closeShare();return;
   }
 }
+
+// Close share sheets when tapping the page backdrop (outside the sheet)
+document.addEventListener('click', function(e) {
+  var shareSheet = document.getElementById('share-sheet');
+  var contactSheet = document.getElementById('contact-sheet');
+  if (shareSheet && shareSheet.classList.contains('open') && !shareSheet.contains(e.target)) {
+    closeShare();
+  }
+  if (contactSheet && contactSheet.classList.contains('open') && !contactSheet.contains(e.target)) {
+    closeContact();
+  }
+});
+
+// Scroll-anchor buttons (bridge CTAs between sections)
+document.querySelectorAll('.scroll-anchor').forEach(function(el){
+  el.addEventListener('click', function(e){
+    e.preventDefault();
+    var href = this.getAttribute('href');
+    var target = document.querySelector(href);
+    if (!target) return;
+    var navH = 80;
+    var top = target.getBoundingClientRect().top + window.scrollY - navH;
+    window.scrollTo({ top: top, behavior: 'smooth' });
+  });
+});
 
 /* HERO WAVE — full width, continuous, crisp on all screens */
 (function(){
