@@ -161,13 +161,203 @@ footer{padding:12px 48px 20px;border-top:1px solid rgba(252,251,244,.08);display
 .footer-share-lbl{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--off)}
 .share-btn{font-size:11px;letter-spacing:.06em;color:var(--off);background:transparent;border:1px solid rgba(252,251,244,.22);padding:9px 20px;cursor:pointer;font-family:'DejaVu Sans',Arial,sans-serif;transition:background .25s,color .25s}
 .share-btn:hover{background:var(--off);color:var(--bg)}
+
+/* CLOTHING SECTION */
+.clothing-section {
+  padding: 80px 48px 120px;
+  background: var(--bg);
+}
+.clothing-grid {
+  max-width: 1060px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+}
+.clothing-card {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(252,251,244,.1);
+}
+.clothing-card-color {
+  height: 220px;
+  width: 100%;
+  flex-shrink: 0;
+}
+.clothing-color-1 { background: linear-gradient(160deg, #2c3e5a 0%, #1a2840 100%); }
+.clothing-color-2 { background: linear-gradient(160deg, #8b4a2a 0%, #c4784a 100%); }
+.clothing-color-3 { background: linear-gradient(160deg, #3d5a3e 0%, #6b9e6c 100%); }
+.clothing-card-body {
+  padding: 32px 28px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.clothing-tag {
+  font-size: 10px;
+  letter-spacing: .26em;
+  text-transform: uppercase;
+  color: var(--off);
+  opacity: .45;
+}
+.clothing-name {
+  font-size: clamp(17px, 2vw, 22px);
+  line-height: 1.2;
+  letter-spacing: -.01em;
+  font-weight: 700;
+}
+.clothing-desc {
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--off);
+  opacity: .78;
+}
+.clothing-fabric {
+  font-size: 11px;
+  letter-spacing: .08em;
+  color: var(--off);
+  opacity: .42;
+  font-style: italic;
+  margin-top: 4px;
+}
+
+/* ALGORITHM SECTION */
+.algo-section {
+  position: relative;
+  padding: 120px 48px;
+  background: var(--bg);
+  overflow: hidden;
+}
+.algo-inner {
+  max-width: 760px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 52px;
+}
+.algo-statement { }
+.algo-lbl {
+  font-size: 10px;
+  letter-spacing: .26em;
+  text-transform: uppercase;
+  color: var(--off);
+  opacity: .45;
+  display: block;
+  margin-bottom: 20px;
+}
+.algo-h {
+  font-size: clamp(26px, 3.5vw, 46px);
+  line-height: 1.1;
+  letter-spacing: -.02em;
+}
+.algo-body p {
+  font-size: clamp(14px, 1.5vw, 16px);
+  line-height: 1.85;
+  color: var(--off);
+  opacity: .78;
+  margin-bottom: 20px;
+}
+.algo-body p.algo-close {
+  opacity: 1;
+  font-style: italic;
+  margin-bottom: 0;
+}
+
+/* EMAIL SECTION */
+.email-section {
+  background: var(--bg);
+  border-top: 1px solid rgba(252,251,244,.08);
+  border-bottom: 1px solid rgba(252,251,244,.08);
+  padding: 100px 48px;
+}
+.email-inner {
+  max-width: 640px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+.email-lbl {
+  font-size: 10px;
+  letter-spacing: .26em;
+  text-transform: uppercase;
+  color: var(--off);
+  opacity: .45;
+  display: block;
+  margin-bottom: 20px;
+}
+.email-h {
+  font-size: clamp(26px, 3.5vw, 42px);
+  line-height: 1.1;
+  letter-spacing: -.02em;
+  margin-bottom: 16px;
+}
+.email-sub {
+  font-size: clamp(14px, 1.5vw, 16px);
+  line-height: 1.8;
+  color: var(--off);
+  opacity: .72;
+}
+.email-field-wrap {
+  display: flex;
+  gap: 0;
+  border: 1px solid rgba(252,251,244,.3);
+}
+.email-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 14px 20px;
+  font-family: 'DejaVu Sans', Arial, sans-serif;
+  font-size: 13px;
+  letter-spacing: .04em;
+  color: var(--off);
+  min-width: 0;
+}
+.email-input::placeholder { color: var(--off); opacity: .35; }
+.email-submit {
+  border: none;
+  border-left: 1px solid rgba(252,251,244,.3);
+  border-radius: 0;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.email-note {
+  font-size: 11px;
+  letter-spacing: .06em;
+  color: var(--off);
+  opacity: .5;
+  margin-top: 12px;
+  min-height: 18px;
+}
+.enter-note {
+  margin-top: 18px;
+  font-size: 11px;
+  letter-spacing: .08em;
+  color: var(--off);
+  position: relative;
+}
+
+/* FOOTER LEGAL */
 .footer-legal{text-align:center}
 .footer-legal-link{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--off);opacity:.55;text-decoration:none;transition:opacity .25s}
 .footer-legal-link:hover{opacity:1}
 .footer-legal-sep{font-size:10px;color:var(--off);opacity:.3;margin:0 10px}
 
-/* SHARE SHEET */
-.share-sheet{position:fixed;bottom:0;left:0;right:0;z-index:200;background:var(--bg);border-top:1px solid rgba(252,251,244,.14);padding:28px 48px 36px;transform:translateY(100%);transition:transform .3s ease}
+/* MOBILE — new sections */
+@media(max-width:720px){
+  .clothing-section { padding: 60px 20px 80px; }
+  .clothing-grid { grid-template-columns: 1fr; gap: 16px; }
+  .clothing-card-color { height: 160px; }
+  .clothing-card-body { padding: 24px 20px 32px; }
+  .algo-section { padding: 80px 20px; }
+  .algo-inner { gap: 36px; }
+  .email-section { padding: 80px 20px; }
+  .email-field-wrap { flex-direction: column; }
+  .email-submit { border-left: none; border-top: 1px solid rgba(252,251,244,.3); }
+  .rack-section { display: none; }
+}
 .share-sheet.open{transform:translateY(0)}
 .share-lbl{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--off);margin-bottom:16px;display:block}
 .share-opts{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
@@ -374,7 +564,6 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
 
 <section class="hero" id="top">
   <canvas id="sw"></canvas>
-  <a href="#" class="portal-trigger hero-portal-btn"><span style="position:relative;z-index:1;transition:color .3s ease;">Enter Sound Portal</span></a>
   <div class="hero-content">
     <p class="htag">Music-powered lifestyle</p>
     <h1 class="serif">You know where you need to go.<br>Sound is what gets you there.</h1>
@@ -387,43 +576,97 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
 
 
 <div class="rack-section" id="how">
-  <p class="rack-copy serif rev">This is a lifestyle built around sound and recognition.<br>What you discover in the music lives on.<br>Through how you move. Through what you wear.<br>Through today.</p>
-  <div class="rack-frame rev d1">
-    <img src="/rack.png" alt="" class="rack-img">
+  <p class="rack-copy serif rev">Sound moves through the body differently every day.<br>The clothing is built around that.<br>Each piece carries the weight of a particular kind of movement.<br>Color is not decoration here — it is data.<br>Only the clothing is in color because color is what sound becomes<br>when it finds its form.</p>
+</div>
+
+<!-- CLOTHING — THREE DIRECTIONS -->
+<div class="clothing-section" id="clothing">
+  <div class="clothing-grid">
+
+    <div class="clothing-card rev d1">
+      <div class="clothing-card-color clothing-color-1"></div>
+      <div class="clothing-card-body">
+        <span class="clothing-tag">Still</span>
+        <h3 class="clothing-name">The weight of not rushing.</h3>
+        <p class="clothing-desc">Dense, grounded fabrics that hold their shape. Built for the person who has decided not to move yet — not because they can't, but because they know the difference. These pieces don't perform. They just are.</p>
+        <span class="clothing-fabric">Heavyweight canvas. Brushed fleece. Structured cotton.</span>
+      </div>
+    </div>
+
+    <div class="clothing-card rev d2">
+      <div class="clothing-card-color clothing-color-2"></div>
+      <div class="clothing-card-body">
+        <span class="clothing-tag">Forward</span>
+        <h3 class="clothing-name">Built to carry what's next.</h3>
+        <p class="clothing-desc">Fabrics that move with intention — light enough to not slow you down, structured enough to mean it. For the person who already knows where they're going and needs clothing that keeps up. These pieces have momentum built in.</p>
+        <span class="clothing-fabric">Technical twill. Stretch poplin. Tapered jersey.</span>
+      </div>
+    </div>
+
+    <div class="clothing-card rev d3">
+      <div class="clothing-card-color clothing-color-3"></div>
+      <div class="clothing-card-body">
+        <span class="clothing-tag">Shifting</span>
+        <h3 class="clothing-name">For the moment things change.</h3>
+        <p class="clothing-desc">Fluid cuts and materials that don't commit to a single silhouette. These pieces are for the person who is mid-turn — noticing something different, not sure where it leads yet. They move with the question, not the answer.</p>
+        <span class="clothing-fabric">Washed silk. Drapey linen. Open-weave knit.</span>
+      </div>
+    </div>
+
   </div>
 </div>
 
-<!-- SOUND RECOGNITION FORM -->
-<div class="srf-section" id="srf">
+<!-- ALGORITHM ARGUMENT -->
+<div class="algo-section" id="algo">
   <canvas id="srf-wave"></canvas>
-  <div class="srf-inner">
-    <div class="srf-item" id="srf-0">
-      <div class="srf-word">Sound</div>
-      <div class="srf-line">moves you.</div>
+  <div class="algo-inner">
+    <div class="algo-statement rev">
+      <span class="algo-lbl">The difference</span>
+      <h2 class="algo-h">Spotify knows what you've listened to.<br>It doesn't know what it did to you.</h2>
     </div>
-    <div class="srf-item" id="srf-1">
-      <div class="srf-word">Recognition</div>
-      <div class="srf-line">names you.</div>
+    <div class="algo-body rev d1">
+      <p>Every streaming platform is built on the same thing — mechanics. Tempo, key, genre, what's trending, what people like you have played before. Their algorithm is real and it's powerful, but it operates entirely on the sound itself. It has no way to learn what the sound is actually doing to the human listening to it.</p>
+      <p>That data doesn't exist yet. No one is collecting it. The industry controls what gets surfaced and when — TikTok decides a song blows up, the charts confirm it, the algorithm feeds it back. The cycle has nothing to do with what actually moves a person on a specific Tuesday morning.</p>
+      <p>This is a different experiment. Every time someone brings a track to FYND TODAY and taps what stands out to them — we're collecting something the platforms can't. Real behavioral data, tied to real listening moments, from real people. Over time, that becomes something no algorithm built on mechanics alone can produce: a map of what sound actually does to humans.</p>
+      <p class="algo-close">If that's worth building, this is where it starts.</p>
     </div>
-    <div class="srf-item" id="srf-2">
-      <div class="srf-word">Form</div>
-      <div class="srf-line">carries you.</div>
+  </div>
+</div>
+
+<!-- EMAIL SECTION -->
+<div class="email-section" id="early">
+  <div class="email-inner">
+    <div class="email-header rev">
+      <span class="email-lbl">Stay in it</span>
+      <h2 class="email-h">Be part of what we're learning.</h2>
+      <p class="email-sub">First look at clothing drops. Five new tracks every week, chosen by what we're hearing from real listening sessions. And when something significant happens here, you'll know before anyone else.</p>
     </div>
-    <div class="srf-cta rev d4">
-      <button class="btn btn-sm srf-enter-btn"><span>Experience it</span></button>
-    </div>
+    <form class="email-form rev d1" id="landing-email-form" onsubmit="handleEmailSubmit(event)">
+      <div class="email-field-wrap">
+        <input
+          type="email"
+          class="email-input"
+          id="landing-email-input"
+          placeholder="your email"
+          autocomplete="email"
+          required>
+        <button type="submit" class="email-submit btn"><span id="email-submit-label">Count me in</span></button>
+      </div>
+      <p class="email-note" id="email-note"></p>
+    </form>
   </div>
 </div>
 
 <div class="enter" id="enter">
   <canvas id="rc"></canvas>
-  <h2 class="eh serif rev">Press Play on Today.</h2>
-  <p class="es rev d1">Start anywhere.</p>
+  <h2 class="eh serif rev">Bring a track.<br>Or let one find you.</h2>
+  <p class="es rev d1">Search something that's been pulling at you lately —<br>or take a chance and let the sound decide.</p>
   <div class="rev d2">
     <a href="#" class="btn portal-trigger"><span>Enter Sound Portal</span></a>
   </div>
-  <p class="rev d3" style="margin-top:18px;font-size:11px;letter-spacing:.08em;color:var(--off)">Free. No account needed to start.</p>
+  <p class="rev d3" style="margin-top:18px;font-size:11px;letter-spacing:.08em;color:var(--off)">Free. No account needed.</p>
 </div>
+
 
 <footer>
   <div class="footer-top">
@@ -449,6 +692,32 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
 <script>
 var PORTAL_URL='/today';
 var SITE_URL='https://fyndtoday.com';
+
+// Email signup — sends to Brevo via existing subscribe endpoint
+function handleEmailSubmit(e) {
+  e.preventDefault();
+  var input = document.getElementById('landing-email-input');
+  var label = document.getElementById('email-submit-label');
+  var note = document.getElementById('email-note');
+  var email = input ? input.value.trim() : '';
+  if (!email) return;
+  if (label) label.textContent = 'Sending...';
+  fetch('/.netlify/functions/subscribe', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: email }),
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (label) label.textContent = 'Count me in';
+    if (note) note.textContent = data.error ? 'Something went wrong. Try again.' : "You're in. Watch for it.";
+    if (input && !data.error) { input.value = ''; input.disabled = true; }
+  })
+  .catch(function() {
+    if (label) label.textContent = 'Count me in';
+    if (note) note.textContent = 'Something went wrong. Try again.';
+  });
+}
 
 // Chrome mobile BFCache fix — if page is restored from back-forward cache
 // (e.g. after visiting /today and pressing back), force a full reload
