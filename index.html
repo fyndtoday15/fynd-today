@@ -46,7 +46,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:22px 48px;display:fl
   visibility: hidden;
   pointer-events: none;
 }
-.nav-portal-btn{display:none}
 .hero-portal-btn{
   position:absolute;
   top:90px;
@@ -267,6 +266,10 @@ footer{padding:12px 48px 20px;border-top:1px solid rgba(252,251,244,.08);display
 .algo-body p.algo-close {
   font-style: italic;
   margin-bottom: 0;
+}
+.algo-cta {
+  margin-top: 48px;
+  text-align: center;
 }
 
 /* EMAIL SECTION */
@@ -613,7 +616,7 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
   <a href="/" style="display:flex;align-items:center;text-decoration:none;">
     <img src="/logo.png" alt="FYND TODAY" style="height:56px;width:auto;display:block;">
   </a>
-  <span class="nav-tag">Early Access</span>
+  <a href="#enter" class="nav-portal-btn scroll-anchor" style="display:block;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--off);text-decoration:none;">Enter Sound Portal</a>
 </nav>
 
 <section class="hero" id="top">
@@ -693,9 +696,12 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
       <p>How often do you find yourself hearing the same songs everywhere you go. The same sounds, the same artists, the same cycle repeating. And somewhere in that cycle the real connection to music, the kind that actually means something, gets harder to hold onto.</p>
       <p>Right now music is surfaced by what sounds similar to what you already like. By what is trending. By what the algorithm has learned to predict about your taste. None of that is wrong. But none of it is recognition. It is recommendation. The difference is the distance between being told what to order and knowing what you actually need.</p>
       <p>What if the music that found you also told you something. Not about your taste. About where you are. What if every time a track hit you could mark that moment, and what gets collected across people and moments builds something no platform has ever been built to produce.</p>
-      <p>That is what the sound portal is. A place to bring a track you have been drawn to and listen, or hear something chosen for a reason beyond what is trending. To mark what stands out. Not to build a playlist. To recognize something. And what gets learned from that, from real people and real listening moments, is what this lifestyle is built from.</p>
+      <p>That is what our sound portal is. You will find it below. A place to bring a track you have been drawn to and listen, or hear something chosen for a reason beyond what is trending. To mark what stands out. Not to build a playlist. To recognize something. And what gets learned from that, from real people and real listening moments, is what this lifestyle is built from.</p>
       <p>A lifestyle where music is not background. Not trending. Not algorithmic noise. Where it carries where you are into what you wear, how you move, and how your day actually goes.</p>
       <p class="algo-close">Different lives. Same rhythms. You are part of how we learn what those are.</p>
+    </div>
+    <div class="algo-cta rev d2">
+      <a href="#early" class="btn scroll-anchor"><span>Be part of it</span></a>
     </div>
   </div>
 </div>
@@ -777,8 +783,20 @@ function handleEmailSubmit(e) {
   .then(function(r) { return r.json(); })
   .then(function(data) {
     if (label) label.textContent = 'Count me in';
-    if (note) note.textContent = data.error ? 'Something went wrong. Try again.' : "You're in. Watch for it.";
-    if (input && !data.error) { input.value = ''; input.disabled = true; }
+    if (data.error) {
+      if (note) note.textContent = 'Something went wrong. Try again.';
+    } else {
+      if (input) { input.value = ''; input.disabled = true; }
+      if (note) note.textContent = 'You are in.';
+      // Scroll to the enter section after a beat
+      setTimeout(function() {
+        var target = document.getElementById('enter');
+        if (target) {
+          var top = target.getBoundingClientRect().top + window.scrollY - 80;
+          window.scrollTo({ top: top, behavior: 'smooth' });
+        }
+      }, 1200);
+    }
   })
   .catch(function() {
     if (label) label.textContent = 'Count me in';
