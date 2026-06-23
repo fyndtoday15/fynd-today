@@ -408,7 +408,9 @@ footer{padding:12px 48px 20px;border-top:1px solid rgba(252,251,244,.08);display
   .clothing-card-body { padding: 24px 20px 32px; }
   .clothing-intro { margin-bottom: 40px; }
   .clothing-color-note { margin-top: 40px; }
-  .rack-section { padding: 60px 20px 60px; }
+  .rack-cta,
+  .clothing-bridge .btn,
+  .algo-cta { display: none; }
   .algo-section { padding: 60px 20px; }
   .algo-inner { gap: 28px; }
   .algo-lbl { margin-bottom: 12px; }
@@ -722,6 +724,14 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
       <p class="email-sub">First look at clothing drops. New tracks from us when something is worth sharing. And when something significant happens here, you will know before anyone else.</p>
     </div>
     <form class="email-form rev d1" id="landing-email-form" onsubmit="handleEmailSubmit(event)">
+      <input
+        type="text"
+        class="email-input name-input"
+        id="landing-name-input"
+        placeholder="your first name"
+        autocomplete="given-name"
+        required
+        style="border:1px solid rgba(252,251,244,.3);margin-bottom:8px;width:100%;padding:14px 20px;background:transparent;font-family:'DejaVu Sans',Arial,sans-serif;font-size:13px;letter-spacing:.04em;color:var(--off);outline:none;">
       <div class="email-field-wrap">
         <input
           type="email"
@@ -773,19 +783,21 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
 var PORTAL_URL='/today';
 var SITE_URL='https://fyndtoday.com';
 
-// Email signup — sends to Brevo via existing subscribe endpoint
+// Email signup — adds contact to Brevo list 3
 function handleEmailSubmit(e) {
   e.preventDefault();
-  var input = document.getElementById('landing-email-input');
+  var nameInput = document.getElementById('landing-name-input');
+  var emailInput = document.getElementById('landing-email-input');
   var label = document.getElementById('email-submit-label');
   var note = document.getElementById('email-note');
-  var email = input ? input.value.trim() : '';
-  if (!email) return;
+  var firstName = nameInput ? nameInput.value.trim() : '';
+  var email = emailInput ? emailInput.value.trim() : '';
+  if (!firstName || !email) return;
   if (label) label.textContent = 'Sending...';
   fetch('/.netlify/functions/subscribe', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: email }),
+    body: JSON.stringify({ email: email, firstName: firstName }),
   })
   .then(function(r) { return r.json(); })
   .then(function(data) {
@@ -793,9 +805,9 @@ function handleEmailSubmit(e) {
     if (data.error) {
       if (note) note.textContent = 'Something went wrong. Try again.';
     } else {
-      if (input) { input.value = ''; input.disabled = true; }
+      if (emailInput) { emailInput.value = ''; emailInput.disabled = true; }
+      if (nameInput) { nameInput.value = ''; nameInput.disabled = true; }
       if (note) note.textContent = 'You are in.';
-      // Scroll to the enter section after a beat
       setTimeout(function() {
         var target = document.getElementById('enter');
         if (target) {
