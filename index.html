@@ -609,7 +609,6 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
     padding: 10px 0;
     margin-top: 8px;
   }
-  .algo-read-more.open { display: none; }
   footer{padding:20px 20px 16px;gap:14px}
   .footer-top{padding:8px 0}
   .footer-bot{flex-direction:column;gap:16px}
@@ -951,12 +950,19 @@ document.addEventListener('click', function(e) {
   }
 });
 
-// Algo section read more — mobile only
+// Algo section read more / read less toggle — mobile only
 function expandAlgo() {
   var wrap = document.getElementById('algo-expand-wrap');
   var btn = document.getElementById('algo-read-more');
-  if (wrap) wrap.classList.add('open');
-  if (btn) btn.classList.add('open');
+  if (!wrap || !btn) return;
+  var isOpen = wrap.classList.contains('open');
+  if (isOpen) {
+    wrap.classList.remove('open');
+    btn.textContent = 'Read more';
+  } else {
+    wrap.classList.add('open');
+    btn.textContent = 'Read less';
+  }
 }
 
 // Scroll-anchor buttons (bridge CTAs between sections)
