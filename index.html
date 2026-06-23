@@ -401,6 +401,10 @@ footer{padding:12px 48px 20px;border-top:1px solid rgba(252,251,244,.08);display
 }
 
 /* MOBILE — new sections */
+/* ALGO EXPAND — mobile only */
+.algo-expand-wrap { display: block; }
+.algo-read-more { display: none; }
+
 @media(max-width:720px){
   .clothing-section { padding: 48px 20px 60px; }
   .clothing-grid { grid-template-columns: 1fr; gap: 16px; }
@@ -581,7 +585,7 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
   .srf-section{min-height:auto}
   .srf-word{font-size:clamp(26px,8vw,42px)}
   .exp-section{padding:28px 20px 40px}
-  .rack-section{padding:48px 20px 40px;gap:32px}
+  .rack-section{padding:48px 20px 120px;gap:32px}
   .rack-frame{max-width:180px}
   .rack-copy{font-size:clamp(15px,4vw,19px)}
   .srf-section{min-height:auto}
@@ -589,6 +593,23 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
   .srf-cta{margin-top:8px}
   .algo-section{padding:52px 20px}
   .algo-body p{font-size:14px;line-height:1.7;margin-bottom:14px}
+  .algo-expand-wrap { display: none; }
+  .algo-expand-wrap.open { display: block; }
+  .algo-read-more {
+    display: block;
+    background: none;
+    border: none;
+    border-bottom: 1px solid rgba(252,251,244,.3);
+    font-family: 'DejaVu Sans', Arial, sans-serif;
+    font-size: 11px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--off);
+    cursor: pointer;
+    padding: 10px 0;
+    margin-top: 8px;
+  }
+  .algo-read-more.open { display: none; }
   footer{padding:20px 20px 16px;gap:14px}
   .footer-top{padding:8px 0}
   .footer-bot{flex-direction:column;gap:16px}
@@ -704,10 +725,13 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
     <div class="algo-body rev d1">
       <p>How often do you find yourself hearing the same songs everywhere you go. The same sounds, the same artists, the same cycle repeating. And somewhere in that cycle the real connection to music, the kind that actually means something, gets harder to hold onto.</p>
       <p>Right now music is surfaced by what sounds similar to what you already like. By what is trending. By what the algorithm has learned to predict about your taste. None of that is wrong. But none of it is recognition. It is recommendation. The difference is the distance between being told what to order and knowing what you actually need.</p>
-      <p>What if the music that found you also told you something. Not about your taste. About where you are. What if every time a track hit you could mark that moment, and what gets collected across people and moments builds something no platform has ever been built to produce.</p>
-      <p>That is what our sound portal is [you will find it below]. A place to bring a track you have been drawn to and listen, or hear something chosen for a reason beyond what is trending. To mark what stands out. Not to build a playlist. To recognize something. And what gets learned from that, from real people and real listening moments, is what this lifestyle is built from.</p>
-      <p>A lifestyle where music is not background. Not trending. Not algorithmic noise. Where it carries where you are into what you wear, how you move, and how your day actually goes.</p>
-      <p class="algo-close">Different lives. Same rhythms. You are part of how we learn what those are.</p>
+      <div class="algo-expand-wrap" id="algo-expand-wrap">
+        <p>What if the music that found you also told you something. Not about your taste. About where you are. What if every time a track hit you could mark that moment, and what gets collected across people and moments builds something no platform has ever been built to produce.</p>
+        <p>That is what our sound portal is [you will find it below]. A place to bring a track you have been drawn to and listen, or hear something chosen for a reason beyond what is trending. To mark what stands out. Not to build a playlist. To recognize something. And what gets learned from that, from real people and real listening moments, is what this lifestyle is built from.</p>
+        <p>A lifestyle where music is not background. Not trending. Not algorithmic noise. Where it carries where you are into what you wear, how you move, and how your day actually goes.</p>
+        <p class="algo-close">Different lives. Same rhythms. You are part of how we learn what those are.</p>
+      </div>
+      <button class="algo-read-more" id="algo-read-more" onclick="expandAlgo()" aria-expanded="false">Read more</button>
     </div>
     <div class="algo-cta rev d2">
       <a href="#early" class="btn scroll-anchor"><span>Be part of it</span></a>
@@ -720,7 +744,7 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
   <div class="email-inner">
     <div class="email-header">
       <span class="email-lbl">Stay in it</span>
-      <h2 class="email-h">Be part of what we are learning.</h2>
+      <h2 class="email-h">Be part of what we are creating.</h2>
       <p class="email-sub">First look at clothing drops. New tracks from us when something is worth sharing. And when something significant happens here, you will know before anyone else.</p>
     </div>
     <form class="email-form rev d1" id="landing-email-form" onsubmit="handleEmailSubmit(event)">
@@ -926,6 +950,14 @@ document.addEventListener('click', function(e) {
     closeContact();
   }
 });
+
+// Algo section read more — mobile only
+function expandAlgo() {
+  var wrap = document.getElementById('algo-expand-wrap');
+  var btn = document.getElementById('algo-read-more');
+  if (wrap) wrap.classList.add('open');
+  if (btn) btn.classList.add('open');
+}
 
 // Scroll-anchor buttons (bridge CTAs between sections)
 document.querySelectorAll('.scroll-anchor').forEach(function(el){
