@@ -414,6 +414,15 @@ footer{padding:12px 48px 20px;border-top:1px solid rgba(252,251,244,.08);display
     transform: none;
     transition: none;
   }
+  .clothing-card .clothing-card-color {
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .clothing-card .clothing-card-color.color-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
   .clothing-section { padding: 48px 20px 60px; }
   .clothing-grid { grid-template-columns: 1fr; gap: 16px; }
   .clothing-card-color { height: 160px; }
@@ -957,6 +966,22 @@ document.addEventListener('click', function(e) {
     closeContact();
   }
 });
+
+// Color block fade-in on mobile — independent of card .rev so Chrome
+// timing inconsistency doesn't reveal the whole card prematurely
+if (window.innerWidth <= 720 && 'IntersectionObserver' in window) {
+  var colorObs = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('color-visible');
+        colorObs.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.clothing-card-color').forEach(function(el) {
+    colorObs.observe(el);
+  });
+}
 
 // Algo section read more / read less toggle — mobile only
 function expandAlgo() {
