@@ -1587,7 +1587,7 @@ function handleReplay() {
 // ── YT DEBUG LOGGING (visible overlay disabled — core mechanism confirmed working) ──
 // Set to true only for active debugging sessions; logs go to console instead
 // of an on-screen panel so they never block real users' controls again.
-var YT_DEBUG_VISIBLE = true;
+var YT_DEBUG_VISIBLE = false;
 function _ytDebug(msg) {
   if (!YT_DEBUG_VISIBLE) {
     if (window.console && console.log) console.log('[yt]', msg);
