@@ -92,12 +92,29 @@ html, body {
   pointer-events: none;
   transition: opacity 0.2s ease;
 }
+#yt-attribution {
+  position: fixed;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 22px);
+  right: 16px;
+  font-size: 9px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--fg);
+  opacity: 0.3;
+  text-decoration: none;
+  z-index: 10;
+  pointer-events: all;
+  transition: opacity 0.2s ease;
+}
+#yt-attribution:hover { opacity: 0.7; }
 /* Hide the wordmark during the word-tap and color-tap overlays — these
    are full-screen takeovers and the logo has no reason to compete for
    space with content that can run long (Done button colliding with the
    logo on tracks with more tapped words than usual). */
 body:has(.listen-stmts.show) #wordmark,
-body:has(#s-recognition.active) #wordmark {
+body:has(#s-recognition.active) #wordmark,
+body:has(.listen-stmts.show) #yt-attribution,
+body:has(#s-recognition.active) #yt-attribution {
   opacity: 0;
 }
 
@@ -921,6 +938,9 @@ body:has(#s-recognition.active) #wordmark {
 
 <!-- WORDMARK -->
 <img id="wordmark" src="/logo.png" alt="FYND TODAY">
+
+<!-- YOUTUBE ATTRIBUTION — required by YouTube API developer policies -->
+<a id="yt-attribution" href="https://www.youtube.com" target="_blank" rel="noopener">Powered by YouTube</a>
 
 <!-- S-ENTRY -->
 <div class="screen" id="s-entry">
