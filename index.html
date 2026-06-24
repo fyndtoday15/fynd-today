@@ -2,1290 +2,2343 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" id="theme-color" content="#0a0a0a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="icon" type="image/png" href="/FYND_TODAY_logo_1024x1024_white_bckg.png">
+<link rel="apple-touch-icon" href="/FYND_TODAY_logo_1024x1024_white_bckg.png">
 <title>FYND TODAY</title>
-<link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABCGlDQ1BJQ0MgUHJvZmlsZQAAeJxjYGA8wQAELAYMDLl5JUVB7k4KEZFRCuwPGBiBEAwSk4sLGHADoKpv1yBqL+viUYcLcKakFicD6Q9ArFIEtBxopAiQLZIOYWuA2EkQtg2IXV5SUAJkB4DYRSFBzkB2CpCtkY7ETkJiJxcUgdT3ANk2uTmlyQh3M/Ck5oUGA2kOIJZhKGYIYnBncAL5H6IkfxEDg8VXBgbmCQixpJkMDNtbGRgkbiHEVBYwMPC3MDBsO48QQ4RJQWJRIliIBYiZ0tIYGD4tZ2DgjWRgEL7AwMAVDQsIHG5TALvNnSEfCNMZchhSgSKeDHkMyQx6QJYRgwGDIYMZAKbWPz9HbOBQAAACfUlEQVR4nO2VzUtUURiHn3POnY/bnXEhXCFhKnEmEnJZIiFuTAlxlwt3CaaBpNlCaCGBf4BgC0loZ0JboZ3QshJaGRgVfkSGbsTMmZiZe889LWaMgXRmrIUt5geXA+eee85z39/7vkf4ftpwhpJneXgNoAZQA/gvAKxqFmmtEUIghMAYgxCCIDBIKQiCACllyXxQ/EqgVOX/qwogHK4DNOABUSAPhIEcEAGyxTFfHAvy/TRCiL8EMIAAYwyTkw+RUtHRcYM3r98ycm+IxecvuNJymeXlV0xNPWJhYZGenm5mZp4QiYTo779NV1c3nvcTKU+OxIlvDPwO+dLSS/b29qivd2lONtPZeZPNrS2ampqYm5tn/ukzVlbesbb2gfX1dYaHRxgdHWd39xuWFcGYk6+biiYZYwiHw7S2XsV16xkcvIvWmomJ+2jfp7f3Fh8/fWZ19T2O4xCNRkkkEnieh+d5hTCWUVmAI/va29sYGrpDMtmC1ln6+npxHAcrFKLt+jUejI+SSiW5cDGBpSzGxsaYnn5MInEJ38+WzQNRzXWsVBjPywIGpSyktCkkYJiCWaq40qc0rbROUykCVQEclVo+HzA7O0tDg4vv+8RicXZ2dkgmmwm0JpvLoZQik8kwMDCAZUkqFEF1ZSilRGuNbdfR2HgepSTb29vkcl/JZNIcHh6ytfkFt8EllUoSizlEo3Hy+R8opcruXVUESlA4OPhOPB5jY2MT13XZ39/Htm0c5xxaa6SU2LaNZYUo2FNepwQApVTRkggFzxUQFB8BGIIgKFt6/wRQ2nILfYI/fK7U/UpVVQ4ct/lRdzvFWcfqzG/DGkANoAZQAzhzgF/lue0iCzr6DgAAAABJRU5ErkJggg==">
-<meta property="og:title" content="FYND TODAY">
-<meta property="og:description" content="Music-powered lifestyle. Are you ready to find out where you are?">
-<meta property="og:url" content="https://fyndtoday.com">
-<meta property="og:type" content="website">
-<meta property="og:image" content="https://fyndtoday.com/FYND_TODAY_logo_1024x1024_white_bckg.png">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="FYND TODAY">
-<meta name="twitter:description" content="Music-powered lifestyle. Are you ready to find out where you are?">
-<meta name="twitter:image" content="https://fyndtoday.com/FYND_TODAY_logo_1024x1024_white_bckg.png">
-<meta name="description" content="Music-powered lifestyle. Are you ready to find out where you are?">
 <style>
-@font-face{font-family:'DejaVu Sans';src:url('/ttf/DejaVuSans.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
-@font-face{font-family:'DejaVu Sans';src:url('/ttf/DejaVuSans-Bold.ttf') format('truetype');font-weight:700;font-style:normal;font-display:swap}
-@font-face{font-family:'DejaVu Sans';src:url('/ttf/DejaVuSans-Oblique.ttf') format('truetype');font-weight:400;font-style:italic;font-display:swap}
-@font-face{font-family:'DejaVu Sans';src:url('/ttf/DejaVuSans-BoldOblique.ttf') format('truetype');font-weight:700;font-style:italic;font-display:swap}
-@import url('https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@1,400&display=swap');
-
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#080808;--off:#FCFBF4}
-::-webkit-scrollbar{width:5px}
-::-webkit-scrollbar-track{background:var(--bg)}
-::-webkit-scrollbar-thumb{background:var(--off)}
-html{scroll-behavior:smooth;scrollbar-color:var(--off) var(--bg);scroll-padding-top:64px}
-#how,#algo,#close,#enter{scroll-margin-top:0px}
-body{background:var(--bg);color:var(--off);font-family:'DejaVu Sans',Arial,sans-serif;font-weight:400;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;overflow-x:hidden}
-.serif{font-family:'DejaVu Sans',Arial,sans-serif;font-style:italic;font-weight:400}
-/* Force DejaVu on all non-serif elements */
-p,span,a,button,div,li,td,th,label,input{font-family:'DejaVu Sans',Arial,sans-serif}
-
-/* NAV */
-nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:22px 48px;display:flex;justify-content:space-between;align-items:center}
-.nav-portal-btn {
-  transition: opacity 0.4s ease, visibility 0.4s ease;
-  opacity: 1;
-  visibility: visible;
+@font-face {
+  font-family: 'DejaVu Sans';
+  src: url('/ttf/DejaVuSans.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
 }
-.nav-portal-btn.hidden {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-}
-.hero-portal-btn{
-  position:absolute;
-  top:90px;
-  right:48px;
-  z-index:2;
-  display:inline-block;
-  padding:8px 16px;
-  border:1px solid rgba(252,251,244,.35);
-  border-radius:2px;
-  font-family:'DejaVu Sans',Arial,sans-serif;
-  font-size:9px;
-  letter-spacing:.18em;
-  text-transform:uppercase;
-  color:#FCFBF4;
-  text-decoration:none;
-  background:transparent;
-  cursor:pointer;
-  opacity:0;
-  animation:up .8s ease forwards 1.2s;
-  white-space:nowrap;
-  width:auto;
-  overflow:hidden;
-}
-.hero-portal-btn::before{
-  content:'';
-  position:absolute;
-  left:0;bottom:0;right:0;height:0;
-  background:#FCFBF4;
-  transition:height .3s ease;
-}
-.hero-portal-btn:hover::before{height:100%}
-.hero-portal-btn:hover{color:#080808;position:absolute;}
-.nav-logo{font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:var(--off);cursor:pointer;text-decoration:none;background:none;border:none;font-family:'DejaVu Sans',Arial,sans-serif}
-.nav-tag{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--off)}
-
-/* HERO */
-.hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:100px 48px 80px;position:relative;overflow:hidden}
-canvas#sw{position:absolute;left:0;top:0;width:100%;height:100%;opacity:.13;pointer-events:none}
-.hero-content{position:relative;z-index:1;max-width:560px}
-.htag{font-size:10px;letter-spacing:.26em;text-transform:uppercase;color:var(--off);margin-bottom:28px;opacity:0;animation:up .8s ease forwards .2s}
-h1{font-size:clamp(30px,4vw,54px);line-height:1.08;letter-spacing:-.02em;opacity:0;animation:up 1s ease forwards .4s}
-.hero-btns{margin-top:44px;display:flex;gap:14px;flex-wrap:wrap;opacity:0;animation:up 1s ease forwards 1s}
-
-/* RULE */
-.rule{height:1px;background:rgba(252,251,244,.08)}
-
-/* HOW */
-.blk{max-width:1060px;margin:0 auto;padding:80px 48px 48px;min-height:100vh;display:flex;flex-direction:column;justify-content:center}
-.lbl{font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--off);margin-bottom:36px}
-.section-fwd{margin-top:48px}
-
-/* Album cover cards — square on desktop, auto-height on mobile */
-.hgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
-.hc{
-  background:var(--bg);border:1px solid rgba(252,251,244,.14);
-  position:relative;overflow:hidden;
-  display:flex;flex-direction:column;justify-content:space-between;
-  min-height:320px;
-}
-/* waveform at bottom of each card, full width */
-canvas.cw{
-  position:absolute;bottom:0;left:0;width:100%;height:45%;
-  opacity:.09;pointer-events:none;display:block;
-}
-.hc-top{padding:28px 28px 0;position:relative;z-index:1}
-.hc-bot{padding:0 28px 28px;position:relative;z-index:1}
-.hn{font-size:10px;letter-spacing:.2em;color:var(--off);margin-bottom:20px;display:block}
-.ht{font-size:19px;line-height:1.22;margin-bottom:14px}
-.hb{font-size:13px;line-height:1.8;color:var(--off)}
-
-/* CLOSE */
-.close-blk{max-width:760px;margin:0 auto;padding:80px 48px 48px;text-align:center;min-height:100vh;display:flex;flex-direction:column;justify-content:center}
-.close-h{font-size:clamp(26px,4vw,50px);line-height:1.08;letter-spacing:-.02em;margin-bottom:24px}
-.close-mid{font-size:clamp(15px,1.55vw,18px);line-height:1.8;color:var(--off);margin-bottom:14px}
-.close-s{font-size:clamp(14px,1.4vw,17px);line-height:1.8;color:var(--off);margin-bottom:44px}
-
-/* HUMAN ALGO SECTION */
-.algo-blk{max-width:1060px;margin:0 auto;padding:80px 48px 48px;display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center;min-height:100vh}
-.algo-left h3{font-size:clamp(22px,3vw,40px);line-height:1.12;letter-spacing:-.02em;margin-bottom:20px}
-.algo-left p{font-size:14px;line-height:1.85;color:var(--off);margin-bottom:16px}
-.algo-right{border:1px solid rgba(252,251,244,.1);padding:40px 36px}
-/* button spans full width below both columns on desktop */
-.algo-fwd{grid-column:1/-1;margin-top:8px}
-.algo-stat{margin-bottom:32px}
-.algo-stat:last-child{margin-bottom:0}
-.algo-stat-n{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--off);margin-bottom:8px;display:block}
-.algo-stat-t{font-size:clamp(18px,2.2vw,26px);line-height:1.2;letter-spacing:-.01em}
-
-/* ENTER */
-.enter{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:88px 48px;position:relative;overflow:hidden;}
-canvas#rc{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;opacity:.17}
-.eh{font-size:clamp(32px,5.5vw,64px);line-height:1.05;margin-bottom:14px;position:relative}
-.es{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--off);margin-bottom:48px;position:relative}
-
-/* BUTTONS — matching portal exactly */
-.btn{display:inline-block;padding:12px 36px;border:1px solid rgba(252,251,244,.3);font-family:'DejaVu Sans',Arial,sans-serif;font-size:10px;font-weight:400;letter-spacing:.24em;text-transform:uppercase;color:var(--off);text-decoration:none;background:transparent;cursor:pointer;position:relative;overflow:hidden;white-space:nowrap;border-radius:2px}
-.btn::before{content:'';position:absolute;left:0;bottom:0;right:0;height:0;background:var(--off);transition:height .3s ease}
-.btn span{position:relative;z-index:1;transition:color .3s ease}
-.btn:hover::before{height:100%}
-.btn:hover span{color:var(--bg)}
-.btn-sm{padding:11px 28px}
-
-/* FOOTER */
-footer{padding:12px 48px 20px;border-top:1px solid rgba(252,251,244,.08);display:flex;flex-direction:column;gap:16px}
-.footer-top{text-align:center;padding:0}
-.footer-bot{display:flex;align-items:flex-start;justify-content:space-between;gap:24px}
-.footer-contact{display:flex;flex-direction:column;gap:8px}
-.footer-contact-lbl{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--off)}
-.footer-email{font-size:11px;letter-spacing:.06em;color:var(--off);text-decoration:none;border:1px solid rgba(252,251,244,.22);padding:9px 20px;display:inline-block;transition:background .25s,color .25s;font-family:'DejaVu Sans',Arial,sans-serif}
-.footer-email:hover{background:var(--off);color:var(--bg)}
-.footer-share{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
-.footer-share-lbl{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--off)}
-.share-btn{font-size:11px;letter-spacing:.06em;color:var(--off);background:transparent;border:1px solid rgba(252,251,244,.22);padding:9px 20px;cursor:pointer;font-family:'DejaVu Sans',Arial,sans-serif;transition:background .25s,color .25s}
-.share-btn:hover{background:var(--off);color:var(--bg)}
-
-/* CLOTHING SECTION */
-.clothing-section {
-  padding: 80px 48px 120px;
-  background: var(--bg);
-}
-.clothing-grid {
-  max-width: 1060px;
-  margin: 0 auto;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 2px;
-}
-.clothing-card {
-  display: flex;
-  flex-direction: column;
-  border: 1px solid rgba(252,251,244,.1);
-}
-.clothing-card-color {
-  height: 220px;
-  width: 100%;
-  flex-shrink: 0;
-  position: relative;
-}
-.clothing-style-label {
-  position: absolute;
-  bottom: 16px;
-  left: 20px;
-  font-size: 10px;
-  letter-spacing: .22em;
-  text-transform: uppercase;
-  color: rgba(252,251,244,.9);
-  font-family: 'DejaVu Sans', Arial, sans-serif;
-  line-height: 1.6;
-}
-.clothing-color-1 { background: linear-gradient(160deg, #2c3e5a 0%, #1a2840 100%); }
-.clothing-color-2 { background: linear-gradient(160deg, #8b4a2a 0%, #c4784a 100%); }
-.clothing-color-3 { background: linear-gradient(160deg, #3d5a3e 0%, #6b9e6c 100%); }
-.clothing-card-body {
-  padding: 32px 28px 40px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-.clothing-tag {
-  font-size: 10px;
-  letter-spacing: .26em;
-  text-transform: uppercase;
-  color: var(--off);
-}
-.clothing-name {
-  font-size: clamp(17px, 2vw, 22px);
-  line-height: 1.2;
-  letter-spacing: -.01em;
+@font-face {
+  font-family: 'DejaVu Sans';
+  src: url('/ttf/DejaVuSans-Bold.ttf') format('truetype');
   font-weight: 700;
-}
-.clothing-desc {
-  font-size: 14px;
-  line-height: 1.8;
-  color: var(--off);
-}
-.clothing-fabric {
-  font-size: 11px;
-  letter-spacing: .08em;
-  color: var(--off);
-  font-style: italic;
-  margin-top: 4px;
+  font-style: normal;
+  font-display: swap;
 }
 
-/* ALGORITHM SECTION */
-.algo-section {
-  position: relative;
-  padding: 120px 48px;
-  background: var(--bg);
-  overflow: hidden;
-}
-.algo-inner {
-  max-width: 760px;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 52px;
-}
-.algo-statement { }
-.algo-lbl {
-  font-size: 10px;
-  letter-spacing: .26em;
-  text-transform: uppercase;
-  color: var(--off);
-  display: block;
-  margin-bottom: 20px;
-}
-.algo-h {
-  font-size: clamp(26px, 3.5vw, 46px);
-  line-height: 1.1;
-  letter-spacing: -.02em;
-}
-.algo-body p {
-  font-size: clamp(14px, 1.5vw, 16px);
-  line-height: 1.85;
-  color: var(--off);
-  margin-bottom: 20px;
-}
-.algo-body p.algo-close {
-  font-style: italic;
-  margin-bottom: 0;
-}
-.algo-cta {
-  margin-top: 48px;
-  text-align: center;
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
 }
 
-/* EMAIL SECTION */
-.email-section {
-  background: var(--bg);
-  border-top: 1px solid rgba(252,251,244,.08);
-  border-bottom: 1px solid rgba(252,251,244,.08);
-  padding: 100px 48px;
-}
-.email-inner {
-  max-width: 640px;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 40px;
-}
-.email-lbl {
-  font-size: 10px;
-  letter-spacing: .26em;
-  text-transform: uppercase;
-  color: var(--off);
-  display: block;
-  margin-bottom: 20px;
-}
-.email-h {
-  font-size: clamp(26px, 3.5vw, 42px);
-  line-height: 1.1;
-  letter-spacing: -.02em;
-  margin-bottom: 16px;
-}
-.email-sub {
-  font-size: clamp(14px, 1.5vw, 16px);
-  line-height: 1.8;
-  color: var(--off);
-}
-.email-field-wrap {
-  display: flex;
-  gap: 0;
-  border: 1px solid rgba(252,251,244,.3);
-}
-.email-input {
-  flex: 1;
-  background: transparent;
-  border: none;
-  outline: none;
-  padding: 14px 20px;
-  font-family: 'DejaVu Sans', Arial, sans-serif;
-  font-size: 13px;
-  letter-spacing: .04em;
-  color: var(--off);
-  min-width: 0;
-}
-.email-input::placeholder { color: var(--off); opacity: .35; }
-.email-submit {
-  border: none;
-  border-left: 1px solid rgba(252,251,244,.3);
-  border-radius: 0;
-  flex-shrink: 0;
-  white-space: nowrap;
-}
-.email-note {
-  font-size: 11px;
-  letter-spacing: .06em;
-  color: var(--off);
-  margin-top: 12px;
-  min-height: 18px;
-}
-.enter-note {
-  margin-top: 18px;
-  font-size: 11px;
-  letter-spacing: .08em;
-  color: var(--off);
-  position: relative;
+:root {
+  --bg: #0a0a0a;
+  --fg: #f0ede6;
+  --dim: rgba(240,237,230,0.4);
+  --dimmer: rgba(240,237,230,0.18);
+  --f: 'DejaVu Sans', Arial, sans-serif;
 }
 
-/* FOOTER LEGAL */
-.footer-legal{text-align:center}
-.footer-legal-link{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--off);opacity:.55;text-decoration:none;transition:opacity .25s}
-.footer-legal-link:hover{opacity:1}
-.footer-legal-sep{font-size:10px;color:var(--off);opacity:.3;margin:0 10px}
-
-.clothing-intro {
-  max-width: 760px;
-  margin: 0 auto 64px;
-  text-align: center;
-}
-.clothing-section-lbl {
-  font-size: 10px;
-  letter-spacing: .26em;
-  text-transform: uppercase;
-  color: var(--off);
-  display: block;
-  margin-bottom: 20px;
-}
-.clothing-section-head {
-  font-size: clamp(18px, 2.2vw, 26px);
-  line-height: 1.5;
-  letter-spacing: -.01em;
-  color: var(--off);
-}
-.clothing-color-note {
-  max-width: 640px;
-  margin: 64px auto 0;
-  text-align: center;
-  font-size: 14px;
-  line-height: 1.8;
-  color: var(--off);
-  font-style: italic;
-}
-
-.rack-cta {
-  margin-top: 40px;
-  text-align: center;
-}
-.clothing-bridge {
-  max-width: 640px;
-  margin: 72px auto 0;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 32px;
-}
-.clothing-bridge-line {
-  font-size: clamp(14px, 1.5vw, 16px);
-  line-height: 1.8;
-  color: var(--off);
-  font-style: italic;
-}
-
-/* MOBILE — new sections */
-/* ALGO EXPAND — mobile only */
-.algo-expand-wrap { display: block; }
-.algo-read-more { display: none; }
-
-@media(max-width:720px){
-  .clothing-card.rev,
-  .clothing-card.rev.d1,
-  .clothing-card.rev.d2,
-  .clothing-card.rev.d3 {
-    opacity: 1;
-    transform: none;
-    transition: none;
-  }
-  .clothing-card .clothing-card-color {
-    opacity: 0;
-    transform: translateY(12px);
-    transition: opacity 0.7s ease, transform 0.7s ease;
-  }
-  .clothing-card .clothing-card-color.color-visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  .clothing-section { padding: 48px 20px 60px; }
-  .clothing-grid { grid-template-columns: 1fr; gap: 16px; }
-  .clothing-card-color { height: 160px; }
-  .clothing-card-body { padding: 24px 20px 32px; }
-  .clothing-intro { margin-bottom: 40px; }
-  .clothing-color-note { margin-top: 40px; }
-  .rack-cta,
-  .clothing-bridge .btn,
-  .algo-cta { display: none; }
-  .algo-section { padding: 60px 20px; }
-  .algo-inner { gap: 28px; }
-  .algo-lbl { margin-bottom: 12px; }
-  .algo-h { font-size: clamp(22px, 6vw, 32px); }
-  .algo-body p { font-size: 14px; line-height: 1.7; margin-bottom: 16px; }
-  .algo-cta { margin-top: 32px; }
-  .email-section { padding: 60px 20px; }
-  .email-field-wrap { flex-direction: column; }
-  .email-submit { border-left: none; border-top: 1px solid rgba(252,251,244,.3); }
-}
-.share-sheet{position:fixed;bottom:0;left:0;right:0;z-index:200;background:var(--bg);border-top:1px solid rgba(252,251,244,.14);padding:28px 48px 36px;transform:translateY(100%);transition:transform .3s ease}
-.share-sheet.open{transform:translateY(0)}
-.share-lbl{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--off);margin-bottom:16px;display:block}
-.share-opts{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-.share-opt{padding:11px 28px;border:1px solid rgba(252,251,244,.35);border-radius:2px;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--off);cursor:pointer;background:transparent;font-family:'DejaVu Sans',Arial,sans-serif;transition:background .25s,color .25s;position:relative;overflow:hidden}
-.share-opt:hover{background:var(--off);color:var(--bg)}
-.share-close{margin-left:auto;padding:11px 28px;border:1px solid rgba(252,251,244,.2);border-radius:2px;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--off);cursor:pointer;background:transparent;font-family:'DejaVu Sans',Arial,sans-serif;opacity:0.5}
-/* copied toast */
-.copied-toast{position:fixed;bottom:110px;left:50%;transform:translateX(-50%) translateY(12px);background:var(--off);color:var(--bg);font-family:'DejaVu Sans',Arial,sans-serif;font-size:10px;letter-spacing:.2em;text-transform:uppercase;padding:10px 24px;opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;z-index:300}
-.copied-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-
-/* RACK SECTION */
-.rack-section {
-  padding: 80px 48px 120px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background: var(--bg);
-  gap: 48px;
-}
-.rack-copy {
-  font-size: clamp(17px, 2vw, 24px);
-  line-height: 1.7;
-  color: var(--off);
-  text-align: center;
-  max-width: 580px;
-  font-family: 'DejaVu Sans', Arial, sans-serif;
-  font-style: italic;
-}
-.rack-frame {
-  position: relative;
-  width: 100%;
-  max-width: 220px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-.rack-img {
-  width: 100%;
-  height: auto;
-  filter: invert(1) opacity(0.9);
-  display: block;
-}
-.rack-states {
-  position: absolute;
-  top: 28%;
-  left: 8%;
-  right: 8%;
-  display: flex;
-  justify-content: space-between;
-  pointer-events: none;
-}
-.rack-states span {
-  font-size: 5px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--off);
-  opacity: 0.35;
-  font-family: 'DejaVu Sans', Arial, sans-serif;
-  white-space: nowrap;
-  writing-mode: horizontal-tb;
-}
-
-/* SRF — Sound Recognition Form scroll section */
-.srf-section {
-  position: relative;
-  min-height: 120vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  background: var(--bg);
-  scroll-margin-top: 80px;
-}
-canvas#srf-wave {
-  position: absolute;
-  inset: 0;
+html, body {
   width: 100%;
   height: 100%;
-  opacity: 0.12;
-  pointer-events: none;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--f);
+  -webkit-font-smoothing: antialiased;
 }
-.srf-inner {
-  position: relative;
-  z-index: 1;
+
+/* ── SCREENS ── */
+.screen {
+  position: fixed;
+  inset: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: clamp(48px, 10vh, 96px);
-  padding: 100px 48px 120px;
-  text-align: center;
-}
-.srf-item {
+  justify-content: center;
   opacity: 0;
-  transform: translateY(24px);
-  transition: opacity 0.9s ease, transform 0.9s ease;
+  pointer-events: none;
+  visibility: hidden;
+  z-index: 1;
+  transition: opacity 0.35s ease, visibility 0s linear 0.35s;
+  padding:
+    calc(env(safe-area-inset-top, 20px) + 20px)
+    32px
+    calc(env(safe-area-inset-bottom, 20px) + 20px);
+  overflow: hidden;
+  background: var(--bg);
 }
-.srf-item.on {
+
+.screen.active {
+  opacity: 1;
+  pointer-events: all;
+  visibility: visible;
+  z-index: 2;
+  transition: opacity 0.7s ease, visibility 0s linear 0s;
+}
+
+/* ── WORDMARK ── */
+#wordmark {
+  position: fixed;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 18px);
+  left: 50%;
+  transform: translateX(-50%);
+  height: 52px;
+  width: auto;
+  opacity: 1;
+  z-index: 10;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+#yt-attribution {
+  position: fixed;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 22px);
+  right: 16px;
+  font-size: 9px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--fg);
+  opacity: 0.3;
+  text-decoration: none;
+  z-index: 10;
+  pointer-events: all;
+  transition: opacity 0.2s ease;
+}
+#yt-attribution:hover { opacity: 0.7; }
+/* Hide the wordmark during the word-tap and color-tap overlays — these
+   are full-screen takeovers and the logo has no reason to compete for
+   space with content that can run long (Done button colliding with the
+   logo on tracks with more tapped words than usual). */
+body:has(.listen-stmts.show) #wordmark,
+body:has(#s-recognition.active) #wordmark,
+body:has(.listen-stmts.show) #yt-attribution,
+body:has(#s-recognition.active) #yt-attribution {
+  opacity: 0;
+}
+
+/* ── LOADER ── */
+#loader {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  transition: opacity 0.6s ease;
+}
+#loader.out {
+  opacity: 0;
+  pointer-events: none;
+}
+.loader-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--dimmer);
+  animation: breathe 1.8s ease-in-out infinite;
+}
+@keyframes breathe {
+  0%, 100% { opacity: 0.2; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.4); }
+}
+
+/* ── S-ENTRY ── */
+#s-entry { gap: 0; }
+#s-return { gap: 0; }
+
+.entry-line {
+  font-size: clamp(13px, 2.7vw, 16px);
+  font-weight: 400;
+  line-height: 1.6;
+  text-align: center;
+  color: var(--fg);
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+  max-width: 400px;
+  padding: 0 8px;
+}
+.entry-line.show {
   opacity: 1;
   transform: translateY(0);
 }
-.srf-word {
-  font-family: 'DejaVu Sans', Arial, sans-serif;
-  font-style: italic;
-  font-size: clamp(32px, 5vw, 64px);
-  line-height: 1.05;
-  letter-spacing: -0.02em;
-  color: var(--off);
-  margin-bottom: 8px;
+
+.entry-paths {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-top: 56px;
+  opacity: 0;
+  transition: opacity 1s ease;
 }
-.srf-line {
-  font-size: clamp(10px, 1.2vw, 13px);
-  letter-spacing: 0.22em;
+.entry-paths.show { opacity: 1; }
+
+.path-btn {
+  background: none;
+  border: none;
+  border-bottom: 1px solid rgba(240,237,230,0.22);
+  font-family: var(--f);
+  font-size: 13px;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--off);
-  opacity: 0.45;
-  font-family: 'DejaVu Sans', Arial, sans-serif;
+  color: var(--fg);
+  cursor: pointer;
+  padding: 12px 0;
+  width: 200px;
+  text-align: center;
+  transition: opacity 0.15s ease, transform 0.1s ease;
+}
+.path-btn:active {
+  opacity: 0.5;
+  transform: scale(0.97);
 }
 
-.srf-cta {
-  margin-top: 16px;
+.path-sep {
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--fg);
+}
+
+.landing-link {
+  display: block;
+  margin-top: 40px;
+  font-family: var(--f);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(240,237,230,0.5);
+  text-decoration: none;
+  text-align: center;
+  opacity: 0;
+  transition: opacity 1s ease, color 0.2s ease;
+}
+.landing-link.show { opacity: 1; }
+.landing-link:active { color: var(--fg); }
+
+/* ── S-BEFORE (return visit) ── */
+#s-before { gap: 0; }
+
+.before-observation {
+  font-size: clamp(16px, 4vw, 22px);
+  font-weight: 400;
+  color: var(--fg);
+  text-align: center;
+  max-width: 380px;
+  line-height: 1.65;
+  opacity: 0;
+  transition: opacity 1.2s ease;
+  padding: 0 8px;
+}
+.before-observation.show { opacity: 1; }
+
+.before-cta {
+  margin-top: 52px;
+  background: none;
+  border: none;
+  font-family: var(--f);
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--fg);
+  cursor: pointer;
+  padding: 12px 0;
+  opacity: 0;
+  transition: opacity 0.8s ease, color 0.2s ease;
+}
+.before-cta.show { opacity: 1; }
+.before-cta:active { color: var(--fg); }
+
+/* ── S-SEARCH ── */
+#s-search { justify-content: flex-start; padding-top: clamp(80px, 15vh, 120px); gap: 0; overflow: hidden; }
+
+.search-back {
+  position: absolute;
+  top: calc(env(safe-area-inset-top, 20px) + 20px);
+  left: 32px;
+  background: none;
+  border: none;
+  font-family: var(--f);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--fg);
+  cursor: pointer;
+  padding: 8px 0;
+  transition: color 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.search-back:active { color: var(--fg); }
+
+.search-label {
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--fg);
+  margin-bottom: 32px;
   text-align: center;
 }
 
-@media(max-width:720px) {
-  .srf-inner { padding: 80px 20px; gap: 48px; }
-  .exp-section { padding: 60px 20px; }
+.search-field-wrap {
+  width: 100%;
+  max-width: 340px;
 }
-#portal{position:fixed;inset:0;z-index:9999;background:var(--bg);display:none}
-#portal.active{display:block}
-canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
 
-/* ANIMS */
-@keyframes up{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
-.rev{opacity:0;transform:translateY(18px);transition:opacity .7s ease,transform .7s ease}
-.rev.on{opacity:1;transform:translateY(0)}
-.d1{transition-delay:.1s}.d2{transition-delay:.2s}.d3{transition-delay:.3s}.d4{transition-delay:.4s}
-
-/* MOBILE */
-@media(max-width:720px){
-  nav{padding:18px 20px}
-  .nav-portal-btn{display:none}
-  .hero-portal-btn{top:80px;right:20px;font-size:8px;padding:6px 12px;}
-  .hero{padding:80px 20px 48px;min-height:100vh;text-align:left;align-items:flex-start}
-  h1{font-size:clamp(24px,7vw,36px);text-align:left}
-  .hero-content{align-items:flex-start}
-  .blk{padding:48px 20px;min-height:auto;justify-content:flex-start}
-  .close-blk{padding:48px 20px;min-height:auto}
-  .enter{padding:60px 20px;min-height:100vh}
-  .algo-blk{grid-template-columns:1fr;padding:48px 20px;gap:24px;min-height:auto;display:flex;flex-direction:column}
-  .algo-left{order:1}.algo-right{order:2}.algo-fwd{order:3;margin-top:0}
-  .algo-fwd .btn{display:block;text-align:center}
-  .hgrid{grid-template-columns:1fr;gap:14px}
-  .hc{min-height:200px}
-  .section-fwd .btn{display:block;text-align:center}
-  .srf-inner{padding:40px 20px;gap:20px}
-  .srf-section{min-height:auto}
-  .srf-word{font-size:clamp(26px,8vw,42px)}
-  .exp-section{padding:28px 20px 40px}
-  .rack-section{padding:48px 20px 120px;gap:32px}
-  .rack-frame{max-width:180px}
-  .rack-copy{font-size:clamp(15px,4vw,19px)}
-  .srf-section{min-height:auto}
-  .srf-inner{padding:80px 20px 100px;gap:clamp(40px,8vh,72px)}
-  .srf-cta{margin-top:8px}
-  .algo-section{padding:52px 20px}
-  .algo-body p{font-size:14px;line-height:1.7;margin-bottom:14px}
-  .algo-expand-wrap { display: none; }
-  .algo-expand-wrap.open { display: block; }
-  .algo-read-more {
-    display: block;
-    background: none;
-    border: none;
-    border-bottom: 1px solid rgba(252,251,244,.3);
-    font-family: 'DejaVu Sans', Arial, sans-serif;
-    font-size: 11px;
-    letter-spacing: .16em;
-    text-transform: uppercase;
-    color: var(--off);
-    cursor: pointer;
-    padding: 10px 0;
-    margin-top: 8px;
-  }
-  footer{padding:20px 20px 16px;gap:14px}
-  .footer-top{padding:8px 0}
-  .footer-bot{flex-direction:column;gap:16px}
-  .footer-share{align-items:flex-start}
-  .share-sheet{padding:24px 20px 32px}
+.search-field {
+  width: 100%;
+  background: none;
+  border: none;
+  border-bottom: 1px solid rgba(240,237,230,0.2);
+  padding: 14px 0;
+  font-family: var(--f);
+  font-size: clamp(16px, 4.2vw, 20px);
+  color: var(--fg);
+  outline: none;
+  caret-color: var(--fg);
+  letter-spacing: 0.01em;
+  transition: border-color 0.3s ease;
 }
+.search-field::placeholder { color: var(--dimmer); }
+.search-field:focus { border-color: rgba(240,237,230,0.45); }
+
+.search-results {
+  width: 100%;
+  max-width: 340px;
+  margin-top: 28px;
+  display: flex;
+  flex-direction: column;
+  max-height: calc(52vh - 70px);
+  overflow-y: scroll;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  padding-bottom: 70px;
+}
+
+.result-audio-tag {
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--fg);
+  border: 1px solid rgba(240,237,230,0.15);
+  border-radius: 2px;
+  padding: 1px 5px;
+  margin-left: 7px;
+  vertical-align: middle;
+  position: relative;
+  top: -1px;
+}
+
+.search-result {
+  padding: 15px 0;
+  border-bottom: 1px solid rgba(240,237,230,0.07);
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+.search-result:active { opacity: 0.45; }
+
+.result-title {
+  font-size: clamp(14px, 3.5vw, 16px);
+  color: var(--fg);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.result-sub {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fg);
+  margin-top: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.search-empty {
+  font-size: 15px;
+  color: var(--fg);
+  text-align: center;
+  padding: 28px 0;
+  line-height: 1.7;
+}
+
+/* ── S-LISTEN ── */
+#s-listen { gap: 0; }
+
+.listen-curated-tag {
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--fg);
+  text-align: center;
+  margin-bottom: 52px;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+.listen-curated-tag.show { opacity: 1; }
+
+.listen-video-wrap {
+  width: 200px;
+  height: 200px;
+  margin: 0 auto 32px;
+  overflow: hidden;
+  border: 1px solid rgba(252,251,244,.14);
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+.listen-video-wrap.show { opacity: 1; }
+.listen-pulse-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 52px;
+  min-width: 44px;
+  min-height: 44px;
+  position: relative;
+}
+.listen-play-btn {
+  background: none;
+  border: none;
+  border-bottom: 1px solid rgba(240,237,230,0.22);
+  font-family: var(--f);
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--fg);
+  cursor: pointer;
+  padding: 12px 4px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease, transform 0.1s ease;
+}
+.listen-play-btn.tappable {
+  opacity: 1;
+  pointer-events: all;
+  animation: pulse-waiting 1.8s ease-in-out infinite;
+}
+.listen-play-btn.loading {
+  opacity: 0.5;
+  pointer-events: none;
+  animation: none;
+}
+.listen-play-btn:active {
+  transform: scale(0.97);
+}
+.pulse-dot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--fg);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+.pulse-dot.active {
+  opacity: 0.65;
+  animation: pulse-active 2.6s ease-in-out infinite;
+}
+@keyframes pulse-active {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.45; }
+  50% { transform: translate(-50%, -50%) scale(1.7); opacity: 0.85; }
+}
+@keyframes pulse-waiting {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+
+.hidden-under-overlay {
+  opacity: 0 !important;
+}
+
+.listen-track-info {
+  text-align: center;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+  padding: 0 32px;
+  max-width: 380px;
+}
+.listen-track-info.show { opacity: 1; }
+
+.listen-framing {
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--fg);
+  margin-bottom: 14px;
+  line-height: 1.5;
+}
+.listen-title {
+  font-size: clamp(17px, 4.2vw, 22px);
+  color: var(--fg);
+  line-height: 1.4;
+}
+.listen-artist {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--fg);
+  margin-top: 7px;
+}
+
+.listen-stop {
+  position: fixed;
+  top: calc(env(safe-area-inset-top, 20px) + 20px);
+  left: 32px;
+  background: none;
+  border: none;
+  font-family: var(--f);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--fg);
+  cursor: pointer;
+  padding: 8px 0;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 40;
+  transition: opacity 0.5s ease, color 0.2s ease, transform 0.1s ease;
+  white-space: nowrap;
+}
+.listen-stop.show { opacity: 1; pointer-events: all; }
+.listen-stop:active { color: var(--fg); transform: scale(0.97); }
+
+.listen-replay {
+  position: fixed;
+  top: calc(env(safe-area-inset-top, 20px) + 20px);
+  right: 32px;
+  background: none;
+  border: none;
+  font-family: var(--f);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--fg);
+  cursor: pointer;
+  padding: 8px 0;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 40;
+  transition: opacity 0.5s ease, color 0.2s ease, transform 0.1s ease;
+  white-space: nowrap;
+}
+.listen-replay.show { opacity: 1; pointer-events: all; }
+.listen-replay:active { transform: scale(0.97); }
+
+/* ── LISTEN STATEMENTS OVERLAY ── */
+.listen-stmts {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: calc(env(safe-area-inset-top, 20px) + 110px) 36px 70px;
+  gap: 16px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 1.2s ease;
+  background: #0a0a0a;
+  z-index: 30;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.listen-stmts.show {
+  opacity: 1;
+  pointer-events: all;
+}
+.listen-stmts-track {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--fg);
+  text-align: center;
+  margin-bottom: 8px;
+}
+.listen-stmts-prompt {
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--fg);
+  text-align: center;
+  margin-bottom: 20px;
+}
+.tap-word-scatter {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 14px 16px;
+  max-width: 380px;
+  margin: 8px 0 36px;
+}
+.tap-word {
+  background: none;
+  border: 1px solid rgba(240,237,230,0.16);
+  border-radius: 20px;
+  padding: 9px 18px;
+  font-family: var(--f);
+  font-size: clamp(14px, 3.6vw, 16px);
+  color: var(--fg);
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.15s ease, transform 0.1s ease, opacity 0.2s ease;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(6px);
+}
+.tap-word.show {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+.tap-word:active {
+  transform: scale(0.96);
+}
+.tap-word.tapped {
+  border-color: rgba(240,237,230,0.6);
+  background: rgba(240,237,230,0.1);
+}
+.tap-done-btn {
+  background: none;
+  border: none;
+  border-bottom: 1px solid rgba(240,237,230,0.4);
+  font-family: var(--f);
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--fg);
+  cursor: pointer;
+  padding: 10px 4px;
+  margin-top: 8px;
+  transition: opacity 0.2s ease, border-color 0.2s ease;
+  opacity: 0;
+}
+.tap-done-btn.show { opacity: 1; }
+.tap-done-btn:active { border-color: rgba(240,237,230,0.8); opacity: 0.7; }
+.tap-word.colorword-red { color: #e26a6a; border-color: rgba(226,106,106,0.35); }
+.tap-word.colorword-blue { color: #7aa8e0; border-color: rgba(122,168,224,0.35); }
+.tap-word.colorword-gold { color: #d4af6a; border-color: rgba(212,175,106,0.35); }
+.tap-word.colorword-green { color: #7ec98f; border-color: rgba(126,201,143,0.35); }
+.tap-word.colorword-purple { color: #b08ad9; border-color: rgba(176,138,217,0.35); }
+.tap-word.colorword-amber { color: #e0a05a; border-color: rgba(224,160,90,0.35); }
+.tap-word.colorword-silver { color: #c9cdd3; border-color: rgba(201,205,211,0.35); }
+.tap-word.colorword-violet { color: #9b8ad9; border-color: rgba(155,138,217,0.35); }
+.tap-word.colorword-crimson { color: #d14d5a; border-color: rgba(209,77,90,0.35); }
+.tap-word.colorword-teal { color: #6ec4bc; border-color: rgba(110,196,188,0.35); }
+.tap-word.colorword-white { color: #f5f3ed; border-color: rgba(245,243,237,0.4); }
+.tap-word.colorword-black { color: #9a9690; border-color: rgba(154,150,144,0.4); }
+.tap-word.colorword-pink { color: #e09ab8; border-color: rgba(224,154,184,0.35); }
+.tap-word.colorword-orange { color: #e08a52; border-color: rgba(224,138,82,0.35); }
+.tap-word.colorword-grey { color: #a8a8a8; border-color: rgba(168,168,168,0.35); }
+.tap-word.colorword-yellow { color: #e0d05a; border-color: rgba(224,208,90,0.35); }
+.tap-word.colorword-brown { color: #a8825a; border-color: rgba(168,130,90,0.35); }
+
+#s-recognition {
+  justify-content: flex-start;
+  gap: 24px;
+  padding: calc(env(safe-area-inset-top, 20px) + 110px) 36px 70px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.recog-reveal {
+  text-align: center;
+  margin-bottom: 44px;
+  opacity: 0;
+  transition: opacity 0.9s ease;
+}
+.recog-reveal.show { opacity: 1; }
+.recog-reveal-label {
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--fg);
+  margin-bottom: 10px;
+}
+.recog-reveal-name {
+  font-size: clamp(14px, 3.5vw, 17px);
+  color: var(--fg);
+}
+
+.recog-prompt {
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--fg);
+  text-align: center;
+  margin-bottom: 36px;
+  opacity: 0;
+  transition: opacity 0.7s ease;
+}
+.recog-prompt.show { opacity: 1; }
+
+.recog-stmts {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  max-width: 340px;
+}
+
+.stmt-btn {
+  background: none;
+  border: 1px solid rgba(240,237,230,0.1);
+  border-radius: 1px;
+  padding: 20px 22px;
+  font-family: var(--f);
+  font-size: clamp(15px, 3.8vw, 18px);
+  color: var(--fg);
+  cursor: pointer;
+  text-align: left;
+  line-height: 1.55;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.65s ease, transform 0.65s ease, border-color 0.2s ease, background 0.15s ease;
+}
+.stmt-btn.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+.stmt-btn:active {
+  background: rgba(240,237,230,0.05);
+  border-color: rgba(240,237,230,0.28);
+}
+.stmt-btn.chosen {
+  border-color: rgba(240,237,230,0.35);
+  background: rgba(240,237,230,0.04);
+}
+
+.neither-btn {
+  background: none;
+  border: none;
+  font-family: var(--f);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--fg);
+  cursor: pointer;
+  padding: 18px 0;
+  text-align: center;
+  width: 100%;
+  max-width: 340px;
+  opacity: 0;
+  transition: opacity 0.65s ease 0.5s, color 0.2s ease;
+}
+.neither-btn.show { opacity: 1; }
+.neither-btn:active { color: var(--fg); }
+
+/* ── S-REFLECTION ── */
+#s-reflection { gap: 0; padding: 0 40px; }
+
+.reflection-memory {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--fg);
+  text-align: center;
+  margin-bottom: 18px;
+  opacity: 0;
+  transition: opacity 1s ease;
+  max-width: 340px;
+}
+.reflection-memory.show { opacity: 1; }
+
+.reflection-text {
+  font-size: clamp(20px, 5vw, 30px);
+  font-weight: 400;
+  color: var(--fg);
+  text-align: center;
+  max-width: 420px;
+  line-height: 1.55;
+  opacity: 0;
+  transition: opacity 1.4s ease;
+}
+.reflection-text.show { opacity: 1; }
+
+.reflection-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  margin-top: 56px;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+.reflection-actions.show { opacity: 1; }
+
+.keep-going-btn {
+  background: none;
+  border: none;
+  border-bottom: 1px solid rgba(240,237,230,0.2);
+  font-family: var(--f);
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--fg);
+  cursor: pointer;
+  padding: 12px 0;
+  width: 180px;
+  text-align: center;
+  transition: opacity 0.15s ease, transform 0.1s ease;
+}
+.keep-going-btn:active { opacity: 0.5; transform: scale(0.97); }
+
+.share-btn {
+  background: none;
+  border: none;
+  font-family: var(--f);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--fg);
+  cursor: pointer;
+  padding: 8px 0;
+  transition: color 0.2s ease;
+}
+.share-btn:active { color: var(--fg); }
+
+/* ── S-STOPPED ── */
+#s-stopped { gap: 0; padding: 0 40px; }
+
+.stopped-text {
+  font-size: clamp(15px, 3.8vw, 19px);
+  color: var(--fg);
+  text-align: center;
+  line-height: 1.7;
+  max-width: 340px;
+  opacity: 0;
+  transition: opacity 1s ease;
+}
+.stopped-text.show { opacity: 1; }
+
+.stopped-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  margin-top: 48px;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+.stopped-actions.show { opacity: 1; }
+
+.stopped-btn {
+  background: none;
+  border: none;
+  border-bottom: 1px solid rgba(240,237,230,0.15);
+  font-family: var(--f);
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--fg);
+  cursor: pointer;
+  padding: 12px 0;
+  width: 200px;
+  text-align: center;
+  transition: opacity 0.15s ease, transform 0.1s ease;
+}
+.stopped-btn:active { opacity: 0.5; transform: scale(0.97); }
+
+/* ── SHARE OVERLAY ── */
+#share-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10,10,10,0.96);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+  z-index: 200;
+}
+#share-overlay.show {
+  opacity: 1;
+  pointer-events: all;
+}
+.share-card {
+  width: 100%;
+  max-width: 300px;
+  border: 1px solid rgba(240,237,230,0.1);
+  padding: 44px 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 36px;
+  text-align: center;
+}
+.share-card-line {
+  font-size: clamp(16px, 4vw, 21px);
+  color: var(--fg);
+  line-height: 1.55;
+}
+.share-card-mark {
+  font-size: 9px;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--fg);
+}
+.share-close {
+  position: absolute;
+  top: 20px;
+  right: 24px;
+  background: none;
+  border: none;
+  color: var(--fg);
+  font-size: 22px;
+  cursor: pointer;
+  padding: 8px;
+  line-height: 1;
+  transition: color 0.2s ease;
+}
+.share-close:active { color: var(--fg); }
+.share-card-stmt {
+  font-size: 12px;
+  color: var(--fg);
+  text-align: center;
+  font-style: italic;
+  line-height: 1.5;
+  padding: 0 8px;
+}
+.share-card-track {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--fg);
+  text-align: center;
+  margin-top: 4px;
+}
+.share-copy {
+  background: none;
+  border: 1px solid rgba(240,237,230,0.18);
+  font-family: var(--f);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--fg);
+  cursor: pointer;
+  padding: 13px 0;
+  width: 100%;
+  transition: border-color 0.2s ease;
+}
+.share-copy:active { border-color: rgba(240,237,230,0.45); }
 </style>
 </head>
 <body>
 
-<div id="portal"><canvas id="portal-c"></canvas></div>
-<div class="copied-toast" id="copied-toast">Copied</div>
+<!-- LOADER -->
+<div id="loader"><div class="loader-dot"></div></div>
 
-<div class="share-sheet" id="share-sheet">
-  <span class="share-lbl">Share</span>
-  <div class="share-opts">
-    <button class="share-opt" id="copy-btn" onclick="shareVia('copy')">Copy Link</button>
-    <button class="share-opt" onclick="shareVia('message')">Message</button>
-    <button class="share-opt" onclick="shareVia('email')">Email</button>
-    <button class="share-close" onclick="closeShare()">Close</button>
+<!-- WORDMARK -->
+<img id="wordmark" src="/logo.png" alt="FYND TODAY">
+
+<!-- YOUTUBE ATTRIBUTION — required by YouTube API developer policies -->
+<a id="yt-attribution" href="https://www.youtube.com" target="_blank" rel="noopener">Powered by YouTube</a>
+
+<!-- S-ENTRY -->
+<div class="screen" id="s-entry">
+  <div class="entry-line" id="el-1">You've heard a song</div>
+  <div class="entry-line" id="el-2">that changed the room.</div>
+  <div class="entry-line" id="el-3">You've felt music move you</div>
+  <div class="entry-line" id="el-4">before you understood why.</div>
+  <div class="entry-line" id="el-5">This is built around that.</div>
+  <div class="entry-paths" id="entry-paths">
+    <button class="path-btn" id="btn-search">Search for a track</button>
+    <div class="path-sep">or</div>
+    <button class="path-btn" id="btn-discover">Let sound find you</button>
+  </div>
+  <a class="landing-link" id="landing-link" href="/">go back to the landing page</a>
+</div>
+
+<!-- S-RETURN (lighter screen for the back button mid-session) -->
+<div class="screen" id="s-return">
+  <div class="entry-line" id="return-line">Sound will always be here.</div>
+  <div class="entry-paths" id="return-paths">
+    <button class="path-btn" id="return-btn-search">Search for a track</button>
+    <div class="path-sep">or</div>
+    <button class="path-btn" id="return-btn-discover">Let sound find you</button>
+  </div>
+  <a class="landing-link" id="return-landing-link" href="/">go back to the landing page</a>
+</div>
+
+<!-- S-BEFORE -->
+<div class="screen" id="s-before">
+  <div class="before-observation" id="before-obs"></div>
+  <button class="before-cta" id="before-cta">continue</button>
+</div>
+
+<!-- S-SEARCH -->
+<div class="screen" id="s-search">
+  <button class="search-back" id="search-back">← back</button>
+  <div class="search-label">bring a track you've been drawn to</div>
+  <div class="search-field-wrap">
+    <input class="search-field" id="search-field" type="text"
+      placeholder="title or artist"
+      autocomplete="off" autocorrect="off" spellcheck="false">
+  </div>
+  <div class="search-results" id="search-results"></div>
+</div>
+
+<!-- S-LISTEN -->
+<div class="screen" id="s-listen">
+  <div class="listen-curated-tag" id="curated-tag">we wanted you to hear this</div>
+  <div class="listen-video-wrap" id="listen-video-wrap"></div>
+  <div class="listen-pulse-wrap" id="listen-pulse-wrap">
+    <button class="listen-play-btn" id="listen-play-btn">press play</button>
+    <div class="pulse-dot" id="pulse-dot"></div>
+  </div>
+  <div class="listen-track-info" id="track-info">
+    <div class="listen-framing" id="listen-framing"></div>
+    <div class="listen-title" id="listen-title"></div>
+    <div class="listen-artist" id="listen-artist"></div>
+  </div>
+
+  <!-- Tap-word recognition overlay — appears at 30s while track still plays -->
+  <div class="listen-stmts" id="listen-stmts">
+    <div class="listen-stmts-track" id="listen-stmts-track"></div>
+    <div class="listen-stmts-prompt">while you listen, tap what stands out to you</div>
+    <div class="tap-word-scatter" id="tap-word-scatter"></div>
+    <button class="tap-done-btn" id="tap-done-btn">done</button>
   </div>
 </div>
 
-<div class="share-sheet" id="contact-sheet">
-  <span class="share-lbl">Contact us</span>
-  <div class="share-opts">
-    <button class="share-opt" onclick="contactVia('email')">Email us</button>
-    <button class="share-opt" id="copy-email-btn" onclick="contactVia('copy')">Copy email</button>
-    <button class="share-close" onclick="closeContact()">Close</button>
+<!-- S-RECOGNITION -->
+<div class="screen" id="s-recognition">
+  <div class="listen-stmts-track" id="color-screen-track"></div>
+  <div class="listen-stmts-prompt">while you listen, tap what colors stand out to you</div>
+  <div class="tap-word-scatter" id="color-word-scatter"></div>
+  <button class="tap-done-btn" id="color-done-btn">done</button>
+</div>
+
+<!-- Back and replay controls — standalone, NOT inside a .screen, so they
+     persist visibly across both the listen screen and the color screen.
+     Visibility controlled directly via JS, not tied to any single screen's
+     .active state. -->
+<button class="listen-stop" id="listen-stop">back to search</button>
+<button class="listen-replay" id="listen-replay">replay</button>
+
+<!-- S-REFLECTION -->
+<div class="screen" id="s-reflection">
+  <div class="reflection-memory" id="reflection-memory"></div>
+  <div class="reflection-text" id="reflection-text"></div>
+  <div class="reflection-actions" id="reflection-actions">
+    <button class="keep-going-btn" id="keep-going-btn">keep going</button>
   </div>
 </div>
 
-<nav id="main-nav">
-  <a href="/" style="display:flex;align-items:center;text-decoration:none;">
-    <img src="/logo.png" alt="FYND TODAY" style="height:56px;width:auto;display:block;">
-  </a>
-  <a href="#enter" class="nav-portal-btn scroll-anchor" style="display:block;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--off);text-decoration:underline;text-underline-offset:3px;">Enter Sound Portal</a>
-</nav>
-
-<section class="hero" id="top">
-  <canvas id="sw"></canvas>
-  <div class="hero-content">
-    <p class="htag">Music-powered lifestyle</p>
-    <h1 class="serif">You know where you need to go.<br>Sound is what gets you there.</h1>
-    <div class="hero-btns">
-      <a href="#how" class="btn btn-sm"><span>Find out</span></a>
-    </div>
+<!-- S-STOPPED -->
+<div class="screen" id="s-stopped">
+  <div class="stopped-text" id="stopped-text">
+    you can always come back.<br>the sound will be here.
   </div>
-</section>
-
-
-
-<div class="rack-section" id="how">
-  <p class="rack-copy serif rev">This is a lifestyle built around sound and recognition.<br>What you discover in the music lives on.<br>Through how you move. Through what you wear.<br>Through today.</p>
-  <div class="rack-cta rev d2">
-    <a href="#clothing" class="btn btn-sm scroll-anchor"><span>See what that looks like</span></a>
+  <div class="stopped-actions" id="stopped-actions">
+    <button class="stopped-btn" id="btn-keep-going-2">keep going</button>
+    <button class="stopped-btn" id="btn-done">done for now</button>
   </div>
 </div>
-
-<!-- CLOTHING — THREE DIRECTIONS -->
-<div class="clothing-section" id="clothing">
-  <div class="clothing-intro">
-    <span class="clothing-section-lbl">The Form</span>
-    <p class="clothing-section-head">Sound reveals where you are.<br>Clothing carries it into the world.<br>Expressed in three directions.</p>
-  </div>
-  <div class="clothing-grid">
-
-    <div class="clothing-card rev d1">
-      <div class="clothing-card-color clothing-color-1">
-        <span class="clothing-style-label">Style 01<br>The Weight</span>
-      </div>
-      <div class="clothing-card-body">
-        <h3 class="clothing-name">Weighted to hold you where you are.</h3>
-        <p class="clothing-desc">For the person who has decided not to rush. Not because they are behind. Because they know exactly where they are. This clothing does not perform. It confirms.</p>
-      </div>
-    </div>
-
-    <div class="clothing-card rev d2">
-      <div class="clothing-card-color clothing-color-2">
-        <span class="clothing-style-label">Style 02<br>The Pace</span>
-      </div>
-      <div class="clothing-card-body">
-        <h3 class="clothing-name">Built to move when you do.</h3>
-        <p class="clothing-desc">For the person already in motion. Something is pulling forward and the next thing is beginning to form. This clothing keeps pace. It carries purpose without announcing it.</p>
-      </div>
-    </div>
-
-    <div class="clothing-card rev d3">
-      <div class="clothing-card-color clothing-color-3">
-        <span class="clothing-style-label">Style 03<br>The Spark</span>
-      </div>
-      <div class="clothing-card-body">
-        <h3 class="clothing-name">Designed to stand out the way that moment did.</h3>
-        <p class="clothing-desc">For the person who just caught something. A spark. An idea. A direction that was not there a moment ago. This clothing is designed to stand out. It carries that creative energy without holding it back.</p>
-      </div>
-    </div>
-
-  </div>
-  <div class="clothing-bridge rev">
-    <p class="clothing-bridge-line">Where the color comes from is the whole story.</p>
-    <a href="#algo" class="btn btn-sm scroll-anchor"><span>See where it comes from</span></a>
-  </div>
-</div>
-
-<!-- WHAT WE ARE BUILDING -->
-<div class="algo-section" id="algo">
-  <canvas id="srf-wave"></canvas>
-  <div class="algo-inner">
-    <div class="algo-statement">
-      <span class="algo-lbl">What we are building</span>
-      <h2 class="algo-h">Music has never been more available.<br>And yet somehow harder to find.</h2>
-    </div>
-    <div class="algo-body rev d1">
-      <p>How often do you find yourself hearing the same songs everywhere you go. The same sounds, the same artists, the same cycle repeating. And somewhere in that cycle the real connection to music, the kind that actually means something, gets harder to hold onto.</p>
-      <p>Right now music is surfaced by what sounds similar to what you already like. By what is trending. By what the algorithm has learned to predict about your taste. None of that is wrong. But none of it is recognition. It is recommendation. The difference is the distance between being told what to order and knowing what you actually need.</p>
-      <div class="algo-expand-wrap" id="algo-expand-wrap">
-        <p>What if the music that found you also told you something. Not about your taste. About where you are. What if every time a track hit you could mark that moment, and what gets collected across people and moments builds something no platform has ever been built to produce.</p>
-        <p>That is what our sound portal is [you will find it below]. A place to bring a track you have been drawn to and listen, or hear something chosen for a reason beyond what is trending. To mark what stands out. Not to build a playlist. To recognize something. And what gets learned from that, from real people and real listening moments, is what this lifestyle is built from.</p>
-        <p>A lifestyle where music is not background. Not trending. Not algorithmic noise. Where it carries where you are into what you wear, how you move, and how your day actually goes.</p>
-        <p class="algo-close">Different lives. Same rhythms. You are part of how we learn what those are.</p>
-      </div>
-      <button class="algo-read-more" id="algo-read-more" onclick="expandAlgo()" aria-expanded="false">Read more</button>
-    </div>
-    <div class="algo-cta rev d2">
-      <a href="#early" class="btn scroll-anchor"><span>Be part of it</span></a>
-    </div>
-  </div>
-</div>
-
-<!-- EMAIL SECTION -->
-<div class="email-section" id="early">
-  <div class="email-inner">
-    <div class="email-header">
-      <span class="email-lbl">Stay in it</span>
-      <h2 class="email-h">Be part of what we are creating.</h2>
-      <p class="email-sub">First look at clothing drops. New tracks from us when something is worth sharing. And when something significant happens here, you will know before anyone else.</p>
-    </div>
-    <form class="email-form rev d1" id="landing-email-form" onsubmit="handleEmailSubmit(event)">
-      <input
-        type="text"
-        class="email-input name-input"
-        id="landing-name-input"
-        placeholder="your first name"
-        autocomplete="given-name"
-        required
-        style="border:1px solid rgba(252,251,244,.3);margin-bottom:8px;width:100%;padding:14px 20px;background:transparent;font-family:'DejaVu Sans',Arial,sans-serif;font-size:13px;letter-spacing:.04em;color:var(--off);outline:none;">
-      <div class="email-field-wrap">
-        <input
-          type="email"
-          class="email-input"
-          id="landing-email-input"
-          placeholder="your email"
-          autocomplete="email"
-          required>
-        <button type="submit" class="email-submit btn"><span id="email-submit-label">Count me in</span></button>
-      </div>
-      <p class="email-note" id="email-note"></p>
-    </form>
-  </div>
-</div>
-
-<div class="enter" id="enter">
-  <canvas id="rc"></canvas>
-  <h2 class="eh serif rev">Press Play on Today.</h2>
-  <p class="es rev d1">Search a track that has been pulling at you, or hear something chosen for a reason beyond what is trending.</p>
-  <div class="rev d2">
-    <a href="#" class="btn portal-trigger"><span>Enter Sound Portal</span></a>
-  </div>
-  <p class="rev d3 enter-note">Free. No account needed.</p>
-</div>
-
-
-<footer>
-  <div class="footer-top">
-    <img src="/Slogan.png" alt="Life sounds better in color." style="max-width:320px;width:60%;height:auto;opacity:0.85;display:block;margin:0 auto;">
-  </div>
-  <div class="footer-bot">
-    <div class="footer-contact">
-      <span class="footer-contact-lbl">Contact us</span>
-      <button class="btn btn-sm" onclick="openContact()"><span>hello@fyndtoday.com</span></button>
-    </div>
-    <div class="footer-share">
-      <span class="footer-share-lbl">Share</span>
-      <button class="btn btn-sm" onclick="openShare()"><span>fyndtoday.com</span></button>
-    </div>
-  </div>
-  <div class="footer-legal">
-    <a href="/privacy" class="footer-legal-link">Privacy Policy</a>
-    <span class="footer-legal-sep">·</span>
-    <a href="/terms" class="footer-legal-link">Terms of Service</a>
-  </div>
-  <div class="footer-legal" style="margin-top:10px;">
-    <a href="https://www.youtube.com" target="_blank" rel="noopener" class="footer-legal-link" style="opacity:.4;">Powered by YouTube</a>
-  </div>
-</footer>
 
 <script>
-var PORTAL_URL='/today';
-var SITE_URL='https://fyndtoday.com';
+// ── FYND TODAY SOUND PORTAL v2 ────────────────────────────────────────────────
 
-// Email signup — adds contact to Brevo list 3
-function handleEmailSubmit(e) {
-  e.preventDefault();
-  var nameInput = document.getElementById('landing-name-input');
-  var emailInput = document.getElementById('landing-email-input');
-  var label = document.getElementById('email-submit-label');
-  var note = document.getElementById('email-note');
-  var firstName = nameInput ? nameInput.value.trim() : '';
-  var email = emailInput ? emailInput.value.trim() : '';
-  if (!firstName || !email) return;
-  if (label) label.textContent = 'Sending...';
-  fetch('/.netlify/functions/subscribe', {
+// ── STORAGE ──────────────────────────────────────────────────────────────────
+var LS = {
+  get: function(k) {
+    try { var v = localStorage.getItem('fynd2_'+k); return v ? JSON.parse(v) : null; } catch(e) { return null; }
+  },
+  set: function(k, v) {
+    try { localStorage.setItem('fynd2_'+k, JSON.stringify(v)); } catch(e) {}
+  },
+};
+
+// ── CURATED TRACKS ────────────────────────────────────────────────────────────
+// Add approved tracks here: { title, artist, ytId }
+var CURATED = [
+  // { title: 'Track Name', artist: 'Artist', ytId: 'youtubeVideoId' },
+];
+
+// Statement pairs now generated per-track by get-statements.js
+
+// ── FALLBACKS ─────────────────────────────────────────────────────────────────
+var FALLBACKS = {
+  stay: [
+    'you know exactly where you are right now.',
+    "you've been sitting with something.",
+    'some things are worth staying inside.',
+  ],
+  move: [
+    'something moved through you that needed to.',
+    "you went somewhere you didn't plan to go.",
+    "you're further along than you were.",
+  ],
+  open: [
+    "something shifted that wasn't there before.",
+    "a door opened that you didn't know was there.",
+    "you didn't expect that.",
+    "something new just arrived.",
+    "you went somewhere you didn't plan to go.",
+    "that landed differently than you expected.",
+  ],
+};
+
+// ── SESSION STATE ─────────────────────────────────────────────────────────────
+var sess = {
+  id: null,
+  email: null,
+  firstName: null,
+  sessionCount: 0,
+  returnScreenAnimating: false,
+  reflectionTimers: [],
+  beforeLine: null,
+  trackTitle: null,
+  trackArtist: null,
+  trackId: null,
+  isCurated: false,
+  isSearched: false,
+  isInterrupted: false,
+  trackCount: 0,
+  positions: [],
+  chosenPosition: null,
+  chosenStatement: '',
+  responseSpeed: 'normal',
+  reflectionLine: null,
+  reflectionToken: 0,
+  curatedIdx: 0,
+  pendingStatements: null,
+  positionA: 'stay',
+  positionB: 'move',
+  chosenStatement: '',
+  currentStatements: { a: '', b: '' },
+  choiceTime: null,
+  pendingChoice: null,
+  tappedWords: [],
+  tappedColorsList: [],
+  recognitionTimer: null,
+  stopTimer: null,
+  ytPlayer: null,
+  ytReady: false,
+};
+
+// ── SCREENS ───────────────────────────────────────────────────────────────────
+function show(id) {
+  var current = document.querySelector('.screen.active');
+  var next = document.getElementById(id);
+  if (!next) return;
+  _ytDebug('show(' + id + ') called, current active=' + (current ? current.id : 'none'));
+
+  if (current && current !== next) {
+    // Fade the current screen all the way out first, then bring in the
+    // next one. No crossfade — the old screen is fully gone before the
+    // new one starts appearing, so nothing bleeds through underneath.
+    current.classList.remove('active');
+    _ytDebug('  removed .active from ' + current.id);
+    setTimeout(function() {
+      next.classList.add('active');
+      _ytDebug('  added .active to ' + next.id + ' (after 350ms)');
+    }, 350);
+  } else {
+    next.classList.add('active');
+    _ytDebug('  added .active to ' + next.id + ' (immediate, no current screen)');
+  }
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+  var loader = document.getElementById('loader');
+  setTimeout(function() {
+    loader.classList.add('out');
+  }, 200);
+  setTimeout(function() {
+    loader.style.display = 'none';
+    init();
+  }, 700);
+});
+
+function checkResetParam() {
+  try {
+    var params = new URLSearchParams(window.location.search);
+    if (params.get('reset') === 'true') {
+      // Clear all FYND TODAY storage — both the prefixed session keys
+      // and the per-track memory history
+      var keysToRemove = [];
+      for (var i = 0; i < localStorage.length; i++) {
+        var key = localStorage.key(i);
+        if (key && (key.indexOf('fynd2_') === 0 || key === 'fynd_trackHistory')) {
+          keysToRemove.push(key);
+        }
+      }
+      keysToRemove.forEach(function(k) { localStorage.removeItem(k); });
+
+      // Clean the URL so a refresh doesn't re-trigger reset
+      var cleanUrl = window.location.pathname;
+      window.history.replaceState({}, document.title, cleanUrl);
+      return true;
+    }
+  } catch(e) {}
+  return false;
+}
+
+function init() {
+  checkResetParam();
+
+  sess.email = LS.get('email');
+  sess.firstName = LS.get('firstName');
+  sess.sessionCount = LS.get('sessionCount') || 0;
+  sess.beforeLine = LS.get('beforeLine');
+  sess.id = 'f2_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+
+  if (sess.sessionCount > 0 && sess.beforeLine) {
+    showBefore();
+  } else {
+    sess.sessionCount = 0; // reset if no beforeLine
+    showEntry();
+  }
+
+  bindEvents();
+}
+
+// ── ENTRY ─────────────────────────────────────────────────────────────────────
+function showEntry() {
+  show('s-entry');
+  // Reset lines
+  ['el-1','el-2','el-3','el-4','el-5'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.classList.remove('show');
+  });
+  var ep = document.getElementById('entry-paths');
+  if (ep) ep.classList.remove('show');
+  var ll = document.getElementById('landing-link');
+  if (ll) ll.classList.remove('show');
+
+  // Animate in — each line gets its own fade at natural reading pace
+  ['el-1','el-2','el-3','el-4','el-5'].forEach(function(id, i) {
+    setTimeout(function() {
+      var el = document.getElementById(id);
+      if (el) el.classList.add('show');
+    }, 400 + i * 1200);
+  });
+  setTimeout(function() {
+    var ep2 = document.getElementById('entry-paths');
+    if (ep2) ep2.classList.add('show');
+  }, 400 + 4 * 1200 + 600);
+  setTimeout(function() {
+    var ll2 = document.getElementById('landing-link');
+    if (ll2) ll2.classList.add('show');
+  }, 400 + 4 * 1200 + 1000);
+}
+
+// Lighter, faster version of the entry screen used when backing out of
+// search mid-session. No five-line slow buildup — just one line, then
+// the same three options, loading in quickly.
+function showReturn() {
+  // Guard against rapid re-clicks of the back button restarting this
+  // screen's fade mid-transition, which looks like a flash/disappear/
+  // flash-again instead of one clean fade in.
+  _ytDebug('showReturn() called, returnScreenAnimating=' + sess.returnScreenAnimating);
+  if (sess.returnScreenAnimating) {
+    _ytDebug('  BLOCKED by guard, returning early');
+    return;
+  }
+  sess.returnScreenAnimating = true;
+
+  show('s-return');
+  var line = document.getElementById('return-line');
+  var paths = document.getElementById('return-paths');
+  var link = document.getElementById('return-landing-link');
+  if (line) line.classList.remove('show');
+  if (paths) paths.classList.remove('show');
+  if (link) link.classList.remove('show');
+
+  // show() itself takes 350ms to swap screens (old one fades out first).
+  // Anchor all timing off that, not off the moment this function was
+  // called, so nothing starts fading in before the screen is even visible.
+  // Extra 150ms buffer on top accounts for the keyboard-dismiss viewport
+  // resize triggered by blurring the search field right before this is
+  // called — without it, the resize can land mid-fade and disrupt the
+  // animation, reading as a flash/disappear before the screen settles.
+  var BUFFER = 150;
+  setTimeout(function() {
+    if (line) line.classList.add('show');
+  }, 350 + BUFFER + 150);
+  setTimeout(function() {
+    if (paths) paths.classList.add('show');
+  }, 350 + BUFFER + 700);
+  setTimeout(function() {
+    if (link) link.classList.add('show');
+  }, 350 + BUFFER + 1100);
+  setTimeout(function() {
+    sess.returnScreenAnimating = false;
+  }, 350 + BUFFER + 1100 + 600);
+}
+
+function showBefore() {
+  show('s-before');
+  var obs = document.getElementById('before-obs');
+  var cta = document.getElementById('before-cta');
+  obs.textContent = sess.beforeLine;
+  setTimeout(function() {
+    obs.classList.add('show');
+    setTimeout(function() { cta.classList.add('show'); }, 900);
+  }, 400);
+}
+
+// ── SEARCH ────────────────────────────────────────────────────────────────────
+var searchTimer = null;
+
+function showSearch() {
+  // Guard against rapid re-clicks restarting this screen's fade mid
+  // transition — same fix already applied to showReturn(). Without
+  // this, tapping into search a second time (e.g. from the return
+  // screen) can re-trigger show() before the first fade finishes.
+  if (sess.searchScreenAnimating) return;
+  sess.searchScreenAnimating = true;
+
+  // Safety: force-clear any overlay that might be stuck blocking clicks
+  document.getElementById('listen-stmts').classList.remove('show');
+  document.getElementById('listen-stop').classList.remove('show');
+  document.getElementById('listen-replay').classList.remove('show');
+  var wm = document.getElementById('wordmark');
+  if (wm) wm.style.opacity = '';
+
+  show('s-search');
+  document.getElementById('search-results').innerHTML = '';
+  document.getElementById('search-field').value = '';
+  searchRequestToken++; // invalidate any in-flight request from a previous visit to this screen
+
+  // Wait for show()'s fade to fully finish (350ms swap + transition)
+  // before focusing the input. Focusing earlier pops the iOS Safari
+  // keyboard while the screen is still mid opacity-transition, which
+  // resizes the visual viewport and forces a repaint that reads as
+  // the screen flashing in, disappearing, then fading in again.
+  setTimeout(function() {
+    var f = document.getElementById('search-field');
+    if (f) f.focus();
+    sess.searchScreenAnimating = false;
+  }, 700);
+}
+
+var searchRequestToken = 0;
+
+function doSearch(q) {
+  if (!q || q.length < 2) {
+    document.getElementById('search-results').innerHTML = '';
+    return;
+  }
+  // Show searching state
+  document.getElementById('search-results').innerHTML =
+    '<div class="search-empty" id="search-status">searching...</div>';
+
+  // Tag this request. If the person keeps typing before this resolves,
+  // a newer search starts and bumps the token — when this older request's
+  // response eventually arrives, it's discarded instead of overwriting
+  // the screen with results (or a false "not here yet") for a query that
+  // isn't even what's in the search field anymore.
+  var thisToken = ++searchRequestToken;
+
+  fetch('/.netlify/functions/search-tracks', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: email, firstName: firstName }),
+    body: JSON.stringify({ query: q }),
   })
-  .then(function(r) { return r.json(); })
-  .then(function(data) {
-    if (label) label.textContent = 'Count me in';
-    if (data.error) {
-      if (note) note.textContent = 'Something went wrong. Try again.';
+  .then(function(r) {
+    // fetch() only rejects on network failure, never on HTTP error status
+    // codes — a 500 from the server (quota exhausted, API key issue, etc)
+    // was silently parsing as JSON and falling through to the same "not
+    // here yet" message as a genuine empty result, hiding real failures.
+    return r.json().then(function(body) {
+      return { ok: r.ok, status: r.status, body: body };
+    });
+  })
+  .then(function(result) {
+    if (thisToken !== searchRequestToken) return; // stale response, ignore
+    if (!result.ok) {
+      console.error('search-tracks failed:', result.status, result.body);
+      document.getElementById('search-results').innerHTML =
+        '<div class="search-empty">something went wrong.<br>try again.</div>';
+      return;
+    }
+    var data = result.body;
+    if (data.results && data.results.length > 0) {
+      renderResults(data.results);
     } else {
-      if (emailInput) { emailInput.value = ''; emailInput.disabled = true; }
-      if (nameInput) { nameInput.value = ''; nameInput.disabled = true; }
-      if (note) note.textContent = 'You are in.';
-      setTimeout(function() {
-        var target = document.getElementById('enter');
-        if (target) {
-          var top = target.getBoundingClientRect().top + window.scrollY - 80;
-          window.scrollTo({ top: top, behavior: 'smooth' });
-        }
-      }, 1200);
+      document.getElementById('search-results').innerHTML =
+        '<div class="search-empty">that track isn\'t here yet.<br>bring another.</div>';
     }
   })
   .catch(function() {
-    if (label) label.textContent = 'Count me in';
-    if (note) note.textContent = 'Something went wrong. Try again.';
+    if (thisToken !== searchRequestToken) return; // stale response, ignore
+    document.getElementById('search-results').innerHTML =
+      '<div class="search-empty">something went wrong.<br>try again.</div>';
   });
 }
 
-// Chrome mobile BFCache fix — if page is restored from back-forward cache
-// (e.g. after visiting /today and pressing back), force a full reload
-// so the portal animation canvas doesn't show as a blank frozen state
-window.addEventListener('pageshow', function(e) {
-  if (e.persisted) {
-    window.location.reload();
-  }
-});
-
-function footerCopy(){
-  var btn = document.getElementById('footer-copy-btn');
-  var span = btn ? btn.querySelector('span') : null;
-  navigator.clipboard.writeText(SITE_URL).then(function(){
-    if(span){ span.textContent = 'Copied'; }
-    setTimeout(function(){ if(span){ span.textContent = 'fyndtoday.com'; } }, 2000);
-  }).catch(function(){
-    var ta = document.createElement('textarea');
-    ta.value = SITE_URL; document.body.appendChild(ta); ta.select();
-    document.execCommand('copy'); document.body.removeChild(ta);
-    if(span){ span.textContent = 'Copied'; }
-    setTimeout(function(){ if(span){ span.textContent = 'fyndtoday.com'; } }, 2000);
-  });
+function cleanDisplay(str) {
+  return (str || '').replace(/#\w+/g, '').replace(/\s{2,}/g, ' ').trim();
 }
 
-function copyEmail(){
-  var email = 'hello@fyndtoday.com';
-  var btn = document.getElementById('copy-email-btn');
-  var span = btn ? btn.querySelector('span') : null;
-  navigator.clipboard.writeText(email).then(function(){
-    if(span){ span.textContent = 'Copied'; }
-    setTimeout(function(){ if(span){ span.textContent = 'Copy email'; } }, 2000);
-  }).catch(function(){
-    var ta = document.createElement('textarea');
-    ta.value = email; document.body.appendChild(ta); ta.select();
-    document.execCommand('copy'); document.body.removeChild(ta);
-    if(span){ span.textContent = 'Copied'; }
-    setTimeout(function(){ if(span){ span.textContent = 'Copy email'; } }, 2000);
-  });
-}
-
-function openContact(){document.getElementById('contact-sheet').classList.add('open')}
-function closeContact(){document.getElementById('contact-sheet').classList.remove('open')}
-function contactVia(type){
-  var email = 'hello@fyndtoday.com';
-  if(type==='email'){
-    window.open('mailto:'+email);
-    closeContact();return;
-  }
-  if(type==='copy'){
-    var btn = document.getElementById('copy-email-btn');
-    navigator.clipboard.writeText(email).then(function(){
-      if(btn){var orig=btn.textContent;btn.textContent='Copied';setTimeout(function(){btn.textContent=orig;},2000);}
-    }).catch(function(){
-      var ta=document.createElement('textarea');ta.value=email;document.body.appendChild(ta);ta.select();
-      document.execCommand('copy');document.body.removeChild(ta);
-      if(btn){var orig=btn.textContent;btn.textContent='Copied';setTimeout(function(){btn.textContent=orig;},2000);}
-    });
-  }
-}
-
-function openShare(){document.getElementById('share-sheet').classList.add('open')}
-function closeShare(){document.getElementById('share-sheet').classList.remove('open')}
-function shareVia(type){
-  var url = SITE_URL;
-  var msg = 'Find out what the sound reveals. ' + url;
-  if(type==='copy'){
-    navigator.clipboard.writeText(url).then(function(){
-      closeShare();
-      var toast=document.getElementById('copied-toast');
-      toast.classList.add('show');
-      setTimeout(function(){toast.classList.remove('show');},2000);
-    }).catch(function(){
-      var ta=document.createElement('textarea');
-      ta.value=url;document.body.appendChild(ta);ta.select();
-      document.execCommand('copy');document.body.removeChild(ta);
-      closeShare();
-      var toast=document.getElementById('copied-toast');
-      toast.classList.add('show');
-      setTimeout(function(){toast.classList.remove('show');},2000);
-    });
+function renderResults(tracks) {
+  var container = document.getElementById('search-results');
+  container.innerHTML = '';
+  if (!tracks || tracks.length === 0) {
+    container.innerHTML = '<div class="search-empty">that track isn\'t here yet.<br>bring another.</div>';
     return;
   }
-  if(type==='message'){
-    window.open('sms:?body='+encodeURIComponent(msg));
-    closeShare();return;
-  }
-  if(type==='email'){
-    window.open('mailto:?subject='+encodeURIComponent('Find out what the sound reveals.')+'&body='+encodeURIComponent(msg));
-    closeShare();return;
-  }
-}
-
-// Close share sheets when tapping the page backdrop (outside the sheet)
-document.addEventListener('click', function(e) {
-  var shareSheet = document.getElementById('share-sheet');
-  var contactSheet = document.getElementById('contact-sheet');
-  if (shareSheet && shareSheet.classList.contains('open') && !shareSheet.contains(e.target)) {
-    closeShare();
-  }
-  if (contactSheet && contactSheet.classList.contains('open') && !contactSheet.contains(e.target)) {
-    closeContact();
-  }
-});
-
-// Color block fade-in on mobile — independent of card .rev so Chrome
-// timing inconsistency doesn't reveal the whole card prematurely
-if (window.innerWidth <= 720 && 'IntersectionObserver' in window) {
-  var colorObs = new IntersectionObserver(function(entries) {
-    entries.forEach(function(entry) {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('color-visible');
-        colorObs.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.1 });
-  document.querySelectorAll('.clothing-card-color').forEach(function(el) {
-    colorObs.observe(el);
+  tracks.forEach(function(t) {
+    var displayTitle = cleanDisplay(t.title);
+    var displayArtist = cleanDisplay(t.artist);
+    if (!displayTitle) return;
+    var el = document.createElement('div');
+    el.className = 'search-result';
+    el.setAttribute('data-title', displayTitle);
+    el.setAttribute('data-artist', displayArtist);
+    el.setAttribute('data-ytid', t.id);
+    var audioTag = t.isAudio ? ' <span class="result-audio-tag">audio</span>' : '';
+    el.innerHTML =
+      '<div class="result-title">' + esc(displayTitle) + audioTag + '</div>' +
+      '<div class="result-sub">' + esc(displayArtist) + '</div>';
+    container.appendChild(el);
   });
 }
 
-// Algo section read more / read less toggle — mobile only
-function expandAlgo() {
-  var wrap = document.getElementById('algo-expand-wrap');
-  var btn = document.getElementById('algo-read-more');
-  if (!wrap || !btn) return;
-  var isOpen = wrap.classList.contains('open');
-  if (isOpen) {
-    wrap.classList.remove('open');
-    btn.textContent = 'Read more';
+// ── TRACK SELECTION ───────────────────────────────────────────────────────────
+function selectTrack(track, isCurated) {
+  // Unlock audio playback synchronously inside this user tap, before any
+  // async work (word pool fetch, YouTube iframe creation/load) starts.
+  // iOS Safari only treats play() as gesture-trusted within the original
+  // synchronous call stack of the tap. The YouTube IFrame Player's own
+  // playVideo() fires later, inside an async onReady callback, after the
+  // iframe has loaded — by then the gesture credential has expired and
+  // WebKit can silently block it. Playing a near-silent local audio
+  // element right here, synchronously, unlocks the page's audio context
+  // for the rest of this gesture chain. Same fix used on the old
+  // SoundCloud widget version.
+  try {
+    var silentUnlock = new Audio('data:audio/wav;base64,UklGRiUAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQEAAACA');
+    silentUnlock.volume = 0;
+    silentUnlock.play().catch(function(){});
+  } catch(e) {}
+
+  sess.trackTitle = track.title;
+  sess.trackArtist = track.artist;
+  sess.trackId = track.ytId || track.id || null;
+  sess.isCurated = isCurated;
+  sess.isSearched = !isCurated;
+  sess.isInterrupted = track.isInterrupted || false;
+  sess.chosenPosition = null;
+  sess.trackCount++;
+
+  // Reset tap state and increment token to cancel any pending callbacks
+  sess.wordPool = null;
+  sess.structuralTag = '';
+  sess.tappedWords = [];
+  sess.reflectionToken = (sess.reflectionToken || 0) + 1;
+
+  // Check if they have brought this exact song before
+  var history = getTrackHistory(track.title, track.artist);
+  sess.sameSongHistory = history; // { lastPosition, count, previousPosition, lastDate } or null
+
+  // Fetch Claude-researched word pool for this specific track in background
+  fetchWordPool(track.title, track.artist);
+
+  // Start the YouTube player loading NOW, not after the listen screen
+  // appears. Creating the iframe and waiting for YouTube's cross-origin
+  // load is the actual source of the multi-second wait before "press
+  // play" shows up. Starting it here overlaps that load time with the
+  // screen transition that's about to happen anyway, so the player is
+  // usually already cued and ready by the time the listen screen settles.
+  if (sess.trackId) {
+    playYouTube(sess.trackId);
+  }
+
+  goListen();
+}
+
+function selectCurated(interrupt) {
+  if (CURATED.length === 0) { showSearch(); return; }
+  var t = CURATED[sess.curatedIdx % CURATED.length];
+  sess.curatedIdx++;
+  selectTrack({ title: t.title, artist: t.artist, ytId: t.ytId, isInterrupted: !!interrupt }, true);
+}
+
+// ── LISTEN ────────────────────────────────────────────────────────────────────
+function goListen() {
+  show('s-listen');
+
+  // Reset elements
+  var dot = document.getElementById('pulse-dot');
+  var playBtn = document.getElementById('listen-play-btn');
+  var videoWrap = document.getElementById('listen-video-wrap');
+  var stop = document.getElementById('listen-stop');
+  var replay = document.getElementById('listen-replay');
+  var info = document.getElementById('track-info');
+  var tag = document.getElementById('curated-tag');
+
+  _ytDebug('goListen: videoWrap exists=' + !!videoWrap + ', playBtn exists=' + !!playBtn);
+  var stmtWrapCheck = document.getElementById('listen-stmts');
+  if (stmtWrapCheck) {
+    var cs = window.getComputedStyle(stmtWrapCheck);
+    _ytDebug('goListen: listen-stmts computed opacity=' + cs.opacity + ', pointerEvents=' + cs.pointerEvents + ', classList=' + stmtWrapCheck.className);
+  }
+
+  dot.classList.remove('active');
+  dot.classList.remove('hidden-under-overlay');
+  if (videoWrap) videoWrap.classList.remove('show');
+  if (playBtn) {
+    playBtn.classList.remove('tappable');
+    playBtn.classList.remove('loading');
+    playBtn.classList.remove('hidden-under-overlay');
+    playBtn.textContent = 'press play';
+  }
+  stop.classList.remove('show');
+  stop.classList.remove('hidden-under-overlay');
+  replay.classList.remove('show');
+  replay.classList.remove('hidden-under-overlay');
+  info.classList.remove('show');
+  info.classList.remove('hidden-under-overlay');
+  tag.classList.remove('show');
+  tag.classList.remove('hidden-under-overlay');
+
+  // Fully reset the word-tap overlay from any previous track — without
+  // this, the old track's tapped words stay visible in the DOM and
+  // briefly flash on screen before the new track's words load in.
+  var stmtWrap = document.getElementById('listen-stmts');
+  if (stmtWrap) stmtWrap.classList.remove('show');
+  var scatter = document.getElementById('tap-word-scatter');
+  if (scatter) scatter.innerHTML = '';
+  var doneBtn = document.getElementById('tap-done-btn');
+  if (doneBtn) doneBtn.classList.remove('show');
+
+  clearTimeout(sess.recognitionTimer);
+  clearTimeout(sess.stopTimer);
+
+  // Fresh per-track state for the tap-to-listen gate
+  sess.ytStarted = false;
+  sess.listenStartedAt = false;
+
+  if (sess.isCurated) {
+    if (sess.isInterrupted) tag.classList.add('show');
+    document.getElementById('listen-framing').textContent = '';
+    document.getElementById('listen-title').textContent = '';
+    document.getElementById('listen-artist').textContent = '';
   } else {
-    wrap.classList.add('open');
-    btn.textContent = 'Read less';
+    document.getElementById('listen-framing').textContent =
+      "let's find out what it's doing to you today.";
+    document.getElementById('listen-title').textContent = sess.trackTitle;
+    document.getElementById('listen-artist').textContent = sess.trackArtist;
+    setTimeout(function() { info.classList.add('show'); }, 700);
+  }
+
+  // YouTube player loading was already kicked off in selectTrack(), as
+  // early as possible. The pulse dot becomes tappable once its onReady
+  // fires; tapping it calls startListening(). Only the no-ytId curated
+  // fallback needs handling here, since that path never had a player.
+  if (!sess.trackId) {
+    startListenTimers();
   }
 }
 
-// Scroll-anchor buttons (bridge CTAs between sections)
-document.querySelectorAll('.scroll-anchor').forEach(function(el){
-  el.addEventListener('click', function(e){
-    e.preventDefault();
-    var href = this.getAttribute('href');
-    var target = document.querySelector(href);
-    if (!target) return;
-    var navH = 80;
-    var top = target.getBoundingClientRect().top + window.scrollY - navH;
-    window.scrollTo({ top: top, behavior: 'smooth' });
-  });
-});
+function startListenTimers() {
+  // Dot
+  setTimeout(function() {
+    document.getElementById('pulse-dot').classList.add('active');
+  }, 300);
 
-/* HERO WAVE — full width, continuous, crisp on all screens */
-(function(){
-  var c=document.getElementById('sw');if(!c)return;
-  var N=110,bars=[],t=0;
-  for(var i=0;i<N;i++){
-    var d=Math.abs(i-N/2)/(N/2);
-    bars.push({env:Math.pow(1-d*d,.45),phase:Math.random()*Math.PI*2,speed:.45+Math.random()*.9});
-  }
-  (function frame(){
-    var dpr=window.devicePixelRatio||1;
-    var w=c.offsetWidth,h=c.offsetHeight;
-    c.width=w*dpr;c.height=h*dpr;
-    c.style.width=w+'px';c.style.height=h+'px';
-    var ctx=c.getContext('2d');
-    ctx.scale(dpr,dpr);
-    ctx.clearRect(0,0,w,h);
-    /* on narrow screens use fewer bars, thinner, shorter */
-    var n=w<500?60:N;
-    var bw=w<500?.6:1;
-    var gap=(w-n*bw)/(n-1);
-    var cy=h/2,maxH=w<500?h*.32:h*.5;
-    t+=.010;
-    ctx.fillStyle='#FCFBF4';
-    for(var i=0;i<n;i++){
-      var idx=Math.floor(i*N/n);
-      var b=bars[idx];
-      var sc=.04+.96*Math.abs(Math.sin(t*b.speed+b.phase+i*.10));
-      var hh=maxH*b.env*sc;
-      ctx.fillRect(i*(bw+gap),cy-hh/2,bw,hh);
-    }
-    requestAnimationFrame(frame);
-  })();
-})();
+  // Show stop and replay after 10s
+  sess.stopTimer = setTimeout(function() {
+    document.getElementById('listen-stop').classList.add('show');
+    document.getElementById('listen-replay').classList.add('show');
+  }, 10000);
 
-/* CARD WAVES — full width bottom fill */
-document.querySelectorAll('canvas.cw').forEach(function(c,ci){
-  var N=55,bars=[],t=ci*1.8;
-  for(var i=0;i<N;i++){bars.push({phase:Math.random()*Math.PI*2,speed:.35+Math.random()*.55});}
-  (function frame(){
-    c.width=c.offsetWidth;c.height=c.offsetHeight;
-    var ctx=c.getContext('2d');
-    ctx.clearRect(0,0,c.width,c.height);
-    var bw=2;
-    var gap=(c.width-N*bw)/(N-1);
-    var maxH=c.height*.85;
-    t+=.007;
-    ctx.fillStyle='#FCFBF4';
-    for(var i=0;i<N;i++){
-      var b=bars[i];
-      var sc=.08+.92*Math.abs(Math.sin(t*b.speed+b.phase+i*.18));
-      var h=maxH*sc;
-      ctx.fillRect(i*(bw+gap),c.height-h,bw,h);
-    }
-    requestAnimationFrame(frame);
-  })();
-});
-
-/* ROSE */
-(function(){
-  var c=document.getElementById('rc');if(!c)return;
-  var t=0;
-  var rings=[
-    {rx:1.00,ry:.82,ox:-.04,oy:.06,lw:1.5,a:.9},
-    {rx:.83,ry:.70,ox:.05,oy:-.04,lw:1.1,a:.8},
-    {rx:.65,ry:.55,ox:-.03,oy:.05,lw:.9,a:.72},
-    {rx:.49,ry:.43,ox:.04,oy:-.03,lw:.75,a:.62},
-    {rx:.34,ry:.30,ox:-.02,oy:.03,lw:.6,a:.52},
-    {rx:.21,ry:.19,ox:.02,oy:-.02,lw:.45,a:.42},
-    {rx:.09,ry:.08,ox:0,oy:0,lw:.35,a:.34},
-  ];
-  (function frame(){
-    c.width=c.offsetWidth;c.height=c.offsetHeight;
-    var ctx=c.getContext('2d');
-    ctx.clearRect(0,0,c.width,c.height);
-    var cx=c.width/2,cy=c.height/2,base=Math.min(c.width,c.height)*.38;
-    t+=.0038;
-    ctx.strokeStyle='#FCFBF4';
-    rings.forEach(function(r,i){
-      var breathe=1+.042*Math.sin(t*1.05-i*.58);
-      ctx.globalAlpha=r.a;ctx.lineWidth=r.lw;
-      ctx.beginPath();
-      ctx.ellipse(
-        cx+base*r.ox*Math.cos(t*.26+i),
-        cy+base*r.oy*Math.sin(t*.20+i*.8),
-        base*r.rx*breathe,base*r.ry*breathe,
-        t*.033+i*.11,0,Math.PI*2
-      );
-      ctx.stroke();
-    });
-    ctx.globalAlpha=1;
-    requestAnimationFrame(frame);
-  })();
-})();
-
-/* PORTAL — travel along rings, radial bloom out at end */
-function triggerPortal(){
-  var portal=document.getElementById('portal');
-  var pc=document.getElementById('portal-c');
-  if(portal.classList.contains('active'))return;
-  portal.classList.add('active');
-  var start=null;
-  var rings=[
-    {rx:1.00,ry:.80,ox:-.04,oy:.05,rot:.00},
-    {rx:.82,ry:.68,ox:.05,oy:-.04,rot:.11},
-    {rx:.64,ry:.54,ox:-.03,oy:.05,rot:.22},
-    {rx:.48,ry:.42,ox:.04,oy:-.03,rot:.33},
-    {rx:.34,ry:.30,ox:-.02,oy:.03,rot:.44},
-    {rx:.21,ry:.19,ox:.02,oy:-.02,rot:.55},
-    {rx:.10,ry:.09,ox:0,oy:0,rot:.66},
-  ];
-  var loopsPerRing=1.3;
-  var totalAngle=rings.length*loopsPerRing*Math.PI*2;
-  var travelDur=3000,fadeDur=900,totalDur=travelDur+fadeDur;
-
-  (function anim(ts){
-    if(!start)start=ts;
-    var el=ts-start;
-    var raw=Math.min(el/totalDur,1);
-    pc.width=window.innerWidth;pc.height=window.innerHeight;
-    var ctx=pc.getContext('2d');
-    ctx.clearRect(0,0,pc.width,pc.height);
-    var cx=pc.width/2,cy=pc.height/2;
-    var base=Math.min(pc.width,pc.height)*.44;
-    var tp=Math.min(el/travelDur,1);
-    var te=tp<.5?2*tp*tp:1-Math.pow(-2*tp+2,2)/2;
-    var traveled=te*totalAngle;
-    var ri=Math.min(Math.floor(traveled/(loopsPerRing*Math.PI*2)),rings.length-1);
-    var air=traveled%(loopsPerRing*Math.PI*2);
-    /* draw rings */
-    ctx.strokeStyle='#FCFBF4';
-    rings.forEach(function(r,i){
-      var passed=i<ri,curr=i===ri;
-      var a=passed?.05:curr?.55:.28-i*.03;
-      if(a<=0)return;
-      ctx.globalAlpha=Math.max(0,a);
-      ctx.lineWidth=curr?1.1:.45;
-      ctx.setLineDash(passed?[1,7]:[]);
-      ctx.beginPath();
-      ctx.ellipse(cx+base*r.ox,cy+base*r.oy,base*r.rx,base*r.ry,r.rot,0,Math.PI*2);
-      ctx.stroke();
-      ctx.setLineDash([]);
-    });
-    /* traveling point */
-    if(tp<1){
-      var r=rings[ri];
-      var a=Math.min(air,loopsPerRing*Math.PI*2-.02);
-      var px=cx+base*r.ox+Math.cos(a)*base*r.rx;
-      var py=cy+base*r.oy+Math.sin(a)*base*r.ry;
-      /* trail */
-      for(var tr=10;tr>=0;tr--){
-        var ta2=a-tr*.045;
-        ctx.globalAlpha=(1-tr/11)*.3;
-        ctx.fillStyle='#FCFBF4';
-        ctx.beginPath();
-        ctx.arc(cx+base*r.ox+Math.cos(ta2)*base*r.rx,cy+base*r.oy+Math.sin(ta2)*base*r.ry,1.8*(1-tr/11),0,Math.PI*2);
-        ctx.fill();
-      }
-      ctx.globalAlpha=.85;ctx.fillStyle='#FCFBF4';
-      ctx.beginPath();ctx.arc(px,py,2.2,0,Math.PI*2);ctx.fill();
-    }
-    ctx.globalAlpha=1;
-    /* radial bloom from center outward */
-    if(el>travelDur){
-      var fp=Math.min((el-travelDur)/fadeDur,1);
-      var fe=fp*fp;
-      var maxR=Math.sqrt(cx*cx+cy*cy)*1.1;
-      var grd=ctx.createRadialGradient(cx,cy,0,cx,cy,maxR);
-      grd.addColorStop(0,'rgba(252,251,244,'+fe+')');
-      grd.addColorStop(Math.min(fe+.25,1),'rgba(252,251,244,0)');
-      ctx.fillStyle=grd;ctx.fillRect(0,0,pc.width,pc.height);
-    }
-    if(raw<1){requestAnimationFrame(anim);}
-    else{window.location.href=PORTAL_URL;}
-  })(performance.now());
+  // Show statements at 30s — track keeps playing underneath
+  // Recognition (stopping track) only happens when user picks a statement
+  sess.recognitionTimer = setTimeout(function() {
+    showStatementsOverlay();
+  }, 30000);
 }
 
-document.querySelectorAll('.portal-trigger').forEach(function(el){
-  el.addEventListener('click',function(e){e.preventDefault();triggerPortal();});
-});
-
-/* Experience it — scroll enter section fully to top */
-document.querySelectorAll('.srf-enter-btn').forEach(function(btn){
-  btn.addEventListener('click', function(e){
-    e.preventDefault();
-    var target = document.getElementById('enter');
-    if(!target) return;
-    target.scrollIntoView({behavior:'smooth', block:'start'});
-  });
-});
-
-/* JS scroll with nav clearance for iOS Safari */
-document.querySelectorAll('a[href^="#"]').forEach(function(a){
-  a.addEventListener('click',function(e){
-    var hash=this.getAttribute('href');
-    var target=document.querySelector(hash);
-    if(!target)return;
-    e.preventDefault();
-    var navH=document.querySelector('nav').offsetHeight||60;
-    /* extra 8px breathing room below nav */
-    var top=target.getBoundingClientRect().top+window.scrollY-navH-8;
-    window.scrollTo({top:Math.max(0,top),behavior:'smooth'});
-  });
-});
-
-/* SRF WAVE — reacts to scroll position */
-(function(){
-  var c = document.getElementById('srf-wave'); if(!c) return;
-  var N = 80, bars = [], t = 0, intensity = 0;
-  for(var i = 0; i < N; i++){
-    var d = Math.abs(i - N/2) / (N/2);
-    bars.push({env: Math.pow(1 - d*d, .4), phase: Math.random()*Math.PI*2, speed: .4 + Math.random()*.8});
+function stopAudio() {
+  document.getElementById('pulse-dot').classList.remove('active');
+  clearTimeout(sess.recognitionTimer);
+  clearTimeout(sess.stopTimer);
+  if (sess.ytPlayer && typeof sess.ytPlayer.stopVideo === 'function') {
+    try { sess.ytPlayer.stopVideo(); } catch(e) {}
   }
-  // Track scroll intensity within SRF section
-  var lastScroll = 0;
-  window.addEventListener('scroll', function(){
-    var sect = document.getElementById('srf');
-    if(!sect) return;
-    var rect = sect.getBoundingClientRect();
-    var inView = rect.top < window.innerHeight && rect.bottom > 0;
-    if(inView){
-      var scrollDelta = Math.abs(window.scrollY - lastScroll);
-      intensity = Math.min(1, intensity + scrollDelta * 0.04);
-    }
-    lastScroll = window.scrollY;
-  }, {passive: true});
+}
 
-  (function frame(){
-    intensity *= 0.94; // decay
-    var dpr = window.devicePixelRatio||1;
-    var w = c.offsetWidth, h = c.offsetHeight;
-    c.width = w*dpr; c.height = h*dpr;
-    c.style.width = w+'px'; c.style.height = h+'px';
-    var ctx = c.getContext('2d');
-    ctx.scale(dpr, dpr);
-    ctx.clearRect(0,0,w,h);
-    var bw = w < 500 ? .8 : 1.2;
-    var gap = (w - N*bw) / (N-1);
-    var cy = h/2, maxH = h * .45;
-    t += .012;
-    ctx.fillStyle = '#FCFBF4';
-    var amp = 0.08 + intensity * 0.92;
-    for(var i = 0; i < N; i++){
-      var b = bars[i];
-      var sc = amp * Math.abs(Math.sin(t * b.speed + b.phase + i * .12));
-      var hh = maxH * b.env * sc;
-      ctx.fillRect(i*(bw+gap), cy-hh/2, bw, hh);
-    }
-    requestAnimationFrame(frame);
-  })();
-})();
+function handleReplay() {
+  // Restart the track from the beginning. Nothing else changes.
+  // The screen, the word overlay, whatever was tapped already, all of it
+  // stays exactly as it was. This only touches the audio.
+  if (sess.ytPlayer && typeof sess.ytPlayer.seekTo === 'function') {
+    try {
+      sess.ytPlayer.seekTo(0, true);
+      sess.ytPlayer.playVideo();
+    } catch(e) {}
+  }
+}
 
-/* SRF ITEMS — staggered scroll reveal with delays */
-(function(){
-  var items = document.querySelectorAll('.srf-item');
-  var delays = [0, 250, 500];
-  var io2 = new IntersectionObserver(function(entries){
-    entries.forEach(function(e){
-      if(e.isIntersecting){
-        var idx = Array.from(items).indexOf(e.target);
-        setTimeout(function(){ e.target.classList.add('on'); }, delays[idx] || 0);
-        io2.unobserve(e.target);
-      }
+// ── YOUTUBE PLAYER ────────────────────────────────────────────────────────────
+// ── YT DEBUG LOGGING (visible overlay disabled — core mechanism confirmed working) ──
+// Set to true only for active debugging sessions; logs go to console instead
+// of an on-screen panel so they never block real users' controls again.
+var YT_DEBUG_VISIBLE = false;
+function _ytDebug(msg) {
+  if (!YT_DEBUG_VISIBLE) {
+    if (window.console && console.log) console.log('[yt]', msg);
+    return;
+  }
+  var panel = document.getElementById('yt-debug-panel');
+  if (!panel) {
+    panel = document.createElement('div');
+    panel.id = 'yt-debug-panel';
+    panel.style.cssText = 'position:fixed;bottom:0;left:0;right:0;max-height:35vh;overflow-y:auto;background:rgba(0,0,0,0.92);color:#0f0;font-family:monospace;font-size:11px;line-height:1.5;padding:8px;z-index:99999;pointer-events:none;white-space:pre-wrap;';
+    document.body.appendChild(panel);
+  }
+  var line = document.createElement('div');
+  line.textContent = new Date().toISOString().slice(11,23) + '  ' + msg;
+  panel.appendChild(line);
+  panel.scrollTop = panel.scrollHeight;
+}
+
+function playYouTube(ytId) {
+  _ytDebug('playYouTube called, ytId=' + ytId + ', window.YT exists=' + !!window.YT + ', navigator.onLine=' + navigator.onLine);
+  // Destroy previous player
+  if (sess.ytPlayer && typeof sess.ytPlayer.destroy === 'function') {
+    try { sess.ytPlayer.destroy(); _ytDebug('old player destroyed'); }
+    catch(e) { _ytDebug('destroy() threw: ' + e.message); }
+    sess.ytPlayer = null;
+  }
+  sess.ytStarted = false;
+
+  // destroy() removes the #yt-player element itself from the DOM (it gets
+  // replaced by the player iframe, which destroy() then removes without
+  // restoring the original div). Without recreating it, the next
+  // new YT.Player('yt-player', ...) call has no element to attach to and
+  // silently fails — this is why the second track never played while the
+  // first one did.
+  //
+  // The player now attaches into the visible #listen-video-wrap on the
+  // listen screen instead of a hidden off-screen container. YouTube's
+  // developer policies require the player and its branding to actually
+  // be visible to the viewer, not hidden — a fully hidden player used
+  // purely as an audio source is explicitly against their terms.
+  var videoWrap = document.getElementById('listen-video-wrap');
+  if (videoWrap) {
+    var oldTarget = document.getElementById('yt-player');
+    if (oldTarget) oldTarget.remove();
+    var freshTarget = document.createElement('div');
+    freshTarget.id = 'yt-player';
+    videoWrap.appendChild(freshTarget);
+    _ytDebug('fresh #yt-player div created in visible video wrap');
+  } else {
+    _ytDebug('ERROR: #listen-video-wrap not found in DOM');
+  }
+
+  if (!window.YT || !window.YT.Player) {
+    _ytDebug('YT API not ready yet, retrying in 300ms');
+    setTimeout(function() { playYouTube(ytId); }, 300);
+    return;
+  }
+
+  // Unmuted autoplay on iOS Safari proved genuinely unreliable — same
+  // video, same code, sometimes plays, sometimes silently stalls at
+  // UNSTARTED with no error, confirmed across many test rounds. Instead
+  // of fighting that gate, the player now CUES the video (loads it fully,
+  // ready to play instantly) without autoplaying. Actual playback only
+  // starts from startListening(), called directly inside the pulse dot's
+  // tap handler — a fresh, real user gesture every time, which WebKit
+  // always honors regardless of any autoplay heuristic.
+  _ytDebug('creating new YT.Player (cue, not autoplay)...');
+  try {
+    sess.ytPlayer = new YT.Player('yt-player', {
+      height: '200',
+      width: '200',
+      videoId: ytId,
+      playerVars: {
+        autoplay: 0,
+        controls: 0,
+        disablekb: 1,
+        fs: 0,
+        rel: 0,
+        playsinline: 1,
+        iv_load_policy: 3,
+        origin: window.location.origin,
+      },
+      events: {
+        onReady: function(e) {
+          _ytDebug('onReady fired (cued, waiting for tap)');
+          // Show the video wrap now — the screen is active and goListen's
+          // reset has already run, so adding .show here sticks correctly.
+          var vw = document.getElementById('listen-video-wrap');
+          if (vw) vw.classList.add('show');
+          showTapToListen();
+        },
+        onStateChange: function(e) {
+          var stateNames = { '-1': 'UNSTARTED', '0': 'ENDED', '1': 'PLAYING', '2': 'PAUSED', '3': 'BUFFERING', '5': 'CUED' };
+          _ytDebug('onStateChange: ' + (stateNames[e.data] || e.data));
+          // YT.PlayerState.PLAYING = 1
+          if (e.data === 1) {
+            hideTapToListen();
+            if (!sess.listenStartedAt) {
+              sess.listenStartedAt = true;
+              startListenTimers();
+            }
+          }
+          // YT.PlayerState.ENDED = 0
+          if (e.data === 0) {
+            clearTimeout(sess.recognitionTimer);
+            // If words aren't showing yet (short track ended before 30s), show them now
+            var stmtWrap = document.getElementById('listen-stmts');
+            if (stmtWrap && !stmtWrap.classList.contains('show')) {
+              showStatementsOverlay();
+            }
+            // Track audio has ended — that's fine. The word scatter and the
+            // forward button stay exactly as they are. The person decides
+            // when they're done by tapping the button themselves.
+            // No auto-advance, no timer, no silent screen change.
+          }
+        },
+        onError: function(e) {
+          var errCodes = { '2': 'invalid video ID', '5': 'HTML5 player error', '100': 'video not found/private', '101': 'embedding disabled by uploader', '150': 'embedding disabled by uploader' };
+          _ytDebug('onError fired! code=' + e.data + ' (' + (errCodes[e.data] || 'unknown') + ')');
+          // Track unavailable — show the word scatter so they aren't stuck
+          // on a dead player with nothing to do
+          clearTimeout(sess.recognitionTimer);
+          var stmtWrap = document.getElementById('listen-stmts');
+          if (stmtWrap && !stmtWrap.classList.contains('show')) {
+            showStatementsOverlay();
+          }
+        },
+      },
     });
-  }, {threshold: 0.4, rootMargin: '0px 0px -15% 0px'});
-  items.forEach(function(el){ io2.observe(el); });
+    _ytDebug('new YT.Player() call completed, sess.ytPlayer set');
+  } catch(err) {
+    _ytDebug('new YT.Player() THREW: ' + err.message);
+  }
+}
+
+// Called directly from the pulse dot's click handler — a fresh, real
+// user gesture every time, so playVideo() here is always fully trusted
+// by WebKit regardless of how autoplay heuristics are behaving.
+function startListening() {
+  if (!sess.ytPlayer || typeof sess.ytPlayer.playVideo !== 'function') return;
+  if (sess.ytStarted) return;
+  sess.ytStarted = true;
+
+  // Immediate visual acknowledgment — without this there's a dead gap
+  // between the tap and audio actually starting (player buffering takes
+  // a moment) where it looks like the tap didn't register at all.
+  var btn = document.getElementById('listen-play-btn');
+  if (btn) {
+    btn.textContent = 'loading...';
+    btn.classList.remove('tappable');
+    btn.classList.add('loading');
+  }
+
+  try {
+    sess.ytPlayer.playVideo();
+    _ytDebug('startListening: playVideo() called from direct tap');
+  } catch(e) {
+    _ytDebug('startListening: playVideo() threw: ' + e.message);
+  }
+}
+
+function showTapToListen() {
+  var btn = document.getElementById('listen-play-btn');
+  if (btn) btn.classList.add('tappable');
+}
+
+function hideTapToListen() {
+  var btn = document.getElementById('listen-play-btn');
+  if (btn) {
+    btn.classList.remove('tappable');
+    btn.classList.remove('loading');
+  }
+}
+
+// ── STATEMENTS OVERLAY ────────────────────────────────────────────────────────
+function showColorScreen() {
+  var scatter = document.getElementById('color-word-scatter');
+  scatter.innerHTML = '';
+  sess.tappedColorsList = [];
+
+  // Wordmark can't be scrolled away (position:fixed to viewport) and this
+  // screen's content reaches where it sits — hide it directly.
+  var wm = document.getElementById('wordmark');
+  if (wm) wm.style.opacity = '0';
+
+  // Always the same eleven, no shuffle needed since order doesn't carry meaning here,
+  // but shuffle anyway so it never feels like a fixed memorized layout
+  var shuffled = MAIN_COLORS.slice().sort(function() { return Math.random() - 0.5; });
+
+  shuffled.forEach(function(colorName, i) {
+    var btn = document.createElement('button');
+    btn.className = 'tap-word';
+    btn.textContent = colorName;
+    var colorClass = colorWordClass(colorName);
+    if (colorClass) btn.classList.add(colorClass);
+    btn.setAttribute('data-position', 'color');
+    btn.addEventListener('click', function() {
+      toggleColorTap(btn, colorName);
+    });
+    scatter.appendChild(btn);
+    setTimeout(function() { btn.classList.add('show'); }, 80 * i);
+  });
+
+  var doneBtn = document.getElementById('color-done-btn');
+  doneBtn.classList.remove('show');
+  setTimeout(function() { doneBtn.classList.add('show'); }, 80 * shuffled.length + 600);
+}
+
+function toggleColorTap(btn, colorName) {
+  var idx = sess.tappedColorsList.indexOf(colorName);
+  if (idx === -1) {
+    sess.tappedColorsList.push(colorName);
+    btn.classList.add('tapped');
+  } else {
+    sess.tappedColorsList.splice(idx, 1);
+    btn.classList.remove('tapped');
+  }
+}
+
+// Shows statements ON the listen screen while track keeps playing.
+// User picks — THEN track fades and recognition screen appears.
+function showStatementsOverlay() {
+  var stmtWrap = document.getElementById('listen-stmts');
+  if (!stmtWrap) return;
+
+  // Belt-and-suspenders alongside the CSS :has() rule that hides the
+  // wordmark during this overlay — explicit JS hide in case of any
+  // browser without :has() support.
+  var wm = document.getElementById('wordmark');
+  if (wm) wm.style.opacity = '0';
+
+  var pool = (sess.wordPool && sess.wordPool.length >= 6) ? sess.wordPool : FALLBACK_WORD_POOL;
+  sess.tappedWords = [];
+
+  var scatter = document.getElementById('tap-word-scatter');
+  scatter.innerHTML = '';
+
+  // Shuffle pool so position order is never readable as a pattern
+  var shuffled = pool.slice().sort(function() { return Math.random() - 0.5; });
+
+  shuffled.forEach(function(w, i) {
+    var btn = document.createElement('button');
+    btn.className = 'tap-word';
+    btn.textContent = w.text;
+    if (w.position === 'color') {
+      var colorClass = colorWordClass(w.text);
+      if (colorClass) btn.classList.add(colorClass);
+    }
+    btn.setAttribute('data-position', w.position);
+    btn.addEventListener('click', function() {
+      toggleTapWord(btn, w);
+    });
+    scatter.appendChild(btn);
+    setTimeout(function() { btn.classList.add('show'); }, 80 * i);
+  });
+
+  // Show "that's it" button after a short delay so they have time to read first
+  var doneBtn = document.getElementById('tap-done-btn');
+  doneBtn.classList.remove('show');
+  setTimeout(function() { doneBtn.classList.add('show'); }, 80 * shuffled.length + 600);
+
+  // Show track name on overlay
+  var trackLabel = document.getElementById('listen-stmts-track');
+  if (trackLabel) {
+    trackLabel.textContent = sess.trackTitle + (sess.trackArtist ? ' · ' + sess.trackArtist : '');
+  }
+
+  sess.choiceTime = Date.now();
+
+  // Hide listen screen elements underneath so nothing bleeds through.
+  // Back and replay stay visible the whole time, they sit above the overlay.
+  var dot = document.getElementById('pulse-dot');
+  var playBtn = document.getElementById('listen-play-btn');
+  var info = document.getElementById('track-info');
+  var tag = document.getElementById('curated-tag');
+  if (dot) dot.classList.add('hidden-under-overlay');
+  if (playBtn) playBtn.classList.add('hidden-under-overlay');
+  if (info) info.classList.add('hidden-under-overlay');
+  if (tag) tag.classList.add('hidden-under-overlay');
+
+  // The wordmark is position:fixed to the viewport, not the document, so
+  // it can't be scrolled away or cleared with padding — this overlay's
+  // content genuinely reaches where it sits. Hide it directly while the
+  // overlay is up.
+  var wm = document.getElementById('wordmark');
+  if (wm) wm.style.opacity = '0';
+
+  stmtWrap.classList.add('show');
+}
+
+// The eleven main colors, fixed, always the same, always shown in full —
+// this is genuine human choice, not research narrowed or Claude selected.
+var MAIN_COLORS = ['black', 'white', 'red', 'green', 'yellow', 'blue', 'brown', 'orange', 'pink', 'purple', 'grey'];
+
+function colorWordClass(text) {
+  // Literal color words render in their own actual color — instant recognition,
+  // no interpretation. "gold" looks gold. "blue" looks blue.
+  var map = {
+    red: 'colorword-red', blue: 'colorword-blue', gold: 'colorword-gold',
+    green: 'colorword-green', purple: 'colorword-purple', amber: 'colorword-amber',
+    silver: 'colorword-silver', violet: 'colorword-violet', crimson: 'colorword-crimson',
+    teal: 'colorword-teal', white: 'colorword-white', black: 'colorword-black',
+    pink: 'colorword-pink', orange: 'colorword-orange', grey: 'colorword-grey',
+    gray: 'colorword-grey', yellow: 'colorword-yellow', brown: 'colorword-brown',
+  };
+  return map[text.toLowerCase()] || null;
+}
+
+function toggleTapWord(btn, wordObj) {
+  var idx = sess.tappedWords.findIndex(function(w) { return w.text === wordObj.text; });
+  if (idx === -1) {
+    sess.tappedWords.push(wordObj);
+    btn.classList.add('tapped');
+  } else {
+    sess.tappedWords.splice(idx, 1);
+    btn.classList.remove('tapped');
+  }
+}
+
+// ── FETCH WORD POOL FROM CLAUDE ───────────────────────────────────────────────
+// Fires when track is selected — runs in background during listening.
+// By the time recognition screen appears, the pool is ready.
+function fetchWordPool(title, artist) {
+  fetch('/.netlify/functions/get-word-pool', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ title: title, artist: artist }),
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    sess.wordPool = (data.words && data.words.length >= 6) ? data.words : FALLBACK_WORD_POOL;
+    sess.structuralTag = data.structuralTag || '';
+  })
+  .catch(function() {
+    sess.wordPool = FALLBACK_WORD_POOL;
+    sess.structuralTag = '';
+  });
+}
+
+var FALLBACK_WORD_POOL = [
+  { text: 'still', position: 'stay' },
+  { text: 'holding', position: 'stay' },
+  { text: 'quiet', position: 'stay' },
+  { text: 'forward', position: 'move' },
+  { text: 'pulling', position: 'move' },
+  { text: 'building', position: 'move' },
+  { text: 'unexpected', position: 'open' },
+  { text: 'shift', position: 'open' },
+  { text: 'gold', position: 'color' },
+  { text: 'blue', position: 'color' },
+];
+
+// ── HANDLE CHOICE FROM LISTEN OVERLAY ────────────────────────────────────────
+// Track fades out, then recognition screen appears
+function computeDominantFromTaps() {
+  var counts = { stay: 0, move: 0, open: 0 };
+  sess.tappedWords.forEach(function(w) {
+    if (counts[w.position] !== undefined) counts[w.position]++;
+  });
+  var max = Math.max(counts.stay, counts.move, counts.open);
+  if (max === 0) return 'open'; // tapped nothing or only color words — treat as Open
+  var winners = Object.keys(counts).filter(function(k) { return counts[k] === max; });
+  if (winners.length > 1) return 'mixed';
+  return winners[0];
+}
+
+function handleTapDone() {
+  var elapsed = Date.now() - sess.choiceTime;
+  sess.responseSpeed = elapsed < 3000 ? 'fast' : elapsed > 25000 ? 'slow' : 'normal';
+
+  var dominant = computeDominantFromTaps();
+  sess.pendingChoice = dominant;
+
+  clearTimeout(sess.recognitionTimer);
+  clearTimeout(sess.stopTimer);
+
+  goRecognitionWithChoice(dominant);
+}
+
+// ── RECOGNITION ───────────────────────────────────────────────────────────────
+function goRecognitionWithChoice(position) {
+  // Don't stop audio here — music plays through to reflection screen
+  clearTimeout(sess.recognitionTimer);
+  clearTimeout(sess.stopTimer);
+  document.getElementById('pulse-dot').classList.remove('active');
+
+  // Clear any leftover color buttons from a previous track BEFORE the
+  // screen becomes visible — otherwise the old track's tapped colors
+  // sit fully visible for a moment while the screen fades in, then
+  // get wiped and repopulated, which is what caused the flash.
+  var scatter = document.getElementById('color-word-scatter');
+  if (scatter) scatter.innerHTML = '';
+  var colorDoneBtn = document.getElementById('color-done-btn');
+  if (colorDoneBtn) colorDoneBtn.classList.remove('show');
+  sess.tappedColorsList = [];
+
+  show('s-recognition');
+
+  // Always show track title and artist on the color screen — required
+  // for YouTube API compliance, same as the listen screen, regardless
+  // of whether this was a curated or searched track.
+  var trackLabel = document.getElementById('color-screen-track');
+  if (trackLabel) {
+    trackLabel.textContent = sess.trackTitle + (sess.trackArtist ? ' · ' + sess.trackArtist : '');
+  }
+
+  // show() itself takes ~350ms to swap screens (old one fades out first),
+  // then the new screen fades in over another ~350ms. Wait for both to
+  // genuinely finish before the color words start populating and
+  // staggering in, so nothing competes with the screen's own motion.
+  setTimeout(function() {
+    showColorScreen();
+  }, 700);
+}
+
+
+function confirmChoice(position) {
+  sess.chosenPosition = position;
+  sess.positions.push(position);
+  // Save this track + position to history
+  if (sess.trackTitle) {
+    saveTrackHistory(sess.trackTitle, sess.trackArtist || '', position);
+  }
+  // Leaving the listen/color flow — hide the persistent back and replay controls
+  document.getElementById('listen-stop').classList.remove('show');
+  document.getElementById('listen-replay').classList.remove('show');
+  goReflection();
+}
+
+// ── REFLECTION ────────────────────────────────────────────────────────────────
+function fadeAudioOut(cb) {
+  // Fade audio out after reflection appears — music plays through the transition
+  if (sess.ytPlayer && typeof sess.ytPlayer.setVolume === 'function') {
+    var vol = 100;
+    var fadeInterval = setInterval(function() {
+      vol -= 5;
+      if (vol <= 0) {
+        clearInterval(fadeInterval);
+        try { sess.ytPlayer.stopVideo(); } catch(e) {}
+        try { sess.ytPlayer.setVolume(100); } catch(e) {} // reset volume for next track
+        if (typeof cb === 'function') cb();
+      } else {
+        try { sess.ytPlayer.setVolume(vol); } catch(e) {}
+      }
+    }, 75); // ~1.5s fade
+  } else if (typeof cb === 'function') {
+    // No player to fade — don't block the reveal waiting on a fade that
+    // will never report back
+    cb();
+  }
+}
+
+function goReflection() {
+  show('s-reflection');
+
+  var mem = document.getElementById('reflection-memory');
+  var txt = document.getElementById('reflection-text');
+  var acts = document.getElementById('reflection-actions');
+  mem.classList.remove('show');
+  mem.textContent = '';
+  txt.classList.remove('show');
+  txt.textContent = '';
+  acts.classList.remove('show');
+
+  // Start the form fetch immediately. Begin the audio fade once the
+  // reflection screen has visibly settled, then reveal the form text
+  // only once BOTH the fade has finished AND the form data has arrived —
+  // whichever takes longer. This keeps the music-out and form-in beats
+  // locked together regardless of network speed, instead of racing a
+  // fixed-delay fade against an independent fetch.
+  var fadeDone = false;
+  var formReady = false;
+  var formArgs = null;
+
+  function revealIfReady() {
+    if (!fadeDone || !formReady) return;
+    var memoryLine = formArgs[0], challenge = formArgs[1];
+    sess.reflectionLine = challenge;
+    if (memoryLine) {
+      mem.textContent = memoryLine;
+      mem.classList.add('show');
+    }
+    txt.textContent = challenge;
+    txt.classList.add('show');
+    acts.classList.add('show');
+  }
+
+  setTimeout(function() {
+    fadeAudioOut(function() {
+      fadeDone = true;
+      revealIfReady();
+    });
+  }, 400);
+
+  getForm(function(memoryLine, challenge) {
+    formReady = true;
+    formArgs = [memoryLine, challenge];
+    revealIfReady();
+  });
+}
+
+function getForm(cb) {
+  var token = sess.reflectionToken;
+  var settled = false;
+  var dominant = sess.chosenPosition || computeDominantFromTaps();
+
+  var history = sess.sameSongHistory; // set in selectTrack via getTrackHistory
+  var hasHistory = !!history;
+
+  var safetyTimer = setTimeout(function() {
+    if (settled) return;
+    settled = true;
+    cb('', getFallbackChallenge(dominant));
+  }, 4500);
+
+  var positionWords = sess.tappedWords || [];
+  var colorWords = (sess.tappedColorsList || []).map(function(c) { return { text: c, position: 'color' }; });
+
+  fetch('/.netlify/functions/generate-form', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      trackTitle: sess.trackTitle || '',
+      trackArtist: sess.trackArtist || '',
+      tappedWords: positionWords,
+      tappedColors: colorWords,
+      dominantPosition: dominant,
+      structuralTag: sess.structuralTag || '',
+      hasHistory: hasHistory,
+      historyCount: hasHistory ? (history.count + 1) : 1,
+      historyPreviousPosition: hasHistory ? history.lastPosition : null,
+    }),
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (settled) return;
+    settled = true;
+    clearTimeout(safetyTimer);
+    if (token !== sess.reflectionToken) return;
+    cb(data.memoryLine || '', data.challenge || getFallbackChallenge(dominant));
+  })
+  .catch(function() {
+    if (settled) return;
+    settled = true;
+    clearTimeout(safetyTimer);
+    cb('', getFallbackChallenge(dominant));
+  });
+}
+
+function getFallbackChallenge(position) {
+  var lines = {
+    stay: ["don't rush whatever's next, you're not behind", 'stay in it a little longer, no one is timing you'],
+    move: ['go finish the thing you keep circling', "let it pull you somewhere loud for once"],
+    open: ["say yes to the next weird thing, on purpose", 'let this one stay unresolved a little longer'],
+    mixed: ["you're carrying two directions right now, that's allowed"],
+  };
+  var opts = lines[position] || lines.stay;
+  return opts[Math.floor(Math.random() * opts.length)];
+}
+
+function getDominant() {
+  var c = { stay: 0, move: 0, open: 0 };
+  sess.positions.forEach(function(p) { if (c[p] !== undefined) c[p]++; });
+  return Object.keys(c).reduce(function(a, b) { return c[a] >= c[b] ? a : b; });
+}
+
+function fallback(pos) {
+  var opts = FALLBACKS[pos] || FALLBACKS.open;
+  // Avoid repeating last reflection
+  var last = LS.get('lastFallback');
+  var filtered = opts.filter(function(o) { return o !== last; });
+  var pool = filtered.length > 0 ? filtered : opts;
+  var chosen = pool[Math.floor(Math.random() * pool.length)];
+  LS.set('lastFallback', chosen);
+  return chosen;
+}
+
+// ── KEEP GOING ────────────────────────────────────────────────────────────────
+function keepGoing() {
+  // Occasionally introduce curated track mid-session (point 8)
+  var interrupt = sess.isSearched
+    && sess.trackCount > 1
+    && CURATED.length > 0
+    && Math.random() < 0.25;
+
+  if (interrupt) {
+    selectCurated(true);
+  } else if (sess.isCurated && CURATED.length > 0) {
+    selectCurated(false);
+  } else {
+    showSearch();
+  }
+}
+
+// ── SESSION END ───────────────────────────────────────────────────────────────
+function endSession() {
+  sess.sessionCount++;
+  LS.set('sessionCount', sess.sessionCount);
+  LS.set('lastPosition', getDominant());
+  showStopped();
+}
+
+function showStopped() {
+  show('s-stopped');
+  setTimeout(function() {
+    document.getElementById('stopped-text').classList.add('show');
+    setTimeout(function() {
+      document.getElementById('stopped-actions').classList.add('show');
+    }, 600);
+  }, 300);
+}
+// ── SHARE ─────────────────────────────────────────────────────────────────────
+
+// ── YOUTUBE LOADER ───────────────────────────────────────────────────────────
+// Load YouTube API — must be inside main script so sess is in scope
+(function() {
+  var tag = document.createElement('script');
+  tag.src = 'https://www.youtube.com/iframe_api';
+  tag.onerror = function() { _ytDebug('YT iframe_api script FAILED to load'); };
+  tag.onload = function() { _ytDebug('YT iframe_api script tag loaded (onYouTubeIframeAPIReady should fire next)'); };
+  document.head.appendChild(tag);
+  _ytDebug('YT iframe_api script tag appended to head');
 })();
 
-/* REVEAL */
-var io=new IntersectionObserver(function(e){
-  e.forEach(function(x){if(x.isIntersecting)x.target.classList.add('on');});
-},{threshold:.04,rootMargin:'0px 0px 0px 0px'});
-document.querySelectorAll('.rev').forEach(function(el){io.observe(el);});
+window.onYouTubeIframeAPIReady = function() {
+  sess.ytReady = true;
+  _ytDebug('onYouTubeIframeAPIReady fired, window.YT.Player exists=' + !!(window.YT && window.YT.Player));
+};
+
+// ── EVENTS ────────────────────────────────────────────────────────────────────
+function bindEvents() {
+  // Entry
+  document.getElementById('btn-search').addEventListener('click', showSearch);
+  document.getElementById('btn-discover').addEventListener('click', function() {
+    if (CURATED.length > 0) { selectCurated(false); } else { showSearch(); }
+  });
+
+  // Tap to listen — the pulse dot is the only thing that ever calls
+  // playVideo(). This is a direct, fresh user gesture every time, which
+  // is the one case WebKit always honors regardless of autoplay heuristics.
+  document.getElementById('listen-play-btn').addEventListener('click', startListening);
+
+  // Return screen — same two actions, same landing link, just reached
+  // from the lighter mid-session screen instead of the full first-time one
+  document.getElementById('return-btn-search').addEventListener('click', showSearch);
+  document.getElementById('return-btn-discover').addEventListener('click', function() {
+    if (CURATED.length > 0) { selectCurated(false); } else { showSearch(); }
+  });
+
+  // Before
+  document.getElementById('before-cta').addEventListener('click', showEntry);
+
+  // Tap on search field wrapper to re-open keyboard on mobile
+  document.getElementById('search-field').addEventListener('input', function(e) {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(function() { doSearch(e.target.value.trim()); }, 400);
+  });
+
+  // Search back button — always returns to entry, the one stable home
+  // screen, so behavior is consistent every time you hit back, whether
+  // it's your first search or your fifth.
+  document.getElementById('search-back').addEventListener('click', function() {
+    _ytDebug('search-back clicked');
+    // Force the keyboard to dismiss synchronously before the return
+    // screen's timed animation starts. If the search field still has
+    // focus when back is tapped, iOS Safari dismisses the keyboard as
+    // a side effect, resizing the visual viewport — if that resize
+    // lands mid-transition it disrupts showReturn()'s animation timing,
+    // which reads as the screen flashing/disappearing before settling.
+    var f = document.getElementById('search-field');
+    if (f) f.blur();
+    showReturn();
+  });
+
+  // Event delegation for search results — handles clicks even on
+  // dynamically-rendered results, immune to stale listener bugs
+  document.getElementById('search-results').addEventListener('click', function(e) {
+    var resultEl = e.target.closest('.search-result');
+    if (!resultEl) return;
+    var title = resultEl.getAttribute('data-title');
+    var artist = resultEl.getAttribute('data-artist');
+    var ytId = resultEl.getAttribute('data-ytid');
+    if (title && ytId) {
+      selectTrack({ title: title, artist: artist, ytId: ytId }, false);
+    }
+  });
+
+  // Tap-word "that's it" button (appears at 30s, track still playing)
+  document.getElementById('tap-done-btn').addEventListener('click', function() {
+    handleTapDone();
+  });
+
+  // Listen
+  document.getElementById('listen-stop').addEventListener('click', function() {
+    stopAudio();
+    showSearch();
+  });
+  document.getElementById('listen-replay').addEventListener('click', handleReplay);
+
+  // Color screen
+  document.getElementById('color-done-btn').addEventListener('click', function() {
+    confirmChoice(sess.pendingChoice);
+  });
+
+  // Reflection
+  document.getElementById('keep-going-btn').addEventListener('click', keepGoing);
+
+  // Stopped
+  document.getElementById('btn-keep-going-2').addEventListener('click', keepGoing);
+  document.getElementById('btn-done').addEventListener('click', endSession);
+}
+
+// ── TRACK HISTORY ────────────────────────────────────────────────────────────
+function getTrackKey(title, artist) {
+  // Normalize: lowercase, remove punctuation, trim
+  return (title + '___' + artist).toLowerCase().replace(/[^a-z0-9___]/g, '').trim();
+}
+
+function getTrackHistory(title, artist) {
+  var key = getTrackKey(title, artist);
+  try {
+    var all = JSON.parse(localStorage.getItem('fynd_trackHistory') || '{}');
+    return all[key] || null;
+  } catch(e) { return null; }
+}
+
+function saveTrackHistory(title, artist, position) {
+  var key = getTrackKey(title, artist);
+  try {
+    var all = JSON.parse(localStorage.getItem('fynd_trackHistory') || '{}');
+    var prev = all[key];
+    all[key] = {
+      title: title,
+      artist: artist,
+      lastPosition: position,
+      lastDate: new Date().toISOString().slice(0, 10),
+      count: prev ? (prev.count + 1) : 1,
+      previousPosition: prev ? prev.lastPosition : null,
+    };
+    localStorage.setItem('fynd_trackHistory', JSON.stringify(all));
+  } catch(e) {}
+}
+
+// ── UTILS ─────────────────────────────────────────────────────────────────────
+function esc(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
 </script>
 </body>
 </html>
