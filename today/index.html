@@ -112,9 +112,7 @@ html, body {
    space with content that can run long (Done button colliding with the
    logo on tracks with more tapped words than usual). */
 body:has(.listen-stmts.show) #wordmark,
-body:has(#s-recognition.active) #wordmark,
-body:has(.listen-stmts.show) #yt-attribution,
-body:has(#s-recognition.active) #yt-attribution {
+body:has(#s-recognition.active) #wordmark {
   opacity: 0;
 }
 
@@ -388,9 +386,14 @@ body:has(#s-recognition.active) #yt-attribution {
   overflow: hidden;
   border: 1px solid rgba(252,251,244,.14);
   opacity: 0;
-  transition: opacity 0.6s ease;
+  transition: opacity 0.6s ease, width 0.4s ease, height 0.4s ease, margin 0.4s ease;
 }
 .listen-video-wrap.show { opacity: 1; }
+.listen-video-wrap.overlay-small {
+  width: 80px;
+  height: 45px;
+  margin: 16px auto 0;
+}
 .listen-pulse-wrap {
   display: flex;
   align-items: center;
@@ -1488,7 +1491,16 @@ function goListen() {
 
   dot.classList.remove('active');
   dot.classList.remove('hidden-under-overlay');
-  if (videoWrap) videoWrap.classList.remove('show');
+  if (videoWrap) {
+    videoWrap.classList.remove('show');
+    videoWrap.classList.remove('overlay-small');
+    // Restore to original position before pulse-wrap if it was moved during overlay
+    var sListen = document.getElementById('s-listen');
+    var pulseWrap = document.getElementById('listen-pulse-wrap');
+    if (sListen && pulseWrap && videoWrap.parentNode !== sListen) {
+      sListen.insertBefore(videoWrap, pulseWrap);
+    }
+  }
   if (playBtn) {
     playBtn.classList.remove('tappable');
     playBtn.classList.remove('loading');
@@ -1863,10 +1875,20 @@ function showStatementsOverlay() {
   var playBtn = document.getElementById('listen-play-btn');
   var info = document.getElementById('track-info');
   var tag = document.getElementById('curated-tag');
+  var videoWrap = document.getElementById('listen-video-wrap');
   if (dot) dot.classList.add('hidden-under-overlay');
   if (playBtn) playBtn.classList.add('hidden-under-overlay');
   if (info) info.classList.add('hidden-under-overlay');
   if (tag) tag.classList.add('hidden-under-overlay');
+  // Shrink the video and move it below the DONE button so it stays visible
+  // (YouTube branding compliance) without interfering with the word taps.
+  if (videoWrap) {
+    videoWrap.classList.add('overlay-small');
+    var doneBtn = document.getElementById('tap-done-btn');
+    if (doneBtn && doneBtn.parentNode) {
+      doneBtn.parentNode.insertBefore(videoWrap, doneBtn.nextSibling);
+    }
+  }
 
   // The wordmark is position:fixed to the viewport, not the document, so
   // it can't be scrolled away or cleared with padding — this overlay's
@@ -2289,6 +2311,12 @@ function bindEvents() {
 
   // Color screen
   document.getElementById('color-done-btn').addEventListener('click', function() {
+    // Hide the video entirely after color tapping is done — no more playback
+    var vw = document.getElementById('listen-video-wrap');
+    if (vw) {
+      vw.classList.remove('show');
+      vw.classList.remove('overlay-small');
+    }
     confirmChoice(sess.pendingChoice);
   });
 
