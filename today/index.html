@@ -573,10 +573,12 @@ body:has(#s-recognition.active) #wordmark {
   cursor: pointer;
   transition: border-color 0.2s ease, background 0.15s ease, transform 0.1s ease, opacity 0.2s ease;
   opacity: 0;
+  pointer-events: none;
   transform: translateY(6px);
 }
 .tap-word.show {
   opacity: 1;
+  pointer-events: auto;
   transform: translateY(0);
 }
 .tap-word:active {
@@ -1457,6 +1459,13 @@ function goListen() {
   var info = document.getElementById('track-info');
   var tag = document.getElementById('curated-tag');
 
+  _ytDebug('goListen: videoWrap exists=' + !!videoWrap + ', playBtn exists=' + !!playBtn);
+  var stmtWrapCheck = document.getElementById('listen-stmts');
+  if (stmtWrapCheck) {
+    var cs = window.getComputedStyle(stmtWrapCheck);
+    _ytDebug('goListen: listen-stmts computed opacity=' + cs.opacity + ', pointerEvents=' + cs.pointerEvents + ', classList=' + stmtWrapCheck.className);
+  }
+
   dot.classList.remove('active');
   dot.classList.remove('hidden-under-overlay');
   if (videoWrap) videoWrap.classList.remove('show');
@@ -1558,7 +1567,7 @@ function handleReplay() {
 // ── YT DEBUG LOGGING (visible overlay disabled — core mechanism confirmed working) ──
 // Set to true only for active debugging sessions; logs go to console instead
 // of an on-screen panel so they never block real users' controls again.
-var YT_DEBUG_VISIBLE = false;
+var YT_DEBUG_VISIBLE = true;
 function _ytDebug(msg) {
   if (!YT_DEBUG_VISIBLE) {
     if (window.console && console.log) console.log('[yt]', msg);
@@ -1606,7 +1615,6 @@ function playYouTube(ytId) {
     var freshTarget = document.createElement('div');
     freshTarget.id = 'yt-player';
     videoWrap.appendChild(freshTarget);
-    videoWrap.classList.add('show');
     _ytDebug('fresh #yt-player div created in visible video wrap');
   } else {
     _ytDebug('ERROR: #listen-video-wrap not found in DOM');
@@ -1645,6 +1653,10 @@ function playYouTube(ytId) {
       events: {
         onReady: function(e) {
           _ytDebug('onReady fired (cued, waiting for tap)');
+          // Show the video wrap now — the screen is active and goListen's
+          // reset has already run, so adding .show here sticks correctly.
+          var vw = document.getElementById('listen-video-wrap');
+          if (vw) vw.classList.add('show');
           showTapToListen();
         },
         onStateChange: function(e) {
