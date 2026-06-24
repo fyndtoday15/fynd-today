@@ -386,14 +386,9 @@ body:has(#s-recognition.active) #wordmark {
   overflow: hidden;
   border: 1px solid rgba(252,251,244,.14);
   opacity: 0;
-  transition: opacity 0.6s ease, width 0.4s ease, height 0.4s ease, margin 0.4s ease;
+  transition: opacity 0.6s ease;
 }
 .listen-video-wrap.show { opacity: 1; }
-.listen-video-wrap.overlay-small {
-  width: 80px;
-  height: 45px;
-  margin: 16px auto 0;
-}
 .listen-pulse-wrap {
   display: flex;
   align-items: center;
@@ -1494,12 +1489,7 @@ function goListen() {
   if (videoWrap) {
     videoWrap.classList.remove('show');
     videoWrap.classList.remove('overlay-small');
-    // Restore to original position before pulse-wrap if it was moved during overlay
-    var sListen = document.getElementById('s-listen');
-    var pulseWrap = document.getElementById('listen-pulse-wrap');
-    if (sListen && pulseWrap && videoWrap.parentNode !== sListen) {
-      sListen.insertBefore(videoWrap, pulseWrap);
-    }
+    videoWrap.classList.remove('hidden-under-overlay');
   }
   if (playBtn) {
     playBtn.classList.remove('tappable');
@@ -1880,15 +1870,7 @@ function showStatementsOverlay() {
   if (playBtn) playBtn.classList.add('hidden-under-overlay');
   if (info) info.classList.add('hidden-under-overlay');
   if (tag) tag.classList.add('hidden-under-overlay');
-  // Shrink the video and move it below the DONE button so it stays visible
-  // (YouTube branding compliance) without interfering with the word taps.
-  if (videoWrap) {
-    videoWrap.classList.add('overlay-small');
-    var doneBtn = document.getElementById('tap-done-btn');
-    if (doneBtn && doneBtn.parentNode) {
-      doneBtn.parentNode.insertBefore(videoWrap, doneBtn.nextSibling);
-    }
-  }
+  if (videoWrap) videoWrap.classList.add('hidden-under-overlay');
 
   // The wordmark is position:fixed to the viewport, not the document, so
   // it can't be scrolled away or cleared with padding — this overlay's
