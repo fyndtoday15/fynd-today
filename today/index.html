@@ -211,7 +211,12 @@ body:has(#s-recognition.active) #wordmark {
   text-transform: uppercase;
   color: rgba(240,237,230,0.5);
   text-decoration: none;
+  text-align: center;
+  opacity: 0;
+  transition: opacity 1s ease, color 0.2s ease;
 }
+.landing-link.show { opacity: 1; }
+.landing-link:active { color: var(--fg); }
 .return-browser-note {
   font-family: var(--f);
   font-size: 10px;
@@ -221,13 +226,10 @@ body:has(#s-recognition.active) #wordmark {
   max-width: 320px;
   line-height: 1.7;
   margin-top: 32px;
-}
-  text-align: center;
   opacity: 0;
-  transition: opacity 1s ease, color 0.2s ease;
+  transition: opacity 1s ease;
 }
-.landing-link.show { opacity: 1; }
-.landing-link:active { color: var(--fg); }
+.return-browser-note.show { opacity: 1; }
 
 /* ── S-BEFORE (return visit) ── */
 #s-before { gap: 0; }
@@ -1323,6 +1325,12 @@ function init() {
   sess.beforeLine = LS.get('beforeLine');
   sess.id = 'f2_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
 
+  // Restore discover session progress from localStorage
+  var savedDiscoverIdx = LS.get('discoverIdx');
+  var savedDiscoverDone = LS.get('discoverDone');
+  if (savedDiscoverIdx !== null) discoverSess.idx = savedDiscoverIdx;
+  if (savedDiscoverDone) discoverSess.done = true;
+
   if (sess.sessionCount > 0 && sess.beforeLine) {
     showBefore();
   } else {
@@ -1380,18 +1388,13 @@ function showReturn() {
   show('s-return');
   var line = document.getElementById('return-line');
   var paths = document.getElementById('return-paths');
+  var note = document.querySelector('.return-browser-note');
   var link = document.getElementById('return-landing-link');
   if (line) line.classList.remove('show');
   if (paths) paths.classList.remove('show');
+  if (note) note.classList.remove('show');
   if (link) link.classList.remove('show');
 
-  // show() itself takes 350ms to swap screens (old one fades out first).
-  // Anchor all timing off that, not off the moment this function was
-  // called, so nothing starts fading in before the screen is even visible.
-  // Extra 150ms buffer on top accounts for the keyboard-dismiss viewport
-  // resize triggered by blurring the search field right before this is
-  // called — without it, the resize can land mid-fade and disrupt the
-  // animation, reading as a flash/disappear before the screen settles.
   var BUFFER = 150;
   setTimeout(function() {
     if (line) line.classList.add('show');
@@ -1400,11 +1403,14 @@ function showReturn() {
     if (paths) paths.classList.add('show');
   }, 350 + BUFFER + 700);
   setTimeout(function() {
-    if (link) link.classList.add('show');
+    if (note) note.classList.add('show');
   }, 350 + BUFFER + 1100);
   setTimeout(function() {
+    if (link) link.classList.add('show');
+  }, 350 + BUFFER + 1400);
+  setTimeout(function() {
     sess.returnScreenAnimating = false;
-  }, 350 + BUFFER + 1100 + 600);
+  }, 350 + BUFFER + 1400 + 600);
 }
 
 function showBefore() {
@@ -1616,13 +1622,21 @@ function loadDiscoverTrack() {
     // All 5 complete
     discoverSess.done = true;
     discoverSess.active = false;
+    LS.set('discoverIdx', discoverSess.idx);
+    LS.set('discoverDone', true);
     hideDiscoverDots();
     show('s-caught-up');
     return;
   }
+  LS.set('discoverIdx', discoverSess.idx);
   var t = CURATED[discoverSess.idx];
   updateDiscoverDots(discoverSess.idx);
   selectTrack({ title: t.title, artist: t.artist, ytId: t.ytId, isInterrupted: false }, true);
+  // Show back button immediately in discover mode — don't wait for play
+  setTimeout(function() {
+    var stop = document.getElementById('listen-stop');
+    if (stop) stop.classList.add('show');
+  }, 400);
 }
 
 function updateDiscoverDots(currentIdx) {
@@ -1650,6 +1664,7 @@ function skipDiscoverTrack() {
     }
   });
   discoverSess.idx++;
+  LS.set('discoverIdx', discoverSess.idx);
   // Hide skip button immediately
   var skipBtn = document.getElementById('listen-skip');
   if (skipBtn) skipBtn.classList.remove('show');
@@ -2516,6 +2531,7 @@ function bindEvents() {
     // Advance discover index when a track is fully completed
     if (discoverSess.active) {
       discoverSess.idx++;
+      LS.set('discoverIdx', discoverSess.idx);
     }
     confirmChoice(sess.pendingChoice);
   });
@@ -2527,6 +2543,8 @@ function bindEvents() {
   document.getElementById('caught-up-replay').addEventListener('click', function() {
     discoverSess.idx = 0;
     discoverSess.done = false;
+    LS.set('discoverIdx', 0);
+    LS.set('discoverDone', false);
     startDiscover();
   });
   document.getElementById('caught-up-search').addEventListener('click', function() {
