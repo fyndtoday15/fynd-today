@@ -1122,7 +1122,7 @@ body:has(#s-recognition.active) #wordmark {
      persist visibly across both the listen screen and the color screen.
      Visibility controlled directly via JS, not tied to any single screen's
      .active state. -->
-<button class="listen-stop" id="listen-stop">back</button>
+<button class="listen-stop" id="listen-stop">← back</button>
 <button class="listen-replay" id="listen-replay">replay</button>
 <button class="listen-skip" id="listen-skip">skip</button>
 
@@ -1375,14 +1375,9 @@ function showEntry() {
 // search mid-session. No five-line slow buildup — just one line, then
 // the same three options, loading in quickly.
 function showReturn() {
-  // Guard against rapid re-clicks of the back button restarting this
-  // screen's fade mid-transition, which looks like a flash/disappear/
-  // flash-again instead of one clean fade in.
-  _ytDebug('showReturn() called, returnScreenAnimating=' + sess.returnScreenAnimating);
-  if (sess.returnScreenAnimating) {
-    _ytDebug('  BLOCKED by guard, returning early');
-    return;
-  }
+  // Reset the guard immediately — we want a clean animation every time
+  // this is called deliberately. The guard exists to prevent rapid
+  // double-taps of the back button, not to block navigation from other screens.
   sess.returnScreenAnimating = true;
 
   show('s-return');
@@ -2422,6 +2417,10 @@ function endSession() {
 }
 
 function showStopped() {
+  document.getElementById('listen-stop').classList.remove('show');
+  document.getElementById('listen-replay').classList.remove('show');
+  var skipBtnSS2 = document.getElementById('listen-skip');
+  if (skipBtnSS2) skipBtnSS2.classList.remove('show');
   show('s-stopped');
   setTimeout(function() {
     document.getElementById('stopped-text').classList.add('show');
