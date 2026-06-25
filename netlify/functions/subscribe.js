@@ -27,6 +27,7 @@ exports.handler = async function(event, context) {
   const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
 
   if (!BREVO_API_KEY) {
+    console.error('subscribe: BREVO_API_KEY not set');
     return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Server configuration error' }) };
   }
 
@@ -43,9 +44,9 @@ exports.handler = async function(event, context) {
     return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Email and name are required' }) };
   }
 
-  // 1. Add to Brevo
+  // 1. Add to Brevo — robust response handling
   try {
-    const res = await fetch('https://api.brevo.com/v3/contacts', {
+    const brevoRes = await fetch('https://api.brevo.com/v3/contacts', {
       method: 'POST',
       headers: { 'api-key': BREVO_API_KEY, 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -55,18 +56,31 @@ exports.handler = async function(event, context) {
         updateEnabled: true,
       }),
     });
-    const body = await res.json();
-    const brevoOk = res.status === 201 || res.status === 204 || (res.status === 400 && body.code === 'duplicate_parameter');
-    if (!brevoOk) {
-      console.error('subscribe: Brevo error', res.status, body);
-      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to add to Brevo' }) };
+
+    // 204 has no body — don't try to parse it
+    let brevoBody = null;
+    if (brevoRes.status !== 204) {
+      try { brevoBody = await brevoRes.json(); } catch(e) {}
     }
+
+    // 201 = created, 204 = updated, 200 = ok, duplicate_parameter = already on list
+    const brevoOk = brevoRes.status === 201
+      || brevoRes.status === 204
+      || brevoRes.status === 200
+      || (brevoBody && brevoBody.code === 'duplicate_parameter');
+
+    if (!brevoOk) {
+      console.error('subscribe: Brevo error', brevoRes.status, brevoBody);
+      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to add contact', detail: brevoBody && brevoBody.message }) };
+    }
+
+    console.log('subscribe: Brevo success for', email);
   } catch(err) {
     console.error('subscribe: Brevo fetch error', err);
     return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: err.toString() }) };
   }
 
-  // 2. Patch Airtable if we have a visitorId and API key
+  // 2. Patch Airtable — best effort, never fails the request
   if (visitorId && AIRTABLE_API_KEY) {
     try {
       const atHeaders = {
@@ -101,7 +115,6 @@ exports.handler = async function(event, context) {
           return { id: r.id, fields };
         });
 
-        // Batch in groups of 10 (Airtable limit)
         for (let i = 0; i < patches.length; i += 10) {
           await fetch(AIRTABLE_URL, {
             method: 'PATCH',
@@ -109,10 +122,10 @@ exports.handler = async function(event, context) {
             body: JSON.stringify({ records: patches.slice(i, i + 10) }),
           });
         }
+        console.log('subscribe: Airtable patched', patches.length, 'records for visitorId', visitorId);
       }
     } catch(err) {
-      console.error('subscribe: Airtable patch error', err);
-      // Don't fail the whole request — Brevo succeeded, Airtable patch is best-effort
+      console.error('subscribe: Airtable patch error (non-fatal):', err);
     }
   }
 
