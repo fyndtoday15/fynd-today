@@ -866,6 +866,12 @@ function handleEmailSubmit(e) {
   if (!firstName || !email || !consented) return;
   var consentTimestamp = new Date().toISOString();
   if (label) label.textContent = 'Sending...';
+  // Store in localStorage so the portal can pick these up on first visit
+  try {
+    localStorage.setItem('fynd2_pendingName', JSON.stringify(firstName));
+    localStorage.setItem('fynd2_pendingEmail', JSON.stringify(email));
+    localStorage.setItem('fynd2_pendingConsent', JSON.stringify(consentTimestamp));
+  } catch(e) {}
   // Get visitor ID from localStorage if it exists (set by the portal)
   var visitorId = '';
   try { var stored = localStorage.getItem('fynd2_visitorId'); if (stored) visitorId = JSON.parse(stored); } catch(e) {}
