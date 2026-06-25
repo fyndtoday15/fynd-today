@@ -85,6 +85,7 @@ exports.handler = async function(event, context) {
       if (data.colorsTapped !== undefined)     fields['Colors Tapped']           = data.colorsTapped;
       if (data.dominantPosition !== undefined) fields['Dominant Position']       = data.dominantPosition;
       if (data.formGenerated !== undefined)    fields['Form Generated']          = data.formGenerated;
+      if (data.memoryLine !== undefined)       fields['Memory Line']             = data.memoryLine;
       if (data.timeListened !== undefined)     fields['Time Listened (seconds)'] = data.timeListened;
       if (data.status !== undefined)           fields['Status']                  = data.status;
       if (data.replayCount !== undefined)      fields['Replay Count']            = data.replayCount;
