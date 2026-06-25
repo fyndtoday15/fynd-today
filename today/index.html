@@ -1178,6 +1178,74 @@ var LS = {
   },
 };
 
+// ── AIRTABLE LOGGING ──────────────────────────────────────────────────────────
+function getDeviceInfo() {
+  var ua = navigator.userAgent;
+  var browser = 'Unknown';
+  if (ua.indexOf('Chrome') > -1 && ua.indexOf('Edg') === -1) browser = 'Chrome';
+  else if (ua.indexOf('Safari') > -1 && ua.indexOf('Chrome') === -1) browser = 'Safari';
+  else if (ua.indexOf('Firefox') > -1) browser = 'Firefox';
+  else if (ua.indexOf('Edg') > -1) browser = 'Edge';
+  var device = /Mobi|Android|iPhone|iPad/i.test(ua) ? 'Mobile' : 'Desktop';
+  return { browser: browser, device: device };
+}
+
+function logCreate(track, entryMode) {
+  var info = getDeviceInfo();
+  var tz = '';
+  try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone; } catch(e) {}
+  var payload = {
+    action: 'create',
+    visitorId: sess.visitorId,
+    sessionId: sess.id,
+    visitNumber: sess.sessionCount + 1,
+    daysSinceLastVisit: sess.daysSinceLastVisit,
+    timestamp: new Date().toISOString(),
+    timezone: tz,
+    entryMode: entryMode,
+    trackTitle: track.title || '',
+    trackArtist: track.artist || '',
+    youtubeLink: track.ytId ? 'https://www.youtube.com/watch?v=' + track.ytId : '',
+    browser: info.browser,
+    device: info.device,
+  };
+  fetch('/.netlify/functions/log-session', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.recordId) sess.airtableRecordId = data.recordId;
+  })
+  .catch(function(e) { console.warn('logCreate failed:', e); });
+}
+
+function logUpdate(fields) {
+  if (!sess.airtableRecordId) return;
+  fields.action = 'update';
+  fields.recordId = sess.airtableRecordId;
+  fetch('/.netlify/functions/log-session', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(fields),
+  }).catch(function(e) { console.warn('logUpdate failed:', e); });
+}
+
+function logEmailPatch(name, email, consentTimestamp) {
+  fetch('/.netlify/functions/log-session', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      action: 'emailPatch',
+      visitorId: sess.visitorId,
+      name: name,
+      email: email,
+      consentTimestamp: consentTimestamp || null,
+    }),
+  }).catch(function(e) { console.warn('logEmailPatch failed:', e); });
+}
+
 // ── CURATED TRACKS ────────────────────────────────────────────────────────────
 var CURATED = [
   { title: 'Casa', artist: 'Anfa Rose', ytId: '4XKZAg9oNv8' },
@@ -1324,6 +1392,24 @@ function init() {
   sess.sessionCount = LS.get('sessionCount') || 0;
   sess.beforeLine = LS.get('beforeLine');
   sess.id = 'f2_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+
+  // Visitor ID — permanent per browser, generated once, stored forever
+  var storedVisitorId = LS.get('visitorId');
+  if (!storedVisitorId) {
+    storedVisitorId = 'v_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+    LS.set('visitorId', storedVisitorId);
+  }
+  sess.visitorId = storedVisitorId;
+
+  // Days since last visit
+  var lastVisitTs = LS.get('lastVisitTs');
+  var now = Date.now();
+  sess.daysSinceLastVisit = lastVisitTs ? Math.floor((now - lastVisitTs) / 86400000) : 0;
+  LS.set('lastVisitTs', now);
+
+  // Current Airtable record ID for the active track — patched progressively
+  sess.airtableRecordId = null;
+  sess.replayCount = 0;
 
   // Restore discover session progress from localStorage
   var savedDiscoverIdx = LS.get('discoverIdx');
@@ -1574,6 +1660,14 @@ function selectTrack(track, isCurated) {
   sess.chosenPosition = null;
   sess.trackCount++;
 
+  // Reset Airtable record for this new track
+  sess.airtableRecordId = null;
+  sess.replayCount = 0;
+
+  // Log to Airtable — create row immediately on track start
+  var entryMode = isCurated ? 'Discover' : 'Search';
+  logCreate(track, entryMode);
+
   // Reset tap state and increment token to cancel any pending callbacks
   sess.wordPool = null;
   sess.structuralTag = '';
@@ -1658,6 +1752,7 @@ function hideDiscoverDots() {
 
 function skipDiscoverTrack() {
   if (!discoverSess.active) return;
+  logUpdate({ status: 'Skipped' });
   // Stop current audio
   fadeAudioOut(function() {
     if (sess.ytPlayer && typeof sess.ytPlayer.stopVideo === 'function') {
@@ -1795,14 +1890,14 @@ function stopAudio() {
 
 function handleReplay() {
   // Restart the track from the beginning. Nothing else changes.
-  // The screen, the word overlay, whatever was tapped already, all of it
-  // stays exactly as it was. This only touches the audio.
   if (sess.ytPlayer && typeof sess.ytPlayer.seekTo === 'function') {
     try {
       sess.ytPlayer.seekTo(0, true);
       sess.ytPlayer.playVideo();
     } catch(e) {}
   }
+  sess.replayCount = (sess.replayCount || 0) + 1;
+  logUpdate({ replayCount: sess.replayCount });
 }
 
 // ── YOUTUBE PLAYER ────────────────────────────────────────────────────────────
@@ -2299,6 +2394,8 @@ function goReflection() {
     txt.textContent = challenge;
     txt.classList.add('show');
     acts.classList.add('show');
+    // Log the generated form text
+    logUpdate({ formGenerated: challenge || '' });
   }
 
   setTimeout(function() {
@@ -2517,6 +2614,10 @@ function bindEvents() {
 
   // Tap-word "that's it" button (appears at 30s, track still playing)
   document.getElementById('tap-done-btn').addEventListener('click', function() {
+    // Log words tapped immediately when user taps done on word overlay
+    var wordsStr = (sess.tappedWords || []).map(function(w) { return w.text; }).join(', ');
+    var timeListened = sess.choiceTime ? Math.round((Date.now() - sess.choiceTime) / 1000) : 0;
+    logUpdate({ wordsTapped: wordsStr, timeListened: timeListened });
     handleTapDone();
   });
 
@@ -2543,6 +2644,10 @@ function bindEvents() {
       discoverSess.idx++;
       LS.set('discoverIdx', discoverSess.idx);
     }
+    // Log colors tapped and dominant position
+    var colorsStr = (sess.tappedColorsList || []).join(', ');
+    var dominant = sess.pendingChoice || '';
+    logUpdate({ colorsTapped: colorsStr, dominantPosition: dominant, status: 'Completed' });
     confirmChoice(sess.pendingChoice);
   });
 
