@@ -1664,6 +1664,10 @@ function selectTrack(track, isCurated) {
   sess.airtableRecordId = null;
   sess.replayCount = 0;
 
+  // Clear any existing listen timer
+  if (sess.listenTimer) { clearInterval(sess.listenTimer); sess.listenTimer = null; }
+  sess.listenStartTime = null;
+
   // Log to Airtable — create row immediately on track start
   var entryMode = isCurated ? 'Discover' : 'Search';
   logCreate(track, entryMode);
@@ -2048,6 +2052,13 @@ function startListening() {
   if (sess.ytStarted) return;
   sess.ytStarted = true;
 
+  // Start listen timer
+  sess.listenStartTime = Date.now();
+  sess.listenTimer = setInterval(function() {
+    var secs = Math.round((Date.now() - sess.listenStartTime) / 1000);
+    logUpdate({ timeListened: secs });
+  }, 5000);
+
   // Immediate visual acknowledgment — without this there's a dead gap
   // between the tap and audio actually starting (player buffering takes
   // a moment) where it looks like the tap didn't register at all.
@@ -2394,8 +2405,8 @@ function goReflection() {
     txt.textContent = challenge;
     txt.classList.add('show');
     acts.classList.add('show');
-    // Log the generated form text
-    logUpdate({ formGenerated: challenge || '' });
+    // Log the generated form text and memory line
+    logUpdate({ formGenerated: challenge || '', memoryLine: memoryLine || '' });
   }
 
   setTimeout(function() {
@@ -2614,10 +2625,9 @@ function bindEvents() {
 
   // Tap-word "that's it" button (appears at 30s, track still playing)
   document.getElementById('tap-done-btn').addEventListener('click', function() {
-    // Log words tapped immediately when user taps done on word overlay
+    // Log words tapped when user taps done on word overlay
     var wordsStr = (sess.tappedWords || []).map(function(w) { return w.text; }).join(', ');
-    var timeListened = sess.choiceTime ? Math.round((Date.now() - sess.choiceTime) / 1000) : 0;
-    logUpdate({ wordsTapped: wordsStr, timeListened: timeListened });
+    logUpdate({ wordsTapped: wordsStr });
     handleTapDone();
   });
 
@@ -2644,10 +2654,13 @@ function bindEvents() {
       discoverSess.idx++;
       LS.set('discoverIdx', discoverSess.idx);
     }
+    // Stop listen timer and record final time
+    if (sess.listenTimer) { clearInterval(sess.listenTimer); sess.listenTimer = null; }
+    var finalTime = sess.listenStartTime ? Math.round((Date.now() - sess.listenStartTime) / 1000) : 0;
     // Log colors tapped and dominant position
     var colorsStr = (sess.tappedColorsList || []).join(', ');
     var dominant = sess.pendingChoice || '';
-    logUpdate({ colorsTapped: colorsStr, dominantPosition: dominant, status: 'Completed' });
+    logUpdate({ colorsTapped: colorsStr, dominantPosition: dominant, status: 'Completed', timeListened: finalTime });
     confirmChoice(sess.pendingChoice);
   });
 
