@@ -5,6 +5,9 @@ const ALLOWED_ORIGINS = [
 ];
 
 const BREVO_LIST_ID = 3;
+const AIRTABLE_BASE_ID = 'app6jfIbr50JLlJTi';
+const AIRTABLE_TABLE = 'Sessions';
+const AIRTABLE_URL = 'https://api.airtable.com/v0/' + AIRTABLE_BASE_ID + '/' + encodeURIComponent(AIRTABLE_TABLE);
 
 exports.handler = async function(event, context) {
   context.callbackWaitsForEmptyEventLoop = false;
@@ -21,8 +24,9 @@ exports.handler = async function(event, context) {
   if (event.httpMethod !== 'POST') return { statusCode: 405, body: 'Method Not Allowed' };
 
   const BREVO_API_KEY = process.env.BREVO_API_KEY;
+  const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
+
   if (!BREVO_API_KEY) {
-    console.error('subscribe: BREVO_API_KEY not set');
     return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Server configuration error' }) };
   }
 
@@ -32,66 +36,85 @@ exports.handler = async function(event, context) {
 
   const email = (data.email || '').trim().toLowerCase();
   const firstName = (data.firstName || '').trim();
+  const visitorId = (data.visitorId || '').trim();
+  const consentTimestamp = data.consentTimestamp || null;
 
   if (!email || !firstName) {
-    return {
-      statusCode: 400,
-      headers: corsHeaders,
-      body: JSON.stringify({ error: 'Email and name are required' }),
-    };
+    return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Email and name are required' }) };
   }
 
+  // 1. Add to Brevo
   try {
-    // Create or update contact in Brevo with list assignment
     const res = await fetch('https://api.brevo.com/v3/contacts', {
       method: 'POST',
-      headers: {
-        'api-key': BREVO_API_KEY,
-        'Content-Type': 'application/json',
-      },
+      headers: { 'api-key': BREVO_API_KEY, 'Content-Type': 'application/json' },
       body: JSON.stringify({
         email: email,
         attributes: { FIRSTNAME: firstName },
         listIds: [BREVO_LIST_ID],
-        updateEnabled: true, // update if contact already exists
+        updateEnabled: true,
       }),
     });
-
     const body = await res.json();
-
-    // 201 = created, 204 = updated (no body), both are success
-    if (res.status === 201 || res.status === 204) {
-      console.log('subscribe: contact added/updated:', email);
-      return {
-        statusCode: 200,
-        headers: corsHeaders,
-        body: JSON.stringify({ success: true }),
-      };
+    const brevoOk = res.status === 201 || res.status === 204 || (res.status === 400 && body.code === 'duplicate_parameter');
+    if (!brevoOk) {
+      console.error('subscribe: Brevo error', res.status, body);
+      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to add to Brevo' }) };
     }
-
-    // Brevo returns 400 with code 'duplicate_parameter' if already on list — treat as success
-    if (res.status === 400 && body.code === 'duplicate_parameter') {
-      console.log('subscribe: contact already on list:', email);
-      return {
-        statusCode: 200,
-        headers: corsHeaders,
-        body: JSON.stringify({ success: true }),
-      };
-    }
-
-    console.error('subscribe: Brevo error', res.status, body);
-    return {
-      statusCode: 500,
-      headers: corsHeaders,
-      body: JSON.stringify({ error: 'Failed to add contact', detail: body.message }),
-    };
-
   } catch(err) {
-    console.error('subscribe: fetch error', err);
-    return {
-      statusCode: 500,
-      headers: corsHeaders,
-      body: JSON.stringify({ error: err.toString() }),
-    };
+    console.error('subscribe: Brevo fetch error', err);
+    return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: err.toString() }) };
   }
+
+  // 2. Patch Airtable if we have a visitorId and API key
+  if (visitorId && AIRTABLE_API_KEY) {
+    try {
+      const atHeaders = {
+        'Authorization': 'Bearer ' + AIRTABLE_API_KEY,
+        'Content-Type': 'application/json',
+      };
+
+      // Check if email already exists under a different visitor ID
+      const checkUrl = AIRTABLE_URL
+        + '?filterByFormula=' + encodeURIComponent('AND({Email}="' + email + '",{Visitor ID}!="' + visitorId + '")')
+        + '&maxRecords=1&fields%5B%5D=Visitor%20ID';
+      const checkRes = await fetch(checkUrl, { headers: atHeaders });
+      const checkBody = await checkRes.json();
+      const linkedVisitorId = (checkBody.records && checkBody.records.length > 0)
+        ? checkBody.records[0].fields['Visitor ID']
+        : '';
+
+      // Find all records for this visitor
+      const searchUrl = AIRTABLE_URL
+        + '?filterByFormula=' + encodeURIComponent('{Visitor ID}="' + visitorId + '"');
+      const searchRes = await fetch(searchUrl, { headers: atHeaders });
+      const searchBody = await searchRes.json();
+
+      if (searchBody.records && searchBody.records.length > 0) {
+        const patches = searchBody.records.map(function(r) {
+          const fields = { 'Name': firstName, 'Email': email };
+          if (consentTimestamp) {
+            fields['Email Consent'] = 'Yes';
+            fields['Consent Timestamp'] = consentTimestamp;
+          }
+          if (linkedVisitorId) fields['Linked Visitor ID'] = linkedVisitorId;
+          return { id: r.id, fields };
+        });
+
+        // Batch in groups of 10 (Airtable limit)
+        for (let i = 0; i < patches.length; i += 10) {
+          await fetch(AIRTABLE_URL, {
+            method: 'PATCH',
+            headers: atHeaders,
+            body: JSON.stringify({ records: patches.slice(i, i + 10) }),
+          });
+        }
+      }
+    } catch(err) {
+      console.error('subscribe: Airtable patch error', err);
+      // Don't fail the whole request — Brevo succeeded, Airtable patch is best-effort
+    }
+  }
+
+  return { statusCode: 200, headers: corsHeaders, body: JSON.stringify({ success: true }) };
 };
