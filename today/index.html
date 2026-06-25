@@ -1216,7 +1216,19 @@ function logCreate(track, entryMode) {
   })
   .then(function(r) { return r.json(); })
   .then(function(data) {
-    if (data.recordId) sess.airtableRecordId = data.recordId;
+    if (data.recordId) {
+      sess.airtableRecordId = data.recordId;
+      // If there's a pending email patch from a landing page submission
+      // before the portal was ever visited, fire it now
+      if (sess.pendingEmailPatch) {
+        logEmailPatch(
+          sess.pendingEmailPatch.name,
+          sess.pendingEmailPatch.email,
+          sess.pendingEmailPatch.consentTimestamp
+        );
+        sess.pendingEmailPatch = null;
+      }
+    }
   })
   .catch(function(e) { console.warn('logCreate failed:', e); });
 }
@@ -1425,6 +1437,26 @@ function init() {
   var savedDiscoverDone = LS.get('discoverDone');
   if (savedDiscoverIdx !== null) discoverSess.idx = savedDiscoverIdx;
   if (savedDiscoverDone) discoverSess.done = true;
+
+  // Pick up any pending email/name/consent stored from landing page submission
+  // before the user ever visited the portal
+  var pendingName = LS.get('pendingName');
+  var pendingEmail = LS.get('pendingEmail');
+  var pendingConsent = LS.get('pendingConsent');
+  if (pendingEmail) {
+    sess.email = pendingEmail;
+    sess.firstName = pendingName || '';
+    // Patch will fire after first logCreate gets a recordId
+    sess.pendingEmailPatch = {
+      name: pendingName || '',
+      email: pendingEmail,
+      consentTimestamp: pendingConsent || null,
+    };
+    // Clear pending so it only fires once
+    LS.set('pendingName', null);
+    LS.set('pendingEmail', null);
+    LS.set('pendingConsent', null);
+  }
 
   if (sess.sessionCount > 0 && sess.beforeLine) {
     showBefore();
