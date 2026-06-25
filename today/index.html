@@ -1391,12 +1391,21 @@ function init() {
   sess.firstName = LS.get('firstName');
   sess.sessionCount = LS.get('sessionCount') || 0;
   sess.beforeLine = LS.get('beforeLine');
-  sess.id = 'f2_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+  // Session ID — short clean alphanumeric, new each visit
+  sess.id = (function() {
+    var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    var id = '';
+    for (var i = 0; i < 8; i++) id += chars[Math.floor(Math.random() * chars.length)];
+    return id;
+  })();
 
   // Visitor ID — permanent per browser, generated once, stored forever
   var storedVisitorId = LS.get('visitorId');
   if (!storedVisitorId) {
-    storedVisitorId = 'v_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+    var vchars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    var vid = '';
+    for (var vi = 0; vi < 8; vi++) vid += vchars[Math.floor(Math.random() * vchars.length)];
+    storedVisitorId = vid;
     LS.set('visitorId', storedVisitorId);
   }
   sess.visitorId = storedVisitorId;
