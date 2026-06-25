@@ -1375,12 +1375,13 @@ function showEntry() {
 // search mid-session. No five-line slow buildup — just one line, then
 // the same three options, loading in quickly.
 function showReturn() {
-  // Reset the guard immediately — we want a clean animation every time
-  // this is called deliberately. The guard exists to prevent rapid
-  // double-taps of the back button, not to block navigation from other screens.
+  // Guard against rapid re-clicks causing overlapping animations
+  if (sess.returnScreenAnimating) return;
   sess.returnScreenAnimating = true;
 
-  show('s-return');
+  // Remove .show from all elements BEFORE show() so they are already
+  // hidden when s-return fades in — prevents the flash where paths
+  // briefly appear from a previous visit before being cleared.
   var line = document.getElementById('return-line');
   var paths = document.getElementById('return-paths');
   var note = document.querySelector('.return-browser-note');
@@ -1390,22 +1391,27 @@ function showReturn() {
   if (note) note.classList.remove('show');
   if (link) link.classList.remove('show');
 
-  var BUFFER = 150;
+  show('s-return');
+
+  // show() takes 350ms to fade out old screen + fade in new one.
+  // Wait for that to fully settle before starting element reveals.
+  var SETTLE = 500;
   setTimeout(function() {
     if (line) line.classList.add('show');
-  }, 350 + BUFFER + 150);
+  }, SETTLE);
   setTimeout(function() {
     if (paths) paths.classList.add('show');
-  }, 350 + BUFFER + 700);
+  }, SETTLE + 600);
   setTimeout(function() {
     if (note) note.classList.add('show');
-  }, 350 + BUFFER + 1100);
+  }, SETTLE + 1000);
   setTimeout(function() {
     if (link) link.classList.add('show');
-  }, 350 + BUFFER + 1400);
-  setTimeout(function() {
-    sess.returnScreenAnimating = false;
-  }, 350 + BUFFER + 1400 + 600);
+    // Reset guard only after all animations complete
+    setTimeout(function() {
+      sess.returnScreenAnimating = false;
+    }, 800);
+  }, SETTLE + 1300);
 }
 
 function showBefore() {
@@ -2462,8 +2468,12 @@ function bindEvents() {
 
   // Return screen — same two actions, same landing link, just reached
   // from the lighter mid-session screen instead of the full first-time one
-  document.getElementById('return-btn-search').addEventListener('click', showSearch);
+  document.getElementById('return-btn-search').addEventListener('click', function() {
+    sess.returnScreenAnimating = false;
+    showSearch();
+  });
   document.getElementById('return-btn-discover').addEventListener('click', function() {
+    sess.returnScreenAnimating = false;
     startDiscover();
   });
 
@@ -2513,6 +2523,7 @@ function bindEvents() {
   // Listen
   document.getElementById('listen-stop').addEventListener('click', function() {
     stopAudio();
+    sess.returnScreenAnimating = false;
     discoverSess.active = false;
     hideDiscoverDots();
     showReturn();
