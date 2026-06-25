@@ -337,6 +337,28 @@ footer{padding:12px 48px 20px;border-top:1px solid rgba(252,251,244,.08);display
   margin-top: 12px;
   min-height: 18px;
 }
+.consent-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 14px;
+  cursor: pointer;
+}
+.consent-check {
+  margin-top: 2px;
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  accent-color: var(--off);
+  cursor: pointer;
+}
+.consent-text {
+  font-size: 11px;
+  letter-spacing: .06em;
+  color: var(--off);
+  opacity: .6;
+  line-height: 1.5;
+}
 .enter-note {
   margin-top: 18px;
   font-size: 11px;
@@ -782,6 +804,10 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
           required>
         <button type="submit" class="email-submit btn"><span id="email-submit-label">Count me in</span></button>
       </div>
+      <label class="consent-label">
+        <input type="checkbox" id="landing-consent" required class="consent-check">
+        <span class="consent-text">I agree to receive updates from FYND TODAY.</span>
+      </label>
       <p class="email-note" id="email-note"></p>
     </form>
   </div>
@@ -831,16 +857,27 @@ function handleEmailSubmit(e) {
   e.preventDefault();
   var nameInput = document.getElementById('landing-name-input');
   var emailInput = document.getElementById('landing-email-input');
+  var consentCheck = document.getElementById('landing-consent');
   var label = document.getElementById('email-submit-label');
   var note = document.getElementById('email-note');
   var firstName = nameInput ? nameInput.value.trim() : '';
   var email = emailInput ? emailInput.value.trim() : '';
-  if (!firstName || !email) return;
+  var consented = consentCheck ? consentCheck.checked : false;
+  if (!firstName || !email || !consented) return;
+  var consentTimestamp = new Date().toISOString();
   if (label) label.textContent = 'Sending...';
+  // Get visitor ID from localStorage if it exists (set by the portal)
+  var visitorId = '';
+  try { var stored = localStorage.getItem('fynd2_visitorId'); if (stored) visitorId = JSON.parse(stored); } catch(e) {}
   fetch('/.netlify/functions/subscribe', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: email, firstName: firstName }),
+    body: JSON.stringify({
+      email: email,
+      firstName: firstName,
+      consentTimestamp: consentTimestamp,
+      visitorId: visitorId,
+    }),
   })
   .then(function(r) { return r.json(); })
   .then(function(data) {
@@ -850,6 +887,7 @@ function handleEmailSubmit(e) {
     } else {
       if (emailInput) { emailInput.value = ''; emailInput.disabled = true; }
       if (nameInput) { nameInput.value = ''; nameInput.disabled = true; }
+      if (consentCheck) consentCheck.disabled = true;
       if (note) note.textContent = 'You are in.';
       setTimeout(function() {
         var target = document.getElementById('enter');
