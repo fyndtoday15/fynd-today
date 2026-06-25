@@ -155,8 +155,9 @@ function sourceScore(item) {
   // Boost: official audio in title = no intro, music starts immediately
   if (title.includes('official audio')) score += 5;
   else if (title.includes('audio')) score += 3;
+  else if (title.includes('lyric') || title.includes('lyrics')) score += 2;
   // Penalize: music video likely has intro/talking before music
-  if (title.includes('official video') || title.includes('official music video')) score -= 3;
+  if (title.includes('official video') || title.includes('official music video')) score -= 1;
   // Penalize: sped up, slowed, reverb = altered versions
   if (title.includes('sped up') || title.includes('slowed') || title.includes('reverb')) score -= 4;
   // Penalize: live, concert, performance = not studio
