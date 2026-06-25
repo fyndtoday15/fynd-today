@@ -530,6 +530,89 @@ body:has(#s-recognition.active) #wordmark {
 .listen-replay.show { opacity: 1; pointer-events: all; }
 .listen-replay:active { transform: scale(0.97); }
 
+.listen-skip {
+  position: fixed;
+  top: calc(env(safe-area-inset-top, 20px) + 48px);
+  right: 32px;
+  background: none;
+  border: none;
+  font-family: var(--f);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--fg);
+  cursor: pointer;
+  padding: 8px 0;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 40;
+  transition: opacity 0.5s ease;
+  white-space: nowrap;
+}
+.listen-skip.show { opacity: 1; pointer-events: all; }
+
+/* Discover progress dots */
+.discover-dots {
+  position: fixed;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 80px);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  z-index: 40;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+.discover-dots.show { opacity: 1; }
+.discover-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--fg);
+  opacity: 0.25;
+  transition: opacity 0.4s ease;
+}
+.discover-dot.active { opacity: 1; }
+
+/* Caught-up screen */
+.caught-up-text {
+  font-size: clamp(18px, 3vw, 26px);
+  letter-spacing: 0.02em;
+  color: var(--fg);
+  margin-bottom: 16px;
+  text-align: center;
+}
+.caught-up-sub {
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  color: var(--fg);
+  opacity: 0.5;
+  margin-bottom: 48px;
+  text-align: center;
+}
+.caught-up-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+.caught-up-btn {
+  background: none;
+  border: 1px solid rgba(252,251,244,0.3);
+  font-family: var(--f);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--fg);
+  cursor: pointer;
+  padding: 14px 32px;
+  transition: border-color 0.2s ease;
+  min-width: 200px;
+}
+.caught-up-btn:hover { border-color: var(--fg); }
+.caught-up-search { opacity: 0.5; }
+
 /* ── LISTEN STATEMENTS OVERLAY ── */
 .listen-stmts {
   position: fixed;
@@ -1021,6 +1104,26 @@ body:has(#s-recognition.active) #wordmark {
      .active state. -->
 <button class="listen-stop" id="listen-stop">back to search</button>
 <button class="listen-replay" id="listen-replay">replay</button>
+<button class="listen-skip" id="listen-skip">skip</button>
+
+<!-- Discover progress dots — only visible during a discover session -->
+<div class="discover-dots" id="discover-dots">
+  <span class="discover-dot" id="discover-dot-0"></span>
+  <span class="discover-dot" id="discover-dot-1"></span>
+  <span class="discover-dot" id="discover-dot-2"></span>
+  <span class="discover-dot" id="discover-dot-3"></span>
+  <span class="discover-dot" id="discover-dot-4"></span>
+</div>
+
+<!-- S-CAUGHT-UP — shown when all 5 discover tracks are complete -->
+<div class="screen" id="s-caught-up">
+  <div class="caught-up-text">you have heard them all.</div>
+  <div class="caught-up-sub">come back when you are ready to listen again.</div>
+  <div class="caught-up-actions">
+    <button class="caught-up-btn" id="caught-up-replay">listen again</button>
+    <button class="caught-up-btn caught-up-search" id="caught-up-search">search a track</button>
+  </div>
+</div>
 
 <!-- S-REFLECTION -->
 <div class="screen" id="s-reflection">
@@ -1056,10 +1159,21 @@ var LS = {
 };
 
 // ── CURATED TRACKS ────────────────────────────────────────────────────────────
-// Add approved tracks here: { title, artist, ytId }
 var CURATED = [
-  // { title: 'Track Name', artist: 'Artist', ytId: 'youtubeVideoId' },
+  { title: 'Track 1', artist: '', ytId: '4XKZAg9oNv8' },
+  { title: 'Track 2', artist: '', ytId: 'BhOuZMWIx90' },
+  { title: 'Track 3', artist: '', ytId: 'ij2MfqrIBkM' },
+  { title: 'Track 4', artist: '', ytId: 'MDNOL17o5-w' },
+  { title: 'Track 5', artist: '', ytId: 'NH7BHu35JqU' },
 ];
+
+// Discover session — tracks position within the 5 curated tracks independently
+// of the general curatedIdx used for mid-session interrupts
+var discoverSess = {
+  active: false,   // true when user entered via "Let sound find you"
+  idx: 0,          // which of the 5 they're on (0-4)
+  done: false,     // true once all 5 have been completed
+};
 
 // Statement pairs now generated per-track by get-statements.js
 
@@ -1301,6 +1415,10 @@ function showSearch() {
   document.getElementById('listen-stmts').classList.remove('show');
   document.getElementById('listen-stop').classList.remove('show');
   document.getElementById('listen-replay').classList.remove('show');
+  var skipBtnSS = document.getElementById('listen-skip');
+  if (skipBtnSS) skipBtnSS.classList.remove('show');
+  hideDiscoverDots();
+  discoverSess.active = false;
   var wm = document.getElementById('wordmark');
   if (wm) wm.style.opacity = '';
 
@@ -1464,6 +1582,62 @@ function selectCurated(interrupt) {
   selectTrack({ title: t.title, artist: t.artist, ytId: t.ytId, isInterrupted: !!interrupt }, true);
 }
 
+// Start a fresh discover session (user clicked "Let sound find you")
+function startDiscover() {
+  // If all 5 done, show caught-up screen
+  if (discoverSess.done) {
+    show('s-caught-up');
+    return;
+  }
+  discoverSess.active = true;
+  loadDiscoverTrack();
+}
+
+function loadDiscoverTrack() {
+  if (discoverSess.idx >= CURATED.length) {
+    // All 5 complete
+    discoverSess.done = true;
+    discoverSess.active = false;
+    hideDiscoverDots();
+    show('s-caught-up');
+    return;
+  }
+  var t = CURATED[discoverSess.idx];
+  updateDiscoverDots(discoverSess.idx);
+  selectTrack({ title: t.title, artist: t.artist, ytId: t.ytId, isInterrupted: false }, true);
+}
+
+function updateDiscoverDots(currentIdx) {
+  var dotsWrap = document.getElementById('discover-dots');
+  if (!dotsWrap) return;
+  dotsWrap.classList.add('show');
+  for (var i = 0; i < 5; i++) {
+    var dot = document.getElementById('discover-dot-' + i);
+    if (!dot) continue;
+    dot.classList.toggle('active', i === currentIdx);
+  }
+}
+
+function hideDiscoverDots() {
+  var dotsWrap = document.getElementById('discover-dots');
+  if (dotsWrap) dotsWrap.classList.remove('show');
+}
+
+function skipDiscoverTrack() {
+  if (!discoverSess.active) return;
+  // Stop current audio
+  fadeAudioOut(function() {
+    if (sess.ytPlayer && typeof sess.ytPlayer.stopVideo === 'function') {
+      try { sess.ytPlayer.stopVideo(); } catch(e) {}
+    }
+  });
+  discoverSess.idx++;
+  // Hide skip button immediately
+  var skipBtn = document.getElementById('listen-skip');
+  if (skipBtn) skipBtn.classList.remove('show');
+  loadDiscoverTrack();
+}
+
 // ── LISTEN ────────────────────────────────────────────────────────────────────
 function goListen() {
   show('s-listen');
@@ -1501,6 +1675,14 @@ function goListen() {
   stop.classList.remove('hidden-under-overlay');
   replay.classList.remove('show');
   replay.classList.remove('hidden-under-overlay');
+  var skipBtn = document.getElementById('listen-skip');
+  if (skipBtn) { skipBtn.classList.remove('show'); skipBtn.classList.remove('hidden-under-overlay'); }
+  // Show discover dots immediately if in discover session
+  if (discoverSess.active) {
+    updateDiscoverDots(discoverSess.idx);
+  } else {
+    hideDiscoverDots();
+  }
   info.classList.remove('show');
   info.classList.remove('hidden-under-overlay');
   tag.classList.remove('show');
@@ -1555,6 +1737,10 @@ function startListenTimers() {
   sess.stopTimer = setTimeout(function() {
     document.getElementById('listen-stop').classList.add('show');
     document.getElementById('listen-replay').classList.add('show');
+    // Skip only shows in discover mode
+    if (discoverSess.active) {
+      document.getElementById('listen-skip').classList.add('show');
+    }
   }, 10000);
 
   // Show statements at 30s — track keeps playing underneath
@@ -2018,6 +2204,8 @@ function confirmChoice(position) {
   // Leaving the listen/color flow — hide the persistent back and replay controls
   document.getElementById('listen-stop').classList.remove('show');
   document.getElementById('listen-replay').classList.remove('show');
+  var skipBtnCC = document.getElementById('listen-skip');
+  if (skipBtnCC) skipBtnCC.classList.remove('show');
   goReflection();
 }
 
@@ -2171,6 +2359,12 @@ function fallback(pos) {
 
 // ── KEEP GOING ────────────────────────────────────────────────────────────────
 function keepGoing() {
+  // If in a discover session, load the next track in sequence
+  if (discoverSess.active) {
+    loadDiscoverTrack();
+    return;
+  }
+
   // Occasionally introduce curated track mid-session (point 8)
   var interrupt = sess.isSearched
     && sess.trackCount > 1
@@ -2226,7 +2420,7 @@ function bindEvents() {
   // Entry
   document.getElementById('btn-search').addEventListener('click', showSearch);
   document.getElementById('btn-discover').addEventListener('click', function() {
-    if (CURATED.length > 0) { selectCurated(false); } else { showSearch(); }
+    startDiscover();
   });
 
   // Tap to listen — the pulse dot is the only thing that ever calls
@@ -2238,7 +2432,7 @@ function bindEvents() {
   // from the lighter mid-session screen instead of the full first-time one
   document.getElementById('return-btn-search').addEventListener('click', showSearch);
   document.getElementById('return-btn-discover').addEventListener('click', function() {
-    if (CURATED.length > 0) { selectCurated(false); } else { showSearch(); }
+    startDiscover();
   });
 
   // Before
@@ -2293,13 +2487,32 @@ function bindEvents() {
 
   // Color screen
   document.getElementById('color-done-btn').addEventListener('click', function() {
-    // Hide the video entirely after color tapping is done — no more playback
+    // Hide the video entirely after color tapping is done
     var vw = document.getElementById('listen-video-wrap');
     if (vw) {
       vw.classList.remove('show');
-      vw.classList.remove('overlay-small');
+      vw.classList.remove('hidden-under-overlay');
+    }
+    // Advance discover index when a track is fully completed
+    if (discoverSess.active) {
+      discoverSess.idx++;
     }
     confirmChoice(sess.pendingChoice);
+  });
+
+  // Skip button — discover mode only
+  document.getElementById('listen-skip').addEventListener('click', skipDiscoverTrack);
+
+  // Caught-up screen
+  document.getElementById('caught-up-replay').addEventListener('click', function() {
+    discoverSess.idx = 0;
+    discoverSess.done = false;
+    startDiscover();
+  });
+  document.getElementById('caught-up-search').addEventListener('click', function() {
+    discoverSess.active = false;
+    hideDiscoverDots();
+    showSearch();
   });
 
   // Reflection
