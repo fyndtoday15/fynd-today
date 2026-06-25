@@ -906,7 +906,6 @@ function copyEmail(){
   });
 }
 
-function openContact(){document.getElementById('contact-sheet').classList.add('open')}
 function closeContact(){document.getElementById('contact-sheet').classList.remove('open')}
 function contactVia(type){
   var email = 'hello@fyndtoday.com';
@@ -926,7 +925,6 @@ function contactVia(type){
   }
 }
 
-function openShare(){document.getElementById('share-sheet').classList.add('open')}
 function closeShare(){document.getElementById('share-sheet').classList.remove('open')}
 function shareVia(type){
   var url = SITE_URL;
@@ -959,7 +957,20 @@ function shareVia(type){
 }
 
 // Close share sheets when tapping the page backdrop (outside the sheet)
+var sheetJustOpened = false;
+function openContact(){
+  sheetJustOpened = true;
+  document.getElementById('contact-sheet').classList.add('open');
+  setTimeout(function(){ sheetJustOpened = false; }, 50);
+}
+function openShare(){
+  sheetJustOpened = true;
+  document.getElementById('share-sheet').classList.add('open');
+  setTimeout(function(){ sheetJustOpened = false; }, 50);
+}
+
 document.addEventListener('click', function(e) {
+  if (sheetJustOpened) return;
   var shareSheet = document.getElementById('share-sheet');
   var contactSheet = document.getElementById('contact-sheet');
   if (shareSheet && shareSheet.classList.contains('open') && !shareSheet.contains(e.target)) {
