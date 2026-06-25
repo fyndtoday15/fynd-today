@@ -1376,21 +1376,26 @@ function showEntry() {
 // the same three options, loading in quickly.
 var returnTimers = [];
 function showReturn() {
-  // Cancel any pending animation from a previous call — this is what
-  // actually prevents the flash. Old timeouts firing mid-new-sequence
-  // were the root cause of the appear/disappear/appear pattern.
+  // Cancel any pending animation from a previous call
   returnTimers.forEach(function(t) { clearTimeout(t); });
   returnTimers = [];
 
-  // Clear all elements before show() so s-return fades in already clean
   var line = document.getElementById('return-line');
   var paths = document.getElementById('return-paths');
   var note = document.querySelector('.return-browser-note');
   var link = document.getElementById('return-landing-link');
-  if (line) line.classList.remove('show');
-  if (paths) paths.classList.remove('show');
-  if (note) note.classList.remove('show');
-  if (link) link.classList.remove('show');
+
+  // Force instant reset — kill transitions temporarily so elements
+  // snap to opacity:0 rather than fading there over 1s, which would
+  // still be visibly present when s-return fades in.
+  [line, paths, note, link].forEach(function(el) {
+    if (!el) return;
+    el.style.transition = 'none';
+    el.classList.remove('show');
+    // Re-enable transitions after the forced reset settles
+    el.getBoundingClientRect(); // force reflow
+    el.style.transition = '';
+  });
 
   show('s-return');
 
