@@ -211,6 +211,17 @@ body:has(#s-recognition.active) #wordmark {
   text-transform: uppercase;
   color: rgba(240,237,230,0.5);
   text-decoration: none;
+}
+.return-browser-note {
+  font-family: var(--f);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: rgba(240,237,230,0.35);
+  text-align: center;
+  max-width: 320px;
+  line-height: 1.7;
+  margin-top: 32px;
+}
   text-align: center;
   opacity: 0;
   transition: opacity 1s ease, color 0.2s ease;
@@ -464,6 +475,12 @@ body:has(#s-recognition.active) #wordmark {
   max-width: 380px;
 }
 .listen-track-info.show { opacity: 1; }
+
+#s-listen {
+  justify-content: center;
+  padding: 80px 24px 120px;
+  overflow: hidden;
+}
 
 .listen-framing {
   font-size: 12px;
@@ -1046,6 +1063,7 @@ body:has(#s-recognition.active) #wordmark {
     <div class="path-sep">or</div>
     <button class="path-btn" id="return-btn-discover">Let sound find you</button>
   </div>
+  <div class="return-browser-note">The portal remembers you. For the full experience, come back using the same browser.</div>
   <a class="landing-link" id="return-landing-link" href="/">go back to the landing page</a>
 </div>
 
@@ -1102,7 +1120,7 @@ body:has(#s-recognition.active) #wordmark {
      persist visibly across both the listen screen and the color screen.
      Visibility controlled directly via JS, not tied to any single screen's
      .active state. -->
-<button class="listen-stop" id="listen-stop">back to search</button>
+<button class="listen-stop" id="listen-stop">back</button>
 <button class="listen-replay" id="listen-replay">replay</button>
 <button class="listen-skip" id="listen-skip">skip</button>
 
@@ -2481,7 +2499,9 @@ function bindEvents() {
   // Listen
   document.getElementById('listen-stop').addEventListener('click', function() {
     stopAudio();
-    showSearch();
+    discoverSess.active = false;
+    hideDiscoverDots();
+    showReturn();
   });
   document.getElementById('listen-replay').addEventListener('click', handleReplay);
 
