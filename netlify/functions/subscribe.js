@@ -44,40 +44,51 @@ exports.handler = async function(event, context) {
     return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Email and name are required' }) };
   }
 
-  // 1. Add to Brevo — robust response handling
+  // 1. Check if contact already exists in Brevo
+  let alreadyExists = false;
   try {
-    const brevoRes = await fetch('https://api.brevo.com/v3/contacts', {
-      method: 'POST',
-      headers: { 'api-key': BREVO_API_KEY, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        email: email,
-        attributes: { FIRSTNAME: firstName },
-        listIds: [BREVO_LIST_ID],
-        updateEnabled: true,
-      }),
+    const checkRes = await fetch('https://api.brevo.com/v3/contacts/' + encodeURIComponent(email), {
+      method: 'GET',
+      headers: { 'api-key': BREVO_API_KEY },
     });
-
-    // 204 has no body — don't try to parse it
-    let brevoBody = null;
-    if (brevoRes.status !== 204) {
-      try { brevoBody = await brevoRes.json(); } catch(e) {}
+    if (checkRes.status === 200) {
+      alreadyExists = true;
     }
-
-    // 201 = created, 204 = updated, 200 = ok, duplicate_parameter = already on list
-    const brevoOk = brevoRes.status === 201
-      || brevoRes.status === 204
-      || brevoRes.status === 200
-      || (brevoBody && brevoBody.code === 'duplicate_parameter');
-
-    if (!brevoOk) {
-      console.error('subscribe: Brevo error', brevoRes.status, brevoBody);
-      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to add contact', detail: brevoBody && brevoBody.message }) };
-    }
-
-    console.log('subscribe: Brevo success for', email);
   } catch(err) {
-    console.error('subscribe: Brevo fetch error', err);
-    return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: err.toString() }) };
+    console.warn('subscribe: Brevo check error (non-fatal):', err);
+  }
+
+  // 2. Add to Brevo only if new — don't overwrite existing contacts
+  if (!alreadyExists) {
+    try {
+      const brevoRes = await fetch('https://api.brevo.com/v3/contacts', {
+        method: 'POST',
+        headers: { 'api-key': BREVO_API_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: email,
+          attributes: { FIRSTNAME: firstName },
+          listIds: [BREVO_LIST_ID],
+          updateEnabled: false,
+        }),
+      });
+
+      let brevoBody = null;
+      if (brevoRes.status !== 204) {
+        try { brevoBody = await brevoRes.json(); } catch(e) {}
+      }
+
+      const brevoOk = brevoRes.status === 201 || brevoRes.status === 204 || brevoRes.status === 200;
+      if (!brevoOk) {
+        console.error('subscribe: Brevo error', brevoRes.status, brevoBody);
+        return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to add contact', detail: brevoBody && brevoBody.message }) };
+      }
+      console.log('subscribe: Brevo contact created for', email);
+    } catch(err) {
+      console.error('subscribe: Brevo fetch error', err);
+      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: err.toString() }) };
+    }
+  } else {
+    console.log('subscribe: contact already exists in Brevo:', email);
   }
 
   // 2. Patch Airtable — best effort, never fails the request
