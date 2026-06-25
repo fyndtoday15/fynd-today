@@ -1225,7 +1225,7 @@ var sess = {
   email: null,
   firstName: null,
   sessionCount: 0,
-  returnScreenAnimating: false,
+  
   reflectionTimers: [],
   beforeLine: null,
   trackTitle: null,
@@ -1374,14 +1374,15 @@ function showEntry() {
 // Lighter, faster version of the entry screen used when backing out of
 // search mid-session. No five-line slow buildup — just one line, then
 // the same three options, loading in quickly.
+var returnTimers = [];
 function showReturn() {
-  // Guard against rapid re-clicks causing overlapping animations
-  if (sess.returnScreenAnimating) return;
-  sess.returnScreenAnimating = true;
+  // Cancel any pending animation from a previous call — this is what
+  // actually prevents the flash. Old timeouts firing mid-new-sequence
+  // were the root cause of the appear/disappear/appear pattern.
+  returnTimers.forEach(function(t) { clearTimeout(t); });
+  returnTimers = [];
 
-  // Remove .show from all elements BEFORE show() so they are already
-  // hidden when s-return fades in — prevents the flash where paths
-  // briefly appear from a previous visit before being cleared.
+  // Clear all elements before show() so s-return fades in already clean
   var line = document.getElementById('return-line');
   var paths = document.getElementById('return-paths');
   var note = document.querySelector('.return-browser-note');
@@ -1393,25 +1394,19 @@ function showReturn() {
 
   show('s-return');
 
-  // show() takes 350ms to fade out old screen + fade in new one.
-  // Wait for that to fully settle before starting element reveals.
   var SETTLE = 500;
-  setTimeout(function() {
+  returnTimers.push(setTimeout(function() {
     if (line) line.classList.add('show');
-  }, SETTLE);
-  setTimeout(function() {
+  }, SETTLE));
+  returnTimers.push(setTimeout(function() {
     if (paths) paths.classList.add('show');
-  }, SETTLE + 600);
-  setTimeout(function() {
+  }, SETTLE + 600));
+  returnTimers.push(setTimeout(function() {
     if (note) note.classList.add('show');
-  }, SETTLE + 1000);
-  setTimeout(function() {
+  }, SETTLE + 1000));
+  returnTimers.push(setTimeout(function() {
     if (link) link.classList.add('show');
-    // Reset guard only after all animations complete
-    setTimeout(function() {
-      sess.returnScreenAnimating = false;
-    }, 800);
-  }, SETTLE + 1300);
+  }, SETTLE + 1300));
 }
 
 function showBefore() {
@@ -2469,11 +2464,11 @@ function bindEvents() {
   // Return screen — same two actions, same landing link, just reached
   // from the lighter mid-session screen instead of the full first-time one
   document.getElementById('return-btn-search').addEventListener('click', function() {
-    sess.returnScreenAnimating = false;
+    
     showSearch();
   });
   document.getElementById('return-btn-discover').addEventListener('click', function() {
-    sess.returnScreenAnimating = false;
+    
     startDiscover();
   });
 
@@ -2523,7 +2518,7 @@ function bindEvents() {
   // Listen
   document.getElementById('listen-stop').addEventListener('click', function() {
     stopAudio();
-    sess.returnScreenAnimating = false;
+    
     discoverSess.active = false;
     hideDiscoverDots();
     showReturn();
