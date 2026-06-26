@@ -890,6 +890,9 @@ function handleEmailSubmit(e) {
     if (label) label.textContent = 'Count me in';
     if (data.error) {
       if (note) note.textContent = 'Something went wrong. Try again.';
+    } else if (data.alreadyExists) {
+      if (note) note.textContent = 'You are already in.';
+      if (label) label.textContent = 'Count me in';
     } else {
       if (emailInput) { emailInput.value = ''; emailInput.disabled = true; }
       if (nameInput) { nameInput.value = ''; nameInput.disabled = true; }
