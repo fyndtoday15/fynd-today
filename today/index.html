@@ -1921,6 +1921,15 @@ function goListen() {
 }
 
 function startListenTimers() {
+  // Start listen time tracking — works for both search and discover modes
+  // since this fires from onStateChange:PLAYING for both
+  sess.listenStartTime = Date.now();
+  if (sess.listenTimer) clearInterval(sess.listenTimer);
+  sess.listenTimer = setInterval(function() {
+    var secs = Math.round((Date.now() - sess.listenStartTime) / 1000);
+    logUpdate({ timeListened: secs });
+  }, 5000);
+
   // Dot
   setTimeout(function() {
     document.getElementById('pulse-dot').classList.add('active');
@@ -1996,11 +2005,7 @@ function playYouTube(ytId) {
     sess.ytPlayer = null;
   }
   sess.ytStarted = false;
-
-  // destroy() removes the #yt-player element itself from the DOM (it gets
-  // replaced by the player iframe, which destroy() then removes without
-  // restoring the original div). Without recreating it, the next
-  // new YT.Player('yt-player', ...) call has no element to attach to and
+  sess.listenStartedAt = false;
   // silently fails — this is why the second track never played while the
   // first one did.
   //
@@ -2068,6 +2073,7 @@ function playYouTube(ytId) {
             hideTapToListen();
             if (!sess.listenStartedAt) {
               sess.listenStartedAt = true;
+              sess.ytStarted = true; // sync with press-play flag
               startListenTimers();
             }
           }
@@ -2111,13 +2117,6 @@ function startListening() {
   if (!sess.ytPlayer || typeof sess.ytPlayer.playVideo !== 'function') return;
   if (sess.ytStarted) return;
   sess.ytStarted = true;
-
-  // Start listen timer
-  sess.listenStartTime = Date.now();
-  sess.listenTimer = setInterval(function() {
-    var secs = Math.round((Date.now() - sess.listenStartTime) / 1000);
-    logUpdate({ timeListened: secs });
-  }, 5000);
 
   // Immediate visual acknowledgment — without this there's a dead gap
   // between the tap and audio actually starting (player buffering takes
