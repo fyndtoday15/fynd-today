@@ -140,5 +140,5 @@ exports.handler = async function(event, context) {
     }
   }
 
-  return { statusCode: 200, headers: corsHeaders, body: JSON.stringify({ success: true }) };
+  return { statusCode: 200, headers: corsHeaders, body: JSON.stringify({ success: true, alreadyExists }) };
 };
