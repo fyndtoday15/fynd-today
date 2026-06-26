@@ -1263,6 +1263,13 @@ function logUpdate(fields) {
 }
 
 function logEmailPatch(name, email, consentTimestamp) {
+  // Persist so the discovery email can fire even in a later session
+  if (email) {
+    sess.email = email;
+    sess.firstName = name || '';
+    LS.set('email', email);
+    LS.set('firstName', name || '');
+  }
   fetch('/.netlify/functions/log-session', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -1464,6 +1471,9 @@ function init() {
   if (pendingEmail) {
     sess.email = pendingEmail;
     sess.firstName = pendingName || '';
+    // Persist so future sessions can still send the discovery email
+    LS.set('email', pendingEmail);
+    LS.set('firstName', pendingName || '');
     // Patch will fire after first logCreate gets a recordId
     sess.pendingEmailPatch = {
       name: pendingName || '',
@@ -1784,6 +1794,20 @@ function loadDiscoverTrack() {
     LS.set('discoverIdx', discoverSess.idx);
     LS.set('discoverDone', true);
     hideDiscoverDots();
+
+    // Send discovery complete email if we have their email
+    if (sess.email) {
+      fetch('/.netlify/functions/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          templateId: 4,
+          email: sess.email,
+          firstName: sess.firstName || '',
+        }),
+      }).catch(function(e) { console.warn('discovery email failed:', e); });
+    }
+
     show('s-caught-up');
     return;
   }
