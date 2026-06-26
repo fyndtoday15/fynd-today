@@ -36,7 +36,8 @@ exports.handler = async function(event, context) {
   catch(e) { return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'Invalid JSON' }) }; }
 
   const email = (data.email || '').trim().toLowerCase();
-  const firstName = (data.firstName || '').trim();
+  const rawName = (data.firstName || '').trim();
+  const firstName = rawName.charAt(0).toUpperCase() + rawName.slice(1).toLowerCase();
   const visitorId = (data.visitorId || '').trim();
   const consentTimestamp = data.consentTimestamp || null;
 
