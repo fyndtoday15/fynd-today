@@ -83,6 +83,21 @@ exports.handler = async function(event, context) {
         return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to add contact', detail: brevoBody && brevoBody.message }) };
       }
       console.log('subscribe: Brevo contact created for', email);
+
+      // Send welcome email (template 1) — new subscribers only, best effort
+      try {
+        const welcomeRes = await fetch('https://api.brevo.com/v3/smtp/email', {
+          method: 'POST',
+          headers: { 'api-key': BREVO_API_KEY, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            templateId: 1,
+            to: [{ email: email, name: firstName || '' }],
+          }),
+        });
+        console.log('subscribe: welcome email sent, status', welcomeRes.status);
+      } catch(e) {
+        console.warn('subscribe: welcome email failed (non-fatal):', e);
+      }
     } catch(err) {
       console.error('subscribe: Brevo fetch error', err);
       return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: err.toString() }) };
