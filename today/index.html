@@ -1218,8 +1218,20 @@ function logCreate(track, entryMode) {
   .then(function(data) {
     if (data.recordId) {
       sess.airtableRecordId = data.recordId;
-      // If there's a pending email patch from a landing page submission
-      // before the portal was ever visited, fire it now
+      // Flush any updates that queued before the record ID was available
+      if (pendingLogUpdates.length > 0) {
+        pendingLogUpdates.forEach(function(fields) {
+          fields.action = 'update';
+          fields.recordId = sess.airtableRecordId;
+          fetch('/.netlify/functions/log-session', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(fields),
+          }).catch(function(e) { console.warn('logUpdate flush failed:', e); });
+        });
+        pendingLogUpdates = [];
+      }
+      // If there's a pending email patch from landing page submission
       if (sess.pendingEmailPatch) {
         logEmailPatch(
           sess.pendingEmailPatch.name,
@@ -1233,8 +1245,14 @@ function logCreate(track, entryMode) {
   .catch(function(e) { console.warn('logCreate failed:', e); });
 }
 
+var pendingLogUpdates = [];
+
 function logUpdate(fields) {
-  if (!sess.airtableRecordId) return;
+  if (!sess.airtableRecordId) {
+    // Queue it — record ID not back yet, will flush when it arrives
+    pendingLogUpdates.push(fields);
+    return;
+  }
   fields.action = 'update';
   fields.recordId = sess.airtableRecordId;
   fetch('/.netlify/functions/log-session', {
@@ -1704,6 +1722,7 @@ function selectTrack(track, isCurated) {
   // Reset Airtable record for this new track
   sess.airtableRecordId = null;
   sess.replayCount = 0;
+  pendingLogUpdates = [];
 
   // Clear any existing listen timer
   if (sess.listenTimer) { clearInterval(sess.listenTimer); sess.listenTimer = null; }
@@ -2319,9 +2338,9 @@ function computeDominantFromTaps() {
     if (counts[w.position] !== undefined) counts[w.position]++;
   });
   var max = Math.max(counts.stay, counts.move, counts.open);
-  if (max === 0) return 'open'; // tapped nothing or only color words — treat as Open
+  if (max === 0) return 'open'; // tapped nothing — treat as Open
   var winners = Object.keys(counts).filter(function(k) { return counts[k] === max; });
-  if (winners.length > 1) return 'mixed';
+  if (winners.length > 1) return winners.join(' + ');
   return winners[0];
 }
 
@@ -2666,9 +2685,20 @@ function bindEvents() {
 
   // Tap-word "that's it" button (appears at 30s, track still playing)
   document.getElementById('tap-done-btn').addEventListener('click', function() {
-    // Log words tapped when user taps done on word overlay
     var wordsStr = (sess.tappedWords || []).map(function(w) { return w.text; }).join(', ');
-    logUpdate({ wordsTapped: wordsStr });
+    // dominantPosition is computed in handleTapDone via computeDominantFromTaps
+    // compute it here first so we can log it immediately
+    var dominant = (function() {
+      var counts = { stay: 0, move: 0, open: 0 };
+      (sess.tappedWords || []).forEach(function(w) {
+        if (counts[w.position] !== undefined) counts[w.position]++;
+      });
+      var max = Math.max(counts.stay, counts.move, counts.open);
+      if (max === 0) return 'open';
+      var winners = Object.keys(counts).filter(function(k) { return counts[k] === max; });
+      return winners.length > 1 ? winners.join(' + ') : winners[0];
+    })();
+    logUpdate({ wordsTapped: wordsStr, dominantPosition: dominant });
     handleTapDone();
   });
 
