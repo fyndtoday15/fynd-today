@@ -2465,8 +2465,12 @@ function goReflection() {
     txt.textContent = challenge;
     txt.classList.add('show');
     acts.classList.add('show');
-    // Log the generated form text and memory line
-    logUpdate({ formGenerated: challenge || '', memoryLine: memoryLine || '' });
+    // Log the generated form text — always present
+    logUpdate({ formGenerated: challenge || '' });
+    // Log memory line only if it exists — field must exist in Airtable
+    if (memoryLine) {
+      logUpdate({ memoryLine: memoryLine });
+    }
   }
 
   setTimeout(function() {
