@@ -150,6 +150,26 @@ exports.handler = async function(event, context) {
           });
         }
         console.log('subscribe: Airtable patched', patches.length, 'records for visitorId', visitorId);
+
+        // Check if all 5 discover tracks are completed — send discovery email if so
+        try {
+          const completedCount = searchBody.records.filter(function(r) {
+            return r.fields['Entry Mode'] === 'Discover' && r.fields['Status'] === 'Completed';
+          }).length;
+          if (completedCount >= 5) {
+            await fetch('https://api.brevo.com/v3/smtp/email', {
+              method: 'POST',
+              headers: { 'api-key': BREVO_API_KEY, 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                templateId: 4,
+                to: [{ email: email, name: firstName || '' }],
+              }),
+            });
+            console.log('subscribe: discovery email sent to', email);
+          }
+        } catch(e) {
+          console.warn('subscribe: discovery email check failed (non-fatal):', e);
+        }
       }
     } catch(err) {
       console.error('subscribe: Airtable patch error (non-fatal):', err);
