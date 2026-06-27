@@ -1271,6 +1271,14 @@ function logEmailPatch(name, email, consentTimestamp) {
     LS.set('email', email);
     LS.set('firstName', name || '');
   }
+  // If discovery was already completed before email was known, send now
+  if (discoverSess.done && email) {
+    fetch('/.netlify/functions/send-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ templateId: 4, email: email, firstName: name || '' }),
+    }).catch(function(e) { console.warn('discovery email (deferred) failed:', e); });
+  }
   fetch('/.netlify/functions/log-session', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
