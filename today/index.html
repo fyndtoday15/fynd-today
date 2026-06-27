@@ -231,113 +231,6 @@ body:has(#s-recognition.active) #wordmark {
 }
 .return-browser-note.show { opacity: 1; }
 
-/* Device consistency note */
-.device-note {
-  font-family: var(--f);
-  font-size: 10px;
-  letter-spacing: 0.08em;
-  color: rgba(240,237,230,0.3);
-  text-align: center;
-  max-width: 280px;
-  line-height: 1.7;
-  margin: 20px 0 4px 0;
-}
-
-/* Transfer link — appears on entry and return screens */
-.transfer-link {
-  background: none;
-  border: none;
-  font-family: var(--f);
-  font-size: 10px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: rgba(240,237,230,0.5);
-  cursor: pointer;
-  margin-top: 24px;
-  padding: 0;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  transition: color 0.2s ease;
-}
-.transfer-link:hover { color: var(--fg); }
-
-/* Transfer screen */
-.transfer-inner {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0;
-  max-width: 320px;
-  width: 100%;
-  text-align: center;
-}
-.transfer-label {
-  font-size: 10px;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--fg);
-  opacity: 0.5;
-  margin: 0 0 32px 0;
-}
-.transfer-email-input {
-  width: 100%;
-  background: transparent;
-  border: none;
-  border-bottom: 1px solid rgba(240,237,230,0.3);
-  outline: none;
-  padding: 12px 0;
-  font-family: var(--f);
-  font-size: 15px;
-  letter-spacing: 0.04em;
-  color: var(--fg);
-  text-align: center;
-  margin-bottom: 28px;
-}
-.transfer-email-input::placeholder { color: rgba(240,237,230,0.3); }
-.transfer-submit-btn {
-  background: none;
-  border: 1px solid rgba(240,237,230,0.3);
-  font-family: var(--f);
-  font-size: 10px;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--fg);
-  cursor: pointer;
-  padding: 14px 40px;
-  transition: border-color 0.2s ease;
-  margin-bottom: 20px;
-}
-.transfer-submit-btn:hover { border-color: var(--fg); }
-.transfer-note {
-  font-size: 11px;
-  letter-spacing: 0.06em;
-  color: var(--fg);
-  opacity: 0.5;
-  margin: 0 0 32px 0;
-  min-height: 18px;
-}
-.transfer-explain {
-  font-size: 11px;
-  letter-spacing: 0.04em;
-  color: rgba(240,237,230,0.35);
-  line-height: 1.7;
-  margin: 0 0 12px 0;
-}
-.transfer-back-btn {
-  background: none;
-  border: none;
-  font-family: var(--f);
-  font-size: 10px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: rgba(240,237,230,0.4);
-  cursor: pointer;
-  margin-top: 20px;
-  padding: 0;
-  transition: color 0.2s ease;
-}
-.transfer-back-btn:hover { color: var(--fg); }
-
 /* ── S-BEFORE (return visit) ── */
 #s-before { gap: 0; }
 
@@ -1161,12 +1054,11 @@ body:has(#s-recognition.active) #wordmark {
     <div class="path-sep">or</div>
     <button class="path-btn" id="btn-discover">Let sound find you</button>
   </div>
+  <div class="return-browser-note" id="entry-browser-note">For the most consistent experience, use one device and browser.</div>
   <a class="landing-link" id="landing-link" href="/">go back to the landing page</a>
-  <p class="device-note">For the most consistent experience, use one device and browser. To transfer your data, use the button above.</p>
-  <button class="transfer-link" id="entry-transfer-btn">Used this on another device or browser?</button>
 </div>
 
-<!-- S-RETURN -->
+<!-- S-RETURN (lighter screen for the back button mid-session) -->
 <div class="screen" id="s-return">
   <div class="entry-line" id="return-line">Sound will always be here.</div>
   <div class="entry-paths" id="return-paths">
@@ -1174,23 +1066,8 @@ body:has(#s-recognition.active) #wordmark {
     <div class="path-sep">or</div>
     <button class="path-btn" id="return-btn-discover">Let sound find you</button>
   </div>
-  <div class="return-browser-note">For the most consistent experience, use one device and browser. To transfer your history, use the button above.</div>
+  <div class="return-browser-note" id="return-browser-note">For the most consistent experience, use one device and browser.</div>
   <a class="landing-link" id="return-landing-link" href="/">go back to the landing page</a>
-  <p class="device-note">For the most consistent experience, use one device and browser. To transfer your data, use the button above.</p>
-  <button class="transfer-link" id="return-transfer-btn">Used this on another device or browser?</button>
-</div>
-
-<!-- S-TRANSFER -->
-<div class="screen" id="s-transfer">
-  <div class="transfer-inner">
-    <p class="transfer-label">Transfer your data</p>
-    <input type="email" class="transfer-email-input" id="transfer-email-input" placeholder="your email" autocomplete="email">
-    <button class="transfer-submit-btn" id="transfer-submit-btn">Send link</button>
-    <p class="transfer-note" id="transfer-note"></p>
-    <p class="transfer-explain">Enter the email you used to sign up. We will send you a link to carry your history to this device or browser.</p>
-    <p class="transfer-explain">Each time you switch, you will need to do this again. For the most consistent experience, we recommend sticking to one device and browser.</p>
-    <button class="transfer-back-btn" id="transfer-back-btn">← back</button>
-  </div>
 </div>
 
 <!-- S-BEFORE -->
@@ -1547,7 +1424,6 @@ function checkResetParam() {
 
 function init() {
   checkResetParam();
-  checkMagicLinkToken();
 
   sess.email = LS.get('email');
   sess.firstName = LS.get('firstName');
@@ -1613,10 +1489,8 @@ function init() {
 
   if (sess.sessionCount > 0 && sess.beforeLine) {
     showBefore();
-  } else if (sess.sessionCount > 0) {
-    // Returning visitor — go straight to return screen, skip entry statements
-    showReturn();
   } else {
+    sess.sessionCount = 0; // reset if no beforeLine
     showEntry();
   }
 
@@ -1624,87 +1498,6 @@ function init() {
 }
 
 // ── ENTRY ─────────────────────────────────────────────────────────────────────
-function showTransfer(fromScreen) {
-  sess.transferFromScreen = fromScreen || 's-entry';
-  var input = document.getElementById('transfer-email-input');
-  var note = document.getElementById('transfer-note');
-  if (input) input.value = '';
-  if (note) note.textContent = '';
-  show('s-transfer');
-}
-
-function handleTransferSubmit() {
-  var input = document.getElementById('transfer-email-input');
-  var note = document.getElementById('transfer-note');
-  var btn = document.getElementById('transfer-submit-btn');
-  var email = input ? input.value.trim() : '';
-  if (!email) return;
-  if (btn) btn.textContent = 'Sending...';
-  if (note) note.textContent = '';
-  fetch('/.netlify/functions/send-magic-link', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: email }),
-  })
-  .then(function(r) { return r.json(); })
-  .then(function(data) {
-    if (btn) btn.textContent = 'Send link';
-    if (data.error) {
-      if (note) note.textContent = data.error === 'not_found'
-        ? 'No account found for that email.'
-        : 'Something went wrong. Try again.';
-    } else {
-      if (note) note.textContent = 'Check your email for the link.';
-      if (input) input.value = '';
-    }
-  })
-  .catch(function() {
-    if (btn) btn.textContent = 'Send link';
-    if (note) note.textContent = 'Something went wrong. Try again.';
-  });
-}
-
-// Check for magic link token on page load
-function checkMagicLinkToken() {
-  var params = new URLSearchParams(window.location.search);
-  var token = params.get('mltoken');
-  if (!token) return;
-  // Clean the URL immediately
-  window.history.replaceState({}, '', window.location.pathname);
-  fetch('/.netlify/functions/verify-magic-link', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ token: token }),
-  })
-  .then(function(r) { return r.json(); })
-  .then(function(data) {
-    if (data.error || !data.visitorId) return;
-    // Transfer visitor ID and session data to this device
-    LS.set('visitorId', data.visitorId);
-    sess.visitorId = data.visitorId;
-    if (data.discoverIdx !== undefined) {
-      discoverSess.idx = data.discoverIdx;
-      LS.set('discoverIdx', data.discoverIdx);
-    }
-    if (data.discoverDone) {
-      discoverSess.done = true;
-      LS.set('discoverDone', true);
-    }
-    if (data.email) {
-      sess.email = data.email;
-      LS.set('email', data.email);
-    }
-    if (data.firstName) {
-      sess.firstName = data.firstName;
-      LS.set('firstName', data.firstName);
-    }
-    if (data.sessionCount) {
-      sess.sessionCount = data.sessionCount;
-    }
-  })
-  .catch(function() {});
-}
-
 function showEntry() {
   show('s-entry');
   // Reset lines
@@ -1716,6 +1509,8 @@ function showEntry() {
   if (ep) ep.classList.remove('show');
   var ll = document.getElementById('landing-link');
   if (ll) ll.classList.remove('show');
+  var en = document.getElementById('entry-browser-note');
+  if (en) { en.style.transition = 'none'; en.classList.remove('show'); en.getBoundingClientRect(); en.style.transition = ''; }
 
   // Animate in — each line gets its own fade at natural reading pace
   ['el-1','el-2','el-3','el-4','el-5'].forEach(function(id, i) {
@@ -1731,6 +1526,8 @@ function showEntry() {
   setTimeout(function() {
     var ll2 = document.getElementById('landing-link');
     if (ll2) ll2.classList.add('show');
+    var en2 = document.getElementById('entry-browser-note');
+    if (en2) en2.classList.add('show');
   }, 400 + 4 * 1200 + 1000);
 }
 
@@ -1745,14 +1542,18 @@ function showReturn() {
 
   var line = document.getElementById('return-line');
   var paths = document.getElementById('return-paths');
+  var note = document.getElementById('return-browser-note');
   var link = document.getElementById('return-landing-link');
 
-  // Force instant reset — snap to opacity:0 before screen fades in
-  [line, paths, link].forEach(function(el) {
+  // Force instant reset — kill transitions temporarily so elements
+  // snap to opacity:0 rather than fading there over 1s, which would
+  // still be visibly present when s-return fades in.
+  [line, paths, note, link].forEach(function(el) {
     if (!el) return;
     el.style.transition = 'none';
     el.classList.remove('show');
-    el.getBoundingClientRect();
+    // Re-enable transitions after the forced reset settles
+    el.getBoundingClientRect(); // force reflow
     el.style.transition = '';
   });
 
@@ -1766,8 +1567,11 @@ function showReturn() {
     if (paths) paths.classList.add('show');
   }, SETTLE + 600));
   returnTimers.push(setTimeout(function() {
-    if (link) link.classList.add('show');
+    if (note) note.classList.add('show');
   }, SETTLE + 1000));
+  returnTimers.push(setTimeout(function() {
+    if (link) link.classList.add('show');
+  }, SETTLE + 1300));
 }
 
 function showBefore() {
@@ -2855,26 +2659,6 @@ function bindEvents() {
   document.getElementById('btn-search').addEventListener('click', showSearch);
   document.getElementById('btn-discover').addEventListener('click', function() {
     startDiscover();
-  });
-
-  // Transfer buttons — entry and return screens
-  document.getElementById('entry-transfer-btn').addEventListener('click', function() {
-    showTransfer('s-entry');
-  });
-  document.getElementById('return-transfer-btn').addEventListener('click', function() {
-    showTransfer('s-return');
-  });
-  document.getElementById('transfer-submit-btn').addEventListener('click', handleTransferSubmit);
-  document.getElementById('transfer-email-input').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') handleTransferSubmit();
-  });
-  document.getElementById('transfer-back-btn').addEventListener('click', function() {
-    var from = sess.transferFromScreen || 's-entry';
-    if (from === 's-return') {
-      showReturn();
-    } else {
-      show('s-entry');
-    }
   });
 
   // Tap to listen — the pulse dot is the only thing that ever calls
