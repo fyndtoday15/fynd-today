@@ -89,6 +89,20 @@ html, body {
   width: auto;
   opacity: 1;
   z-index: 10;
+}
+#copyright {
+  position: fixed;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 22px);
+  left: 16px;
+  font-family: var(--f);
+  font-size: 9px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--fg);
+  opacity: 0.25;
+  z-index: 10;
+  pointer-events: none;
+}
   pointer-events: none;
   transition: opacity 0.2s ease;
 }
@@ -1038,6 +1052,9 @@ body:has(#s-recognition.active) #wordmark {
 
 <!-- WORDMARK -->
 <img id="wordmark" src="/logo.png" alt="FYND TODAY">
+
+<!-- COPYRIGHT -->
+<div id="copyright">© 2026 FYND TODAY</div>
 
 <!-- YOUTUBE ATTRIBUTION — required by YouTube API developer policies -->
 <a id="yt-attribution" href="https://www.youtube.com" target="_blank" rel="noopener">Powered by YouTube</a>
