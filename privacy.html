@@ -51,7 +51,7 @@ a.inline{color:var(--off);opacity:1;text-decoration:underline;text-underline-off
 
 <div class="wrap">
   <h1>Privacy Policy</h1>
-  <div class="updated">Last updated June 2026</div>
+  <div class="updated">Last updated July 2026</div>
 
   <h2>What this is</h2>
   <p>FYND TODAY is a sound-based recognition app. You search for or listen to a track, and the app gives you a few words to tap based on what stands out to you in the moment. This page explains what we collect when you use it, and why.</p>
@@ -61,8 +61,14 @@ a.inline{color:var(--off);opacity:1;text-decoration:underline;text-underline-off
   <p>When you search for or listen to a track, we log basic activity tied to that session — the track, the words you tapped, and the position they map to. We use Airtable to store this. We use it to build your recognition forms and, if you bring the same track back, to notice the pattern.</p>
   <p>We don't run ad trackers, third-party analytics scripts, or sell any data to anyone. We don't track your location.</p>
 
-  <h2>YouTube</h2>
-  <p>Track search and playback are powered by YouTube. When you search for a track, that search is sent to YouTube's API to find it. When you listen, the track plays through an embedded YouTube player. YouTube's own privacy practices apply to that part of the experience — you can read those at <a class="inline" href="https://policies.google.com/privacy" target="_blank" rel="noopener">policies.google.com/privacy</a>.</p>
+  <h2>YouTube API Services</h2>
+  <p>FYND TODAY uses YouTube API Services to power track search and playback. This includes the YouTube Data API v3 (for search) and the YouTube IFrame Player API (for in-browser playback). By using FYND TODAY, you are also bound by Google's Terms of Service at <a class="inline" href="https://www.youtube.com/t/terms" target="_blank" rel="noopener">youtube.com/t/terms</a>.</p>
+  <p>YouTube's privacy practices apply to the portion of the experience handled by YouTube. You can review Google's Privacy Policy at <a class="inline" href="https://policies.google.com/privacy" target="_blank" rel="noopener">policies.google.com/privacy</a>.</p>
+  <p>In terms of what we access and store from YouTube API Services: when you search for a track, we send your search query to YouTube's API and return the results to your screen. We do not store your search query. We store the YouTube video URL of the track you select in order to log your session in Airtable. We do not store any other YouTube API data — no channel data, no user account data, no video metadata beyond the URL. YouTube API Data is not shared with third parties and is not used for any purpose outside of logging which track you listened to in your FYND TODAY session.</p>
+  <p>We do not retain YouTube API Data beyond what is needed for your session log. If you request deletion of your data, the stored YouTube URL is removed along with your session record.</p>
+
+  <h2>Device storage</h2>
+  <p>FYND TODAY uses browser localStorage — a standard web technology — to store information directly on your device. No cookies are used. The information stored in localStorage includes your session state, a visitor identifier, your first name and email if you have provided them, and your progress through the sound portal. This information stays on your device and is used to recognize you when you return. It is not transmitted to third parties. You can clear this at any time by clearing your browser's site data for fyndtoday.com.</p>
 
   <h2>What we don't do</h2>
   <ul>
