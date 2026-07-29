@@ -659,7 +659,7 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
    STORYBRAND LAYER
    ============================================================ */
 
-/* NAV — direct CTA is a real button, on every screen size */
+/* NAV — the direct CTA, persistent, every screen size */
 .nav-portal-btn{display:inline-block!important;padding:9px 20px;border:1px solid rgba(252,251,244,.3);border-radius:2px;font-family:'DejaVu Sans',Arial,sans-serif;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--off);text-decoration:none;background:transparent;position:relative;overflow:hidden;white-space:nowrap}
 .nav-portal-btn::before{content:'';position:absolute;left:0;bottom:0;right:0;height:0;background:var(--off);transition:height .3s ease}
 .nav-portal-btn span{position:relative;z-index:1;transition:color .3s ease}
@@ -673,27 +673,8 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
 .stakes-section{padding:110px 48px;background:var(--bg);border-top:1px solid rgba(252,251,244,.08);border-bottom:1px solid rgba(252,251,244,.08)}
 .stakes-inner{max-width:840px;margin:0 auto}
 .stakes-h{font-size:clamp(26px,3.6vw,46px);line-height:1.12;letter-spacing:-.02em;margin-bottom:34px}
-.stakes-list p{font-size:clamp(15px,1.6vw,18px);line-height:1.95;color:rgba(252,251,244,.72)}
-.stakes-turn{margin-top:34px;padding-top:30px;border-top:1px solid rgba(252,251,244,.12)}
-.stakes-turn p{color:var(--off)}
-
-/* WHY */
-.why-section{padding:110px 48px;background:var(--bg)}
-.why-inner{max-width:840px;margin:0 auto}
-.why-lbl{font-size:10px;letter-spacing:.26em;text-transform:uppercase;color:rgba(252,251,244,.55);display:block;margin-bottom:22px}
-.why-h{font-size:clamp(24px,3.2vw,40px);line-height:1.14;letter-spacing:-.02em;margin-bottom:34px}
-.why-body p{font-size:clamp(14px,1.55vw,17px);line-height:1.95;color:rgba(252,251,244,.78);margin-bottom:20px}
-.why-body p.why-close{color:var(--off);font-style:italic;margin-bottom:0}
-
-/* SOUND PORTAL */
-.portal-section{position:relative;padding:110px 48px;background:var(--bg);border-top:1px solid rgba(252,251,244,.08);border-bottom:1px solid rgba(252,251,244,.08);overflow:hidden}
-.portal-inner{position:relative;z-index:1;max-width:840px;margin:0 auto}
-.portal-lbl{font-size:10px;letter-spacing:.26em;text-transform:uppercase;color:rgba(252,251,244,.55);display:block;margin-bottom:22px}
-.portal-h{font-size:clamp(24px,3.2vw,40px);line-height:1.14;letter-spacing:-.02em;margin-bottom:34px}
-.portal-body p{font-size:clamp(14px,1.55vw,17px);line-height:1.95;color:rgba(252,251,244,.8);margin-bottom:20px}
-.portal-body p.portal-key{color:var(--off);border-left:1px solid rgba(252,251,244,.28);padding-left:22px}
-.portal-cta{margin-top:44px}
-.portal-micro{margin-top:30px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:rgba(252,251,244,.5)}
+.stakes-list p{font-size:clamp(15px,1.6vw,18px);line-height:1.95;color:rgba(252,251,244,.72);margin-bottom:18px}
+.stakes-list p.stakes-turn{color:var(--off);margin-bottom:0}
 
 /* SUCCESS */
 .win-section{padding:110px 48px;background:var(--bg)}
@@ -706,26 +687,43 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
 .win-lbl{font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:rgba(252,251,244,.5);display:block;margin-bottom:22px}
 .win-col p{font-size:15px;line-height:2.1;color:var(--off)}
 
+/* WHY */
+.why-section{padding:110px 48px;background:var(--bg)}
+.why-inner{max-width:840px;margin:0 auto}
+.why-lbl{font-size:10px;letter-spacing:.26em;text-transform:uppercase;color:rgba(252,251,244,.55);display:block;margin-bottom:22px}
+.why-h{font-size:clamp(24px,3.2vw,40px);line-height:1.14;letter-spacing:-.02em;margin-bottom:34px}
+.why-body p{font-size:clamp(14px,1.55vw,17px);line-height:1.95;color:rgba(252,251,244,.78);margin-bottom:20px}
+.why-body p.why-close{color:var(--off);font-style:italic;margin-bottom:0}
+
+/* SOUND PORTAL — now the closing section */
+.portal-section{position:relative;padding:110px 48px 130px;background:var(--bg);border-top:1px solid rgba(252,251,244,.08);overflow:hidden}
+.portal-inner{position:relative;z-index:1;max-width:840px;margin:0 auto}
+.portal-lbl{font-size:10px;letter-spacing:.26em;text-transform:uppercase;color:rgba(252,251,244,.55);display:block;margin-bottom:22px}
+.portal-h{font-size:clamp(24px,3.2vw,40px);line-height:1.14;letter-spacing:-.02em;margin-bottom:34px}
+.portal-body p{font-size:clamp(14px,1.55vw,17px);line-height:1.95;color:rgba(252,251,244,.8);margin-bottom:20px}
+.portal-body p.portal-key{color:var(--off);border-left:1px solid rgba(252,251,244,.28);padding-left:22px}
+.portal-cta{margin-top:44px}
+.portal-micro{margin-top:30px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:rgba(252,251,244,.5)}
+
 @media(max-width:720px){
   nav{padding:14px 18px}
   .nav-portal-btn{padding:8px 14px;font-size:9px;letter-spacing:.14em}
   .hero-sub{font-size:15px;margin-top:20px}
   .stakes-section{padding:60px 20px}
   .stakes-h{font-size:clamp(22px,6.5vw,32px);margin-bottom:24px}
-  .stakes-list p{font-size:15px;line-height:1.85}
-  .stakes-turn{margin-top:26px;padding-top:24px}
+  .stakes-list p{font-size:15px;line-height:1.85;margin-bottom:15px}
+  .win-section{padding:60px 20px}
+  .win-grid{grid-template-columns:1fr;gap:16px;margin-top:32px}
+  .win-col{padding:28px 22px}
   .why-section{padding:60px 20px}
   .why-h{font-size:clamp(21px,6vw,30px);margin-bottom:24px}
   .why-body p{font-size:15px;line-height:1.8;margin-bottom:16px}
-  .portal-section{padding:60px 20px}
+  .portal-section{padding:60px 20px 80px}
   .portal-h{font-size:clamp(21px,6vw,30px);margin-bottom:24px}
   .portal-body p{font-size:15px;line-height:1.8;margin-bottom:16px}
   .portal-body p.portal-key{padding-left:16px}
   .portal-cta{margin-top:32px}
   .portal-cta .btn{display:block;text-align:center}
-  .win-section{padding:60px 20px}
-  .win-grid{grid-template-columns:1fr;gap:16px;margin-top:32px}
-  .win-col{padding:28px 22px}
 }
 
 </style>
@@ -767,9 +765,6 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
     <p class="htag">Music-powered lifestyle</p>
     <h1 class="serif">Wear the day you<br>are actually in.</h1>
     <p class="hero-sub">Most clothes are aimed at other people. These are built around where you are.</p>
-    <div class="hero-btns">
-      <a href="#clothing" class="btn btn-sm scroll-anchor"><span>See the three styles</span></a>
-    </div>
   </div>
 </section>
 
@@ -778,23 +773,18 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
   <div class="stakes-inner">
     <h2 class="stakes-h rev">Your closet is built around<br>what you are doing. Not where you are.</h2>
     <div class="stakes-list rev d1">
-      <p>Gym clothes. Work clothes. Going out clothes.</p>
-      <p>Every one of them is picked for where you are headed and who will see you there. None of them are picked for you.</p>
-      <p>Anyone can read you at a glance. That is not the same as being recognized.</p>
-      <div class="stakes-turn">
-        <p>Some days you are in no rush.</p>
-        <p>Some days you are on the go.</p>
-        <p>Some days something new gets in.</p>
-      </div>
+      <p>Performance. Status. Whatever is trending. Whichever crowd you are in.</p>
+      <p>Every one of them answers the same question. Who do you want people to think you are?</p>
+      <p class="stakes-turn">Nothing in there answers where you actually are.</p>
     </div>
   </div>
 </div>
 
-<!-- ===== 3. THE THREE PIECES ===== -->
+<!-- ===== 3. THE STYLES ===== -->
 <div class="clothing-section" id="clothing">
   <div class="clothing-intro">
     <span class="clothing-section-lbl">The styles</span>
-    <p class="clothing-section-head">Three ways to show up.<br>Three pieces built for them.</p>
+    <p class="clothing-section-head">Three ways to be in a day.<br>Three pieces built for them.</p>
   </div>
   <div class="clothing-grid">
 
@@ -831,37 +821,7 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
   </div>
 </div>
 
-<!-- ===== 4. WHY THIS EXISTS ===== -->
-<div class="why-section" id="why">
-  <div class="why-inner">
-    <span class="why-lbl rev">Why this exists</span>
-    <h2 class="why-h rev d1">You already use music to figure out where you are.</h2>
-    <div class="why-body rev d2">
-      <p>The song you put on in the morning. The one you switch to at two in the afternoon when something shifts. The one you keep going back to and cannot explain.</p>
-      <p>None of that is random. You are reaching for sound that fits where you are or where you want to be.</p>
-      <p class="why-close">FYND TODAY is built around that.</p>
-    </div>
-  </div>
-</div>
-
-<!-- ===== 5. THE SOUND PORTAL ===== -->
-<div class="portal-section" id="srf">
-  <canvas id="srf-wave"></canvas>
-  <div class="portal-inner">
-    <span class="portal-lbl rev">The sound portal</span>
-    <h2 class="portal-h rev d1">Play one song. Find out what you<br>have not put into words yet.</h2>
-    <div class="portal-body rev d2">
-      <p>Bring a song you already love. Or let one find you.</p>
-      <p class="portal-key">What comes back is not about the song. It is about you, and what you can do next.</p>
-      <div class="portal-cta">
-        <a href="/today" class="btn portal-trigger"><span>Press Play on Today</span></a>
-      </div>
-      <p class="portal-micro">Free. No account. One minute.</p>
-    </div>
-  </div>
-</div>
-
-<!-- ===== 6. SUCCESS ===== -->
+<!-- ===== 4. SUCCESS ===== -->
 <div class="win-section">
   <div class="win-inner">
     <h2 class="win-h serif rev">Life sounds better in color.</h2>
@@ -878,7 +838,7 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
   </div>
 </div>
 
-<!-- ===== 7. FIRST ACCESS ===== -->
+<!-- ===== 5. FIRST ACCESS ===== -->
 <div class="email-section" id="early">
   <div class="email-inner">
     <div class="email-header">
@@ -914,15 +874,34 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
   </div>
 </div>
 
-<!-- ===== 8. CLOSE ===== -->
-<div class="enter" id="enter">
-  <canvas id="rc"></canvas>
-  <h2 class="eh serif rev">This is the moment.</h2>
-  <p class="es rev d1">Play something. Find out where you are.</p>
-  <div class="rev d2">
-    <a href="/today" class="btn portal-trigger"><span>Press Play on Today</span></a>
+<!-- ===== 6. WHY THIS EXISTS ===== -->
+<div class="why-section" id="why">
+  <div class="why-inner">
+    <span class="why-lbl rev">Why this exists</span>
+    <h2 class="why-h rev d1">You already use music to figure out where you are.</h2>
+    <div class="why-body rev d2">
+      <p>The song you put on in the morning. The one you switch to at two in the afternoon when something shifts. The one you keep going back to and cannot explain.</p>
+      <p>None of that is random. You are reaching for sound that fits where you are or where you want to be.</p>
+      <p class="why-close">FYND TODAY is built around that.</p>
+    </div>
   </div>
-  <p class="rev d3 enter-note">Free. No account needed.</p>
+</div>
+
+<!-- ===== 7. THE SOUND PORTAL ===== -->
+<div class="portal-section" id="srf">
+  <canvas id="srf-wave"></canvas>
+  <div class="portal-inner">
+    <span class="portal-lbl rev">The sound portal</span>
+    <h2 class="portal-h rev d1">Play one song. Find out what you<br>have not put into words yet.</h2>
+    <div class="portal-body rev d2">
+      <p>Bring a song you already love. Or let one find you.</p>
+      <p class="portal-key">What comes back is not about the song. It is about you, and what you can do next.</p>
+      <div class="portal-cta">
+        <a href="/today" class="btn portal-trigger"><span>Press Play on Today</span></a>
+      </div>
+      <p class="portal-micro">Free. No account. One minute.</p>
+    </div>
+  </div>
 </div>
 
 
