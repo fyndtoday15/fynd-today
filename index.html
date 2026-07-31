@@ -676,6 +676,13 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
 .stakes-list p{font-size:clamp(15px,1.6vw,18px);line-height:1.95;color:rgba(252,251,244,.72);margin-bottom:18px}
 .stakes-list p.stakes-turn{color:var(--off);margin-bottom:0}
 
+/* AVATAR SELECT on the email form */
+.checkin-wrap{margin-bottom:8px}
+.checkin-q{display:block;font-size:11px;letter-spacing:.1em;color:rgba(252,251,244,.5);margin-bottom:8px}
+.checkin-select{width:100%;padding:14px 20px;background:transparent;border:1px solid rgba(252,251,244,.3);border-radius:0;font-family:'DejaVu Sans',Arial,sans-serif;font-size:13px;letter-spacing:.04em;color:var(--off);outline:none;-webkit-appearance:none;appearance:none;cursor:pointer}
+.checkin-select option{background:#080808;color:#FCFBF4}
+.checkin-select:focus{border-color:rgba(252,251,244,.6)}
+
 /* SUCCESS */
 .win-section{padding:110px 48px;background:var(--bg)}
 .win-inner{max-width:900px;margin:0 auto;text-align:center}
@@ -773,9 +780,9 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
   <div class="stakes-inner">
     <h2 class="stakes-h rev">Your closet is built around<br>what you are doing. Not where you are.</h2>
     <div class="stakes-list rev d1">
-      <p>Performance. Status. Whatever is trending. Whichever crowd you are in.</p>
-      <p>Every one of them answers the same question. Who do you want people to think you are?</p>
-      <p class="stakes-turn">Nothing in there answers where you actually are.</p>
+      <p>You have an app for how you slept. A chart for who you are. A song for when something shifts.</p>
+      <p>Then you get dressed in something that has nothing to do with any of it.</p>
+      <p class="stakes-turn">Everything else in your life is keeping up. Your closet is not.</p>
     </div>
   </div>
 </div>
@@ -855,6 +862,17 @@ canvas#portal-c{position:absolute;inset:0;width:100%;height:100%}
         autocomplete="given-name"
         required
         style="border:1px solid rgba(252,251,244,.3);margin-bottom:8px;width:100%;padding:14px 20px;background:transparent;font-family:'DejaVu Sans',Arial,sans-serif;font-size:13px;letter-spacing:.04em;color:var(--off);outline:none;">
+      <div class="checkin-wrap">
+        <label class="checkin-q" for="landing-checkin">What else do you use to check in on yourself? (optional)</label>
+        <select class="checkin-select" id="landing-checkin">
+          <option value="">Choose one</option>
+          <option value="astrology">Astrology or Human Design</option>
+          <option value="tracker">A sleep or fitness tracker</option>
+          <option value="journaling">Journaling or therapy</option>
+          <option value="music">Just the music</option>
+          <option value="nothing">Nothing yet</option>
+        </select>
+      </div>
       <div class="email-field-wrap">
         <input
           type="email"
@@ -948,6 +966,8 @@ function handleEmailSubmit(e) {
   var email = emailInput ? emailInput.value.trim() : '';
   var consented = consentCheck ? consentCheck.checked : false;
   if (!firstName || !email || !consented) return;
+  var checkInEl = document.getElementById('landing-checkin');
+  var checkIn = checkInEl ? checkInEl.value : '';
   var consentTimestamp = new Date().toISOString();
   if (label) label.textContent = 'Sending...';
   // Store in localStorage so the portal can pick these up on first visit
@@ -967,6 +987,7 @@ function handleEmailSubmit(e) {
       firstName: firstName,
       consentTimestamp: consentTimestamp,
       visitorId: visitorId,
+      checkIn: checkIn,
     }),
   })
   .then(function(r) { return r.json(); })
